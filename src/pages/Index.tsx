@@ -1,10 +1,29 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import SearchBar from "@/components/SearchBar";
 import CategoryRow from "@/components/CategoryRow";
 import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
-import { businesses } from "@/data/mockData";
+import type { Tables } from "@/integrations/supabase/types";
+
+const priceLabels = ["$", "$$", "$$$", "$$$$"];
 
 const Index = () => {
+  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("*")
+        .order("avg_rating", { ascending: false });
+      setBusinesses(data || []);
+      setLoading(false);
+    };
+    fetchBusinesses();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       {/* Header */}
@@ -17,7 +36,6 @@ const Index = () => {
             📍 Montréal
           </span>
         </div>
-
         <SearchBar />
       </div>
 
@@ -28,9 +46,32 @@ const Index = () => {
 
       {/* Feed */}
       <div className="px-4 mt-4 space-y-4">
-        {businesses.map((business) => (
-          <BusinessCard key={business.id} business={business} />
-        ))}
+        {loading ? (
+          <p className="text-center text-muted-foreground py-8">Chargement...</p>
+        ) : (
+          businesses.map((b) => (
+            <BusinessCard
+              key={b.id}
+              business={{
+                id: b.id,
+                name: b.name,
+                category: "",
+                rating: Number(b.avg_rating),
+                reviewCount: b.reviews_count,
+                priceLevel: priceLabels[(b.price_level || 1) - 1],
+                neighborhood: b.city,
+                image: b.image_url || "/placeholder.svg",
+                isOpen: b.is_open,
+                address: b.address,
+                phone: b.phone || "",
+                hours: b.hours || "",
+                description: b.description || "",
+                amenities: b.amenities || [],
+                photos: b.photos || [],
+              }}
+            />
+          ))
+        )}
       </div>
 
       <BottomNav />
