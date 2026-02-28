@@ -1,16 +1,24 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
-import { Star, Camera, MapPin, MessageCircle, Bell, Activity, Eye, ChevronRight, Settings, HelpCircle } from "lucide-react";
+import {
+  Star, Camera, MapPin, MessageCircle, Bell, Activity,
+  Eye, ChevronRight, Settings, HelpCircle, Store
+} from "lucide-react";
 import foodImg from "@/assets/food-1.jpg";
 
 const More = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const sections = [
     {
       items: [
-        { icon: Star, label: "Ajouter un avis" },
+        { icon: Star, label: "Ajouter un avis", action: () => navigate("/") },
         { icon: Camera, label: "Ajouter une photo ou vidéo" },
         { icon: MapPin, label: "Check-in" },
         { icon: MessageCircle, label: "Messages" },
-        { icon: Bell, label: "Notifications", badge: 16 },
+        { icon: Bell, label: "Notifications", badge: 3 },
         { icon: Activity, label: "Fil d'activité" },
         { icon: Eye, label: "Récemment consultés" },
       ],
@@ -18,8 +26,8 @@ const More = () => {
     {
       title: "QMaps pour entreprises",
       items: [
-        { icon: MapPin, label: "Ajouter une entreprise" },
-        { icon: Star, label: "Explorer QMaps Business" },
+        { icon: Store, label: "Ajouter une entreprise", action: () => navigate("/merchant") },
+        { icon: Star, label: "Explorer QMaps Business", action: () => navigate("/merchant") },
       ],
     },
     {
@@ -52,6 +60,7 @@ const More = () => {
               {section.items.map((item, i) => (
                 <button
                   key={item.label}
+                  onClick={"action" in item ? (item as any).action : undefined}
                   className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-accent/50 transition-colors ${
                     i > 0 ? "border-t border-border" : ""
                   }`}
@@ -61,7 +70,7 @@ const More = () => {
                     <span className="text-sm text-foreground">{item.label}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {item.badge && (
+                    {"badge" in item && item.badge && (
                       <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                         {item.badge}
                       </span>
