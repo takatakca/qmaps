@@ -57,25 +57,25 @@ const EnhanceSection = () => {
           {/* Enhancement tools */}
           <div className="space-y-1">
             {enhanceItems.map((item, i) => (
-              <button
-                key={i}
-                onClick={() => !item.locked && navigate(item.route)}
-                className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${item.locked ? "opacity-60" : "hover:bg-accent/30"}`}
-              >
-                <item.icon size={18} className="text-foreground shrink-0" />
-                <span className="text-sm text-foreground flex-1 text-left">{item.label}</span>
-                {item.locked ? (
-                  <Lock size={14} className="text-muted-foreground" />
-                ) : (
-                  <ChevronRight size={14} className="text-muted-foreground" />
+              <div key={i}>
+                <button
+                  onClick={() => !item.locked && navigate(item.route)}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${item.locked ? "opacity-60" : "hover:bg-accent/30"}`}
+                >
+                  <item.icon size={18} className="text-foreground shrink-0" />
+                  <span className="text-sm text-foreground flex-1 text-left">{item.label}</span>
+                  {item.locked ? (
+                    <Lock size={14} className="text-muted-foreground" />
+                  ) : (
+                    <ChevronRight size={14} className="text-muted-foreground" />
+                  )}
+                </button>
+                {item.locked && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5 pl-9">Disponible avec le forfait Upgrade</p>
                 )}
-              </button>
+              </div>
             ))}
           </div>
-
-          {item.locked && (
-            <p className="text-[10px] text-muted-foreground mt-0.5 pl-9">Disponible avec le forfait Upgrade</p>
-          )}
         </div>
       </div>
 
