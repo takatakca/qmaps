@@ -16,6 +16,13 @@ import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
 import AddPhoto from "./pages/AddPhoto";
+import MyReviews from "./pages/MyReviews";
+import QRCode from "./pages/QRCode";
+import Messages from "./pages/Messages";
+import Compliments from "./pages/Compliments";
+import Events from "./pages/Events";
+import Activity from "./pages/Activity";
+import AddedBusinesses from "./pages/AddedBusinesses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
