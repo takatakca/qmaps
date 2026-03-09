@@ -22,6 +22,7 @@ import MerchantBusinessInfo from "./pages/MerchantBusinessInfo";
 import MerchantGuestManager from "./pages/MerchantGuestManager";
 import MerchantPhotos from "./pages/MerchantPhotos";
 import MerchantInbox from "./pages/MerchantInbox";
+import MerchantBilling from "./pages/MerchantBilling";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
