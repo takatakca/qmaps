@@ -42,6 +42,7 @@ const MerchantMarketplace = () => {
   const [editHistory, setEditHistory] = useState(false);
   const [editCategories, setEditCategories] = useState(false);
   const [editAmenities, setEditAmenities] = useState(false);
+  const [editStatus, setEditStatus] = useState(false);
 
   const fetchBusiness = async () => {
     if (!user) return;
