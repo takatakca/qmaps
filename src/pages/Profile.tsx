@@ -236,7 +236,7 @@ const Profile = () => {
       {/* Your activity */}
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Votre activité</h2>
-        <button className="w-full flex items-center justify-between py-2.5">
+        <button onClick={() => navigate("/activity")} className="w-full flex items-center justify-between py-2.5">
           <div className="flex items-center gap-3">
             <Activity size={18} className="text-muted-foreground" />
             <span className="text-sm text-foreground">Activité</span>
