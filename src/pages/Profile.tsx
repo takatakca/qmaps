@@ -101,7 +101,7 @@ const Profile = () => {
           <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span>
         </button>
         <button onClick={() => setShareOpen(true)} className="p-2"><Share2 size={22} className="text-foreground" /></button>
-        <button className="p-2"><QrCode size={22} className="text-foreground" /></button>
+        <button onClick={() => navigate("/qr-code")} className="p-2"><QrCode size={22} className="text-foreground" /></button>
       </div>
 
       {/* Profile header */}
