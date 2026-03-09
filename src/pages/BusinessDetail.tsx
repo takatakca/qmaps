@@ -147,6 +147,8 @@ const BusinessDetail = () => {
           <BusinessReviewsTab
             businessId={business.id}
             reviews={reviews}
+            avgRating={Number(business.avg_rating)}
+            reviewsCount={business.reviews_count}
             userId={user?.id || null}
             userName={userName}
             onReviewSubmitted={fetchData}
