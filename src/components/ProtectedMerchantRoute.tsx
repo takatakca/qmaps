@@ -8,7 +8,7 @@ interface Props {
 }
 
 const ProtectedMerchantRoute = ({ children }: Props) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isMerchant, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [authorized, setAuthorized] = useState(false);
@@ -17,41 +17,36 @@ const ProtectedMerchantRoute = ({ children }: Props) => {
     if (authLoading) return;
 
     if (!user) {
-      navigate("/merchant/login");
+      navigate("/auth?role=merchant");
       return;
     }
 
-    const checkRole = async () => {
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-
-      const hasMerchant = roles?.some(r => r.role === "merchant" || r.role === "admin");
-
-      if (!hasMerchant) {
-        // Also check if they own a business
-        const { data: biz } = await supabase
-          .from("businesses")
-          .select("id")
-          .eq("owner_user_id", user.id)
-          .limit(1);
-
-        if (biz && biz.length > 0) {
-          await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
-          setAuthorized(true);
-        } else {
-          navigate("/merchant/login");
-          return;
-        }
-      } else {
+    const check = async () => {
+      if (isMerchant) {
         setAuthorized(true);
+        setChecking(false);
+        return;
+      }
+
+      // Fallback: check if they own a business
+      const { data: biz } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_user_id", user.id)
+        .limit(1);
+
+      if (biz && biz.length > 0) {
+        await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+        await refreshRoles();
+        setAuthorized(true);
+      } else {
+        navigate("/auth?role=merchant");
       }
       setChecking(false);
     };
 
-    checkRole();
-  }, [user, authLoading]);
+    check();
+  }, [user, authLoading, isMerchant]);
 
   if (authLoading || checking) {
     return (
@@ -62,7 +57,6 @@ const ProtectedMerchantRoute = ({ children }: Props) => {
   }
 
   if (!authorized) return null;
-
   return <>{children}</>;
 };
 

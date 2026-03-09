@@ -56,7 +56,10 @@ const Profile = () => {
           </div>
           <h1 className="font-heading text-xl font-bold text-foreground mb-2">Connectez-vous</h1>
           <p className="text-sm text-muted-foreground mb-6">Accédez à vos avis, collections et plus</p>
-          <Button onClick={() => navigate("/auth")} className="rounded-full gap-2"><LogIn size={16} /> Se connecter</Button>
+          <div className="flex flex-col gap-3 items-center">
+            <Button onClick={() => navigate("/auth")} className="rounded-full gap-2 w-56"><LogIn size={16} /> Se connecter (Client)</Button>
+            <Button onClick={() => navigate("/auth?role=merchant")} variant="outline" className="rounded-full gap-2 w-56"><Store size={16} /> Espace Professionnel</Button>
+          </div>
         </div>
         <BottomNav />
       </div>
@@ -86,6 +89,7 @@ const Profile = () => {
   ];
 
   const accountItems = [
+    { icon: Store, label: "Espace Professionnel", path: "/merchant" },
     { icon: Settings, label: "Préférences", path: "/preferences" },
     { icon: User, label: "Profil", path: "/edit-profile" },
     { icon: HelpCircle, label: "Support", path: "/support" },
