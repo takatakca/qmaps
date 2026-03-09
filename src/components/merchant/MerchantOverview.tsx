@@ -311,6 +311,7 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
 
       {/* Photos and videos */}
       <div className="bg-card rounded-xl border border-border p-4">
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-heading font-bold text-foreground">Photos et vidéos</h3>
           <button onClick={() => navigate("/merchant/photos")} className="text-sm text-primary font-medium">
@@ -324,8 +325,12 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
           {(business.photos || []).slice(0, 4).map((p, i) => (
             <img key={i} src={p} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
           ))}
-          <button onClick={() => navigate("/merchant/photos")} className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0">
-            <Camera size={20} className="text-muted-foreground" />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0 hover:border-primary/40 transition-colors"
+          >
+            {uploading ? <Loader2 size={20} className="text-muted-foreground animate-spin" /> : <Plus size={20} className="text-muted-foreground" />}
           </button>
         </div>
       </div>
