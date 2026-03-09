@@ -109,6 +109,11 @@ const App = () => (
 
             {/* Protected merchant routes */}
             <Route path="/merchant" element={<ProtectedMerchantRoute><MerchantDashboard /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/home" element={<ProtectedMerchantRoute><MerchantHome /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/optimization" element={<ProtectedMerchantRoute><MerchantOptimization /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/marketplace" element={<ProtectedMerchantRoute><MerchantMarketplace /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/messages" element={<ProtectedMerchantRoute><MerchantMessages /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/notifications" element={<ProtectedMerchantRoute><MerchantNotifications /></ProtectedMerchantRoute>} />
             <Route path="/merchant/ads" element={<ProtectedMerchantRoute><MerchantAds /></ProtectedMerchantRoute>} />
             <Route path="/merchant/host" element={<ProtectedMerchantRoute><QmapsHost /></ProtectedMerchantRoute>} />
             <Route path="/merchant/connect" element={<ProtectedMerchantRoute><QmapsConnect /></ProtectedMerchantRoute>} />
