@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
-import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck, Camera, Inbox } from "lucide-react";
+import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck, Camera, Inbox, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
