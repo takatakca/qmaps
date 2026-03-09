@@ -32,6 +32,7 @@ import MerchantOptimization from "./pages/MerchantOptimization";
 import MerchantMarketplace from "./pages/MerchantMarketplace";
 import MerchantMessages from "./pages/MerchantMessages";
 import MerchantNotifications from "./pages/MerchantNotifications";
+import MerchantMore from "./pages/MerchantMore";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
