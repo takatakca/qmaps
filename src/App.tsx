@@ -60,6 +60,12 @@ const App = () => (
             <Route path="/events" element={<Events />} />
             <Route path="/activity" element={<Activity />} />
             <Route path="/added-businesses" element={<AddedBusinesses />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/preferences" element={<Preferences />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/talk" element={<Talk />} />
+            <Route path="/my-activity" element={<MyActivity />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
