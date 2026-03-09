@@ -199,14 +199,14 @@ const Profile = () => {
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Contributions</h2>
         {contributionItems.map(item => (
-          <div key={item.label} className="flex items-center justify-between py-2.5">
+          <button key={item.label} onClick={() => navigate(item.path)} className="w-full flex items-center justify-between py-2.5">
             <div className="flex items-center gap-3">
               <item.icon size={18} className="text-muted-foreground" />
               <span className="text-sm text-foreground">{item.label}</span>
               <span className="text-sm font-semibold text-foreground">{item.count}</span>
             </div>
             <ChevronRight size={16} className="text-muted-foreground" />
-          </div>
+          </button>
         ))}
       </div>
 
