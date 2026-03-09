@@ -90,6 +90,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "Découvrir Guest Manager",
       route: "/merchant/guest-manager",
     },
+    {
+      icon: <Camera size={22} className="text-primary" />,
+      title: "Photos & Vidéos",
+      desc: "Gérez les photos de votre entreprise et voyez l'aperçu sur QMAPS.",
+      cta: "Gérer les photos",
+      route: "/merchant/photos",
+    },
   ];
 
   return (
