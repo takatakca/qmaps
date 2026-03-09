@@ -18,6 +18,7 @@ import EditAddressModal from "@/components/merchant/info/EditAddressModal";
 import EditSpecialtiesModal from "@/components/merchant/info/EditSpecialtiesModal";
 import EditHistoryModal from "@/components/merchant/info/EditHistoryModal";
 import EditAmenitiesModal from "@/components/merchant/info/EditAmenitiesModal";
+import EditBasicInfoModal from "@/components/merchant/info/EditBasicInfoModal";
 
 const MerchantBusinessInfo = () => {
   const navigate = useNavigate();
