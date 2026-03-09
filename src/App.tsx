@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Collections from "./pages/Collections";
 import Projects from "./pages/Projects";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Search from "./pages/Search";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import MerchantAds from "./pages/MerchantAds";
@@ -61,6 +62,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/search" element={<Search />} />
             <Route path="/business/:id" element={<BusinessDetail />} />
             <Route path="/profile" element={<Profile />} />
