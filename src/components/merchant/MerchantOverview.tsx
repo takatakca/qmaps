@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
-import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck, Camera } from "lucide-react";
+import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck, Camera, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -96,6 +96,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       desc: "Gérez les photos de votre entreprise et voyez l'aperçu sur QMAPS.",
       cta: "Gérer les photos",
       route: "/merchant/photos",
+    },
+    {
+      icon: <Inbox size={22} className="text-primary" />,
+      title: "Boîte de réception",
+      desc: "Recevez et gérez les messages de vos clients directement.",
+      cta: "Voir les messages",
+      route: "/merchant/inbox",
     },
   ];
 
