@@ -73,23 +73,23 @@ const Profile = () => {
   ];
 
   const contributionItems = [
-    { label: "Avis", count: stats.reviews, icon: Star },
-    { label: "Commerces ajoutés", count: 0, icon: Store },
+    { label: "Avis", count: stats.reviews, icon: Star, path: "/my-reviews" },
+    { label: "Commerces ajoutés", count: 0, icon: Store, path: "/added-businesses" },
   ];
 
   const communityItems = [
-    { icon: MessageCircle, label: "Messages" },
-    { icon: Heart, label: "Compliments" },
-    { icon: MapPin, label: "Événements" },
-    { icon: Activity, label: "Fil d'activité", badge: 2 },
-    { icon: MessageCircle, label: "Discussions" },
+    { icon: MessageCircle, label: "Messages", path: "/messages" },
+    { icon: Heart, label: "Compliments", path: "/compliments" },
+    { icon: MapPin, label: "Événements", path: "/events" },
+    { icon: Activity, label: "Fil d'activité", badge: 2, path: "/activity" },
+    { icon: MessageCircle, label: "Discussions", path: "/messages" },
   ];
 
   const accountItems = [
-    { icon: Settings, label: "Préférences" },
-    { icon: User, label: "Profil" },
-    { icon: HelpCircle, label: "Support" },
-    { icon: Settings, label: "Paramètres" },
+    { icon: Settings, label: "Préférences", path: "" },
+    { icon: User, label: "Profil", path: "" },
+    { icon: HelpCircle, label: "Support", path: "" },
+    { icon: Settings, label: "Paramètres", path: "" },
   ];
 
   return (
@@ -101,7 +101,7 @@ const Profile = () => {
           <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span>
         </button>
         <button onClick={() => setShareOpen(true)} className="p-2"><Share2 size={22} className="text-foreground" /></button>
-        <button className="p-2"><QrCode size={22} className="text-foreground" /></button>
+        <button onClick={() => navigate("/qr-code")} className="p-2"><QrCode size={22} className="text-foreground" /></button>
       </div>
 
       {/* Profile header */}
@@ -199,14 +199,14 @@ const Profile = () => {
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Contributions</h2>
         {contributionItems.map(item => (
-          <div key={item.label} className="flex items-center justify-between py-2.5">
+          <button key={item.label} onClick={() => navigate(item.path)} className="w-full flex items-center justify-between py-2.5">
             <div className="flex items-center gap-3">
               <item.icon size={18} className="text-muted-foreground" />
               <span className="text-sm text-foreground">{item.label}</span>
               <span className="text-sm font-semibold text-foreground">{item.count}</span>
             </div>
             <ChevronRight size={16} className="text-muted-foreground" />
-          </div>
+          </button>
         ))}
       </div>
 
@@ -216,7 +216,7 @@ const Profile = () => {
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Communauté</h2>
         {communityItems.map(item => (
-          <button key={item.label} className="w-full flex items-center justify-between py-2.5">
+          <button key={item.label} onClick={() => navigate(item.path)} className="w-full flex items-center justify-between py-2.5">
             <div className="flex items-center gap-3">
               <item.icon size={18} className="text-muted-foreground" />
               <span className="text-sm text-foreground">{item.label}</span>
@@ -236,7 +236,7 @@ const Profile = () => {
       {/* Your activity */}
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Votre activité</h2>
-        <button className="w-full flex items-center justify-between py-2.5">
+        <button onClick={() => navigate("/activity")} className="w-full flex items-center justify-between py-2.5">
           <div className="flex items-center gap-3">
             <Activity size={18} className="text-muted-foreground" />
             <span className="text-sm text-foreground">Activité</span>
