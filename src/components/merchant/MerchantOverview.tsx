@@ -76,6 +76,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "À partir de CA$2/jour",
       route: "/merchant/cta",
     },
+    {
+      icon: <Building size={22} className="text-primary" />,
+      title: "Informations de l'entreprise",
+      desc: "Gérez vos catégories, heures, adresse, commodités et plus encore.",
+      cta: "Modifier les infos",
+      route: "/merchant/business-info",
+    },
   ];
 
   return (
