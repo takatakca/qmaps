@@ -48,7 +48,7 @@ const Settings = () => {
             <span className={`text-sm ${item.danger ? "text-destructive font-medium" : "text-foreground"}`}>
               {item.label}
             </span>
-            {!item.action && <ChevronRight size={16} className="text-muted-foreground" />}
+            <ChevronRight size={16} className="text-muted-foreground" />
           </button>
         ))}
       </div>
