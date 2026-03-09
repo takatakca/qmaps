@@ -3,255 +3,340 @@ import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
 import {
-  Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star,
-  Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick,
-  Building, CalendarCheck, Camera, Inbox, Receipt, Pencil
+  Camera, FileText, Phone, Pencil, MapPin, Globe, Clock,
+  ChevronRight, ChevronDown, Megaphone, MessageSquare, Star,
+  MousePointerClick, CalendarCheck, Building, Inbox, Receipt,
+  Wifi, Car, Utensils, CreditCard, Accessibility, Baby,
+  Wind, PartyPopper, ChefHat, Truck, Wine, Coffee,
+  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface Props {
   business: Tables<"businesses">;
   reviews: any[];
 }
 
-const businessQuestions = [
-  { q: "Avez-vous des **places en terrasse** ?", key: "outdoor_seating" },
-  { q: "Offrez-vous le **Wi-Fi gratuit** ?", key: "free_wifi" },
-  { q: "Acceptez-vous les **réservations** ?", key: "reservations" },
-  { q: "Avez-vous un **stationnement** ?", key: "parking" },
-  { q: "Offrez-vous la **livraison** ?", key: "delivery" },
-  { q: "Avez-vous un **menu végétarien** ?", key: "vegetarian" },
-  { q: "Acceptez-vous les **cartes de crédit** ?", key: "credit_cards" },
-  { q: "Avez-vous un **bar** ?", key: "bar" },
-  { q: "Êtes-vous **accessible en fauteuil roulant** ?", key: "wheelchair" },
-  { q: "Offrez-vous le **service à emporter** ?", key: "takeout" },
-  { q: "Avez-vous un **menu enfants** ?", key: "kids_menu" },
-  { q: "Offrez-vous un **brunch** ?", key: "brunch" },
-  { q: "Avez-vous la **climatisation** ?", key: "ac" },
-  { q: "Proposez-vous des **événements privés** ?", key: "private_events" },
-  { q: "Avez-vous un **service de traiteur** ?", key: "catering" },
-];
-
-const pageVisitsData = [
-  { month: "Mar", you: 180, competitor: 286 },
-  { month: "Avr", you: 210, competitor: 250 },
-  { month: "Juin", you: 150, competitor: 220 },
-  { month: "Août", you: 120, competitor: 171 },
-  { month: "Oct", you: 90, competitor: 200 },
-  { month: "Déc", you: 60, competitor: 180 },
-  { month: "Fév", you: 87, competitor: 150 },
-];
-
-const competitors = [
-  { name: "Café St-Barth", rating: 4.6, reviews: 171 },
-  { name: "Le Petit Dep", rating: 4.3, reviews: 126 },
-  { name: "Café Lulu", rating: 4.7, reviews: 98 },
-];
-
 const MerchantOverview = ({ business, reviews }: Props) => {
   const navigate = useNavigate();
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [dismissedQuestion, setDismissedQuestion] = useState(false);
+  const [showAllAmenities, setShowAllAmenities] = useState(false);
+  const [showAllHours, setShowAllHours] = useState(false);
 
-  const currentQuestion = businessQuestions[questionIndex];
+  const actionButtons = [
+    { icon: Camera, label: "Ajouter photo", action: () => navigate("/merchant/photos") },
+    { icon: FileText, label: "Description", action: () => navigate("/merchant/business-info") },
+    { icon: Phone, label: "Appeler", action: () => {} },
+    { icon: Pencil, label: "Modifier la page", action: () => navigate("/merchant/business-info") },
+  ];
 
-  const handleAnswer = (answer: "yes" | "no" | "skip") => {
-    if (questionIndex < businessQuestions.length - 1) {
-      setQuestionIndex(questionIndex + 1);
-    } else {
-      setDismissedQuestion(true);
-    }
+  const amenities = business.amenities || [];
+  const amenityIcons: Record<string, any> = {
+    wifi: Wifi, parking: Car, delivery: Truck, credit_cards: CreditCard,
+    wheelchair: Accessibility, kids_menu: Baby, ac: Wind, private_events: PartyPopper,
+    catering: ChefHat, bar: Wine, brunch: Coffee, takeout: Utensils,
   };
 
-  const renderBoldText = (text: string) => {
-    const parts = text.split(/\*\*(.*?)\*\*/);
-    return parts.map((part, i) =>
-      i % 2 === 1 ? <strong key={i}>{part}</strong> : <span key={i}>{part}</span>
-    );
-  };
-
-  const reminders = [
-    {
-      icon: <CheckCircle size={20} className="text-primary" />,
-      text: "Vérifiez les détails de votre page pour apparaître dans plus de résultats.",
-      action: "Terminer la configuration",
-    },
-    {
-      icon: <Lightbulb size={20} className="text-amber-500" />,
-      text: "Découvrez ce qui a changé chez vos principaux concurrents récemment.",
-      action: "Voir les tendances",
-    },
-    {
-      icon: <Star size={20} className="text-primary" />,
-      text: "Aidez-nous à améliorer le système de recommandation QMAPS.",
-      action: "Répondre au sondage",
-    },
+  const defaultHours = [
+    { day: "Lundi", hours: "Ouvert 24h" },
+    { day: "Mardi", hours: "Ouvert 24h" },
+    { day: "Mercredi", hours: "Ouvert 24h" },
+    { day: "Jeudi", hours: "Ouvert 24h" },
+    { day: "Vendredi", hours: "Ouvert 24h" },
+    { day: "Samedi", hours: "Ouvert 24h" },
+    { day: "Dimanche", hours: "Ouvert 24h" },
   ];
 
   const products = [
-    { icon: <Megaphone size={22} className="text-primary" />, title: "Publicités QMAPS", desc: "Touchez plus de clients avec des annonces ciblées.", cta: "Créer une publicité", route: "/merchant/ads" },
-    { icon: <MessageSquare size={22} className="text-primary" />, title: "QMAPS Connect", desc: "Partagez des publications avec vos clients.", cta: "Découvrir Connect", route: "/merchant/connect" },
-    { icon: <MousePointerClick size={22} className="text-primary" />, title: "Call to Action", desc: "Convertissez les visites en clients.", cta: "À partir de CA$2/jour", route: "/merchant/cta" },
-    { icon: <Star size={22} className="text-primary" />, title: "Business Highlights", desc: "Badges pour mettre en valeur votre entreprise.", cta: "À partir de CA$2/jour", route: "/merchant/highlights" },
-    { icon: <Camera size={22} className="text-primary" />, title: "Photos & Vidéos", desc: "Gérez les photos de votre entreprise.", cta: "Gérer les photos", route: "/merchant/photos" },
-    { icon: <MessageSquare size={22} className="text-primary" />, title: "Avis", desc: "Consultez et répondez aux avis clients.", cta: "Voir les avis", route: "/merchant/dashboard" },
-    { icon: <Phone size={22} className="text-primary" />, title: "QMAPS Host", desc: "Réceptionniste virtuel IA.", cta: "Découvrir Host", route: "/merchant/host" },
-    { icon: <CalendarCheck size={22} className="text-primary" />, title: "QMAPS Guest Manager", desc: "Gérez vos réservations en ligne.", cta: "Découvrir", route: "/merchant/guest-manager" },
-    { icon: <Building size={22} className="text-primary" />, title: "Informations", desc: "Gérez catégories, heures, adresse.", cta: "Modifier", route: "/merchant/business-info" },
-    { icon: <Inbox size={22} className="text-primary" />, title: "Boîte de réception", desc: "Messages de vos clients.", cta: "Voir les messages", route: "/merchant/inbox" },
-    { icon: <Receipt size={22} className="text-primary" />, title: "Facturation", desc: "Solde, paiements et produits.", cta: "Voir la facturation", route: "/merchant/billing" },
+    { icon: <Megaphone size={22} className="text-primary" />, title: "Publicités QMAPS", desc: "Touchez plus de clients.", cta: "Créer une publicité", route: "/merchant/ads" },
+    { icon: <MessageSquare size={22} className="text-primary" />, title: "QMAPS Connect", desc: "Partagez des publications.", cta: "Découvrir", route: "/merchant/connect" },
+    { icon: <MousePointerClick size={22} className="text-primary" />, title: "Call to Action", desc: "Convertissez les visites.", cta: "CA$2/jour", route: "/merchant/cta" },
+    { icon: <Star size={22} className="text-primary" />, title: "Business Highlights", desc: "Badges et mise en valeur.", cta: "CA$2/jour", route: "/merchant/highlights" },
+    { icon: <Camera size={22} className="text-primary" />, title: "Photos & Vidéos", desc: "Gérez vos photos.", cta: "Gérer", route: "/merchant/photos" },
+    { icon: <Phone size={22} className="text-primary" />, title: "QMAPS Host", desc: "Réceptionniste virtuel IA.", cta: "Découvrir", route: "/merchant/host" },
+    { icon: <CalendarCheck size={22} className="text-primary" />, title: "Guest Manager", desc: "Réservations en ligne.", cta: "Découvrir", route: "/merchant/guest-manager" },
+    { icon: <Building size={22} className="text-primary" />, title: "Informations", desc: "Catégories, heures, adresse.", cta: "Modifier", route: "/merchant/business-info" },
+    { icon: <Inbox size={22} className="text-primary" />, title: "Boîte de réception", desc: "Messages clients.", cta: "Voir", route: "/merchant/inbox" },
+    { icon: <Receipt size={22} className="text-primary" />, title: "Facturation", desc: "Solde et paiements.", cta: "Voir", route: "/merchant/billing" },
   ];
 
   return (
     <div className="space-y-4">
-      {/* Business card */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-            {business.image_url ? (
-              <img src={business.image_url} alt={business.name} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-lg font-bold text-muted-foreground">{business.name[0]}</span>
-            )}
+      {/* Hero */}
+      <div className="relative rounded-xl overflow-hidden">
+        <div className="h-40 bg-muted">
+          {business.image_url && (
+            <img src={business.image_url} alt={business.name} className="w-full h-full object-cover" />
+          )}
+        </div>
+        <div className="bg-card border border-border rounded-b-xl p-4 -mt-6 relative z-10 mx-2">
+          <h2 className="font-heading text-xl font-bold text-foreground">{business.name}</h2>
+          <div className="flex items-center gap-2 mt-1">
+            <StarRating rating={business.avg_rating} size={16} />
+            <span className="text-sm text-muted-foreground">{business.avg_rating.toFixed(1)}</span>
+            <span className="text-sm text-muted-foreground">({business.reviews_count} avis)</span>
           </div>
-          <div className="flex-1">
-            <h2 className="font-heading font-semibold text-foreground">{business.name}</h2>
-            <p className="text-xs text-muted-foreground">{business.address}</p>
-          </div>
-          <button onClick={() => navigate(`/business/${business.id}`)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-            <Pencil size={14} className="text-foreground" />
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex justify-between gap-2">
+        {actionButtons.map((btn, i) => (
+          <button key={i} onClick={btn.action} className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+            <btn.icon size={20} className="text-primary" />
+            <span className="text-[10px] text-foreground font-medium text-center leading-tight">{btn.label}</span>
           </button>
-        </div>
+        ))}
       </div>
 
-      {/* Questionnaire section */}
-      {!dismissedQuestion && (
-        <div className="bg-card rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground mb-2">{questionIndex + 1} sur {businessQuestions.length} questions</p>
-          <Progress value={((questionIndex + 1) / businessQuestions.length) * 100} className="h-1.5 mb-4" />
-          <p className="text-foreground text-base mb-4">{renderBoldText(currentQuestion.q)}</p>
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" className="rounded-full px-6" onClick={() => handleAnswer("yes")}>Oui</Button>
-            <Button variant="outline" className="rounded-full px-6" onClick={() => handleAnswer("no")}>Non</Button>
-            <Button variant="ghost" className="rounded-full px-6 text-muted-foreground" onClick={() => handleAnswer("skip")}>Passer</Button>
-          </div>
-        </div>
-      )}
-
-      {/* Insights - Page visits chart */}
+      {/* Check your summary */}
       <div className="bg-card rounded-xl border border-border p-4">
-        <h3 className="font-heading font-bold text-foreground text-lg mb-1">Analyses</h3>
-        <p className="text-xs text-muted-foreground mb-2">12 derniers mois</p>
-        <p className="text-sm font-semibold text-foreground mb-3">Visites de page : vous vs concurrents</p>
-        <ResponsiveContainer width="100%" height={180}>
-          <LineChart data={pageVisitsData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-            <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-            <Line type="monotone" dataKey="you" name="Votre entreprise" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
-            <Line type="monotone" dataKey="competitor" name="Concurrents" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-        <div className="flex items-center gap-4 mt-3 text-xs">
-          <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-primary inline-block rounded" /> Votre entreprise</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-muted-foreground inline-block rounded" /> Plage typique</span>
+        <h3 className="font-heading font-bold text-foreground mb-1">Il est temps de vérifier votre résumé</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          QMAPS utilise les avis et les informations de votre page pour créer un résumé IA. Assurez-vous qu'il reflète bien votre entreprise.
+        </p>
+        <div className="flex items-center gap-2 mb-3">
+          <StarRating rating={business.avg_rating} size={18} />
         </div>
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" size="sm" className="rounded-full text-xs flex-1">Comparer les visites</Button>
-          <Button variant="outline" size="sm" className="rounded-full text-xs flex-1 text-primary border-primary">Modifier concurrents</Button>
-        </div>
+        <p className="text-xs text-muted-foreground italic mb-3">
+          Vérifiez votre résumé d'entreprise dès aujourd'hui
+        </p>
+        <Button className="w-full rounded-full" onClick={() => navigate("/merchant/business-info")}>
+          Vérifier le résumé
+        </Button>
       </div>
 
-      {/* Highly viewed competitors */}
+      {/* Categories */}
       <div className="bg-card rounded-xl border border-border p-4">
-        <p className="text-xs text-muted-foreground mb-1">30 derniers jours</p>
-        <h3 className="font-heading font-semibold text-foreground mb-3">Concurrents les plus vus</h3>
-        <div className="space-y-3">
-          {competitors.map((c, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">{c.name[0]}</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground">{c.name}</p>
-                <div className="flex items-center gap-1">
-                  <StarRating rating={c.rating} size={12} />
-                  <span className="text-xs text-muted-foreground">{c.rating} ({c.reviews} avis)</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Potential customers */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <p className="text-xs text-muted-foreground mb-1">14 derniers jours</p>
-        <h3 className="font-heading font-semibold text-foreground mb-3">Clients potentiels</h3>
-        <div className="w-full h-40 bg-muted rounded-lg flex items-center justify-center mb-3">
-          <MapPin size={32} className="text-muted-foreground" />
-        </div>
-        <div className="flex items-start gap-3 bg-muted/50 rounded-lg p-3">
-          <Globe size={18} className="text-primary mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm text-foreground">Des gens cherchent des services que vous offrez mais ne vous trouvent pas. Mettez à jour vos informations pour plus de visibilité.</p>
-            <button onClick={() => navigate("/merchant/business-info")} className="text-sm font-medium text-primary mt-1">Mettre à jour mes informations</button>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent competitor reviews */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <p className="text-xs text-muted-foreground mb-1">30 derniers jours</p>
-        <h3 className="font-heading font-semibold text-foreground mb-3">Avis récents des concurrents</h3>
-        {competitors.length > 0 ? (
-          <div className="space-y-3">
-            <div className="border border-border rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-semibold text-foreground">Café Lulu</span>
-                <StarRating rating={4.7} size={12} />
-                <span className="text-xs text-muted-foreground">4.7 (96 avis)</span>
-              </div>
-              <p className="text-xs text-muted-foreground line-clamp-3">Le service était incroyable! Le personnel était très accueillant. Un endroit charmant à visiter à Montréal...</p>
-              <button className="text-xs font-medium text-primary mt-1">Voir sur QMAPS</button>
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground text-center py-4">Aucun avis de concurrent récent.</p>
-        )}
-      </div>
-
-      {/* Learn tips */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <div className="flex items-start gap-3">
-          <Lightbulb size={20} className="text-amber-500 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm text-foreground">Apprenez 5 choses gratuites que vous pouvez faire sur QMAPS pour rester compétitif.</p>
-            <button className="text-sm font-medium text-primary mt-1">En savoir plus</button>
-          </div>
+        <h3 className="font-heading font-bold text-foreground mb-3">Catégories</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Les catégories aident les clients à trouver votre entreprise. Elles apparaissent sur votre fiche.
+        </p>
+        <div className="space-y-2">
+          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
+            <span>Restaurants</span>
+            <ChevronRight size={16} />
+          </button>
+          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
+            <span>Déjeuner & Brunch</span>
+            <ChevronRight size={16} />
+          </button>
+          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
+            <span>Diner</span>
+            <ChevronRight size={16} />
+          </button>
+          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
+            <span>Café & Thé</span>
+            <ChevronRight size={16} />
+          </button>
         </div>
       </div>
 
       {/* Upgrade banner */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">⬆ Upgrade</span>
-          <button className="text-muted-foreground"><X size={16} /></button>
-        </div>
-        <h3 className="font-heading font-semibold text-foreground mb-1">Améliorez votre page</h3>
-        <p className="text-xs text-muted-foreground mb-3">Ces fonctionnalités peuvent améliorer votre page QMAPS et booster l'attrait de votre entreprise.</p>
-        <div className="bg-card rounded-lg p-3 border border-border mb-3">
-          <div className="flex items-start justify-between">
-            <p className="text-sm text-foreground">Accédez aux fonctionnalités améliorées pour <strong>62% de moins</strong> avec le Package Upgrade.</p>
-            <button className="text-muted-foreground"><X size={14} /></button>
+        <div className="flex items-start gap-3">
+          <ArrowUpCircle size={24} className="text-primary shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Attirez l'attention de vos clients en améliorant votre fiche avec les fonctionnalités avancées.
+            </p>
+            <button onClick={() => navigate("/merchant/upgrade")} className="text-sm font-medium text-primary mt-2">
+              Essayer la mise à niveau →
+            </button>
           </div>
-          <button onClick={() => navigate("/merchant/upgrade")} className="text-sm font-medium text-primary mt-1">Économisez avec le Bundle →</button>
         </div>
       </div>
 
+      {/* Call to Action */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-3">Call to Action</h3>
+        <div className="space-y-3">
+          <div className="border border-primary/30 bg-primary/5 rounded-lg p-3 flex items-center gap-3">
+            <div className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded">
+              10% de réduction pour les nouveaux clients!
+            </div>
+          </div>
+          <button onClick={() => navigate("/merchant/cta")} className="w-full text-sm font-medium text-primary text-left">
+            Appel maintenant
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Incitez les visiteurs à passer à l'action avec des promotions, des offres spéciales ou un bouton d'appel direct.
+        </p>
+      </div>
+
+      {/* Business Info */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-4">Informations</h3>
+        <div className="space-y-4">
+          {/* Address */}
+          <div className="flex items-start gap-3">
+            <MapPin size={18} className="text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Adresse</p>
+              <p className="text-sm text-muted-foreground">{business.address}</p>
+              <p className="text-xs text-muted-foreground">{business.city}, {business.region} {business.postal_code}</p>
+            </div>
+          </div>
+          {/* Phone */}
+          <div className="flex items-start gap-3">
+            <Phone size={18} className="text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Appeler</p>
+              <p className="text-sm text-primary">{business.phone || "Ajouter un numéro"}</p>
+            </div>
+          </div>
+          {/* Website */}
+          <div className="flex items-start gap-3">
+            <Globe size={18} className="text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Site web</p>
+              <p className="text-sm text-primary truncate">{business.website || "Ajouter un site web"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Amenities */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-3">Commodités et plus</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {(showAllAmenities ? amenities : amenities.slice(0, 4)).map((a, i) => {
+            const IconComp = amenityIcons[a] || Utensils;
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <IconComp size={16} className="text-muted-foreground shrink-0" />
+                <span className="text-sm text-foreground capitalize">{a.replace(/_/g, " ")}</span>
+              </div>
+            );
+          })}
+        </div>
+        {amenities.length > 4 && (
+          <button onClick={() => setShowAllAmenities(!showAllAmenities)} className="flex items-center gap-1 text-sm font-medium text-primary mt-3">
+            {showAllAmenities ? "Voir moins" : `Voir tout (${amenities.length})`}
+            <ChevronDown size={14} className={showAllAmenities ? "rotate-180 transition-transform" : "transition-transform"} />
+          </button>
+        )}
+        {amenities.length === 0 && (
+          <button onClick={() => navigate("/merchant/business-info")} className="text-sm text-primary font-medium">
+            Ajouter des commodités →
+          </button>
+        )}
+      </div>
+
+      {/* Business Hours */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-3">Heures d'ouverture</h3>
+        <div className="space-y-2">
+          {(showAllHours ? defaultHours : defaultHours.slice(0, 3)).map((h, i) => (
+            <div key={i} className="flex justify-between text-sm">
+              <span className="text-foreground font-medium">{h.day}</span>
+              <span className="text-muted-foreground">{h.hours}</span>
+            </div>
+          ))}
+        </div>
+        {!showAllHours && (
+          <button onClick={() => setShowAllHours(true)} className="flex items-center gap-1 text-sm font-medium text-primary mt-3">
+            Voir tous les horaires <ChevronDown size={14} />
+          </button>
+        )}
+        <button onClick={() => navigate("/merchant/business-info")} className="text-xs text-primary font-medium mt-3 block">
+          Ajouter des heures spéciales →
+        </button>
+      </div>
+
+      {/* From this business */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-3">De cette entreprise</h3>
+        <div className="space-y-3">
+          <div className="border border-border rounded-lg p-3">
+            <p className="text-sm font-medium text-foreground">Réseaux sociaux</p>
+            <p className="text-xs text-muted-foreground mt-1">Ajoutez vos liens de réseaux sociaux</p>
+            <button onClick={() => navigate("/merchant/business-info")} className="text-xs text-primary font-medium mt-1">Modifier →</button>
+          </div>
+          <div className="border border-border rounded-lg p-3">
+            <p className="text-sm font-medium text-foreground">Histoire</p>
+            <p className="text-xs text-muted-foreground mt-1">Racontez l'histoire de votre entreprise</p>
+            <button onClick={() => navigate("/merchant/business-info")} className="text-xs text-primary font-medium mt-1">Ajouter l'historique →</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Photos and videos */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-heading font-bold text-foreground">Photos et vidéos</h3>
+          <button onClick={() => navigate("/merchant/photos")} className="text-sm text-primary font-medium">
+            Voir tout →
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Les utilisateurs sont 2,5x plus susceptibles de contacter une entreprise avec des photos. Ajoutez des photos pour attirer plus de clients.
+        </p>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {(business.photos || []).slice(0, 4).map((p, i) => (
+            <img key={i} src={p} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+          ))}
+          <button onClick={() => navigate("/merchant/photos")} className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0">
+            <Camera size={20} className="text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      {/* Slideshow */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-2">Diaporama</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Créez un diaporama avec vos meilleures photos pour impressionner les visiteurs de votre page.
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="rounded-full text-xs gap-1">
+            <ImageIcon size={14} /> Ajouter des photos
+          </Button>
+          <Button variant="outline" size="sm" className="rounded-full text-xs gap-1">
+            <Play size={14} /> Ajouter une vidéo
+          </Button>
+        </div>
+      </div>
+
+      {/* Business Highlights */}
+      <div className="bg-card rounded-xl border border-border p-4">
+        <h3 className="font-heading font-bold text-foreground mb-3">Business Highlights</h3>
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          <div className="flex flex-col items-center gap-1 shrink-0 w-20">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <Award size={22} className="text-primary" />
+            </div>
+            <span className="text-[10px] text-foreground text-center leading-tight">Cuisine locale & bio</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 shrink-0 w-20">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <ShieldCheck size={22} className="text-primary" />
+            </div>
+            <span className="text-[10px] text-foreground text-center leading-tight">Propriétaire vérifié</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 shrink-0 w-20">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <Star size={22} className="text-primary" />
+            </div>
+            <span className="text-[10px] text-foreground text-center leading-tight">15 ans d'expérience</span>
+          </div>
+        </div>
+        <button onClick={() => navigate("/merchant/highlights")} className="text-sm text-primary font-medium mt-2">
+          En savoir plus →
+        </button>
+      </div>
+
+      {/* Mark as claimed */}
+      <Button
+        onClick={() => {}}
+        variant="outline"
+        className="w-full rounded-full border-primary text-primary font-semibold"
+      >
+        Marquer l'entreprise comme revendiquée
+      </Button>
+
       {/* Products grid */}
-      <div className="space-y-3">
+      <div className="space-y-3 mt-2">
         <h3 className="font-heading font-semibold text-foreground px-1">Produits & Services FLEXS</h3>
         {products.map((p, i) => (
           <button
