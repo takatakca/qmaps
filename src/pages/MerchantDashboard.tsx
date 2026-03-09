@@ -120,7 +120,7 @@ const MerchantDashboard = () => {
               ))}
             </div>
 
-            {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} />}
+            {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
             {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}
             {selectedBiz && tab === "edit" && <MerchantEditForm business={selectedBiz} onSaved={fetchBusinesses} />}
             {selectedBiz && tab === "reviews" && <MerchantReviews reviews={reviews} />}
