@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import {
   Crown, Link2, MousePointerClick, Sparkles, Image,
-  Film, ShieldX, Star, Camera, Lock, ChevronRight, X
+  Film, ShieldX, Star, Camera, Lock, ChevronRight, X, Users
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ const enhanceItems = [
 const shortcuts = [
   { icon: Star, label: "Avis", route: "/merchant" },
   { icon: Camera, label: "Photos & Vidéos", route: "/merchant/photos" },
+  { icon: Users, label: "QMAPS Guest Manager", route: "/merchant/guest-manager" },
 ];
 
 const EnhanceSection = () => {
