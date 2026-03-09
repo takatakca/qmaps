@@ -100,6 +100,7 @@ const MerchantBusinessInfo = () => {
       <EditSpecialtiesModal open={showSpecialties} onClose={() => setShowSpecialties(false)} business={business} onSaved={fetchBusiness} />
       <EditHistoryModal open={showHistory} onClose={() => setShowHistory(false)} business={business} onSaved={fetchBusiness} />
       <EditAmenitiesModal open={showAmenities} onClose={() => setShowAmenities(false)} business={business} onSaved={fetchBusiness} />
+      <EditBasicInfoModal open={showBasicInfo} onClose={() => setShowBasicInfo(false)} business={business} onSaved={fetchBusiness} />
     </div>
   );
 };
