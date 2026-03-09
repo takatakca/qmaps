@@ -32,6 +32,7 @@ import MerchantOptimization from "./pages/MerchantOptimization";
 import MerchantMarketplace from "./pages/MerchantMarketplace";
 import MerchantMessages from "./pages/MerchantMessages";
 import MerchantNotifications from "./pages/MerchantNotifications";
+import MerchantMore from "./pages/MerchantMore";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
@@ -114,6 +115,7 @@ const App = () => (
             <Route path="/merchant/marketplace" element={<ProtectedMerchantRoute><MerchantMarketplace /></ProtectedMerchantRoute>} />
             <Route path="/merchant/messages" element={<ProtectedMerchantRoute><MerchantMessages /></ProtectedMerchantRoute>} />
             <Route path="/merchant/notifications" element={<ProtectedMerchantRoute><MerchantNotifications /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/more" element={<ProtectedMerchantRoute><MerchantMore /></ProtectedMerchantRoute>} />
             <Route path="/merchant/ads" element={<ProtectedMerchantRoute><MerchantAds /></ProtectedMerchantRoute>} />
             <Route path="/merchant/host" element={<ProtectedMerchantRoute><QmapsHost /></ProtectedMerchantRoute>} />
             <Route path="/merchant/connect" element={<ProtectedMerchantRoute><QmapsConnect /></ProtectedMerchantRoute>} />
