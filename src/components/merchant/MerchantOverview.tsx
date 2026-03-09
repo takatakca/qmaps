@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
-import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight } from "lucide-react";
+import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -68,6 +68,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       desc: "Affichez des badges pour mettre en valeur ce qui rend votre entreprise unique.",
       cta: "À partir de CA$2/jour",
       route: "/merchant/highlights",
+    },
+    {
+      icon: <MousePointerClick size={22} className="text-primary" />,
+      title: "Call to Action",
+      desc: "Convertissez les visites en clients avec un CTA personnalisable sur votre page.",
+      cta: "À partir de CA$2/jour",
+      route: "/merchant/cta",
     },
   ];
 

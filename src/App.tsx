@@ -17,6 +17,7 @@ import QmapsHost from "./pages/QmapsHost";
 import QmapsConnect from "./pages/QmapsConnect";
 import MerchantUpgrade from "./pages/MerchantUpgrade";
 import MerchantHighlights from "./pages/MerchantHighlights";
+import MerchantCTA from "./pages/MerchantCTA";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/merchant/connect" element={<QmapsConnect />} />
             <Route path="/merchant/upgrade" element={<MerchantUpgrade />} />
             <Route path="/merchant/highlights" element={<MerchantHighlights />} />
+            <Route path="/merchant/cta" element={<MerchantCTA />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
