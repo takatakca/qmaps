@@ -166,22 +166,16 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
           Les catégories aident les clients à trouver votre entreprise. Elles apparaissent sur votre fiche.
         </p>
         <div className="space-y-2">
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Restaurants</span>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Déjeuner & Brunch</span>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Diner</span>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Café & Thé</span>
-            <ChevronRight size={16} />
-          </button>
+          {categories.length > 0 ? categories.map(cat => (
+            <button key={cat.id} onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
+              <span>{cat.icon} {cat.name}</span>
+              <ChevronRight size={16} />
+            </button>
+          )) : (
+            <button onClick={() => navigate("/merchant/business-info")} className="text-sm text-primary font-medium">
+              Ajouter des catégories →
+            </button>
+          )}
         </div>
       </div>
 
