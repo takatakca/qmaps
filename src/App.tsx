@@ -14,6 +14,7 @@ import Search from "./pages/Search";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import MerchantAds from "./pages/MerchantAds";
 import QmapsHost from "./pages/QmapsHost";
+import QmapsConnect from "./pages/QmapsConnect";
 import MerchantUpgrade from "./pages/MerchantUpgrade";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/merchant" element={<MerchantDashboard />} />
             <Route path="/merchant/ads" element={<MerchantAds />} />
             <Route path="/merchant/host" element={<QmapsHost />} />
+            <Route path="/merchant/connect" element={<QmapsConnect />} />
             <Route path="/merchant/upgrade" element={<MerchantUpgrade />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
