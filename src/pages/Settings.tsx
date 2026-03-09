@@ -23,11 +23,6 @@ const Settings = () => {
   const [clearing, setClearing] = useState(false);
 
   const handleItem = (item: typeof settingsItems[0]) => {
-    if (item.label === "Effacer l'historique") {
-      setClearing(true);
-      setTimeout(() => setClearing(false), 1500);
-      return;
-    }
     if (item.path) navigate(item.path);
   };
 
