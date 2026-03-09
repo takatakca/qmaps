@@ -1,12 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, ClipboardList, User, Bookmark, MoreHorizontal } from "lucide-react";
+import { Search, ClipboardList, Bookmark, User } from "lucide-react";
 
 const tabs = [
   { path: "/", icon: Search, label: "Recherche" },
   { path: "/projects", icon: ClipboardList, label: "Projets" },
-  { path: "/profile", icon: User, label: "Moi" },
   { path: "/collections", icon: Bookmark, label: "Collections" },
-  { path: "/more", icon: MoreHorizontal, label: "Plus" },
+  { path: "/profile", icon: User, label: "Moi" },
 ];
 
 const BottomNav = () => {
