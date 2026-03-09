@@ -62,6 +62,7 @@ const App = () => (
             <Route path="/merchant" element={<MerchantDashboard />} />
             <Route path="/merchant/ads" element={<MerchantAds />} />
             <Route path="/merchant/host" element={<QmapsHost />} />
+            <Route path="/merchant/connect" element={<QmapsConnect />} />
             <Route path="/merchant/upgrade" element={<MerchantUpgrade />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
