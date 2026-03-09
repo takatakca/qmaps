@@ -161,7 +161,7 @@ const BusinessDetail = () => {
       <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
 
       {/* Nearby */}
-      <BusinessNearbySection currentBusinessId={business.id} city={business.city} />
+      <BusinessNearbySection currentBusinessId={business.id} city={business.city} isClaimed={business.is_claimed} />
 
       <BottomNav />
     </div>
