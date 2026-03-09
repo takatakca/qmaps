@@ -104,6 +104,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "Voir les messages",
       route: "/merchant/inbox",
     },
+    {
+      icon: <Receipt size={22} className="text-primary" />,
+      title: "Facturation",
+      desc: "Consultez votre solde, gérez vos méthodes de paiement et vos produits.",
+      cta: "Voir la facturation",
+      route: "/merchant/billing",
+    },
   ];
 
   return (

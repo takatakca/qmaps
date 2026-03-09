@@ -76,6 +76,7 @@ const App = () => (
             <Route path="/merchant/guest-manager" element={<MerchantGuestManager />} />
             <Route path="/merchant/photos" element={<MerchantPhotos />} />
             <Route path="/merchant/inbox" element={<MerchantInbox />} />
+            <Route path="/merchant/billing" element={<MerchantBilling />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
