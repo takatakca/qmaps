@@ -20,6 +20,7 @@ import MerchantHighlights from "./pages/MerchantHighlights";
 import MerchantCTA from "./pages/MerchantCTA";
 import MerchantBusinessInfo from "./pages/MerchantBusinessInfo";
 import MerchantGuestManager from "./pages/MerchantGuestManager";
+import MerchantPhotos from "./pages/MerchantPhotos";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
