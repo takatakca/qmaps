@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedMerchantRoute from "@/components/ProtectedMerchantRoute";
 import Index from "./pages/Index";
 import BusinessDetail from "./pages/BusinessDetail";
 import Profile from "./pages/Profile";
@@ -11,6 +12,8 @@ import Collections from "./pages/Collections";
 import Projects from "./pages/Projects";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
+import MerchantAuth from "./pages/MerchantAuth";
+import MerchantOnboarding from "./pages/MerchantOnboarding";
 import Search from "./pages/Search";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import MerchantAds from "./pages/MerchantAds";
@@ -60,6 +63,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -68,18 +72,6 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/collections" element={<Collections />} />
             <Route path="/projects" element={<Projects />} />
-            <Route path="/merchant" element={<MerchantDashboard />} />
-            <Route path="/merchant/ads" element={<MerchantAds />} />
-            <Route path="/merchant/host" element={<QmapsHost />} />
-            <Route path="/merchant/connect" element={<QmapsConnect />} />
-            <Route path="/merchant/upgrade" element={<MerchantUpgrade />} />
-            <Route path="/merchant/highlights" element={<MerchantHighlights />} />
-            <Route path="/merchant/cta" element={<MerchantCTA />} />
-            <Route path="/merchant/business-info" element={<MerchantBusinessInfo />} />
-            <Route path="/merchant/guest-manager" element={<MerchantGuestManager />} />
-            <Route path="/merchant/photos" element={<MerchantPhotos />} />
-            <Route path="/merchant/inbox" element={<MerchantInbox />} />
-            <Route path="/merchant/billing" element={<MerchantBilling />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
@@ -104,6 +96,26 @@ const App = () => (
             <Route path="/settings/distance-units" element={<DistanceUnits />} />
             <Route path="/settings/privacy" element={<PrivacySettings />} />
             <Route path="/settings/app-preferences" element={<AppPreferences />} />
+
+            {/* Merchant auth (public) */}
+            <Route path="/merchant/login" element={<MerchantAuth />} />
+            <Route path="/merchant/register" element={<MerchantAuth />} />
+            <Route path="/merchant/onboarding" element={<MerchantOnboarding />} />
+
+            {/* Protected merchant routes */}
+            <Route path="/merchant" element={<ProtectedMerchantRoute><MerchantDashboard /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/ads" element={<ProtectedMerchantRoute><MerchantAds /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/host" element={<ProtectedMerchantRoute><QmapsHost /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/connect" element={<ProtectedMerchantRoute><QmapsConnect /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/upgrade" element={<ProtectedMerchantRoute><MerchantUpgrade /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/highlights" element={<ProtectedMerchantRoute><MerchantHighlights /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/cta" element={<ProtectedMerchantRoute><MerchantCTA /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/business-info" element={<ProtectedMerchantRoute><MerchantBusinessInfo /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/guest-manager" element={<ProtectedMerchantRoute><MerchantGuestManager /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/photos" element={<ProtectedMerchantRoute><MerchantPhotos /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/inbox" element={<ProtectedMerchantRoute><MerchantInbox /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
