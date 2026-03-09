@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Search from "./pages/Search";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import MerchantAds from "./pages/MerchantAds";
+import QmapsHost from "./pages/QmapsHost";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
