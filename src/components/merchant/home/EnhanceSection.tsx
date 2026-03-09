@@ -18,6 +18,7 @@ const enhanceItems = [
 const shortcuts = [
   { icon: Star, label: "Avis", route: "/merchant" },
   { icon: Camera, label: "Photos & Vidéos", route: "/merchant/photos" },
+  { icon: Users, label: "QMAPS Guest Manager", route: "/merchant/guest-manager" },
 ];
 
 const EnhanceSection = () => {
