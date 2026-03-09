@@ -69,6 +69,7 @@ const App = () => (
             <Route path="/merchant/upgrade" element={<MerchantUpgrade />} />
             <Route path="/merchant/highlights" element={<MerchantHighlights />} />
             <Route path="/merchant/cta" element={<MerchantCTA />} />
+            <Route path="/merchant/business-info" element={<MerchantBusinessInfo />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
