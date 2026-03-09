@@ -13,7 +13,8 @@ type AuthRole = "client" | "merchant";
 
 const Auth = () => {
   const location = useLocation();
-  const isMerchantRoute = location.pathname.startsWith("/merchant");
+  const [searchParams] = useSearchParams();
+  const isMerchantRoute = location.pathname.startsWith("/merchant") || searchParams.get("role") === "merchant";
   
   const [mode, setMode] = useState<AuthMode>("login");
   const [role, setRole] = useState<AuthRole>(isMerchantRoute ? "merchant" : "client");
