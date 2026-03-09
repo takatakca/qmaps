@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
-import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck, Camera, Inbox } from "lucide-react";
+import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck, Camera, Inbox, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -103,6 +103,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       desc: "Recevez et gérez les messages de vos clients directement.",
       cta: "Voir les messages",
       route: "/merchant/inbox",
+    },
+    {
+      icon: <Receipt size={22} className="text-primary" />,
+      title: "Facturation",
+      desc: "Consultez votre solde, gérez vos méthodes de paiement et vos produits.",
+      cta: "Voir la facturation",
+      route: "/merchant/billing",
     },
   ];
 
