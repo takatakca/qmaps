@@ -18,6 +18,7 @@ import QmapsConnect from "./pages/QmapsConnect";
 import MerchantUpgrade from "./pages/MerchantUpgrade";
 import MerchantHighlights from "./pages/MerchantHighlights";
 import MerchantCTA from "./pages/MerchantCTA";
+import MerchantBusinessInfo from "./pages/MerchantBusinessInfo";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
