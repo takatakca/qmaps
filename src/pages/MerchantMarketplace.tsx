@@ -484,6 +484,7 @@ const MerchantMarketplace = () => {
       {editHistory && <EditHistoryModal open={editHistory} onClose={() => setEditHistory(false)} business={business} onSaved={fetchBusiness} />}
       {editCategories && <EditCategoryModal open={editCategories} onClose={() => setEditCategories(false)} business={business} onSaved={fetchBusiness} />}
       {editAmenities && <EditAmenitiesModal open={editAmenities} onClose={() => setEditAmenities(false)} business={business} onSaved={fetchBusiness} />}
+      {editStatus && <EditStatusModal open={editStatus} onClose={() => setEditStatus(false)} business={business} onSaved={fetchBusiness} />}
     </div>
   );
 };
