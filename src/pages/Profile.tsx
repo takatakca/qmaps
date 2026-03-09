@@ -73,23 +73,23 @@ const Profile = () => {
   ];
 
   const contributionItems = [
-    { label: "Avis", count: stats.reviews, icon: Star },
-    { label: "Commerces ajoutés", count: 0, icon: Store },
+    { label: "Avis", count: stats.reviews, icon: Star, path: "/my-reviews" },
+    { label: "Commerces ajoutés", count: 0, icon: Store, path: "/added-businesses" },
   ];
 
   const communityItems = [
-    { icon: MessageCircle, label: "Messages" },
-    { icon: Heart, label: "Compliments" },
-    { icon: MapPin, label: "Événements" },
-    { icon: Activity, label: "Fil d'activité", badge: 2 },
-    { icon: MessageCircle, label: "Discussions" },
+    { icon: MessageCircle, label: "Messages", path: "/messages" },
+    { icon: Heart, label: "Compliments", path: "/compliments" },
+    { icon: MapPin, label: "Événements", path: "/events" },
+    { icon: Activity, label: "Fil d'activité", badge: 2, path: "/activity" },
+    { icon: MessageCircle, label: "Discussions", path: "/messages" },
   ];
 
   const accountItems = [
-    { icon: Settings, label: "Préférences" },
-    { icon: User, label: "Profil" },
-    { icon: HelpCircle, label: "Support" },
-    { icon: Settings, label: "Paramètres" },
+    { icon: Settings, label: "Préférences", path: "" },
+    { icon: User, label: "Profil", path: "" },
+    { icon: HelpCircle, label: "Support", path: "" },
+    { icon: Settings, label: "Paramètres", path: "" },
   ];
 
   return (
