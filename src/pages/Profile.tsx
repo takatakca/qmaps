@@ -82,7 +82,7 @@ const Profile = () => {
     { icon: Heart, label: "Compliments", path: "/compliments" },
     { icon: MapPin, label: "Événements", path: "/events" },
     { icon: Activity, label: "Fil d'activité", badge: 2, path: "/activity" },
-    { icon: MessageCircle, label: "Discussions", path: "/messages" },
+    { icon: MessageCircle, label: "Discussions", path: "/talk" },
   ];
 
   const accountItems = [
