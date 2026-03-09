@@ -147,6 +147,8 @@ const BusinessDetail = () => {
           <BusinessReviewsTab
             businessId={business.id}
             reviews={reviews}
+            avgRating={Number(business.avg_rating)}
+            reviewsCount={business.reviews_count}
             userId={user?.id || null}
             userName={userName}
             onReviewSubmitted={fetchData}
@@ -159,7 +161,7 @@ const BusinessDetail = () => {
       <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
 
       {/* Nearby */}
-      <BusinessNearbySection currentBusinessId={business.id} city={business.city} />
+      <BusinessNearbySection currentBusinessId={business.id} city={business.city} isClaimed={business.is_claimed} />
 
       <BottomNav />
     </div>
