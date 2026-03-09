@@ -8,11 +8,14 @@ import Index from "./pages/Index";
 import BusinessDetail from "./pages/BusinessDetail";
 import Profile from "./pages/Profile";
 import Collections from "./pages/Collections";
-import More from "./pages/More";
 import Projects from "./pages/Projects";
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
 import MerchantDashboard from "./pages/MerchantDashboard";
+import Notifications from "./pages/Notifications";
+import AddBusiness from "./pages/AddBusiness";
+import AddReview from "./pages/AddReview";
+import AddPhoto from "./pages/AddPhoto";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,9 +34,12 @@ const App = () => (
             <Route path="/business/:id" element={<BusinessDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/collections" element={<Collections />} />
-            <Route path="/more" element={<More />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/merchant" element={<MerchantDashboard />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/add-business" element={<AddBusiness />} />
+            <Route path="/add-review" element={<AddReview />} />
+            <Route path="/add-photo" element={<AddPhoto />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
