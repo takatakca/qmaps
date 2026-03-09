@@ -54,12 +54,11 @@ const MerchantBusinessInfo = () => {
   if (!business) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Aucune entreprise trouvée.</p></div>;
 
   const sections = [
+    { label: "Informations de base", icon: PenLine, value: `${business.name} · ${business.phone || ""}`, onClick: () => setShowBasicInfo(true) },
     { label: "Catégories", icon: Tag, value: "Restaurants", onClick: () => setShowCategory(true) },
     { label: "Heures d'ouverture", icon: Clock, value: business.hours || "Non définies", onClick: () => setShowHours(true) },
     { label: "Heures spéciales", icon: Clock, value: "Gérer les jours fériés", onClick: () => setShowHours(true) },
     { label: "Adresse", icon: MapPin, value: `${business.address}, ${business.city}`, onClick: () => setShowAddress(true) },
-    { label: "Téléphone", icon: PhoneIcon, value: business.phone || "Non défini", onClick: () => {} },
-    { label: "Site web", icon: Globe, value: business.website || "Non défini", onClick: () => {} },
     { label: "Spécialités", icon: Sparkles, value: business.description?.substring(0, 40) || "Ajouter", onClick: () => setShowSpecialties(true) },
     { label: "Historique", icon: BookOpen, value: "Modifier l'historique", onClick: () => setShowHistory(true) },
     { label: "Commodités et plus", icon: List, value: `${business.amenities?.length || 0} options`, onClick: () => setShowAmenities(true) },
