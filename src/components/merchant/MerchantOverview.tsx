@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/StarRating";
 import {
   Camera, FileText, Phone, Pencil, MapPin, Globe, Clock,
@@ -8,19 +10,71 @@ import {
   MousePointerClick, CalendarCheck, Building, Inbox, Receipt,
   Wifi, Car, Utensils, CreditCard, Accessibility, Baby,
   Wind, PartyPopper, ChefHat, Truck, Wine, Coffee,
-  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck
+  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck, Plus, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   business: Tables<"businesses">;
   reviews: any[];
+  onRefresh?: () => void;
 }
 
-const MerchantOverview = ({ business, reviews }: Props) => {
+const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showAllHours, setShowAllHours] = useState(false);
+  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data: bcData } = await supabase
+        .from("business_categories")
+        .select("category_id")
+        .eq("business_id", business.id);
+      if (bcData && bcData.length > 0) {
+        const catIds = bcData.map(bc => bc.category_id);
+        const { data: cats } = await supabase
+          .from("categories")
+          .select("*")
+          .in("id", catIds);
+        setCategories(cats || []);
+      } else {
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, [business.id]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setUploading(true);
+    const file = e.target.files[0];
+    const ext = file.name.split(".").pop();
+    const path = `business-photos/${business.id}/${Date.now()}.${ext}`;
+
+    const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
+    if (uploadErr) {
+      toast({ title: "Erreur d'envoi", description: uploadErr.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
+    const newPhotos = [...(business.photos || []), urlData.publicUrl];
+
+    const { error } = await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Photo ajoutée!" });
+      onRefresh?.();
+    }
+    setUploading(false);
+  };
 
   const actionButtons = [
     { icon: Camera, label: "Ajouter photo", action: () => navigate("/merchant/photos") },
@@ -112,22 +166,16 @@ const MerchantOverview = ({ business, reviews }: Props) => {
           Les catégories aident les clients à trouver votre entreprise. Elles apparaissent sur votre fiche.
         </p>
         <div className="space-y-2">
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Restaurants</span>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Déjeuner & Brunch</span>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Diner</span>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
-            <span>Café & Thé</span>
-            <ChevronRight size={16} />
-          </button>
+          {categories.length > 0 ? categories.map(cat => (
+            <button key={cat.id} onClick={() => navigate("/merchant/business-info")} className="w-full flex items-center justify-between py-2 text-sm text-primary font-medium">
+              <span>{cat.icon} {cat.name}</span>
+              <ChevronRight size={16} />
+            </button>
+          )) : (
+            <button onClick={() => navigate("/merchant/business-info")} className="text-sm text-primary font-medium">
+              Ajouter des catégories →
+            </button>
+          )}
         </div>
       </div>
 
@@ -263,6 +311,7 @@ const MerchantOverview = ({ business, reviews }: Props) => {
 
       {/* Photos and videos */}
       <div className="bg-card rounded-xl border border-border p-4">
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-heading font-bold text-foreground">Photos et vidéos</h3>
           <button onClick={() => navigate("/merchant/photos")} className="text-sm text-primary font-medium">
@@ -276,8 +325,12 @@ const MerchantOverview = ({ business, reviews }: Props) => {
           {(business.photos || []).slice(0, 4).map((p, i) => (
             <img key={i} src={p} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
           ))}
-          <button onClick={() => navigate("/merchant/photos")} className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0">
-            <Camera size={20} className="text-muted-foreground" />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0 hover:border-primary/40 transition-colors"
+          >
+            {uploading ? <Loader2 size={20} className="text-muted-foreground animate-spin" /> : <Plus size={20} className="text-muted-foreground" />}
           </button>
         </div>
       </div>
