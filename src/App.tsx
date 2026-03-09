@@ -29,6 +29,13 @@ import Preferences from "./pages/Preferences";
 import EditProfile from "./pages/EditProfile";
 import Talk from "./pages/Talk";
 import MyActivity from "./pages/MyActivity";
+import MyLocations from "./pages/settings/MyLocations";
+import EmailNotifications from "./pages/settings/EmailNotifications";
+import LocationServices from "./pages/settings/LocationServices";
+import ClearHistory from "./pages/settings/ClearHistory";
+import DistanceUnits from "./pages/settings/DistanceUnits";
+import PrivacySettings from "./pages/settings/PrivacySettings";
+import AppPreferences from "./pages/settings/AppPreferences";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
