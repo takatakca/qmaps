@@ -32,7 +32,7 @@ const MerchantOnboarding = () => {
   const [website, setWebsite] = useState("");
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/merchant/login");
+    if (!authLoading && !user) navigate("/auth?role=merchant");
   }, [user, authLoading]);
 
   const canNext = () => {
