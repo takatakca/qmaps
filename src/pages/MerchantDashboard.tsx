@@ -24,7 +24,7 @@ const MerchantDashboard = () => {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { navigate("/auth"); return; }
+    if (!user) { navigate("/merchant/login"); return; }
     fetchBusinesses();
   }, [user, authLoading]);
 
