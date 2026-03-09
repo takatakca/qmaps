@@ -20,10 +20,61 @@ interface Props {
   onRefresh?: () => void;
 }
 
-const MerchantOverview = ({ business, reviews }: Props) => {
+const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showAllHours, setShowAllHours] = useState(false);
+  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data: bcData } = await supabase
+        .from("business_categories")
+        .select("category_id")
+        .eq("business_id", business.id);
+      if (bcData && bcData.length > 0) {
+        const catIds = bcData.map(bc => bc.category_id);
+        const { data: cats } = await supabase
+          .from("categories")
+          .select("*")
+          .in("id", catIds);
+        setCategories(cats || []);
+      } else {
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, [business.id]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setUploading(true);
+    const file = e.target.files[0];
+    const ext = file.name.split(".").pop();
+    const path = `business-photos/${business.id}/${Date.now()}.${ext}`;
+
+    const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
+    if (uploadErr) {
+      toast({ title: "Erreur d'envoi", description: uploadErr.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
+    const newPhotos = [...(business.photos || []), urlData.publicUrl];
+
+    const { error } = await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Photo ajoutée!" });
+      onRefresh?.();
+    }
+    setUploading(false);
+  };
 
   const actionButtons = [
     { icon: Camera, label: "Ajouter photo", action: () => navigate("/merchant/photos") },
