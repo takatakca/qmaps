@@ -73,6 +73,13 @@ const App = () => (
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/talk" element={<Talk />} />
             <Route path="/my-activity" element={<MyActivity />} />
+            <Route path="/settings/my-locations" element={<MyLocations />} />
+            <Route path="/settings/email-notifications" element={<EmailNotifications />} />
+            <Route path="/settings/location-services" element={<LocationServices />} />
+            <Route path="/settings/clear-history" element={<ClearHistory />} />
+            <Route path="/settings/distance-units" element={<DistanceUnits />} />
+            <Route path="/settings/privacy" element={<PrivacySettings />} />
+            <Route path="/settings/app-preferences" element={<AppPreferences />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
