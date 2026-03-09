@@ -97,6 +97,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "Gérer les photos",
       route: "/merchant/photos",
     },
+    {
+      icon: <Inbox size={22} className="text-primary" />,
+      title: "Boîte de réception",
+      desc: "Recevez et gérez les messages de vos clients directement.",
+      cta: "Voir les messages",
+      route: "/merchant/inbox",
+    },
   ];
 
   return (
