@@ -127,7 +127,7 @@ const MerchantDashboard = () => {
           </>
         )}
       </div>
-      <BottomNav />
+      <MerchantBottomNav />
     </div>
   );
 };
