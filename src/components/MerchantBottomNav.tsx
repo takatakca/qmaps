@@ -10,6 +10,7 @@ const tabs = [
   { path: "/merchant/marketplace", icon: Store, label: "Vitrine" },
   { path: "/merchant/messages", icon: MessageSquare, label: "Messages" },
   { path: "/merchant/notifications", icon: Bell, label: "Alertes" },
+  { path: "/merchant/more", icon: Menu, label: "Menu" },
 ];
 
 const MerchantBottomNav = () => {
