@@ -47,6 +47,13 @@ const App = () => (
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
             <Route path="/add-photo" element={<AddPhoto />} />
+            <Route path="/my-reviews" element={<MyReviews />} />
+            <Route path="/qr-code" element={<QRCode />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/compliments" element={<Compliments />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/activity" element={<Activity />} />
+            <Route path="/added-businesses" element={<AddedBusinesses />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
