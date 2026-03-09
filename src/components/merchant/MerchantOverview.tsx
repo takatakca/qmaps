@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
-import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building } from "lucide-react";
+import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight, MousePointerClick, Building, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -82,6 +82,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       desc: "Gérez vos catégories, heures, adresse, commodités et plus encore.",
       cta: "Modifier les infos",
       route: "/merchant/business-info",
+    },
+    {
+      icon: <CalendarCheck size={22} className="text-primary" />,
+      title: "QMAPS Guest Manager",
+      desc: "Gérez vos réservations en ligne et optimisez le remplissage de vos tables.",
+      cta: "Découvrir Guest Manager",
+      route: "/merchant/guest-manager",
     },
   ];
 
