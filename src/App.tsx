@@ -20,6 +20,7 @@ import MerchantHighlights from "./pages/MerchantHighlights";
 import MerchantCTA from "./pages/MerchantCTA";
 import MerchantBusinessInfo from "./pages/MerchantBusinessInfo";
 import MerchantGuestManager from "./pages/MerchantGuestManager";
+import MerchantPhotos from "./pages/MerchantPhotos";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/merchant/cta" element={<MerchantCTA />} />
             <Route path="/merchant/business-info" element={<MerchantBusinessInfo />} />
             <Route path="/merchant/guest-manager" element={<MerchantGuestManager />} />
+            <Route path="/merchant/photos" element={<MerchantPhotos />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
