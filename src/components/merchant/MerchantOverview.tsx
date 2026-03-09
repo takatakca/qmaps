@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/StarRating";
 import {
   Camera, FileText, Phone, Pencil, MapPin, Globe, Clock,
@@ -8,13 +10,14 @@ import {
   MousePointerClick, CalendarCheck, Building, Inbox, Receipt,
   Wifi, Car, Utensils, CreditCard, Accessibility, Baby,
   Wind, PartyPopper, ChefHat, Truck, Wine, Coffee,
-  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck
+  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck, Plus, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   business: Tables<"businesses">;
   reviews: any[];
+  onRefresh?: () => void;
 }
 
 const MerchantOverview = ({ business, reviews }: Props) => {
