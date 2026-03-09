@@ -59,6 +59,7 @@ const App = () => (
             <Route path="/projects" element={<Projects />} />
             <Route path="/merchant" element={<MerchantDashboard />} />
             <Route path="/merchant/ads" element={<MerchantAds />} />
+            <Route path="/merchant/host" element={<QmapsHost />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />
