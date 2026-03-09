@@ -6,14 +6,14 @@ import BottomNav from "@/components/BottomNav";
 
 const settingsItems = [
   { label: "Notifications push", path: "" },
-  { label: "Notifications email", path: "" },
-  { label: "Mes emplacements", path: "" },
-  { label: "Services de localisation", path: "" },
-  { label: "Effacer l'historique", path: "", action: true },
-  { label: "Unités de distance", path: "" },
-  { label: "Paramètres de confidentialité", path: "" },
+  { label: "Notifications email", path: "/settings/email-notifications" },
+  { label: "Mes emplacements", path: "/settings/my-locations" },
+  { label: "Services de localisation", path: "/settings/location-services" },
+  { label: "Effacer l'historique", path: "/settings/clear-history" },
+  { label: "Unités de distance", path: "/settings/distance-units" },
+  { label: "Paramètres de confidentialité", path: "/settings/privacy" },
   { label: "Paramètres de sécurité", path: "" },
-  { label: "Préférences de l'app", path: "/preferences" },
+  { label: "Préférences de l'app", path: "/settings/app-preferences" },
   { label: "Fermer le compte", path: "", danger: true },
 ];
 
