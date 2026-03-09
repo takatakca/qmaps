@@ -83,6 +83,14 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "Modifier les infos",
       route: "/merchant/business-info",
     },
+    {
+      icon: <CalendarCheck size={22} className="text-primary" />,
+      title: "QMAPS Guest Manager",
+      desc: "Gérez vos réservations en ligne et optimisez le remplissage de vos tables.",
+      cta: "Découvrir Guest Manager",
+      route: "/merchant/guest-manager",
+    },
+    },
   ];
 
   return (
