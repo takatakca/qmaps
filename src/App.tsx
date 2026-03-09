@@ -23,6 +23,12 @@ import Compliments from "./pages/Compliments";
 import Events from "./pages/Events";
 import Activity from "./pages/Activity";
 import AddedBusinesses from "./pages/AddedBusinesses";
+import Settings from "./pages/Settings";
+import Support from "./pages/Support";
+import Preferences from "./pages/Preferences";
+import EditProfile from "./pages/EditProfile";
+import Talk from "./pages/Talk";
+import MyActivity from "./pages/MyActivity";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
