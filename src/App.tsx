@@ -29,6 +29,13 @@ import Preferences from "./pages/Preferences";
 import EditProfile from "./pages/EditProfile";
 import Talk from "./pages/Talk";
 import MyActivity from "./pages/MyActivity";
+import MyLocations from "./pages/settings/MyLocations";
+import EmailNotifications from "./pages/settings/EmailNotifications";
+import LocationServices from "./pages/settings/LocationServices";
+import ClearHistory from "./pages/settings/ClearHistory";
+import DistanceUnits from "./pages/settings/DistanceUnits";
+import PrivacySettings from "./pages/settings/PrivacySettings";
+import AppPreferences from "./pages/settings/AppPreferences";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +73,13 @@ const App = () => (
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/talk" element={<Talk />} />
             <Route path="/my-activity" element={<MyActivity />} />
+            <Route path="/settings/my-locations" element={<MyLocations />} />
+            <Route path="/settings/email-notifications" element={<EmailNotifications />} />
+            <Route path="/settings/location-services" element={<LocationServices />} />
+            <Route path="/settings/clear-history" element={<ClearHistory />} />
+            <Route path="/settings/distance-units" element={<DistanceUnits />} />
+            <Route path="/settings/privacy" element={<PrivacySettings />} />
+            <Route path="/settings/app-preferences" element={<AppPreferences />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

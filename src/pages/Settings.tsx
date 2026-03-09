@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronRight, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,30 +5,20 @@ import BottomNav from "@/components/BottomNav";
 
 const settingsItems = [
   { label: "Notifications push", path: "" },
-  { label: "Notifications email", path: "" },
-  { label: "Mes emplacements", path: "" },
-  { label: "Services de localisation", path: "" },
-  { label: "Effacer l'historique", path: "", action: true },
-  { label: "Unités de distance", path: "" },
-  { label: "Paramètres de confidentialité", path: "" },
+  { label: "Notifications email", path: "/settings/email-notifications" },
+  { label: "Mes emplacements", path: "/settings/my-locations" },
+  { label: "Services de localisation", path: "/settings/location-services" },
+  { label: "Effacer l'historique", path: "/settings/clear-history" },
+  { label: "Unités de distance", path: "/settings/distance-units" },
+  { label: "Paramètres de confidentialité", path: "/settings/privacy" },
   { label: "Paramètres de sécurité", path: "" },
-  { label: "Préférences de l'app", path: "/preferences" },
+  { label: "Préférences de l'app", path: "/settings/app-preferences" },
   { label: "Fermer le compte", path: "", danger: true },
 ];
 
 const Settings = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const [clearing, setClearing] = useState(false);
-
-  const handleItem = (item: typeof settingsItems[0]) => {
-    if (item.label === "Effacer l'historique") {
-      setClearing(true);
-      setTimeout(() => setClearing(false), 1500);
-      return;
-    }
-    if (item.path) navigate(item.path);
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -42,13 +31,13 @@ const Settings = () => {
         {settingsItems.map((item, i) => (
           <button
             key={i}
-            onClick={() => handleItem(item)}
+            onClick={() => item.path && navigate(item.path)}
             className="w-full flex items-center justify-between px-4 py-4 hover:bg-accent/30 transition-colors"
           >
             <span className={`text-sm ${item.danger ? "text-destructive font-medium" : "text-foreground"}`}>
               {item.label}
             </span>
-            {!item.action && <ChevronRight size={16} className="text-muted-foreground" />}
+            <ChevronRight size={16} className="text-muted-foreground" />
           </button>
         ))}
       </div>
@@ -70,14 +59,6 @@ const Settings = () => {
         <p className="text-xs text-muted-foreground">Copyright © 2024–2026 QMAPS Inc.</p>
         <p className="text-xs text-muted-foreground">QMAPS v1.0.0</p>
       </div>
-
-      {clearing && (
-        <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
-          <div className="bg-card rounded-xl p-6 shadow-lg text-center">
-            <p className="text-sm text-foreground">Historique effacé ✓</p>
-          </div>
-        </div>
-      )}
 
       <BottomNav />
     </div>
