@@ -96,8 +96,8 @@ const MerchantOverview = ({ business, reviews }: Props) => {
             <p className="text-sm text-foreground">
               Les gens ont cherché votre catégorie <strong>1 219 fois</strong> le mois dernier dans un rayon de 15 km.
             </p>
-            <button className="text-sm font-medium text-primary mt-1 border border-primary rounded-full px-3 py-1">
-              Atteindre avec des Annonces
+            <button onClick={() => navigate("/merchant/ads")} className="text-sm font-medium text-primary mt-1 border border-primary rounded-full px-3 py-1">
+              Créer une publicité QMAPS
             </button>
           </div>
         </div>
