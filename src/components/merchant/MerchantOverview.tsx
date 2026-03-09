@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import StarRating from "@/components/StarRating";
-import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star } from "lucide-react";
+import { Eye, Users, Phone, MapPin, Globe, X, CheckCircle, Lightbulb, Star, Megaphone, MessageSquare, ArrowUpCircle, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   business: Tables<"businesses">;
@@ -29,6 +30,37 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       text: "Aidez-nous à améliorer le système de recommandation QMAPS.",
       action: "Répondre au sondage",
       onAction: () => {},
+    },
+  ];
+
+  const products = [
+    {
+      icon: <Megaphone size={22} className="text-primary" />,
+      title: "Publicités QMAPS",
+      desc: "Touchez plus de clients avec des annonces ciblées dans les résultats de recherche.",
+      cta: "Créer une publicité",
+      route: "/merchant/ads",
+    },
+    {
+      icon: <MessageSquare size={22} className="text-primary" />,
+      title: "QMAPS Connect",
+      desc: "Partagez des publications et mises à jour directement avec vos clients.",
+      cta: "Découvrir Connect",
+      route: "/merchant/connect",
+    },
+    {
+      icon: <Phone size={22} className="text-primary" />,
+      title: "QMAPS Host",
+      desc: "Réceptionniste virtuel IA — ne manquez jamais un appel.",
+      cta: "Découvrir Host",
+      route: "/merchant/host",
+    },
+    {
+      icon: <ArrowUpCircle size={22} className="text-primary" />,
+      title: "Package Upgrade",
+      desc: "Supprimez les pubs concurrentes, ajoutez un CTA personnalisé et plus encore.",
+      cta: "Essai gratuit 14 jours",
+      route: "/merchant/upgrade",
     },
   ];
 
@@ -101,6 +133,27 @@ const MerchantOverview = ({ business, reviews }: Props) => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Products grid */}
+      <div className="space-y-3">
+        <h3 className="font-heading font-semibold text-foreground px-1">Produits & Services FLEXS</h3>
+        {products.map((p, i) => (
+          <button
+            key={i}
+            onClick={() => navigate(p.route)}
+            className="w-full bg-card rounded-xl border border-border p-4 flex items-center gap-3 text-left hover:border-primary/40 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              {p.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">{p.title}</p>
+              <p className="text-xs text-muted-foreground line-clamp-1">{p.desc}</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+          </button>
+        ))}
       </div>
     </div>
   );
