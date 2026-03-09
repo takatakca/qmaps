@@ -86,10 +86,10 @@ const Profile = () => {
   ];
 
   const accountItems = [
-    { icon: Settings, label: "Préférences", path: "" },
-    { icon: User, label: "Profil", path: "" },
-    { icon: HelpCircle, label: "Support", path: "" },
-    { icon: Settings, label: "Paramètres", path: "" },
+    { icon: Settings, label: "Préférences", path: "/preferences" },
+    { icon: User, label: "Profil", path: "/edit-profile" },
+    { icon: HelpCircle, label: "Support", path: "/support" },
+    { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
 
   return (
