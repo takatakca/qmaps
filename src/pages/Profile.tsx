@@ -216,7 +216,7 @@ const Profile = () => {
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Communauté</h2>
         {communityItems.map(item => (
-          <button key={item.label} className="w-full flex items-center justify-between py-2.5">
+          <button key={item.label} onClick={() => navigate(item.path)} className="w-full flex items-center justify-between py-2.5">
             <div className="flex items-center gap-3">
               <item.icon size={18} className="text-muted-foreground" />
               <span className="text-sm text-foreground">{item.label}</span>
