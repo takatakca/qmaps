@@ -11,6 +11,7 @@ import EditSpecialtiesModal from "@/components/merchant/info/EditSpecialtiesModa
 import EditHistoryModal from "@/components/merchant/info/EditHistoryModal";
 import EditCategoryModal from "@/components/merchant/info/EditCategoryModal";
 import EditAmenitiesModal from "@/components/merchant/info/EditAmenitiesModal";
+import EditStatusModal from "@/components/merchant/info/EditStatusModal";
 import {
   Camera, MapPin, Phone, Globe, Clock, ChevronRight, Pencil, Plus, Loader2,
   Star, Lock, Sparkles, Image as ImageIcon, BarChart3, HelpCircle,
