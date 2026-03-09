@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Megaphone, Store, MessageSquare, Bell } from "lucide-react";
+import { Home, Megaphone, Store, MessageSquare, Bell, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
