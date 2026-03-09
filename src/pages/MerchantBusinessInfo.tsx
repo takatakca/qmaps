@@ -34,6 +34,7 @@ const MerchantBusinessInfo = () => {
   const [showSpecialties, setShowSpecialties] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showAmenities, setShowAmenities] = useState(false);
+  const [showBasicInfo, setShowBasicInfo] = useState(false);
 
   const fetchBusiness = async () => {
     if (!user) return;
