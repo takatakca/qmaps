@@ -89,6 +89,7 @@ const Profile = () => {
   ];
 
   const accountItems = [
+    { icon: Store, label: "Espace Professionnel", path: "/merchant" },
     { icon: Settings, label: "Préférences", path: "/preferences" },
     { icon: User, label: "Profil", path: "/edit-profile" },
     { icon: HelpCircle, label: "Support", path: "/support" },
