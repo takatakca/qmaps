@@ -69,6 +69,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "À partir de CA$2/jour",
       route: "/merchant/highlights",
     },
+    {
+      icon: <MousePointerClick size={22} className="text-primary" />,
+      title: "Call to Action",
+      desc: "Convertissez les visites en clients avec un CTA personnalisable sur votre page.",
+      cta: "À partir de CA$2/jour",
+      route: "/merchant/cta",
+    },
   ];
 
   return (
