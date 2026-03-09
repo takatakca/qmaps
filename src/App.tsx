@@ -16,6 +16,7 @@ import MerchantAds from "./pages/MerchantAds";
 import QmapsHost from "./pages/QmapsHost";
 import QmapsConnect from "./pages/QmapsConnect";
 import MerchantUpgrade from "./pages/MerchantUpgrade";
+import MerchantHighlights from "./pages/MerchantHighlights";
 import Notifications from "./pages/Notifications";
 import AddBusiness from "./pages/AddBusiness";
 import AddReview from "./pages/AddReview";
