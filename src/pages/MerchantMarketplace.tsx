@@ -11,6 +11,7 @@ import EditSpecialtiesModal from "@/components/merchant/info/EditSpecialtiesModa
 import EditHistoryModal from "@/components/merchant/info/EditHistoryModal";
 import EditCategoryModal from "@/components/merchant/info/EditCategoryModal";
 import EditAmenitiesModal from "@/components/merchant/info/EditAmenitiesModal";
+import EditStatusModal from "@/components/merchant/info/EditStatusModal";
 import {
   Camera, MapPin, Phone, Globe, Clock, ChevronRight, Pencil, Plus, Loader2,
   Star, Lock, Sparkles, Image as ImageIcon, BarChart3, HelpCircle,
@@ -41,6 +42,7 @@ const MerchantMarketplace = () => {
   const [editHistory, setEditHistory] = useState(false);
   const [editCategories, setEditCategories] = useState(false);
   const [editAmenities, setEditAmenities] = useState(false);
+  const [editStatus, setEditStatus] = useState(false);
 
   const fetchBusiness = async () => {
     if (!user) return;
@@ -452,19 +454,24 @@ const MerchantMarketplace = () => {
         </div>
 
         {/* ===== BUSINESS STATUS ===== */}
-        <div className="bg-card rounded-xl border border-border p-4">
+        <button onClick={() => setEditStatus(true)} className="w-full bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 transition-colors">
           <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${business.is_open ? "bg-green-500" : "bg-destructive"}`} />
+            <div className={`w-3 h-3 rounded-full shrink-0 ${business.is_open && business.is_active ? "bg-green-500" : !business.is_active ? "bg-muted-foreground" : "bg-amber-500"}`} />
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">
-                {business.is_open ? "L'entreprise est ouverte" : "L'entreprise est actuellement fermée"}
+                {business.is_open && business.is_active
+                  ? "L'entreprise est ouverte"
+                  : !business.is_active
+                    ? "L'entreprise est masquée"
+                    : "L'entreprise est temporairement fermée"}
               </p>
               <p className="text-xs text-muted-foreground">
                 {business.is_claimed ? "Entreprise vérifiée par le propriétaire" : "Marquer comme vérifiée"}
               </p>
             </div>
+            <Pencil size={14} className="text-primary shrink-0" />
           </div>
-        </div>
+        </button>
       </div>
 
       <MerchantBottomNav />
@@ -477,6 +484,7 @@ const MerchantMarketplace = () => {
       {editHistory && <EditHistoryModal open={editHistory} onClose={() => setEditHistory(false)} business={business} onSaved={fetchBusiness} />}
       {editCategories && <EditCategoryModal open={editCategories} onClose={() => setEditCategories(false)} business={business} onSaved={fetchBusiness} />}
       {editAmenities && <EditAmenitiesModal open={editAmenities} onClose={() => setEditAmenities(false)} business={business} onSaved={fetchBusiness} />}
+      {editStatus && <EditStatusModal open={editStatus} onClose={() => setEditStatus(false)} business={business} onSaved={fetchBusiness} />}
     </div>
   );
 };
