@@ -62,6 +62,13 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "Essai gratuit 14 jours",
       route: "/merchant/upgrade",
     },
+    {
+      icon: <Star size={22} className="text-primary" />,
+      title: "Business Highlights",
+      desc: "Affichez des badges pour mettre en valeur ce qui rend votre entreprise unique.",
+      cta: "À partir de CA$2/jour",
+      route: "/merchant/highlights",
+    },
   ];
 
   return (
