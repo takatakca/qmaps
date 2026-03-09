@@ -1,42 +1,89 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Mail, Lock, User } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+
+type AuthMode = "login" | "signup" | "forgot";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setDisplayName("");
+    setShowPassword(false);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    if (isLogin) {
-      const { error } = await signIn(email, password);
-      if (error) {
-        toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      } else {
-        navigate("/");
-      }
+    const { error } = await signIn(email, password);
+    if (error) {
+      let msg = error.message;
+      if (msg.includes("Invalid login")) msg = "Courriel ou mot de passe incorrect.";
+      toast({ title: "Erreur de connexion", description: msg, variant: "destructive" });
     } else {
-      const { error } = await signUp(email, password, displayName);
-      if (error) {
-        toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Inscription réussie!", description: "Vérifiez votre courriel pour confirmer votre compte." });
-      }
+      toast({ title: "Bienvenue!", description: "Connexion réussie." });
+      navigate("/");
     }
     setLoading(false);
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 6) {
+      toast({ title: "Erreur", description: "Le mot de passe doit contenir au moins 6 caractères.", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    const { error } = await signUp(email, password, displayName);
+    if (error) {
+      let msg = error.message;
+      if (msg.includes("already registered")) msg = "Ce courriel est déjà utilisé.";
+      toast({ title: "Erreur d'inscription", description: msg, variant: "destructive" });
+    } else {
+      toast({ title: "Compte créé!", description: "Vous êtes maintenant connecté." });
+      navigate("/");
+    }
+    setLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast({ title: "Erreur", description: "Entrez votre courriel.", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Courriel envoyé", description: "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe." });
+      setMode("login");
+    }
+    setLoading(false);
+  };
+
+  const switchMode = (newMode: AuthMode) => {
+    resetForm();
+    setMode(newMode);
   };
 
   return (
@@ -52,11 +99,43 @@ const Auth = () => {
           Q<span className="text-primary">Maps</span>
         </h1>
         <p className="text-muted-foreground mt-2">
-          {isLogin ? "Connectez-vous à votre compte" : "Créez votre compte QMaps"}
+          {mode === "login" && "Connectez-vous à votre compte"}
+          {mode === "signup" && "Créez votre compte QMaps"}
+          {mode === "forgot" && "Réinitialisez votre mot de passe"}
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          {!isLogin && (
+        {mode === "login" && (
+          <form onSubmit={handleLogin} className="mt-8 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Courriel</Label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button type="button" onClick={() => switchMode("forgot")} className="text-xs text-primary font-medium">
+                Mot de passe oublié?
+              </button>
+            </div>
+            <Button type="submit" className="w-full rounded-full" disabled={loading}>
+              {loading ? "Connexion..." : "Se connecter"}
+            </Button>
+          </form>
+        )}
+
+        {mode === "signup" && (
+          <form onSubmit={handleSignup} className="mt-8 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nom d'affichage</Label>
               <div className="relative">
@@ -64,33 +143,60 @@ const Auth = () => {
                 <Input id="name" placeholder="Votre nom" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="pl-10" />
               </div>
             </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Courriel</Label>
-            <div className="relative">
-              <Mail size={16} className="absolute left-3 top-3 text-muted-foreground" />
-              <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+            <div className="space-y-2">
+              <Label htmlFor="email">Courriel</Label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3 top-3 text-muted-foreground" />
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required minLength={6} />
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min. 6 caractères" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
-          </div>
+            <Button type="submit" className="w-full rounded-full" disabled={loading}>
+              {loading ? "Inscription..." : "S'inscrire"}
+            </Button>
+          </form>
+        )}
 
-          <Button type="submit" className="w-full rounded-full" disabled={loading}>
-            {loading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}
-          </Button>
-        </form>
+        {mode === "forgot" && (
+          <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Courriel</Label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-3 text-muted-foreground" />
+                <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+              </div>
+            </div>
+            <Button type="submit" className="w-full rounded-full" disabled={loading}>
+              {loading ? "Envoi..." : "Envoyer le lien de réinitialisation"}
+            </Button>
+          </form>
+        )}
 
         <div className="mt-6 text-center">
-          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary font-medium">
-            {isLogin ? "Pas de compte? S'inscrire" : "Déjà un compte? Se connecter"}
-          </button>
+          {mode === "login" && (
+            <button onClick={() => switchMode("signup")} className="text-sm text-primary font-medium">
+              Pas de compte? S'inscrire
+            </button>
+          )}
+          {mode === "signup" && (
+            <button onClick={() => switchMode("login")} className="text-sm text-primary font-medium">
+              Déjà un compte? Se connecter
+            </button>
+          )}
+          {mode === "forgot" && (
+            <button onClick={() => switchMode("login")} className="text-sm text-primary font-medium">
+              Retour à la connexion
+            </button>
+          )}
         </div>
       </div>
     </div>
