@@ -82,14 +82,14 @@ const Profile = () => {
     { icon: Heart, label: "Compliments", path: "/compliments" },
     { icon: MapPin, label: "Événements", path: "/events" },
     { icon: Activity, label: "Fil d'activité", badge: 2, path: "/activity" },
-    { icon: MessageCircle, label: "Discussions", path: "/messages" },
+    { icon: MessageCircle, label: "Discussions", path: "/talk" },
   ];
 
   const accountItems = [
-    { icon: Settings, label: "Préférences", path: "" },
-    { icon: User, label: "Profil", path: "" },
-    { icon: HelpCircle, label: "Support", path: "" },
-    { icon: Settings, label: "Paramètres", path: "" },
+    { icon: Settings, label: "Préférences", path: "/preferences" },
+    { icon: User, label: "Profil", path: "/edit-profile" },
+    { icon: HelpCircle, label: "Support", path: "/support" },
+    { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
 
   return (
@@ -251,7 +251,7 @@ const Profile = () => {
       <div className="px-4 py-5">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Compte</h2>
         {accountItems.map((item, i) => (
-          <button key={`${item.label}-${i}`} className="w-full flex items-center justify-between py-2.5">
+          <button key={`${item.label}-${i}`} onClick={() => item.path && navigate(item.path)} className="w-full flex items-center justify-between py-2.5">
             <div className="flex items-center gap-3">
               <item.icon size={18} className="text-muted-foreground" />
               <span className="text-sm text-foreground">{item.label}</span>
