@@ -90,7 +90,6 @@ const MerchantOverview = ({ business, reviews }: Props) => {
       cta: "Découvrir Guest Manager",
       route: "/merchant/guest-manager",
     },
-    },
   ];
 
   return (
