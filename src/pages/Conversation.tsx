@@ -22,9 +22,12 @@ const Conversation = () => {
     const trimmed = draft.trim();
     if (!trimmed) return;
     setSending(true);
-    await sendMessage(trimmed);
-    setDraft("");
-    setSending(false);
+    try {
+      await sendMessage(trimmed);
+      setDraft("");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (

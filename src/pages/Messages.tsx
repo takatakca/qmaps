@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, PenSquare, MessageCircle } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
@@ -7,6 +8,12 @@ import { formatRelativeTime, initialsFromName } from "@/lib/social";
 const Messages = () => {
   const navigate = useNavigate();
   const { conversations, loading } = useConversations();
+
+  useEffect(() => {
+    const handleRefresh = () => window.dispatchEvent(new Event("focus"));
+    window.addEventListener("qmaps:messages-updated", handleRefresh);
+    return () => window.removeEventListener("qmaps:messages-updated", handleRefresh);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">

@@ -99,7 +99,11 @@ const BusinessNearbySection = ({ currentBusinessId, city, isClaimed }: BusinessN
               try {
                 await requestClaim();
                 toast({ title: "Demande envoyée", description: "Votre demande de revendication est en attente de validation." });
-              } catch {
+              } catch (error) {
+                if (error instanceof Error && error.message === "claim-pending") {
+                  toast({ title: "Déjà en attente", description: "Votre demande de revendication est déjà en cours de traitement." });
+                  return;
+                }
                 navigate("/auth");
               }
             }}

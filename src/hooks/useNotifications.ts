@@ -24,17 +24,25 @@ export const useNotifications = () => {
 
     setNotifications(((data || []) as unknown) as NotificationRecord[]);
     setLoading(false);
+    window.dispatchEvent(new CustomEvent("qmaps:notifications-updated"));
   }, [user]);
 
   const markAsRead = useCallback(async (id: string) => {
     if (!user) return;
 
     setNotifications((current) => current.map((item) => item.id === id ? { ...item, is_read: true } : item));
-    await supabase
+    const { error } = await supabase
       .from("notifications" as any)
       .update({ is_read: true })
       .eq("id", id)
       .eq("user_id", user.id);
+
+    if (error) {
+      await refresh();
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent("qmaps:notifications-updated"));
   }, [user]);
 
   useEffect(() => {

@@ -5,6 +5,23 @@ import type { CollectionRecord, CollectionWithPreview } from "@/lib/social";
 
 export const DEFAULT_COLLECTION_NAME = "Want to go";
 
+type BookmarkRow = {
+  business_id: string;
+  created_at: string;
+  businesses: {
+    image_url: string | null;
+    name: string;
+  } | null;
+};
+
+type CollectionItemRow = {
+  collection_id: string;
+  businesses: {
+    image_url: string | null;
+    name: string;
+  } | null;
+};
+
 export const useCollections = () => {
   const { user } = useAuth();
   const [collections, setCollections] = useState<CollectionWithPreview[]>([]);
@@ -45,7 +62,7 @@ export const useCollections = () => {
         .limit(8),
     ]);
 
-    const bookmarkRows = (bookmarkResult.data || []) as any[];
+    const bookmarkRows = (bookmarkResult.data || []) as BookmarkRow[];
     setBookmarkCount(bookmarkRows.length);
     setBookmarkPreview(bookmarkRows[0]?.businesses?.image_url || null);
 
@@ -58,8 +75,8 @@ export const useCollections = () => {
         .select("collection_id, businesses(image_url, name)")
         .in("collection_id", ids);
 
-      const grouped = new Map<string, any[]>();
-      for (const item of (items || []) as any[]) {
+      const grouped = new Map<string, CollectionItemRow[]>();
+      for (const item of ((items || []) as unknown as CollectionItemRow[])) {
         const list = grouped.get(item.collection_id) || [];
         list.push(item);
         grouped.set(item.collection_id, list);
@@ -113,10 +130,25 @@ export const useCollections = () => {
 
     if (error) throw error;
     await loadCollections();
+    window.dispatchEvent(new CustomEvent("qmaps:collections-updated"));
   }, [loadCollections, user]);
 
   useEffect(() => {
     void loadCollections();
+  }, [loadCollections]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      void loadCollections();
+    };
+
+    window.addEventListener("qmaps:collections-updated", handleRefresh);
+    window.addEventListener("focus", handleRefresh);
+
+    return () => {
+      window.removeEventListener("qmaps:collections-updated", handleRefresh);
+      window.removeEventListener("focus", handleRefresh);
+    };
   }, [loadCollections]);
 
   const defaultCollection = useMemo(

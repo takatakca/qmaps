@@ -19,8 +19,9 @@ const Notifications = () => {
   }), []);
 
   const dismiss = (id: string, link?: string | null) => {
-    void markAsRead(id);
-    if (link) navigate(link);
+    void markAsRead(id).then(() => {
+      if (link) navigate(link);
+    });
   };
 
   return (
