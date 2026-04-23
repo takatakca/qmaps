@@ -4,8 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
 import SearchBar from "@/components/SearchBar";
+import SearchFiltersSheet from "@/components/search/SearchFiltersSheet";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
+import { formatDistance } from "@/lib/geo";
+import { mapBusinessToCard } from "@/lib/business";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
@@ -25,6 +29,9 @@ const Search = () => {
   const [selectedCategory, setSelectedCategory] = useState(categorySlug);
   const [selectedPrice, setSelectedPrice] = useState<number[]>([]);
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [openNow, setOpenNow] = useState(false);
+  const [radiusKm, setRadiusKm] = useState(5);
+  const { businesses: nearbyBusinesses } = useNearbyBusinesses(12);
 
   useEffect(() => {
     supabase.from("categories").select("*").order("name").then(({ data }) => {
@@ -40,6 +47,7 @@ const Search = () => {
       if (query) q = q.ilike("name", `%${query}%`);
       if (minRating) q = q.gte("avg_rating", minRating);
       if (selectedPrice.length > 0) q = q.in("price_level", selectedPrice);
+      if (openNow) q = q.eq("is_open", true);
 
       // Category filter via business_categories pivot
       if (selectedCategory) {
@@ -61,28 +69,36 @@ const Search = () => {
 
       q = q.order("avg_rating", { ascending: false });
       const { data } = await q;
-      setBusinesses(data || []);
+      const scopedResults = query || !nearbyBusinesses.length
+        ? (data || [])
+        : (data || []).filter((business) => {
+            const nearby = nearbyBusinesses.find((item) => item.id === business.id);
+            return !nearby || ((nearby.distance_meters || 0) <= radiusKm * 1000);
+          });
+      setBusinesses(scopedResults as Tables<"businesses">[]);
       setLoading(false);
     };
     fetchBusinesses();
-  }, [query, selectedCategory, selectedPrice, minRating, categories]);
+  }, [query, selectedCategory, selectedPrice, minRating, openNow, radiusKm, categories, nearbyBusinesses]);
 
   const clearFilters = () => {
     setSelectedCategory("");
     setSelectedPrice([]);
     setMinRating(null);
+    setOpenNow(false);
+    setRadiusKm(5);
   };
 
   const togglePrice = (p: number) => {
     setSelectedPrice(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
   };
 
-  const activeFiltersCount = (selectedCategory ? 1 : 0) + (selectedPrice.length > 0 ? 1 : 0) + (minRating ? 1 : 0);
+  const activeFiltersCount = (selectedCategory ? 1 : 0) + (selectedPrice.length > 0 ? 1 : 0) + (minRating ? 1 : 0) + (openNow ? 1 : 0) + (radiusKm !== 5 ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       <div className="px-4 pt-4">
-        <SearchBar />
+        <SearchBar initialValue={query} />
 
         {/* Filter toggle */}
         <div className="flex items-center gap-2 mt-3">
@@ -161,8 +177,39 @@ const Search = () => {
                 ))}
               </div>
             </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setOpenNow(!openNow)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  openNow ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
+                }`}
+              >
+                Ouvert maintenant
+              </button>
+              <button className="px-3 py-1.5 rounded-full text-xs font-medium border bg-card text-foreground border-border">
+                Rayon {radiusKm} km
+              </button>
+            </div>
           </div>
         )}
+
+        <SearchFiltersSheet
+          open={showFilters}
+          onOpenChange={setShowFilters}
+          categories={categories}
+          selectedCategory={selectedCategory}
+          selectedPrice={selectedPrice}
+          minRating={minRating}
+          openNow={openNow}
+          radiusKm={radiusKm}
+          onCategoryChange={setSelectedCategory}
+          onTogglePrice={togglePrice}
+          onMinRatingChange={setMinRating}
+          onOpenNowChange={setOpenNow}
+          onRadiusChange={setRadiusKm}
+          onClearFilters={clearFilters}
+        />
 
         {/* Results */}
         <div className="mt-4">
@@ -174,24 +221,26 @@ const Search = () => {
 
           <div className="space-y-4">
             {businesses.map(b => (
-              <BusinessCard key={b.id} business={{
-                id: b.id,
-                name: b.name,
-                category: "",
-                rating: Number(b.avg_rating),
-                reviewCount: b.reviews_count,
-                priceLevel: priceLabels[(b.price_level || 1) - 1],
-                neighborhood: b.city,
-                image: b.image_url || "/placeholder.svg",
-                isOpen: b.is_open,
-                address: b.address,
-                phone: b.phone || "",
-                hours: b.hours || "",
-                description: b.description || "",
-                amenities: b.amenities || [],
-                photos: b.photos || [],
-              }} />
+              <BusinessCard key={b.id} business={mapBusinessToCard({
+                ...b,
+                category_name: categories.find(cat => cat.slug === selectedCategory)?.name || "Local",
+                distance_meters: nearbyBusinesses.find(item => item.id === b.id)?.distance_meters,
+              })} />
             ))}
+
+            {!query && nearbyBusinesses.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="text-sm font-semibold text-foreground">Autour de vous</p>
+                <div className="mt-3 space-y-2">
+                  {nearbyBusinesses.slice(0, 4).map((business) => (
+                    <div key={business.id} className="flex items-center justify-between text-sm">
+                      <span className="truncate text-foreground">{business.name}</span>
+                      <span className="text-xs text-muted-foreground">{formatDistance(business.distance_meters)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {!loading && businesses.length === 0 && (
               <div className="text-center py-12">

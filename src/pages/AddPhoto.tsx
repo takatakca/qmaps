@@ -4,6 +4,11 @@ import { ArrowLeft, X, Search, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import NearbyBusinessPicker from "@/components/business/NearbyBusinessPicker";
+import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
+import BusinessMediaUploader from "@/components/media/BusinessMediaUploader";
 import BottomNav from "@/components/BottomNav";
 
 const AddPhoto = () => {
@@ -11,19 +16,12 @@ const AddPhoto = () => {
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
-  const [nearby, setNearby] = useState<any[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  const loadNearby = async () => {
-    if (loaded) return;
-    const { data } = await supabase.from("businesses").select("id, name, address, image_url").limit(10);
-    setNearby(data || []);
-    setLoaded(true);
-  };
+  const { businesses: nearby, loading: nearbyLoading, error: nearbyError, refresh } = useNearbyBusinesses(8);
+  const [selectedBusiness, setSelectedBusiness] = useState<any | null>(null);
+  const [caption, setCaption] = useState("");
 
   const search = async (q: string) => {
     setQuery(q);
-    if (!loaded) loadNearby();
     if (q.length < 2) { setResults([]); return; }
     const { data } = await supabase.from("businesses").select("id, name, address, image_url").ilike("name", `%${q}%`).limit(10);
     setResults(data || []);
@@ -46,23 +44,30 @@ const AddPhoto = () => {
       <div className="px-4 pt-4">
         <div className="relative mb-4">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Chercher un commerce..." value={query} onChange={e => search(e.target.value)} onFocus={() => loadNearby()} className="pl-10 rounded-xl" />
+          <Input placeholder="Chercher un commerce..." value={query} onChange={e => search(e.target.value)} className="pl-10 rounded-xl" />
         </div>
 
         <h3 className="font-heading font-bold text-foreground mb-3">
-          {query.length >= 2 ? "Résultats" : "Commerces à proximité"}
+          {selectedBusiness ? "Publier votre média" : query.length >= 2 ? "Résultats" : "Commerces à proximité"}
         </h3>
-        <div className="divide-y divide-border">
-          {list.map(b => (
-            <button key={b.id} onClick={() => navigate(`/business/${b.id}`)} className="w-full flex items-center gap-3 py-3">
-              <img src={b.image_url || "/placeholder.svg"} alt="" className="w-14 h-14 rounded-lg object-cover" />
-              <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">{b.name}</p>
-                <p className="text-xs text-muted-foreground">{b.address}</p>
+        {selectedBusiness ? (
+          <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-3">
+              <img src={selectedBusiness.image_url || "/placeholder.svg"} alt={selectedBusiness.name} className="h-14 w-14 rounded-lg object-cover" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">{selectedBusiness.name}</p>
+                <p className="text-xs text-muted-foreground">{selectedBusiness.address}</p>
               </div>
-            </button>
-          ))}
-        </div>
+            </div>
+            <Textarea placeholder="Ajouter une légende facultative..." value={caption} onChange={(e) => setCaption(e.target.value)} rows={3} />
+            <div className="flex gap-2">
+              <BusinessMediaUploader businessId={selectedBusiness.id} userId={user.id} kind="business" onUploaded={() => navigate(`/business/${selectedBusiness.id}`)} />
+              <Button variant="outline" className="rounded-full" onClick={() => setSelectedBusiness(null)}>Changer</Button>
+            </div>
+          </div>
+        ) : (
+          <NearbyBusinessPicker businesses={list} loading={nearbyLoading && query.length < 2} error={nearbyError} emptyLabel="Aucun commerce trouvé pour le moment." onSelect={setSelectedBusiness} onRefresh={refresh} />
+        )}
       </div>
 
       <BottomNav />
