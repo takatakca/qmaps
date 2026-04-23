@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -114,11 +114,15 @@ interface Props {
   onClose: () => void;
   business: Tables<"businesses">;
   onSaved: () => Promise<void> | void;
+  isRefreshing?: boolean;
 }
 
-const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
+const EditAmenitiesModal = ({ open, onClose, business, onSaved, isRefreshing = false }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [autoSave, setAutoSave] = useState(false);
+  const [savedNotice, setSavedNotice] = useState<string | null>(null);
+  const skipAutoSaveRef = useRef(true);
 
   const parseAmenities = (amenities: string[] | null) => {
     const nextSelected = new Set<string>();
@@ -163,6 +167,8 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
     const { nextSelected, nextChips } = parseAmenities(business.amenities);
     setSelected(nextSelected);
     setChips(nextChips);
+    setSavedNotice(null);
+    skipAutoSaveRef.current = true;
   }, [open, business.id, business.amenities]);
 
   const normalizedAmenities = useMemo(() => {
@@ -179,6 +185,8 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
     const current = [...initialAmenities].sort((a, b) => a.localeCompare(b));
     return JSON.stringify(current) !== JSON.stringify(normalizedAmenities);
   }, [initialAmenities, normalizedAmenities]);
+
+  const controlsDisabled = saving || isRefreshing;
 
   const toggleItem = (item: string) => {
     setSelected(prev => {
@@ -234,7 +242,7 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
     return normalizedAmenities;
   };
 
-  const handleSave = async () => {
+  const handleSave = async (source: "manual" | "auto" = "manual") => {
     const validatedAmenities = validateAmenities();
     if (!validatedAmenities) return;
 
@@ -250,10 +258,26 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
       await onSaved();
+      setSavedNotice(source === "auto" ? "Enregistré automatiquement" : "Commodités enregistrées");
       toast({ title: "Commodités sauvegardées", description: "La section Commodités a été actualisée." });
-      onClose();
+      if (source === "manual") onClose();
     }
   };
+
+  useEffect(() => {
+    if (!open || !autoSave || isRefreshing || saving) return;
+    if (skipAutoSaveRef.current) {
+      skipAutoSaveRef.current = false;
+      return;
+    }
+    if (!hasChanges) return;
+
+    const timeout = setTimeout(() => {
+      handleSave("auto");
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [normalizedAmenities, autoSave, hasChanges, isRefreshing, saving, open]);
 
   if (!open) return null;
 
@@ -274,6 +298,43 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
           Select the amenities you offer. They will appear on your QMAPS listing.
         </p>
 
+        <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Auto-save</p>
+              <p className="text-xs text-muted-foreground">Save each Commodités change automatically.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAutoSave((prev) => !prev)}
+              disabled={controlsDisabled}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                autoSave ? "bg-primary text-primary-foreground" : "bg-card text-foreground border border-border"
+              } ${controlsDisabled ? "opacity-50" : ""}`}
+            >
+              {autoSave ? "On" : "Off"}
+            </button>
+          </div>
+          {savedNotice && <p className="mt-2 text-xs text-primary">{savedNotice}</p>}
+        </div>
+
+        <div className="mb-4 rounded-lg border border-border bg-muted/20 p-3">
+          <p className="text-sm font-medium text-foreground">Quick test checklist</p>
+          <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+            <li>• Choose Yes or No for a Commodités row.</li>
+            <li>• Save or let auto-save confirm the update.</li>
+            <li>• Re-open the modal and verify the selection stayed selected.</li>
+            <li>• Refresh the page and confirm the same toggle still persists.</li>
+          </ul>
+        </div>
+
+        {isRefreshing ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/20">
+            <Loader2 size={20} className="animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Chargement des commodités actuelles…</p>
+          </div>
+        ) : (
+
         <div className="space-y-6">
           {/* ── YES / NO toggle sections ── */}
           {TOGGLE_SECTIONS.map(section => (
@@ -288,23 +349,25 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
                       <div className="flex gap-1.5 shrink-0">
                         <button
                           type="button"
+                          disabled={controlsDisabled}
                           onClick={() => { if (!isYes) toggleItem(item); }}
                           className={`text-xs px-3.5 py-1.5 rounded-full font-medium transition-colors ${
                             isYes
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted text-muted-foreground hover:bg-accent"
-                          }`}
+                          } ${controlsDisabled ? "opacity-50" : ""}`}
                         >
                           Yes
                         </button>
                         <button
                           type="button"
+                          disabled={controlsDisabled}
                           onClick={() => { if (isYes) toggleItem(item); }}
                           className={`text-xs px-3.5 py-1.5 rounded-full font-medium transition-colors ${
                             !isYes
                               ? "bg-muted text-foreground"
                               : "bg-transparent text-muted-foreground hover:bg-accent"
-                          }`}
+                          } ${controlsDisabled ? "opacity-50" : ""}`}
                         >
                           No
                         </button>
@@ -327,12 +390,13 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
                     <button
                       type="button"
                       key={item}
+                      disabled={controlsDisabled}
                       onClick={() => toggleChip(section.key, item, section.multi)}
                       className={`text-sm px-4 py-2 rounded-full font-medium border transition-colors ${
                         isActive
                           ? "bg-primary text-primary-foreground border-primary"
                           : "bg-card text-foreground border-border hover:border-primary/40"
-                      }`}
+                      } ${controlsDisabled ? "opacity-50" : ""}`}
                     >
                       {item}
                     </button>
@@ -342,11 +406,12 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
             </div>
           ))}
         </div>
+        )}
 
         {/* Save bar */}
         <div className="flex gap-3 justify-end pt-4 border-t border-border mt-4">
           <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !hasChanges} className="min-w-[120px]">
+          <Button onClick={() => handleSave("manual")} disabled={controlsDisabled || !hasChanges} className="min-w-[120px]">
             {saving ? <Loader2 size={14} className="animate-spin mr-2" /> : null}
             Save
           </Button>
