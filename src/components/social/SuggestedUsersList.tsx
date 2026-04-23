@@ -32,7 +32,7 @@ const SuggestedUsersList = () => {
         supabase.from("profiles").select("id, display_name").neq("id", user.id).limit(6),
       ]);
 
-      setFollowingIds(((follows || []) as FollowRow[]).map((row) => row.following_id));
+      setFollowingIds((((follows || []) as unknown as FollowRow[])).map((row) => row.following_id));
       setProfiles((profileRows || []) as SuggestedProfile[]);
     };
 

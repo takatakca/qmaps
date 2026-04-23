@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import { Bookmark, Plus, LogIn, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import cafeImg from "@/assets/cafe-1.jpg";
 import foodImg from "@/assets/food-1.jpg";
 import restaurantImg from "@/assets/restaurant-1.jpg";
@@ -20,14 +22,17 @@ const Collections = () => {
   const navigate = useNavigate();
   const { loading, bookmarkCount, bookmarkPreview, defaultCollection, customCollections, publicCollections, createCollection } = useCollections();
   const [creating, setCreating] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [draftPublic, setDraftPublic] = useState(false);
 
   const handleCreate = async () => {
-    const name = window.prompt("Nom de la collection");
+    const name = draftName.trim();
     if (!name) return;
-    const isPublic = window.confirm("Rendre cette collection publique ?");
     setCreating(true);
     try {
-      await createCollection(name, isPublic);
+      await createCollection(name, draftPublic);
+      setDraftName("");
+      setDraftPublic(false);
     } finally {
       setCreating(false);
     }
@@ -37,7 +42,7 @@ const Collections = () => {
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center justify-between px-4 py-3">
         <h1 className="font-heading text-xl font-bold text-foreground">Collections</h1>
-        {user && <button onClick={() => void handleCreate()} className="text-sm font-semibold text-primary">CRÉER</button>}
+        {user && <button onClick={() => void handleCreate()} disabled={creating || !draftName.trim()} className="text-sm font-semibold text-primary disabled:text-muted-foreground">CRÉER</button>}
       </div>
 
       <div className="px-4 pt-4">
@@ -62,6 +67,23 @@ const Collections = () => {
       </div>
 
       <div className="h-2 bg-muted" />
+
+      {user && (
+        <div className="px-4 py-4 border-b border-border space-y-3 bg-card">
+          <Input
+            value={draftName}
+            onChange={(e) => setDraftName(e.target.value)}
+            placeholder="Créer une collection"
+          />
+          <div className="flex items-center justify-between rounded-xl border border-border px-3 py-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Collection publique</p>
+              <p className="text-xs text-muted-foreground">Permettre aux autres utilisateurs de la découvrir</p>
+            </div>
+            <Switch checked={draftPublic} onCheckedChange={setDraftPublic} />
+          </div>
+        </div>
+      )}
 
       <div className="px-4 pt-4">
         <div className="flex items-center justify-between mb-3">
@@ -105,7 +127,7 @@ const Collections = () => {
               </div>
             ))}
 
-            <button disabled={creating} onClick={() => void handleCreate()} className="min-w-[160px] flex-shrink-0 flex flex-col items-center justify-center h-36 rounded-xl border-2 border-dashed border-border">
+            <button disabled={creating || !draftName.trim()} onClick={() => void handleCreate()} className="min-w-[160px] flex-shrink-0 flex flex-col items-center justify-center h-36 rounded-xl border-2 border-dashed border-border disabled:opacity-50">
               <Plus size={32} className="text-muted-foreground mb-1" />
               <span className="text-sm font-semibold text-foreground">Créer</span>
             </button>
