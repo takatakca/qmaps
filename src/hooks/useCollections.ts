@@ -76,7 +76,7 @@ export const useCollections = () => {
         .in("collection_id", ids);
 
       const grouped = new Map<string, CollectionItemRow[]>();
-      for (const item of (items || []) as CollectionItemRow[]) {
+      for (const item of ((items || []) as unknown as CollectionItemRow[])) {
         const list = grouped.get(item.collection_id) || [];
         list.push(item);
         grouped.set(item.collection_id, list);
@@ -135,6 +135,20 @@ export const useCollections = () => {
 
   useEffect(() => {
     void loadCollections();
+  }, [loadCollections]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      void loadCollections();
+    };
+
+    window.addEventListener("qmaps:collections-updated", handleRefresh);
+    window.addEventListener("focus", handleRefresh);
+
+    return () => {
+      window.removeEventListener("qmaps:collections-updated", handleRefresh);
+      window.removeEventListener("focus", handleRefresh);
+    };
   }, [loadCollections]);
 
   const defaultCollection = useMemo(
