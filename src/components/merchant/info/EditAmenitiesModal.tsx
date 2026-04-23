@@ -143,7 +143,8 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
     return { nextSelected, nextChips };
   };
 
-  const [{ nextSelected: initialSelected, nextChips: initialChips }] = useState(() => [parseAmenities(business.amenities)]);
+  const [initialState] = useState(() => parseAmenities(business.amenities));
+  const { nextSelected: initialSelected, nextChips: initialChips } = initialState;
   const [selected, setSelected] = useState<Set<string>>(initialSelected);
   const [chips, setChips] = useState<Record<string, Set<string>>>(initialChips);
 
