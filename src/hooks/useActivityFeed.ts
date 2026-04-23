@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { getCurrentPosition } from "@/lib/geo";
 import type { ActivityFeedItem } from "@/lib/social";
 
+type FollowRow = { following_id: string };
+
 const distanceMeters = (lat1: number, lng1: number, lat2: number, lng2: number) => {
   const dy = (lat1 - lat2) * 111000;
   const dx = (lng1 - lng2) * 85000;
@@ -102,7 +104,7 @@ export const useActivityFeed = () => {
         body: "Nouveau commerce à découvrir",
       }));
 
-      setFriendIds(((followsResult as any).data || []).map((row: any) => row.following_id));
+      setFriendIds((((followsResult as { data?: FollowRow[] }).data) || []).map((row) => row.following_id));
       setAllItems([...reviewItems, ...photoItems, ...businessItems].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 40));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible de charger l'activité.");
@@ -113,6 +115,16 @@ export const useActivityFeed = () => {
 
   useEffect(() => {
     void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      void refresh();
+    };
+
+    window.addEventListener("qmaps:follows-updated", handleRefresh);
+
+    return () => window.removeEventListener("qmaps:follows-updated", handleRefresh);
   }, [refresh]);
 
   const all = useMemo(() => allItems, [allItems]);

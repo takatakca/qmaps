@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,10 +10,18 @@ interface SuggestedProfile {
   display_name: string | null;
 }
 
+type FollowRow = { following_id: string };
+
 const SuggestedUsersList = () => {
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<SuggestedProfile[]>([]);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  const availableProfiles = useMemo(
+    () => profiles.filter((profile) => !followingIds.includes(profile.id)).slice(0, 6),
+    [followingIds, profiles],
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -24,7 +32,7 @@ const SuggestedUsersList = () => {
         supabase.from("profiles").select("id, display_name").neq("id", user.id).limit(6),
       ]);
 
-      setFollowingIds(((follows || []) as any[]).map((row) => row.following_id));
+      setFollowingIds(((follows || []) as FollowRow[]).map((row) => row.following_id));
       setProfiles((profileRows || []) as SuggestedProfile[]);
     };
 
@@ -34,17 +42,25 @@ const SuggestedUsersList = () => {
   const toggleFollow = async (targetId: string) => {
     if (!user) return;
     const isFollowing = followingIds.includes(targetId);
+    const previous = followingIds;
+    setPendingId(targetId);
 
     setFollowingIds((current) => isFollowing ? current.filter((id) => id !== targetId) : [...current, targetId]);
 
-    if (isFollowing) {
-      await supabase.from("follows" as any).delete().eq("follower_id", user.id).eq("following_id", targetId);
+    const { error } = isFollowing
+      ? await supabase.from("follows" as any).delete().eq("follower_id", user.id).eq("following_id", targetId)
+      : await supabase.from("follows" as any).insert({ follower_id: user.id, following_id: targetId });
+
+    if (error) {
+      setFollowingIds(previous);
     } else {
-      await supabase.from("follows" as any).insert({ follower_id: user.id, following_id: targetId });
+      window.dispatchEvent(new CustomEvent("qmaps:follows-updated"));
     }
+
+    setPendingId(null);
   };
 
-  if (!user || profiles.length === 0) return null;
+  if (!user || availableProfiles.length === 0) return null;
 
   return (
     <div className="space-y-3">
@@ -53,7 +69,7 @@ const SuggestedUsersList = () => {
         <p className="text-sm font-semibold text-foreground">Utilisateurs suggérés</p>
       </div>
       <div className="space-y-2">
-        {profiles.map((profile) => {
+        {availableProfiles.map((profile) => {
           const following = followingIds.includes(profile.id);
           return (
             <div key={profile.id} className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-3">
@@ -66,7 +82,7 @@ const SuggestedUsersList = () => {
                   <p className="text-xs text-muted-foreground">Découvrir ses avis et photos</p>
                 </div>
               </div>
-              <Button variant={following ? "outline" : "default"} size="sm" className="rounded-full" onClick={() => void toggleFollow(profile.id)}>
+              <Button variant={following ? "outline" : "default"} size="sm" className="rounded-full" disabled={pendingId === profile.id} onClick={() => void toggleFollow(profile.id)}>
                 {following ? "Suivi" : "Suivre"}
               </Button>
             </div>
