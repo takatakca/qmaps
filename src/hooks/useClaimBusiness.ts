@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+type ClaimStatusRow = { status: string };
+
 export const useClaimBusiness = (businessId?: string) => {
   const { user } = useAuth();
   const [status, setStatus] = useState<string | null>(null);
@@ -24,12 +26,14 @@ export const useClaimBusiness = (businessId?: string) => {
       .limit(1)
       .maybeSingle();
 
-    setStatus(data?.status || null);
+    setStatus((data as ClaimStatusRow | null)?.status || null);
     setLoading(false);
   }, [businessId, user]);
 
   const requestClaim = useCallback(async (note?: string) => {
     if (!user || !businessId) throw new Error("not-authenticated");
+
+    if (status === "pending") throw new Error("claim-pending");
 
     const { error } = await supabase
       .from("business_claims")
