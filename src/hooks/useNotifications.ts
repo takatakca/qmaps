@@ -22,7 +22,7 @@ export const useNotifications = () => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    setNotifications((data || []) as NotificationRecord[]);
+    setNotifications(((data || []) as unknown) as NotificationRecord[]);
     setLoading(false);
   }, [user]);
 
