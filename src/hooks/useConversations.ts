@@ -5,6 +5,9 @@ import type { ConversationSummary, MessageRecord, ProfileSummary } from "@/lib/s
 
 const unique = <T,>(items: T[]) => Array.from(new Set(items));
 
+type ConversationIdRow = { conversation_id: string };
+type ConversationParticipantRow = { conversation_id: string; user_id: string };
+
 export const useConversations = () => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
@@ -24,7 +27,7 @@ export const useConversations = () => {
       .select("conversation_id")
       .eq("user_id", user.id);
 
-    const conversationIds = (((participantRows || []) as unknown) as Array<{ conversation_id: string }>).map((row) => row.conversation_id);
+    const conversationIds = (((participantRows || []) as unknown) as ConversationIdRow[]).map((row) => row.conversation_id);
     if (!conversationIds.length) {
       setConversations([]);
       setLoading(false);
@@ -37,7 +40,7 @@ export const useConversations = () => {
       supabase.from("messages" as any).select("*").in("conversation_id", conversationIds).order("created_at", { ascending: false }),
     ]);
 
-    const participantUserIds = unique(((participantsData || []) as any[]).map((row) => row.user_id));
+    const participantUserIds = unique((((participantsData || []) as unknown) as ConversationParticipantRow[]).map((row) => row.user_id));
     const { data: profilesData } = participantUserIds.length
       ? await supabase.from("profiles").select("id, display_name, avatar_url").in("id", participantUserIds)
       : { data: [] };
@@ -53,7 +56,7 @@ export const useConversations = () => {
     }
 
     const participantsByConversation = new Map<string, ProfileSummary[]>();
-    for (const participant of (participantsData || []) as any[]) {
+    for (const participant of (((participantsData || []) as unknown) as ConversationParticipantRow[])) {
       const list = participantsByConversation.get(participant.conversation_id) || [];
       const profile = profilesMap.get(participant.user_id) || { id: participant.user_id, display_name: "Utilisateur" };
       list.push(profile);
@@ -88,7 +91,7 @@ export const useConversations = () => {
       .select("conversation_id")
       .eq("user_id", user.id);
 
-    const existingConversationIds = (((ownParticipation || []) as unknown) as Array<{ conversation_id: string }>).map((row) => row.conversation_id);
+    const existingConversationIds = (((ownParticipation || []) as unknown) as ConversationIdRow[]).map((row) => row.conversation_id);
     if (existingConversationIds.length) {
       const { data: existingOther } = await supabase
         .from("conversation_participants" as any)
@@ -96,7 +99,7 @@ export const useConversations = () => {
         .in("conversation_id", existingConversationIds)
         .eq("user_id", participantId);
 
-      const existingRows = ((existingOther || []) as unknown) as Array<{ conversation_id: string; user_id: string }>;
+      const existingRows = ((existingOther || []) as unknown) as ConversationParticipantRow[];
       if (existingRows[0]?.conversation_id) return existingRows[0].conversation_id;
     }
 
@@ -118,6 +121,7 @@ export const useConversations = () => {
 
     if (participantsError) throw participantsError;
     await refresh();
+    window.dispatchEvent(new CustomEvent("qmaps:messages-updated"));
     return insertedConversation.id;
   }, [refresh, user]);
 
@@ -149,7 +153,7 @@ export const useConversationThread = (conversationId?: string) => {
       supabase.from("conversation_participants" as any).select("user_id").eq("conversation_id", conversationId),
     ]);
 
-    const participantIds = ((participantsData || []) as any[]).map((row) => row.user_id);
+    const participantIds = ((((participantsData || []) as unknown) as Array<{ user_id: string }>)).map((row) => row.user_id);
     const { data: profilesData } = participantIds.length
       ? await supabase.from("profiles").select("id, display_name, avatar_url").in("id", participantIds)
       : { data: [] };
@@ -163,6 +167,8 @@ export const useConversationThread = (conversationId?: string) => {
       .eq("conversation_id", conversationId)
       .neq("sender_id", user.id)
       .eq("is_read", false);
+
+    window.dispatchEvent(new CustomEvent("qmaps:messages-updated"));
 
     setLoading(false);
   }, [conversationId, user]);
@@ -178,6 +184,7 @@ export const useConversationThread = (conversationId?: string) => {
 
     if (error) throw error;
     await refresh();
+    window.dispatchEvent(new CustomEvent("qmaps:messages-updated"));
   }, [conversationId, refresh, user]);
 
   useEffect(() => {
