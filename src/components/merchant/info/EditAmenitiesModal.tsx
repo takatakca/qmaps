@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -143,6 +143,23 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
     return map;
   });
 
+  const initialAmenities = useMemo(() => business.amenities || [], [business.amenities]);
+
+  const normalizedAmenities = useMemo(() => {
+    const toggleAmenities = Array.from(selected);
+    const chipAmenities: string[] = [];
+    Object.entries(chips).forEach(([key, vals]) => {
+      vals.forEach(v => chipAmenities.push(`${key}::${v}`));
+    });
+
+    return [...toggleAmenities, ...chipAmenities].sort((a, b) => a.localeCompare(b));
+  }, [selected, chips]);
+
+  const hasChanges = useMemo(() => {
+    const current = [...initialAmenities].sort((a, b) => a.localeCompare(b));
+    return JSON.stringify(current) !== JSON.stringify(normalizedAmenities);
+  }, [initialAmenities, normalizedAmenities]);
+
   const toggleItem = (item: string) => {
     setSelected(prev => {
       const next = new Set(prev);
@@ -167,15 +184,9 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
 
   const handleSave = async () => {
     setSaving(true);
-    const toggleAmenities = Array.from(selected);
-    const chipAmenities: string[] = [];
-    Object.entries(chips).forEach(([key, vals]) => {
-      vals.forEach(v => chipAmenities.push(`${key}::${v}`));
-    });
-
     const { error } = await supabase
       .from("businesses")
-      .update({ amenities: [...toggleAmenities, ...chipAmenities] })
+      .update({ amenities: normalizedAmenities })
       .eq("id", business.id);
 
     setSaving(false);
@@ -270,7 +281,7 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
         {/* Save bar */}
         <div className="flex gap-3 justify-end pt-4 border-t border-border mt-4">
           <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving} className="min-w-[120px]">
+          <Button onClick={handleSave} disabled={saving || !hasChanges} className="min-w-[120px]">
             {saving ? <Loader2 size={14} className="animate-spin mr-2" /> : null}
             Save
           </Button>

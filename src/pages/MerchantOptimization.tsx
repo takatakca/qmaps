@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import {
   ArrowLeft, Megaphone, Zap, TrendingUp, Eye, Star,
-  MousePointerClick, Crown, Rocket, ChevronRight, CheckCircle2
+  MousePointerClick, Crown, Rocket, ChevronRight, CheckCircle2,
+  Target, MapPinned, BadgeDollarSign, LineChart, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
@@ -47,6 +48,34 @@ const metrics = [
   { icon: TrendingUp, label: "ROI", value: "—", change: "—" },
 ];
 
+const boosters = [
+  {
+    icon: Target,
+    title: "Boost de visibilité locale",
+    description: "Passez devant les concurrents dans votre secteur avec une présence prioritaire.",
+    cta: "Activer Boost",
+  },
+  {
+    icon: MapPinned,
+    title: "Zone géographique ciblée",
+    description: "Choisissez précisément votre rayon de diffusion et concentrez votre budget là où ça convertit.",
+    cta: "Définir la zone",
+  },
+  {
+    icon: LineChart,
+    title: "Suivi des performances",
+    description: "Mesurez les clics, appels et leads générés pour ajuster vos campagnes plus vite.",
+    cta: "Voir les stats",
+  },
+];
+
+const revenueLevers = [
+  "Annonces sponsorisées avec budget journalier",
+  "Position prioritaire dans les résultats QMAPS",
+  "Mise en avant de l'offre et du call-to-action",
+  "Visibilité renforcée sur mobile à proximité",
+];
+
 const MerchantOptimization = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -71,6 +100,8 @@ const MerchantOptimization = () => {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Chargement...</p></div>;
   }
 
+  const businessName = business?.name || "Votre entreprise";
+
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       {/* Header */}
@@ -80,6 +111,26 @@ const MerchantOptimization = () => {
       </div>
 
       <div className="p-4 space-y-4">
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+              <BadgeDollarSign size={20} className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Moteur de revenus</p>
+              <h2 className="mt-1 font-heading text-lg font-bold text-foreground">Développez {businessName} avec QMAPS Ads</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Créez des campagnes, activez des boosts et transformez la visibilité locale en appels, clics et demandes clients.</p>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {revenueLevers.map((item) => (
+              <div key={item} className="rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground">
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Active promotions */}
         <div className="bg-card rounded-xl border border-border p-4">
           <h3 className="font-heading font-bold text-foreground mb-3">Promotions actives</h3>
@@ -102,6 +153,36 @@ const MerchantOptimization = () => {
                 </div>
                 <p className="text-lg font-bold text-foreground">{m.value}</p>
                 <span className="text-[10px] text-green-600">{m.change}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-heading font-bold text-foreground">Boosts de visibilité</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-primary">QMAPS</span>
+          </div>
+          <div className="space-y-3">
+            {boosters.map((booster) => (
+              <div key={booster.title} className="rounded-lg border border-border bg-muted/30 p-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                    <booster.icon size={18} className="text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">{booster.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{booster.description}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full rounded-full"
+                  onClick={() => navigate("/merchant/ads")}
+                >
+                  {booster.cta}
+                </Button>
               </div>
             ))}
           </div>
@@ -155,6 +236,33 @@ const MerchantOptimization = () => {
           <p className="text-xs text-muted-foreground mb-3">Créez une campagne sur mesure avec votre texte, photo et budget.</p>
           <Button onClick={() => navigate("/merchant/ads")} className="rounded-full gap-1">
             <Megaphone size={14} /> Créer une publicité
+          </Button>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles size={16} className="text-primary" />
+            <h3 className="font-heading font-bold text-foreground">Campagnes et acquisition</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Lancez des campagnes orientées appels, clics web ou visibilité générale, puis optimisez-les selon vos objectifs.
+          </p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+              <span className="text-sm text-foreground">Objectif appels entrants</span>
+              <span className="text-xs font-medium text-primary">Disponible</span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+              <span className="text-sm text-foreground">Objectif trafic web</span>
+              <span className="text-xs font-medium text-primary">Disponible</span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+              <span className="text-sm text-foreground">Campagne de notoriété locale</span>
+              <span className="text-xs font-medium text-primary">Disponible</span>
+            </div>
+          </div>
+          <Button onClick={() => navigate("/merchant/ads")} className="mt-4 w-full rounded-full gap-1">
+            Configurer une campagne <ChevronRight size={14} />
           </Button>
         </div>
       </div>
