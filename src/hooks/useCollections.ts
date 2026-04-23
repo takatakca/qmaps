@@ -76,8 +76,8 @@ export const useCollections = () => {
       });
     };
 
-    const ownCollections = await enrich((collectionsResult.data || []) as CollectionRecord[]);
-    const othersCollections = await enrich((publicResult.data || []) as CollectionRecord[]);
+    const ownCollections = await enrich(((collectionsResult.data || []) as unknown) as CollectionRecord[]);
+    const othersCollections = await enrich(((publicResult.data || []) as unknown) as CollectionRecord[]);
 
     const hasDefault = ownCollections.some((collection) => collection.name === DEFAULT_COLLECTION_NAME);
     if (!hasDefault) {
@@ -89,7 +89,7 @@ export const useCollections = () => {
 
       if (inserted) {
         ownCollections.unshift({
-          ...(inserted as CollectionRecord),
+          ...((inserted as unknown) as CollectionRecord),
           items_count: 0,
           preview_image: null,
           preview_business_name: null,
