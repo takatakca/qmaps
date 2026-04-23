@@ -2,9 +2,17 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SearchBar = () => {
+interface SearchBarProps {
+  initialValue?: string;
+}
+
+const SearchBar = ({ initialValue = "" }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+
+  useState(() => {
+    if (initialValue) setQuery(initialValue);
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

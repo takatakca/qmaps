@@ -49,6 +49,12 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
           <span>{business.priceLevel}</span>
           <span>·</span>
           <span>{business.neighborhood}</span>
+          {business.distance && (
+            <>
+              <span>·</span>
+              <span>{business.distance}</span>
+            </>
+          )}
         </div>
       </div>
     </div>
