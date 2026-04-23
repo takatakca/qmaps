@@ -42,10 +42,12 @@ const MerchantMarketplace = () => {
   const [editHistory, setEditHistory] = useState(false);
   const [editCategories, setEditCategories] = useState(false);
   const [editAmenities, setEditAmenities] = useState(false);
+  const [refreshingAmenities, setRefreshingAmenities] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
 
-  const fetchBusiness = async () => {
+  const fetchBusiness = async (showPageLoader = false) => {
     if (!user) return;
+    if (showPageLoader) setLoading(true);
     const { data: biz } = await supabase
       .from("businesses")
       .select("*")
@@ -62,17 +64,19 @@ const MerchantMarketplace = () => {
         setCategories([]);
       }
     }
-    setLoading(false);
+    if (showPageLoader) setLoading(false);
   };
 
   useEffect(() => {
     if (authLoading || !user) return;
-    fetchBusiness();
+    fetchBusiness(true);
   }, [user, authLoading]);
 
   const openAmenitiesEditor = async () => {
-    await fetchBusiness();
     setEditAmenities(true);
+    setRefreshingAmenities(true);
+    await fetchBusiness(false);
+    setRefreshingAmenities(false);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -488,7 +492,7 @@ const MerchantMarketplace = () => {
       {editSpecialties && <EditSpecialtiesModal open={editSpecialties} onClose={() => setEditSpecialties(false)} business={business} onSaved={fetchBusiness} />}
       {editHistory && <EditHistoryModal open={editHistory} onClose={() => setEditHistory(false)} business={business} onSaved={fetchBusiness} />}
       {editCategories && <EditCategoryModal open={editCategories} onClose={() => setEditCategories(false)} business={business} onSaved={fetchBusiness} />}
-      {editAmenities && <EditAmenitiesModal open={editAmenities} onClose={() => setEditAmenities(false)} business={business} onSaved={fetchBusiness} />}
+      {editAmenities && <EditAmenitiesModal open={editAmenities} onClose={() => setEditAmenities(false)} business={business} onSaved={() => fetchBusiness(false)} isRefreshing={refreshingAmenities} />}
       {editStatus && <EditStatusModal open={editStatus} onClose={() => setEditStatus(false)} business={business} onSaved={fetchBusiness} />}
     </div>
   );
