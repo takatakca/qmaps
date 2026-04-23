@@ -11,8 +11,6 @@ import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { mapBusinessToCard } from "@/lib/business";
 import type { Tables } from "@/integrations/supabase/types";
 
-const priceLabels = ["$", "$$", "$$$", "$$$$"];
-
 const Index = () => {
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [loading, setLoading] = useState(true);
