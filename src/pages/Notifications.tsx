@@ -1,22 +1,26 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Star, Utensils, Wrench, Sparkles } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
-
-const mockNotifications = [
-  { id: "1", icon: Utensils, title: "Prêt pour une sortie?", desc: "Découvrez les restaurants près de vous", time: "1 jour", image: null },
-  { id: "2", icon: Wrench, title: "Toujours à la recherche d'un plombier?", desc: "Partagez quelques détails et connectez-vous avec des pros locaux — c'est rapide et gratuit.", time: "9 jours", image: null },
-  { id: "3", icon: Utensils, title: "Envie de livraison?", desc: "Pour le dîner, essayez La Banquise, un favori local.", time: "4 mois", image: null },
-  { id: "4", icon: Star, title: "Commerces les mieux notés", desc: "Découvrez les meilleurs commerces de Montréal cette semaine.", time: "4 mois", image: null },
-  { id: "5", icon: Sparkles, title: "Un problème à la maison?", desc: "Peu importe la situation, l'assistant QMAPS peut vous aider.", time: "5 mois", image: null },
-];
+import { useNotifications } from "@/hooks/useNotifications";
+import { formatRelativeTime } from "@/lib/social";
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const { notifications, loading, markAsRead } = useNotifications();
 
-  const dismiss = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const iconForType = useMemo(() => ({
+    nearby: MapPin,
+    review: Star,
+    dining: Utensils,
+    project: Wrench,
+    system: Sparkles,
+    message: Sparkles,
+  }), []);
+
+  const dismiss = (id: string, link?: string | null) => {
+    void markAsRead(id);
+    if (link) navigate(link);
   };
 
   return (
@@ -27,25 +31,29 @@ const Notifications = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {notifications.length === 0 && (
+        {!loading && notifications.length === 0 && (
           <div className="text-center py-16">
             <Sparkles size={40} className="mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground">Aucune notification</p>
           </div>
         )}
+        {loading && <p className="py-10 text-center text-sm text-muted-foreground">Chargement...</p>}
         {notifications.map(n => (
           <button
             key={n.id}
             className="w-full flex items-start gap-3 p-4 hover:bg-accent/30 transition-colors text-left"
-            onClick={() => dismiss(n.id)}
+            onClick={() => dismiss(n.id, n.link)}
           >
-            <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center shrink-0">
-              <n.icon size={24} className="text-muted-foreground" />
+            <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${n.is_read ? "bg-muted" : "bg-primary/10"}`}>
+              {n.image_url ? <img src={n.image_url} alt="" className="w-full h-full rounded-xl object-cover" /> : (() => {
+                const Icon = iconForType[n.type as keyof typeof iconForType] || Sparkles;
+                return <Icon size={24} className={n.is_read ? "text-muted-foreground" : "text-primary"} />;
+              })()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground"><span className="font-semibold">{n.title}</span> {n.desc}</p>
+              <p className="text-sm text-foreground"><span className="font-semibold">{n.title}</span> {n.body}</p>
             </div>
-            <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">{n.time}</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">{formatRelativeTime(n.created_at)}</span>
           </button>
         ))}
       </div>
