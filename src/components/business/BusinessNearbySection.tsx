@@ -4,6 +4,8 @@ import StarRating from "@/components/StarRating";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
+import { useClaimBusiness } from "@/hooks/useClaimBusiness";
+import { useToast } from "@/hooks/use-toast";
 
 interface BusinessNearbySectionProps {
   currentBusinessId: string;
@@ -16,6 +18,8 @@ const priceLabels = ["$", "$$", "$$$", "$$$$"];
 const BusinessNearbySection = ({ currentBusinessId, city, isClaimed }: BusinessNearbySectionProps) => {
   const navigate = useNavigate();
   const [nearby, setNearby] = useState<Tables<"businesses">[]>([]);
+  const { status, requestClaim } = useClaimBusiness(currentBusinessId);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchNearby = async () => {
@@ -91,9 +95,17 @@ const BusinessNearbySection = ({ currentBusinessId, city, isClaimed }: BusinessN
           </p>
           <Button
             className="w-full rounded-full font-semibold"
-            onClick={() => navigate("/merchant")}
+            onClick={async () => {
+              try {
+                await requestClaim();
+                toast({ title: "Demande envoyée", description: "Votre demande de revendication est en attente de validation." });
+              } catch {
+                navigate("/auth");
+              }
+            }}
+            disabled={status === "pending"}
           >
-            Revendiquer ce commerce
+            {status === "pending" ? "Demande en attente" : "Revendiquer ce commerce"}
           </Button>
         </div>
       )}

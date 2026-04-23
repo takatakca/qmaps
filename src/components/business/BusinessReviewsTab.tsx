@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Star, Camera, Award, Info, X, Lightbulb, Heart, Smile, ChevronDown, MoreVertical } from "lucide-react";
+import { Star, Camera, Award, Info, X, ChevronDown, MoreVertical } from "lucide-react";
 import StarRating from "@/components/StarRating";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import ReviewReactionButtons from "@/components/social/ReviewReactionButtons";
+import { useReviewReactions } from "@/hooks/useReviewReactions";
 
 interface BusinessReviewsTabProps {
   businessId: string;
@@ -56,6 +58,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showTrustBanner, setShowTrustBanner] = useState(true);
+  const { byReview, pending, toggleReaction } = useReviewReactions(reviews.map((review) => review.id));
 
   const handleSubmit = async () => {
     if (!userId) { onNavigateAuth(); return; }
@@ -158,20 +161,24 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
               )}
 
               {/* Reaction buttons */}
-              <div className="flex gap-3 mt-3">
-                {[
-                  { icon: Lightbulb, label: "Utile", count: review.useful },
-                  { icon: Heart, label: "Merci", count: review.cool },
-                  { icon: Heart, label: "J'adore", count: review.funny },
-                  { icon: Smile, label: "Oh non", count: 0 },
-                ].map((reaction) => (
-                  <button key={reaction.label} className="flex flex-col items-center gap-1 group">
-                    <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:bg-secondary transition-colors">
-                      <reaction.icon size={16} className="text-muted-foreground group-hover:text-foreground transition-colors" />
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{reaction.label} {reaction.count}</span>
-                  </button>
-                ))}
+              <div className="mt-3">
+                <ReviewReactionButtons
+                  reviewId={review.id}
+                  counts={byReview[review.id]?.counts || { useful: review.useful, funny: review.funny, cool: review.cool }}
+                  mine={byReview[review.id]?.mine || { useful: false, funny: false, cool: false }}
+                  pending={pending}
+                  onToggle={async (reviewId, reactionType) => {
+                    if (!userId) {
+                      onNavigateAuth();
+                      return;
+                    }
+                    try {
+                      await toggleReaction(reviewId, reactionType);
+                    } catch (error) {
+                      toast({ title: "Erreur", description: error instanceof Error ? error.message : "Impossible d'enregistrer la réaction.", variant: "destructive" });
+                    }
+                  }}
+                />
               </div>
             </div>
           );

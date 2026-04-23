@@ -5,13 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import StarRating from "@/components/StarRating";
 import BottomNav from "@/components/BottomNav";
+import ReviewReactionButtons from "@/components/social/ReviewReactionButtons";
+import { useReviewReactions } from "@/hooks/useReviewReactions";
+import { useToast } from "@/hooks/use-toast";
 
 const MyActivity = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<{ display_name: string | null } | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [stats, setStats] = useState({ reviews: 0, photos: 0 });
+  const { byReview, pending, toggleReaction } = useReviewReactions(reviews.map((review) => review.id));
 
   useEffect(() => {
     if (!user) return;
@@ -25,12 +30,6 @@ const MyActivity = () => {
   }, [user]);
 
   const displayName = profile?.display_name || "Utilisateur";
-
-  const reactions = [
-    { icon: ThumbsUp, label: "Utile" },
-    { icon: Smile, label: "Drôle" },
-    { icon: HeartIcon, label: "Cool" },
-  ];
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -94,12 +93,21 @@ const MyActivity = () => {
               <StarRating rating={r.rating} size={18} />
               {r.body && <p className="text-sm text-foreground mt-2 line-clamp-3">{r.body}</p>}
 
-              <div className="flex gap-2 mt-3">
-                {reactions.map(rx => (
-                  <button key={rx.label} className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full text-xs text-muted-foreground hover:bg-accent/30 transition-colors">
-                    <rx.icon size={14} /> {rx.label} 0
-                  </button>
-                ))}
+              <div className="mt-3">
+                <ReviewReactionButtons
+                  compact
+                  reviewId={r.id}
+                  counts={byReview[r.id]?.counts || { useful: r.useful, funny: r.funny, cool: r.cool }}
+                  mine={byReview[r.id]?.mine || { useful: false, funny: false, cool: false }}
+                  pending={pending}
+                  onToggle={async (reviewId, reactionType) => {
+                    try {
+                      await toggleReaction(reviewId, reactionType);
+                    } catch (error) {
+                      toast({ title: "Erreur", description: error instanceof Error ? error.message : "Impossible d'enregistrer la réaction.", variant: "destructive" });
+                    }
+                  }}
+                />
               </div>
             </div>
           ))}

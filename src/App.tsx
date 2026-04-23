@@ -40,6 +40,8 @@ import AddPhoto from "./pages/AddPhoto";
 import MyReviews from "./pages/MyReviews";
 import QRCode from "./pages/QRCode";
 import Messages from "./pages/Messages";
+import NewMessage from "./pages/NewMessage";
+import Conversation from "./pages/Conversation";
 import Compliments from "./pages/Compliments";
 import Events from "./pages/Events";
 import Activity from "./pages/Activity";
@@ -87,6 +89,8 @@ const App = () => (
             <Route path="/my-reviews" element={<MyReviews />} />
             <Route path="/qr-code" element={<QRCode />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/new" element={<NewMessage />} />
+            <Route path="/messages/:id" element={<Conversation />} />
             <Route path="/compliments" element={<Compliments />} />
             <Route path="/events" element={<Events />} />
             <Route path="/activity" element={<Activity />} />
