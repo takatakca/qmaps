@@ -70,6 +70,11 @@ const MerchantMarketplace = () => {
     fetchBusiness();
   }, [user, authLoading]);
 
+  const openAmenitiesEditor = async () => {
+    await fetchBusiness();
+    setEditAmenities(true);
+  };
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length || !business) return;
     setUploading(true);
@@ -324,7 +329,7 @@ const MerchantMarketplace = () => {
         <div className="bg-card rounded-xl border border-border p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-heading font-bold text-foreground">Commodités et plus</h3>
-            <button onClick={() => setEditAmenities(true)} className="text-xs text-primary font-medium">Modifier</button>
+            <button onClick={openAmenitiesEditor} className="text-xs text-primary font-medium">Modifier</button>
           </div>
           {(business.amenities && business.amenities.length > 0) ? (
             <>
@@ -340,7 +345,7 @@ const MerchantMarketplace = () => {
               )}
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">Aucune commodité. <button onClick={() => setEditAmenities(true)} className="text-primary font-medium">Ajouter →</button></p>
+            <p className="text-sm text-muted-foreground">Aucune commodité. <button onClick={openAmenitiesEditor} className="text-primary font-medium">Ajouter →</button></p>
           )}
         </div>
 
