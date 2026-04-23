@@ -14,6 +14,7 @@ const NewMessage = () => {
   const { createConversation } = useConversations();
   const [query, setQuery] = useState("");
   const [profiles, setProfiles] = useState<{ id: string; display_name: string | null; email: string | null }[]>([]);
+  const [startingId, setStartingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -32,8 +33,13 @@ const NewMessage = () => {
   });
 
   const handleStartConversation = async (targetId: string) => {
-    const conversationId = await createConversation(targetId);
-    navigate(`/messages/${conversationId}`);
+    setStartingId(targetId);
+    try {
+      const conversationId = await createConversation(targetId);
+      navigate(`/messages/${conversationId}`);
+    } finally {
+      setStartingId(null);
+    }
   };
 
   return (
@@ -52,7 +58,7 @@ const NewMessage = () => {
 
       <div className="divide-y divide-border">
         {filtered.map((profile) => (
-          <button key={profile.id} onClick={() => void handleStartConversation(profile.id)} className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-accent/30 transition-colors">
+          <button key={profile.id} disabled={startingId === profile.id} onClick={() => void handleStartConversation(profile.id)} className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-accent/30 transition-colors disabled:opacity-60">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-muted-foreground">
               {initialsFromName(profile.display_name)}
             </div>

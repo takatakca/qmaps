@@ -86,6 +86,7 @@ export const useReviewReactions = (reviewIds: string[]) => {
     }
 
     setPending(null);
+    window.dispatchEvent(new CustomEvent("qmaps:review-reactions-updated"));
   }, [refresh, state, user]);
 
   const byReview = useMemo(() => state, [state]);
