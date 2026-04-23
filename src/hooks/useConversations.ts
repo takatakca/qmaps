@@ -24,7 +24,7 @@ export const useConversations = () => {
       .select("conversation_id")
       .eq("user_id", user.id);
 
-    const conversationIds = (participantRows || []).map((row: any) => row.conversation_id);
+    const conversationIds = (((participantRows || []) as unknown) as Array<{ conversation_id: string }>).map((row) => row.conversation_id);
     if (!conversationIds.length) {
       setConversations([]);
       setLoading(false);
@@ -46,7 +46,7 @@ export const useConversations = () => {
     for (const profile of (profilesData || []) as ProfileSummary[]) profilesMap.set(profile.id, profile);
 
     const messagesByConversation = new Map<string, MessageRecord[]>();
-    for (const message of (messagesData || []) as MessageRecord[]) {
+    for (const message of ((messagesData || []) as unknown) as MessageRecord[]) {
       const list = messagesByConversation.get(message.conversation_id) || [];
       list.push(message);
       messagesByConversation.set(message.conversation_id, list);
@@ -88,7 +88,7 @@ export const useConversations = () => {
       .select("conversation_id")
       .eq("user_id", user.id);
 
-    const existingConversationIds = (ownParticipation || []).map((row: any) => row.conversation_id);
+    const existingConversationIds = (((ownParticipation || []) as unknown) as Array<{ conversation_id: string }>).map((row) => row.conversation_id);
     if (existingConversationIds.length) {
       const { data: existingOther } = await supabase
         .from("conversation_participants" as any)
@@ -96,7 +96,8 @@ export const useConversations = () => {
         .in("conversation_id", existingConversationIds)
         .eq("user_id", participantId);
 
-      if (existingOther?.[0]?.conversation_id) return existingOther[0].conversation_id as string;
+      const existingRows = ((existingOther || []) as unknown) as Array<{ conversation_id: string; user_id: string }>;
+      if (existingRows[0]?.conversation_id) return existingRows[0].conversation_id;
     }
 
     const { data: conversation, error: conversationError } = await supabase
@@ -105,18 +106,19 @@ export const useConversations = () => {
       .select("id")
       .single();
 
-    if (conversationError || !conversation) throw conversationError || new Error("conversation-create-failed");
+    const insertedConversation = (conversation as unknown) as { id: string } | null;
+    if (conversationError || !insertedConversation) throw conversationError || new Error("conversation-create-failed");
 
     const { error: participantsError } = await supabase
       .from("conversation_participants" as any)
       .insert([
-        { conversation_id: conversation.id, user_id: user.id },
-        { conversation_id: conversation.id, user_id: participantId },
+        { conversation_id: insertedConversation.id, user_id: user.id },
+        { conversation_id: insertedConversation.id, user_id: participantId },
       ]);
 
     if (participantsError) throw participantsError;
     await refresh();
-    return conversation.id as string;
+    return insertedConversation.id;
   }, [refresh, user]);
 
   useEffect(() => {
@@ -152,7 +154,7 @@ export const useConversationThread = (conversationId?: string) => {
       ? await supabase.from("profiles").select("id, display_name, avatar_url").in("id", participantIds)
       : { data: [] };
 
-    setMessages((messagesData || []) as MessageRecord[]);
+    setMessages(((messagesData || []) as unknown) as MessageRecord[]);
     setParticipants((profilesData || []) as ProfileSummary[]);
 
     await supabase
