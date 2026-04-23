@@ -4,6 +4,11 @@ import SearchBar from "@/components/SearchBar";
 import CategoryRow from "@/components/CategoryRow";
 import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
+import NearbySection from "@/components/home/NearbySection";
+import FeaturedBusinesses from "@/components/home/FeaturedBusinesses";
+import TrendingCollections from "@/components/home/TrendingCollections";
+import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
+import { mapBusinessToCard } from "@/lib/business";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
@@ -11,6 +16,7 @@ const priceLabels = ["$", "$$", "$$$", "$$$$"];
 const Index = () => {
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [loading, setLoading] = useState(true);
+  const { businesses: nearbyBusinesses } = useNearbyBusinesses(4);
 
   useEffect(() => {
     const fetchBusinesses = async () => {
@@ -46,29 +52,21 @@ const Index = () => {
 
       {/* Feed */}
       <div className="px-4 mt-4 space-y-4">
+        <NearbySection title="À proximité" businesses={nearbyBusinesses} />
+        <FeaturedBusinesses businesses={businesses.slice(0, 3)} />
+        <TrendingCollections />
+
+        <div className="pt-2">
+          <h2 className="font-heading text-lg font-bold text-foreground">Mieux notés</h2>
+          <p className="text-xs text-muted-foreground">Les commerces qui performent le mieux actuellement</p>
+        </div>
         {loading ? (
           <p className="text-center text-muted-foreground py-8">Chargement...</p>
         ) : (
           businesses.map((b) => (
             <BusinessCard
               key={b.id}
-              business={{
-                id: b.id,
-                name: b.name,
-                category: "",
-                rating: Number(b.avg_rating),
-                reviewCount: b.reviews_count,
-                priceLevel: priceLabels[(b.price_level || 1) - 1],
-                neighborhood: b.city,
-                image: b.image_url || "/placeholder.svg",
-                isOpen: b.is_open,
-                address: b.address,
-                phone: b.phone || "",
-                hours: b.hours || "",
-                description: b.description || "",
-                amenities: b.amenities || [],
-                photos: b.photos || [],
-              }}
+              business={mapBusinessToCard({ ...b, category_name: "Local" })}
             />
           ))
         )}
