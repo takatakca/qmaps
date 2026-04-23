@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface SearchBarProps {
@@ -10,9 +10,9 @@ const SearchBar = ({ initialValue = "" }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
-  useState(() => {
-    if (initialValue) setQuery(initialValue);
-  });
+  useEffect(() => {
+    setQuery(initialValue);
+  }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

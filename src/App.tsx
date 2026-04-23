@@ -50,6 +50,7 @@ import Preferences from "./pages/Preferences";
 import EditProfile from "./pages/EditProfile";
 import Talk from "./pages/Talk";
 import MyActivity from "./pages/MyActivity";
+import More from "./pages/More";
 import MyLocations from "./pages/settings/MyLocations";
 import EmailNotifications from "./pages/settings/EmailNotifications";
 import LocationServices from "./pages/settings/LocationServices";
@@ -78,6 +79,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/collections" element={<Collections />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/more" element={<More />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
             <Route path="/add-review" element={<AddReview />} />

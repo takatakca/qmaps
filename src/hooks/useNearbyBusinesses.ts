@@ -25,12 +25,7 @@ export const useNearbyBusinesses = (limit = 8): UseNearbyBusinessesResult => {
         .from("businesses")
         .select("*")
         .eq("is_active", true)
-        .order("location", {
-          ascending: true,
-          foreignTable: undefined,
-          referencedTable: undefined,
-        } as never)
-        .limit(limit);
+        .limit(limit * 3);
 
       if (queryError) throw queryError;
 
