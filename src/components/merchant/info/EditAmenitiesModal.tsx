@@ -1,10 +1,9 @@
-import { useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 // ── YES/NO toggle sections ──
 const TOGGLE_SECTIONS = [
@@ -114,36 +113,56 @@ interface Props {
   open: boolean;
   onClose: () => void;
   business: Tables<"businesses">;
-  onSaved: () => void;
+  onSaved: () => Promise<void> | void;
 }
 
 const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
-  const [selected, setSelected] = useState<Set<string>>(() => {
-    const set = new Set<string>();
-    (business.amenities || []).forEach(a => {
-      if (!a.includes("::")) set.add(a);
-    });
-    return set;
-  });
+  const parseAmenities = (amenities: string[] | null) => {
+    const nextSelected = new Set<string>();
+    const nextChips: Record<string, Set<string>> = {};
 
-  const [chips, setChips] = useState<Record<string, Set<string>>>(() => {
-    const map: Record<string, Set<string>> = {};
-    CHIP_SECTIONS.forEach(s => { map[s.key] = new Set(); });
-    (business.amenities || []).forEach(a => {
-      const idx = a.indexOf("::");
-      if (idx > -1) {
-        const prefix = a.substring(0, idx);
-        const val = a.substring(idx + 2);
-        if (map[prefix]) map[prefix].add(val);
-      }
+    CHIP_SECTIONS.forEach((section) => {
+      nextChips[section.key] = new Set();
     });
-    return map;
-  });
+
+    (amenities || []).forEach((amenity) => {
+      const idx = amenity.indexOf("::");
+      if (idx === -1) {
+        nextSelected.add(amenity);
+        return;
+      }
+
+      const prefix = amenity.substring(0, idx);
+      const value = amenity.substring(idx + 2);
+      if (nextChips[prefix]) nextChips[prefix].add(value);
+    });
+
+    return { nextSelected, nextChips };
+  };
+
+  const [{ nextSelected: initialSelected, nextChips: initialChips }] = useState(() => [parseAmenities(business.amenities)]);
+  const [selected, setSelected] = useState<Set<string>>(initialSelected);
+  const [chips, setChips] = useState<Record<string, Set<string>>>(initialChips);
 
   const initialAmenities = useMemo(() => business.amenities || [], [business.amenities]);
+  const allowedToggleItems = useMemo(() => new Set(TOGGLE_SECTIONS.flatMap(section => section.items)), []);
+  const allowedChipItems = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    CHIP_SECTIONS.forEach((section) => {
+      map.set(section.key, new Set(section.items));
+    });
+    return map;
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const { nextSelected, nextChips } = parseAmenities(business.amenities);
+    setSelected(nextSelected);
+    setChips(nextChips);
+  }, [open, business.id, business.amenities]);
 
   const normalizedAmenities = useMemo(() => {
     const toggleAmenities = Array.from(selected);
@@ -173,7 +192,17 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
       const next = { ...prev };
       const set = new Set(prev[key]);
       if (multi) {
-        if (set.has(value)) set.delete(value); else set.add(value);
+        if (value === "None") {
+          if (set.has(value)) {
+            set.delete(value);
+          } else {
+            set.clear();
+            set.add(value);
+          }
+        } else {
+          set.delete("None");
+          if (set.has(value)) set.delete(value); else set.add(value);
+        }
       } else {
         if (set.has(value)) { set.clear(); } else { set.clear(); set.add(value); }
       }
@@ -182,29 +211,64 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
     });
   };
 
+  const validateAmenities = () => {
+    const invalidToggleItems = Array.from(selected).filter(item => !allowedToggleItems.has(item));
+    const invalidChipItems = Object.entries(chips).flatMap(([key, values]) => {
+      const allowed = allowedChipItems.get(key);
+      return Array.from(values)
+        .filter(value => !allowed?.has(value))
+        .map(value => `${key}::${value}`);
+    });
+
+    const invalidItems = [...invalidToggleItems, ...invalidChipItems];
+    if (invalidItems.length > 0) {
+      toast({
+        title: "Sélection invalide",
+        description: "Certaines commodités ne sont pas reconnues. Veuillez réessayer.",
+        variant: "destructive",
+      });
+      return null;
+    }
+
+    return normalizedAmenities;
+  };
+
   const handleSave = async () => {
+    const validatedAmenities = validateAmenities();
+    if (!validatedAmenities) return;
+
     setSaving(true);
     const { error } = await supabase
       .from("businesses")
-      .update({ amenities: normalizedAmenities })
+      .update({ amenities: validatedAmenities })
+      .select("amenities")
       .eq("id", business.id);
 
     setSaving(false);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Commodités mises à jour!" });
-      onSaved();
+      await onSaved();
+      toast({ title: "Commodités sauvegardées", description: "La section Commodités a été actualisée." });
       onClose();
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-heading text-xl font-bold">Amenities and more</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 bg-black/80">
+      <div className="fixed inset-x-0 top-1/2 z-50 mx-auto w-full max-w-md -translate-y-1/2 border bg-background p-6 shadow-lg sm:rounded-lg">
+        <div className="absolute right-4 top-4">
+          <button type="button" onClick={onClose} className="rounded-sm opacity-70 transition-opacity hover:opacity-100">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
+        <div className="max-h-[85vh] overflow-y-auto pr-1">
+          <div className="mb-4 text-center sm:text-left">
+            <h2 className="font-heading text-xl font-bold text-foreground">Amenities and more</h2>
+          </div>
         <p className="text-sm text-muted-foreground mb-2">
           Select the amenities you offer. They will appear on your QMAPS listing.
         </p>
@@ -286,8 +350,9 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved }: Props) => {
             Save
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   );
 };
 
