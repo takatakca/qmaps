@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,9 +6,12 @@ import MerchantBottomNav from "@/components/MerchantBottomNav";
 import {
   ArrowLeft, Megaphone, Zap, TrendingUp, Eye, Star,
   MousePointerClick, Crown, Rocket, ChevronRight, CheckCircle2,
-  Target, MapPinned, BadgeDollarSign, LineChart, Sparkles
+  Target, MapPinned, BadgeDollarSign, LineChart, Sparkles, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import type { Tables } from "@/integrations/supabase/types";
 
 const packages = [
@@ -81,6 +84,16 @@ const MerchantOptimization = () => {
   const navigate = useNavigate();
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPackage, setSelectedPackage] = useState("premium");
+  const [dailyBudget, setDailyBudget] = useState(18);
+  const [radiusKm, setRadiusKm] = useState(12);
+  const [callsEnabled, setCallsEnabled] = useState(true);
+  const [webClicksEnabled, setWebClicksEnabled] = useState(true);
+  const [priorityPlacement, setPriorityPlacement] = useState(true);
+
+  const estimatedClicks = useMemo(() => Math.round(dailyBudget * 34), [dailyBudget]);
+  const estimatedLeads = useMemo(() => Math.max(4, Math.round(dailyBudget * 1.6)), [dailyBudget]);
+  const monthlyCap = useMemo(() => dailyBudget * 30, [dailyBudget]);
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -188,12 +201,74 @@ const MerchantOptimization = () => {
           </div>
         </div>
 
+        <div className="bg-card rounded-xl border border-border p-4 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="font-heading font-bold text-foreground">Contrôle de revenu</h3>
+              <p className="text-xs text-muted-foreground mt-1">Ajustez votre budget, votre rayon et vos leviers de conversion avant publication.</p>
+            </div>
+            <span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">Bêta marchand</span>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Budget journalier</span>
+              <span className="text-sm font-bold text-primary">CA${dailyBudget}/jour</span>
+            </div>
+            <Slider value={[dailyBudget]} min={5} max={60} step={1} onValueChange={([value]) => setDailyBudget(value)} />
+            <p className="mt-2 text-xs text-muted-foreground">Plafond mensuel estimé: CA${monthlyCap}</p>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Rayon de diffusion</span>
+              <span className="text-sm font-bold text-primary">{radiusKm} km</span>
+            </div>
+            <Slider value={[radiusKm]} min={3} max={40} step={1} onValueChange={([value]) => setRadiusKm(value)} />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Recevoir des appels</p>
+                <p className="text-xs text-muted-foreground">Favorise les prospects prêts à contacter l’entreprise.</p>
+              </div>
+              <Switch checked={callsEnabled} onCheckedChange={setCallsEnabled} />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Trafic web</p>
+                <p className="text-xs text-muted-foreground">Pousse les visiteurs vers votre site ou votre menu.</p>
+              </div>
+              <Switch checked={webClicksEnabled} onCheckedChange={setWebClicksEnabled} />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Placement prioritaire</p>
+                <p className="text-xs text-muted-foreground">Ajoute une mise en avant locale dans les résultats.</p>
+              </div>
+              <Switch checked={priorityPlacement} onCheckedChange={setPriorityPlacement} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">Clics estimés / mois</p>
+              <p className="text-lg font-bold text-foreground">{estimatedClicks}</p>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">Leads estimés / mois</p>
+              <p className="text-lg font-bold text-foreground">{estimatedLeads}</p>
+            </div>
+          </div>
+        </div>
+
         {/* Packages */}
         <div>
           <h3 className="font-heading font-bold text-foreground mb-3">Forfaits disponibles</h3>
           <div className="space-y-3">
             {packages.map(pkg => (
-              <div key={pkg.id} className={`bg-card rounded-xl border p-4 relative ${pkg.popular ? "border-primary" : "border-border"}`}>
+              <div key={pkg.id} className={`bg-card rounded-xl border p-4 relative ${selectedPackage === pkg.id || pkg.popular ? "border-primary" : "border-border"}`}>
                 {pkg.popular && (
                   <span className="absolute -top-2.5 right-3 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
                     Populaire
@@ -218,12 +293,12 @@ const MerchantOptimization = () => {
                   </div>
                 </div>
                 <Button
-                  onClick={() => pkg.id === "campaign" ? navigate("/merchant/ads") : null}
+                  onClick={() => setSelectedPackage(pkg.id)}
                   size="sm"
                   className="w-full rounded-full mt-3 gap-1"
-                  variant={pkg.popular ? "default" : "outline"}
+                  variant={selectedPackage === pkg.id || pkg.popular ? "default" : "outline"}
                 >
-                  Activer <ChevronRight size={14} />
+                  {selectedPackage === pkg.id ? <>Sélectionné <Check size={14} /></> : <>Activer <ChevronRight size={14} /></>}
                 </Button>
               </div>
             ))}
@@ -250,19 +325,26 @@ const MerchantOptimization = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm text-foreground">Objectif appels entrants</span>
-              <span className="text-xs font-medium text-primary">Disponible</span>
+              <span className="text-xs font-medium text-primary">{callsEnabled ? "Activé" : "Inactif"}</span>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm text-foreground">Objectif trafic web</span>
-              <span className="text-xs font-medium text-primary">Disponible</span>
+              <span className="text-xs font-medium text-primary">{webClicksEnabled ? "Activé" : "Inactif"}</span>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm text-foreground">Campagne de notoriété locale</span>
-              <span className="text-xs font-medium text-primary">Disponible</span>
+              <span className="text-xs font-medium text-primary">{priorityPlacement ? "Activé" : "Inactif"}</span>
             </div>
+          </div>
+          <div className="mt-4 space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Nom de campagne</label>
+            <Input defaultValue={`${businessName} - ${selectedPackage}`} className="rounded-lg" />
           </div>
           <Button onClick={() => navigate("/merchant/ads")} className="mt-4 w-full rounded-full gap-1">
             Configurer une campagne <ChevronRight size={14} />
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/merchant/ads")} className="mt-2 w-full rounded-full gap-1">
+            Publier la campagne <Megaphone size={14} />
           </Button>
         </div>
       </div>
