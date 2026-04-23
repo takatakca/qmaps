@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+type ParticipantRow = { conversation_id: string };
 
 export const useUnreadCounts = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState(0);
   const [messages, setMessages] = useState(0);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!user) {
       setNotifications(0);
       setMessages(0);
       return;
     }
 
-    const load = async () => {
       const [{ count: notifCount }, { data: participants }] = await Promise.all([
         supabase
           .from("notifications" as any)
@@ -29,7 +30,7 @@ export const useUnreadCounts = () => {
 
       setNotifications(notifCount || 0);
 
-      const conversationIds = (participants || []).map((item: any) => item.conversation_id);
+      const conversationIds = (((participants || []) as unknown) as ParticipantRow[]).map((item) => item.conversation_id);
       if (!conversationIds.length) {
         setMessages(0);
         return;
@@ -45,8 +46,27 @@ export const useUnreadCounts = () => {
       setMessages(unreadMessages || 0);
     };
 
-    void load();
   }, [user]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      void load();
+    };
+
+    window.addEventListener("focus", handleRefresh);
+    window.addEventListener("qmaps:notifications-updated", handleRefresh);
+    window.addEventListener("qmaps:messages-updated", handleRefresh);
+
+    return () => {
+      window.removeEventListener("focus", handleRefresh);
+      window.removeEventListener("qmaps:notifications-updated", handleRefresh);
+      window.removeEventListener("qmaps:messages-updated", handleRefresh);
+    };
+  }, [load]);
 
   return { unreadNotifications: notifications, unreadMessages: messages };
 };
