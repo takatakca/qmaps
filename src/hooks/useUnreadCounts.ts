@@ -16,35 +16,34 @@ export const useUnreadCounts = () => {
       return;
     }
 
-      const [{ count: notifCount }, { data: participants }] = await Promise.all([
-        supabase
-          .from("notifications" as any)
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .eq("is_read", false),
-        supabase
-          .from("conversation_participants" as any)
-          .select("conversation_id")
-          .eq("user_id", user.id),
-      ]);
-
-      setNotifications(notifCount || 0);
-
-      const conversationIds = (((participants || []) as unknown) as ParticipantRow[]).map((item) => item.conversation_id);
-      if (!conversationIds.length) {
-        setMessages(0);
-        return;
-      }
-
-      const { count: unreadMessages } = await supabase
-        .from("messages" as any)
+    const [{ count: notifCount }, { data: participants }] = await Promise.all([
+      supabase
+        .from("notifications" as any)
         .select("id", { count: "exact", head: true })
-        .in("conversation_id", conversationIds)
-        .neq("sender_id", user.id)
-        .eq("is_read", false);
+        .eq("user_id", user.id)
+        .eq("is_read", false),
+      supabase
+        .from("conversation_participants" as any)
+        .select("conversation_id")
+        .eq("user_id", user.id),
+    ]);
 
-      setMessages(unreadMessages || 0);
-    };
+    setNotifications(notifCount || 0);
+
+    const conversationIds = (((participants || []) as unknown) as ParticipantRow[]).map((item) => item.conversation_id);
+    if (!conversationIds.length) {
+      setMessages(0);
+      return;
+    }
+
+    const { count: unreadMessages } = await supabase
+      .from("messages" as any)
+      .select("id", { count: "exact", head: true })
+      .in("conversation_id", conversationIds)
+      .neq("sender_id", user.id)
+      .eq("is_read", false);
+
+    setMessages(unreadMessages || 0);
 
   }, [user]);
 
