@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Star, ImageIcon, Bookmark, ThumbsUp, Smile, Heart as HeartIcon, Frown } from "lucide-react";
+import { ArrowLeft, User, Star, ImageIcon, Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import StarRating from "@/components/StarRating";
