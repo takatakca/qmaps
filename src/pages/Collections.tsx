@@ -1,14 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import { Bookmark, Plus, LogIn, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Tables } from "@/integrations/supabase/types";
 import cafeImg from "@/assets/cafe-1.jpg";
 import foodImg from "@/assets/food-1.jpg";
 import restaurantImg from "@/assets/restaurant-1.jpg";
+import { useCollections } from "@/hooks/useCollections";
 
 const featuredCollections = [
   { id: "f1", title: "Sélection hebdo Montréal", desc: "Les 10 meilleurs restaurants de Montréal cette semaine", image: foodImg, count: 10 },
@@ -17,34 +16,30 @@ const featuredCollections = [
 ];
 
 const Collections = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [bookmarks, setBookmarks] = useState<(Tables<"bookmarks"> & { businesses: Tables<"businesses"> | null })[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { loading, bookmarkCount, bookmarkPreview, defaultCollection, customCollections, publicCollections, createCollection } = useCollections();
+  const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) { setLoading(false); return; }
-    supabase
-      .from("bookmarks")
-      .select("*, businesses(*)")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setBookmarks((data as any) || []);
-        setLoading(false);
-      });
-  }, [user, authLoading]);
+  const handleCreate = async () => {
+    const name = window.prompt("Nom de la collection");
+    if (!name) return;
+    const isPublic = window.confirm("Rendre cette collection publique ?");
+    setCreating(true);
+    try {
+      await createCollection(name, isPublic);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
-      {/* Header */}
       <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center justify-between px-4 py-3">
         <h1 className="font-heading text-xl font-bold text-foreground">Collections</h1>
-        {user && <button className="text-sm font-semibold text-primary">CRÉER</button>}
+        {user && <button onClick={() => void handleCreate()} className="text-sm font-semibold text-primary">CRÉER</button>}
       </div>
 
-      {/* Featured */}
       <div className="px-4 pt-4">
         <button className="flex items-center gap-1 text-sm text-foreground font-medium mb-3">
           En vedette à <span className="font-bold">Montréal</span> <ChevronDown size={14} />
@@ -68,11 +63,10 @@ const Collections = () => {
 
       <div className="h-2 bg-muted" />
 
-      {/* My Collections */}
       <div className="px-4 pt-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-heading text-lg font-bold text-foreground">Mes collections</h2>
-          {bookmarks.length > 0 && <button className="text-sm font-semibold text-primary">Voir tout</button>}
+          {(bookmarkCount > 0 || customCollections.length > 0) && <button className="text-sm font-semibold text-primary">Voir tout</button>}
         </div>
 
         {!user ? (
@@ -85,26 +79,33 @@ const Collections = () => {
           <p className="text-center text-muted-foreground py-8">Chargement...</p>
         ) : (
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-3">
-            {/* Saved bookmarks */}
-            {bookmarks.length > 0 && (
+            {defaultCollection && (
               <div className="min-w-[160px] flex-shrink-0">
                 <div className="relative">
-                  <img
-                    src={bookmarks[0]?.businesses?.image_url || "/placeholder.svg"}
-                    alt="Envies"
-                    className="w-full h-36 rounded-xl object-cover"
-                  />
+                  <img src={bookmarkPreview || defaultCollection.preview_image || "/placeholder.svg"} alt="Want to go" className="w-full h-36 rounded-xl object-cover" />
                   <span className="absolute bottom-2 right-2 bg-card/90 backdrop-blur-sm text-foreground text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1">
-                    <Bookmark size={12} className="fill-current" /> {bookmarks.length}
+                    <Bookmark size={12} className="fill-current" /> {bookmarkCount}
                   </span>
                 </div>
-                <h3 className="text-sm font-bold text-foreground mt-2">Envies</h3>
+                <h3 className="text-sm font-bold text-foreground mt-2">Want to go</h3>
                 <p className="text-xs text-muted-foreground">Privé</p>
               </div>
             )}
 
-            {/* Create new */}
-            <button className="min-w-[160px] flex-shrink-0 flex flex-col items-center justify-center h-36 rounded-xl border-2 border-dashed border-border">
+            {customCollections.map((collection) => (
+              <div key={collection.id} className="min-w-[160px] flex-shrink-0">
+                <div className="relative">
+                  <img src={collection.preview_image || "/placeholder.svg"} alt={collection.name} className="w-full h-36 rounded-xl object-cover" />
+                  <span className="absolute bottom-2 right-2 bg-card/90 backdrop-blur-sm text-foreground text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+                    <Bookmark size={12} className="fill-current" /> {collection.items_count}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground mt-2 truncate">{collection.name}</h3>
+                <p className="text-xs text-muted-foreground">{collection.is_public ? "Public" : "Privé"}</p>
+              </div>
+            ))}
+
+            <button disabled={creating} onClick={() => void handleCreate()} className="min-w-[160px] flex-shrink-0 flex flex-col items-center justify-center h-36 rounded-xl border-2 border-dashed border-border">
               <Plus size={32} className="text-muted-foreground mb-1" />
               <span className="text-sm font-semibold text-foreground">Créer</span>
             </button>
@@ -114,13 +115,26 @@ const Collections = () => {
 
       <div className="h-2 bg-muted" />
 
-      {/* Following Collections */}
       <div className="px-4 pt-4 pb-6">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Collections suivies</h2>
-        <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">Vous ne suivez aucune collection.</p>
-          <p className="text-xs text-muted-foreground mt-1">Découvrez les collections en vedette ci-dessus!</p>
-        </div>
+        {publicCollections.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">Vous ne suivez aucune collection.</p>
+            <p className="text-xs text-muted-foreground mt-1">Découvrez les collections en vedette ci-dessus!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {publicCollections.map((collection) => (
+              <div key={collection.id} className="flex items-center gap-3 rounded-xl border border-border p-3 bg-card">
+                <img src={collection.preview_image || "/placeholder.svg"} alt={collection.name} className="w-16 h-16 rounded-lg object-cover" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{collection.name}</p>
+                  <p className="text-xs text-muted-foreground">{collection.items_count} adresses enregistrées</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <BottomNav />
