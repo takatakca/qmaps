@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
 const packages = [
@@ -82,6 +83,7 @@ const revenueLevers = [
 const MerchantOptimization = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState("premium");
@@ -90,10 +92,21 @@ const MerchantOptimization = () => {
   const [callsEnabled, setCallsEnabled] = useState(true);
   const [webClicksEnabled, setWebClicksEnabled] = useState(true);
   const [priorityPlacement, setPriorityPlacement] = useState(true);
+  const [campaignName, setCampaignName] = useState("Campagne locale QMAPS");
+  const [campaignPublished, setCampaignPublished] = useState(false);
 
   const estimatedClicks = useMemo(() => Math.round(dailyBudget * 34), [dailyBudget]);
   const estimatedLeads = useMemo(() => Math.max(4, Math.round(dailyBudget * 1.6)), [dailyBudget]);
   const monthlyCap = useMemo(() => dailyBudget * 30, [dailyBudget]);
+  const selectedPackageData = useMemo(() => packages.find((pkg) => pkg.id === selectedPackage) ?? packages[0], [selectedPackage]);
+
+  const publishCampaign = () => {
+    setCampaignPublished(true);
+    toast({
+      title: "Campagne prête",
+      description: `${campaignName} est prête avec un budget de CA$${dailyBudget}/jour.`,
+    });
+  };
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -147,11 +160,37 @@ const MerchantOptimization = () => {
         {/* Active promotions */}
         <div className="bg-card rounded-xl border border-border p-4">
           <h3 className="font-heading font-bold text-foreground mb-3">Promotions actives</h3>
-          <div className="text-center py-6">
-            <Rocket size={32} className="mx-auto text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">Aucune promotion active</p>
-            <p className="text-xs text-muted-foreground mt-1">Lancez une campagne pour booster votre visibilité.</p>
-          </div>
+          {campaignPublished ? (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{campaignName}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{selectedPackageData.name} • {radiusKm} km • CA${dailyBudget}/jour</p>
+                </div>
+                <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground">Active</span>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-md bg-card p-2">
+                  <p className="text-[10px] text-muted-foreground">Clics</p>
+                  <p className="text-sm font-bold text-foreground">{estimatedClicks}</p>
+                </div>
+                <div className="rounded-md bg-card p-2">
+                  <p className="text-[10px] text-muted-foreground">Leads</p>
+                  <p className="text-sm font-bold text-foreground">{estimatedLeads}</p>
+                </div>
+                <div className="rounded-md bg-card p-2">
+                  <p className="text-[10px] text-muted-foreground">Budget</p>
+                  <p className="text-sm font-bold text-foreground">CA${monthlyCap}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Rocket size={32} className="mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">Aucune promotion active</p>
+              <p className="text-xs text-muted-foreground mt-1">Lancez une campagne pour booster votre visibilité.</p>
+            </div>
+          )}
         </div>
 
         {/* Campaign metrics */}
@@ -338,12 +377,12 @@ const MerchantOptimization = () => {
           </div>
           <div className="mt-4 space-y-2">
             <label className="text-xs font-medium text-muted-foreground">Nom de campagne</label>
-            <Input defaultValue={`${businessName} - ${selectedPackage}`} className="rounded-lg" />
+            <Input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} className="rounded-lg" />
           </div>
           <Button onClick={() => navigate("/merchant/ads")} className="mt-4 w-full rounded-full gap-1">
             Configurer une campagne <ChevronRight size={14} />
           </Button>
-          <Button variant="outline" onClick={() => navigate("/merchant/ads")} className="mt-2 w-full rounded-full gap-1">
+          <Button variant="outline" onClick={publishCampaign} className="mt-2 w-full rounded-full gap-1">
             Publier la campagne <Megaphone size={14} />
           </Button>
         </div>
