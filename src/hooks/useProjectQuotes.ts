@@ -81,7 +81,13 @@ export const useProjectQuotes = (projectRequestId?: string) => {
         .insert(payload)
         .select()
         .single();
-      if (!error) window.dispatchEvent(new Event(REFRESH_EVENT));
+      if (!error) {
+        window.dispatchEvent(new Event(REFRESH_EVENT));
+        try {
+          const { trackBusinessEvent } = await import("@/lib/analytics");
+          trackBusinessEvent(input.business_id, "quote_sent", { source: "project_quote" });
+        } catch { /* silent */ }
+      }
       return { data: (data as unknown) as ProjectQuote | null, error: error?.message ?? null };
     },
     [user],
