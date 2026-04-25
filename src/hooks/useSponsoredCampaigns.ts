@@ -197,6 +197,8 @@ export interface SponsoredMetricsBreakdown {
   ctr: number;
   byPlacement: Array<{ placement: string; impressions: number; clicks: number }>;
   byDay: Array<{ day: string; impressions: number; clicks: number }>;
+  /** Previous equal-length window. Null when range is "all" (no comparable window). */
+  previous: { impressions: number; clicks: number } | null;
   loading: boolean;
 }
 
