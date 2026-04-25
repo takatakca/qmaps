@@ -12,6 +12,7 @@ import {
   type SponsoredStatus,
 } from "@/lib/sponsored";
 import { useAuth } from "@/hooks/useAuth";
+import { useSponsoredCampaignMetrics } from "@/hooks/useSponsoredCampaigns";
 
 interface Row {
   id: string;
