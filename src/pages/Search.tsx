@@ -11,6 +11,7 @@ import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { formatDistance } from "@/lib/geo";
 import { mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
+import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
