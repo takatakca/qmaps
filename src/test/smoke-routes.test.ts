@@ -75,6 +75,7 @@ const SMOKE_ROUTES = [
   "/admin/projects",
   "/admin/sponsored",
   "/admin/users",
+  "/admin/review-moderation",
 ];
 
 describe("smoke: route inventory (App.tsx)", () => {

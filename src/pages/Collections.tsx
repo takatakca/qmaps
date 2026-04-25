@@ -10,6 +10,8 @@ import cafeImg from "@/assets/cafe-1.jpg";
 import foodImg from "@/assets/food-1.jpg";
 import restaurantImg from "@/assets/restaurant-1.jpg";
 import { useCollections } from "@/hooks/useCollections";
+import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 
 const featuredCollections = [
   { id: "f1", title: "Sélection hebdo Montréal", desc: "Les 10 meilleurs restaurants de Montréal cette semaine", image: foodImg, count: 10 },
@@ -21,9 +23,12 @@ const Collections = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { loading, bookmarkCount, bookmarkPreview, defaultCollection, customCollections, publicCollections, createCollection } = useCollections();
+  const { becauseYouLiked, recommended, loading: recLoading } = useRecommendedBusinesses({ limit: 4 });
   const [creating, setCreating] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [draftPublic, setDraftPublic] = useState(false);
+  const showRecs = !!user && bookmarkCount > 0;
+  const recItems = (becauseYouLiked.length > 0 ? becauseYouLiked : recommended).slice(0, 4);
 
   const handleCreate = async () => {
     const name = draftName.trim();
@@ -158,6 +163,18 @@ const Collections = () => {
           </div>
         )}
       </div>
+
+      {showRecs && recItems.length > 0 && (
+        <div className="px-4 pb-6">
+          <RecommendedSection
+            title="Vous pourriez aussi aimer"
+            subtitle="Inspiré de vos commerces enregistrés"
+            source="collections_because_you_saved"
+            items={recItems.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
+            loading={recLoading}
+          />
+        </div>
+      )}
 
       <BottomNav />
     </div>

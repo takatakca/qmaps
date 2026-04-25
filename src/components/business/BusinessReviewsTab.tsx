@@ -1,14 +1,21 @@
-import { useState } from "react";
-import { Star, Camera, Award, Info, X, ChevronDown, MoreVertical } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Star, Camera, Award, Info, X, ChevronDown, MoreVertical, ShieldAlert } from "lucide-react";
 import StarRating from "@/components/StarRating";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import ReviewReactionButtons from "@/components/social/ReviewReactionButtons";
 import { useReviewReactions } from "@/hooks/useReviewReactions";
 import ReportButton from "@/components/reports/ReportButton";
+import {
+  formatRiskLevelAdmin,
+  riskLevelTone,
+  type ReviewRiskLevel,
+} from "@/lib/reviewTrust";
 
 interface BusinessReviewsTabProps {
   businessId: string;
@@ -55,11 +62,47 @@ const RatingDistribution = ({ reviews, avgRating, reviewsCount }: { reviews: any
 
 const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, userId, userName, onReviewSubmitted, onNavigateAuth }: BusinessReviewsTabProps) => {
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   const [rating, setRating] = useState(0);
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showTrustBanner, setShowTrustBanner] = useState(true);
-  const { byReview, pending, toggleReaction } = useReviewReactions(reviews.map((review) => review.id));
+  const [trustByReview, setTrustByReview] = useState<Record<string, { risk_level: ReviewRiskLevel; status: string }>>({});
+
+  // Public-safe: hide moderation-hidden reviews from normal viewers.
+  // Admins see everything; the review's own author can also see their hidden review.
+  const visibleReviews = reviews.filter((r) => {
+    const status = (r as any).moderation_status ?? "visible";
+    if (status !== "hidden") return true;
+    if (isAdmin) return true;
+    if (userId && r.user_id === userId) return true;
+    return false;
+  });
+
+  const { byReview, pending, toggleReaction } = useReviewReactions(visibleReviews.map((review) => review.id));
+
+  // Admin-only: load risk badges. Non-admin requests are blocked by RLS,
+  // so we only fetch when we know the viewer is an admin.
+  useEffect(() => {
+    if (!isAdmin || visibleReviews.length === 0) {
+      setTrustByReview({});
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from("review_trust_scores" as any)
+        .select("review_id, risk_level, status")
+        .in("review_id", visibleReviews.map((r) => r.id));
+      if (cancelled) return;
+      const map: Record<string, { risk_level: ReviewRiskLevel; status: string }> = {};
+      for (const row of (data ?? []) as any[]) {
+        map[row.review_id] = { risk_level: row.risk_level as ReviewRiskLevel, status: row.status };
+      }
+      setTrustByReview(map);
+    })();
+    return () => { cancelled = true; };
+  }, [isAdmin, visibleReviews.map((r) => r.id).join(",")]);
 
   const handleSubmit = async () => {
     if (!userId) { onNavigateAuth(); return; }
@@ -104,23 +147,24 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
       )}
 
       {/* Rating distribution */}
-      <RatingDistribution reviews={reviews} avgRating={avgRating} reviewsCount={reviewsCount} />
+      <RatingDistribution reviews={visibleReviews} avgRating={avgRating} reviewsCount={reviewsCount} />
 
       {/* Filters */}
       <button className="flex items-center gap-1 text-sm text-foreground font-medium">
-        Voir {reviews.length > 0 ? reviews.length : ""} filtres <ChevronDown size={14} />
+        Voir {visibleReviews.length > 0 ? visibleReviews.length : ""} filtres <ChevronDown size={14} />
       </button>
 
       {/* Review list */}
       <div className="space-y-4">
-        {reviews.length === 0 && (
+        {visibleReviews.length === 0 && (
           <div className="text-center py-8">
             <p className="text-muted-foreground text-sm">Aucun avis pour le moment</p>
             <p className="text-muted-foreground text-xs mt-1">Soyez le premier à partager votre expérience!</p>
           </div>
         )}
-        {reviews.map((review) => {
+        {visibleReviews.map((review) => {
           const displayName = (review as any).profiles?.display_name || "Utilisateur";
+          const trust = trustByReview[review.id];
           return (
             <div key={review.id} className="border-b border-border pb-4 last:border-0">
               {/* User header */}
@@ -138,6 +182,16 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                 </div>
                 <button><MoreVertical size={16} className="text-muted-foreground" /></button>
               </div>
+
+              {/* Admin-only risk badge (never shown to public users or merchants) */}
+              {isAdmin && trust && (trust.risk_level !== "low" || trust.status !== "visible") && (
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                  <Badge variant={riskLevelTone(trust.risk_level)} className="gap-1">
+                    <ShieldAlert size={12} /> {formatRiskLevelAdmin(trust.risk_level)}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">{trust.status}</Badge>
+                </div>
+              )}
 
               {/* Rating + date */}
               <div className="flex items-center gap-2 mt-2">

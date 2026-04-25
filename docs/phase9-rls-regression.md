@@ -68,8 +68,34 @@ insert into public.review_moderation_actions (review_id, actor_user_id, action)
 values ('<id>', auth.uid(), 'add_note');
 ```
 
+## 11. reviews — hidden review visibility (Phase 9B hardening)
+```sql
+-- as anonymous or any non-author non-admin: hidden reviews must NOT appear
+select id from public.reviews
+ where moderation_status = 'hidden';
+-- expected: 0 rows
+```
+
+## 12. reviews — author can still read own hidden review
+```sql
+-- as the review's author: their own hidden review IS returned
+select id from public.reviews
+ where moderation_status = 'hidden' and user_id = auth.uid();
+-- expected: returns the row
+```
+
+## 13. review_moderation_actions — append-only
+```sql
+-- as admin: UPDATE/DELETE must FAIL (no policy granted)
+update public.review_moderation_actions set reason = 'x' where id = '<id>';
+delete from public.review_moderation_actions where id = '<id>';
+-- expected: 0 rows affected / policy violation
+```
+
 ## Notes
 - `review_trust_scores` exposes a merchant-only read policy limited to reviews on their own businesses, with no raw signal access.
 - `recommendation_feedback` mirrors `recommendation_events` insert rules.
 - `business_recommendation_scores` and `user_preference_profiles` writes are admin-only; reads are owner-or-admin.
-- The reviews table gained `moderation_status` (default `visible`), `hidden_at`, `hidden_by`, `hidden_reason`. Existing review behavior is unchanged.
+- The reviews table gained `moderation_status` (default `visible`), `hidden_at`, `hidden_by`, `hidden_reason`. Existing review behavior is unchanged for visible/trusted/needs_review/restored statuses.
+- Phase 9B hardening: hidden reviews are now excluded from public reads via RLS. Author + admins remain able to read them.
+- Pre-existing PostGIS linter findings (`spatial_ref_sys` RLS, extension-in-public x2) are not introduced by Phase 9 and are expected.

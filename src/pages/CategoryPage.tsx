@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityFromSlug } from "@/lib/seo";
+import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import type { Tables } from "@/integrations/supabase/types";
 
 const CategoryPage = () => {
@@ -17,6 +19,10 @@ const CategoryPage = () => {
   const [category, setCategory] = useState<Tables<"categories"> | null>(null);
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [loading, setLoading] = useState(true);
+  const { recommended, loading: recLoading } = useRecommendedBusinesses({
+    city: cityLabel,
+    limit: 4,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -155,6 +161,18 @@ const CategoryPage = () => {
           ))
         )}
       </section>
+
+      {category && (
+        <div className="px-4 mt-6">
+          <RecommendedSection
+            title={`Recommandé dans ${category.name}`}
+            subtitle="Sélectionné pour vous selon votre activité"
+            source="category_recommended"
+            items={recommended.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
+            loading={recLoading}
+          />
+        </div>
+      )}
 
       <BottomNav />
     </div>
