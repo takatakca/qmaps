@@ -7,6 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import NearbySection from "@/components/home/NearbySection";
 import FeaturedBusinesses from "@/components/home/FeaturedBusinesses";
 import TrendingCollections from "@/components/home/TrendingCollections";
+import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { mapBusinessToCard } from "@/lib/business";
 import type { Tables } from "@/integrations/supabase/types";
@@ -50,6 +51,8 @@ const Index = () => {
       <div className="px-4 mt-3">
         <CategoryRow />
       </div>
+
+      <SponsoredListings placement="home" />
 
       {/* Feed */}
       <div className="px-4 mt-4 space-y-4">
