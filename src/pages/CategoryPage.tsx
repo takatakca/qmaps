@@ -6,6 +6,7 @@ import BusinessCard from "@/components/BusinessCard";
 import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mapBusinessToCard } from "@/lib/business";
+import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityFromSlug } from "@/lib/seo";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -112,6 +113,14 @@ const CategoryPage = () => {
           </Link>
         )}
       </header>
+
+      {category && (
+        <SponsoredListings
+          placement="category"
+          city={cityLabel || undefined}
+          categoryId={category.id}
+        />
+      )}
 
       <section className="px-4 space-y-3">
         {loading ? (
