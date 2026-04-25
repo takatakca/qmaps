@@ -65,11 +65,13 @@ Take on a real device or 390×844 viewport, in both FR locales:
 
 ## 5. Privacy & legal
 
-- [ ] Public Privacy Policy URL
-- [ ] Public Terms of Service URL
+- [x] Public Privacy Policy URL → `/privacy`
+- [x] Public Terms of Service URL → `/terms`
+- [x] Account deletion policy → `/account-deletion-policy`
+- [x] Support policy → `/support-policy`
 - [ ] Cookie / tracking disclosure
-- [ ] Children's policy (13+ recommended)
-- [ ] Account deletion path (in-app **and** documented)
+- [x] Children's policy (13+ in Terms §1)
+- [x] Account deletion path (in-app **and** documented)
 
 ## 6. Data deletion / user rights
 

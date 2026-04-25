@@ -124,6 +124,29 @@ const More = () => {
             </div>
           </div>
         </div>
+
+        <div>
+          <h2 className="font-heading font-semibold text-foreground mb-2 text-sm">Légal & support</h2>
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            {[
+              { to: "/privacy", label: "Politique de confidentialité" },
+              { to: "/terms", label: "Conditions d'utilisation" },
+              { to: "/account-deletion-policy", label: "Suppression de compte" },
+              { to: "/support-policy", label: "Politique de support" },
+            ].map((l, i) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-accent/50 transition-colors ${
+                  i > 0 ? "border-t border-border" : ""
+                }`}
+              >
+                <span className="text-sm text-foreground">{l.label}</span>
+                <ChevronRight size={16} className="text-muted-foreground" />
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
 
       <BottomNav />
