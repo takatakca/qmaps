@@ -66,7 +66,19 @@ const Projects = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { requests } = useProjectRequests();
+  const { categories } = useProjectCategories();
   const [startOpen, setStartOpen] = useState(false);
+  const [presetCategoryId, setPresetCategoryId] = useState<string | null>(null);
+
+  const openWithSlug = (slug: string) => {
+    if (slug === "__more__") {
+      setPresetCategoryId(null);
+    } else {
+      const match = categories.find(c => c.slug === slug);
+      setPresetCategoryId(match?.id ?? null);
+    }
+    setStartOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -76,7 +88,7 @@ const Projects = () => {
             <h1 className="font-heading text-2xl font-bold text-foreground">Projets QMAPS</h1>
             <p className="text-muted-foreground text-sm mt-1">Engagez un professionnel local</p>
           </div>
-          <Button onClick={() => setStartOpen(true)} size="sm" className="rounded-full gap-1 shrink-0">
+          <Button onClick={() => { setPresetCategoryId(null); setStartOpen(true); }} size="sm" className="rounded-full gap-1 shrink-0">
             <Plus size={14} /> Démarrer
           </Button>
         </div>
@@ -84,7 +96,7 @@ const Projects = () => {
         {/* Service Categories */}
         <div className="grid grid-cols-4 gap-3 mt-5">
           {serviceCategories.map(cat => (
-            <button key={cat.label} onClick={() => setStartOpen(true)} className="flex flex-col items-center gap-1.5">
+            <button key={cat.label} onClick={() => openWithSlug(cat.slug)} className="flex flex-col items-center gap-1.5">
               <div className="w-14 h-14 rounded-full bg-card border border-border flex items-center justify-center shadow-sm hover:bg-accent transition-colors">
                 <cat.icon size={24} className="text-primary" />
               </div>
