@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import {
@@ -6,6 +6,14 @@ import {
   Eye, ChevronRight, Settings, HelpCircle, Store
 } from "lucide-react";
 import foodImg from "@/assets/food-1.jpg";
+
+const POPULAR_CITIES = ["montreal", "quebec", "laval", "gatineau"];
+const POPULAR_CATEGORIES = [
+  { slug: "restaurants", label: "Restaurants" },
+  { slug: "cafes", label: "Cafés" },
+  { slug: "salons", label: "Salons & beauté" },
+  { slug: "menage", label: "Ménage" },
+];
 
 const More = () => {
   const { user } = useAuth();
@@ -82,6 +90,40 @@ const More = () => {
             </div>
           </div>
         ))}
+
+        <div>
+          <h2 className="font-heading font-semibold text-foreground mb-2 text-sm">Découvrir QMaps</h2>
+          <div className="bg-card rounded-xl border border-border p-4 space-y-3">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Villes populaires</p>
+              <div className="flex flex-wrap gap-2">
+                {POPULAR_CITIES.map((s) => (
+                  <Link
+                    key={s}
+                    to={`/city/${s}`}
+                    className="text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground hover:bg-accent transition-colors capitalize"
+                  >
+                    {s}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Catégories</p>
+              <div className="flex flex-wrap gap-2">
+                {POPULAR_CATEGORIES.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/c/${c.slug}`}
+                    className="text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+                  >
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <BottomNav />

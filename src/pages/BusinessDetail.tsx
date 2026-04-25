@@ -12,6 +12,8 @@ import BusinessReviewsTab from "@/components/business/BusinessReviewsTab";
 import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
 import { trackBusinessEvent } from "@/lib/analytics";
+import Seo from "@/components/Seo";
+import { slugify } from "@/lib/seo";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
@@ -84,8 +86,48 @@ const BusinessDetail = () => {
     );
   }
 
+  const seoTitle = `${business.name}${business.city ? ` · ${business.city}` : ""} | QMaps`;
+  const seoDescription = (business.description?.trim()
+    ? business.description
+    : `${business.name}${business.city ? ` à ${business.city}` : ""}. ${business.reviews_count} avis · note ${Number(business.avg_rating).toFixed(1)}/5 sur QMaps.`).slice(0, 200);
+  const localBusinessJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: business.name,
+    image: business.image_url || undefined,
+    telephone: business.phone || undefined,
+    url: business.website || `${typeof window !== "undefined" ? window.location.origin : ""}/business/${business.id}`,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: business.address,
+      addressLocality: business.city,
+      addressRegion: business.region,
+      postalCode: business.postal_code,
+      addressCountry: business.country,
+    },
+    geo: business.latitude && business.longitude ? {
+      "@type": "GeoCoordinates",
+      latitude: business.latitude,
+      longitude: business.longitude,
+    } : undefined,
+    aggregateRating: business.reviews_count > 0 ? {
+      "@type": "AggregateRating",
+      ratingValue: Number(business.avg_rating),
+      reviewCount: business.reviews_count,
+    } : undefined,
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title={seoTitle}
+        description={seoDescription}
+        canonicalPath={`/business/${business.id}`}
+        image={business.image_url || undefined}
+        type="profile"
+        jsonLdId="local-business"
+        jsonLd={localBusinessJsonLd}
+      />
       {/* Hero */}
       <BusinessHero
         name={business.name}
@@ -97,6 +139,10 @@ const BusinessDetail = () => {
         bookmarked={bookmarked}
         onBookmark={handleBookmark}
       />
+      {/* hidden link kept for SSR-friendly category link */}
+      {business.city && (
+        <link rel="alternate" data-city-slug={slugify(business.city)} />
+      )}
 
       {/* Actions */}
       <BusinessActions
