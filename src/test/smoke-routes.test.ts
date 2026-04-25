@@ -82,6 +82,7 @@ const SMOKE_ROUTES = [
   "/admin/users",
   "/admin/review-moderation",
   "/admin/account-deletions",
+  "/admin/launch-status",
   "/settings/delete-account",
 ];
 
