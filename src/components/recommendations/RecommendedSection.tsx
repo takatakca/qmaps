@@ -34,6 +34,9 @@ interface Props {
   helperText?: string;
 }
 
+const DEFAULT_HELPER_TEXT =
+  "Les recommandations s'améliorent à mesure que vous consultez, sauvegardez et notez des commerces.";
+
 const RecommendedSection = ({
   title,
   subtitle,
@@ -42,6 +45,7 @@ const RecommendedSection = ({
   showReasonChips = true,
   emptyHint,
   loading,
+  helperText = DEFAULT_HELPER_TEXT,
 }: Props) => {
   const { user } = useAuth();
   const seen = useRef<Set<string>>(new Set());
