@@ -49,6 +49,11 @@ const Sitemap = () => {
       const urls: string[] = [];
       urls.push(`${origin}/`);
       urls.push(`${origin}/projects`);
+      urls.push(`${origin}/privacy`);
+      urls.push(`${origin}/terms`);
+      urls.push(`${origin}/cookies`);
+      urls.push(`${origin}/account-deletion-policy`);
+      urls.push(`${origin}/support-policy`);
       (cats || []).forEach((c) => urls.push(`${origin}/c/${c.slug}`));
       citySlugs.forEach((s) => urls.push(`${origin}/city/${s}`));
       (biz || []).forEach((b) => urls.push(`${origin}/business/${b.id}`));
