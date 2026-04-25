@@ -336,33 +336,42 @@ const CampaignCard = ({
         </Badge>
       </div>
 
-      <div className="flex gap-1 mt-3" role="tablist" aria-label="Période">
-        {RANGES.map((r) => (
-          <button
-            key={r.key}
-            onClick={() => setRange(r.key)}
-            className={`text-[11px] px-2 py-0.5 rounded-full border ${
-              range === r.key
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card text-muted-foreground border-border"
-            }`}
-          >
-            {r.label}
-          </button>
-        ))}
+      <div className="flex items-center justify-between gap-2 mt-3">
+        <div className="flex gap-1" role="tablist" aria-label="Période">
+          {RANGES.map((r) => (
+            <button
+              key={r.key}
+              onClick={() => setRange(r.key)}
+              className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                range === r.key
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-muted-foreground border-border"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+        <span className="text-[10px] text-muted-foreground">
+          {SPONSORED_RANGE_LABELS[range]}
+        </span>
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-2 text-center">
         <Metric label="Impressions" value={metrics.impressions} />
         <Metric label="Clics" value={metrics.clicks} />
-        <Metric label="CTR" value={`${(metrics.ctr * 100).toFixed(1)}%`} />
+        <Metric label="CTR" value={formatCtr(metrics.impressions, metrics.clicks)} />
       </div>
 
-      {metrics.byPlacement.length > 0 && (
-        <div className="mt-3">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
-            Par emplacement
+      <div className="mt-3">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+          Par emplacement
+        </p>
+        {metrics.byPlacement.length === 0 ? (
+          <p className="text-xs text-muted-foreground bg-muted/40 rounded px-2 py-1.5">
+            Aucun événement sur cette période.
           </p>
+        ) : (
           <div className="space-y-1">
             {metrics.byPlacement.map((p) => (
               <div
@@ -375,13 +384,27 @@ const CampaignCard = ({
                   ] ?? p.placement}
                 </span>
                 <span className="text-muted-foreground tabular-nums">
-                  {p.impressions} imp · {p.clicks} clic
+                  {p.impressions} imp · {p.clicks} clic ·{" "}
+                  {formatCtr(p.impressions, p.clicks)}
                 </span>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <div className="mt-3">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+          Activité par jour
+        </p>
+        {metrics.byDay.length === 0 ? (
+          <p className="text-xs text-muted-foreground bg-muted/40 rounded px-2 py-1.5">
+            Aucune activité sur cette période.
+          </p>
+        ) : (
+          <DayActivityBars data={metrics.byDay} />
+        )}
+      </div>
 
       {isRejected && campaign.admin_note && (
         <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
