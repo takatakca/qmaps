@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { trackBusinessEvent } from "@/lib/analytics";
 
 export interface ProjectQuote {
   id: string;
@@ -84,7 +85,6 @@ export const useProjectQuotes = (projectRequestId?: string) => {
       if (!error) {
         window.dispatchEvent(new Event(REFRESH_EVENT));
         try {
-          const { trackBusinessEvent } = await import("@/lib/analytics");
           trackBusinessEvent(input.business_id, "quote_sent", { source: "project_quote" });
         } catch { /* silent */ }
       }
