@@ -27,6 +27,8 @@ interface Row {
   starts_at: string | null;
   ends_at: string | null;
   admin_note: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   created_at: string;
   business: { id: string; name: string; city: string } | null;
 }
@@ -57,6 +59,14 @@ const AdminSponsored = () => {
   }, [filter]);
 
   const updateStatus = async (id: string, status: SponsoredStatus) => {
+    if (status === "rejected" && !(notes[id] && notes[id].trim())) {
+      toast({
+        title: "Note requise",
+        description: "Ajoutez une note expliquant le rejet avant de rejeter la campagne.",
+        variant: "destructive",
+      });
+      return;
+    }
     const patch: any = {
       status,
       reviewed_at: new Date().toISOString(),
@@ -127,6 +137,12 @@ const AdminSponsored = () => {
                     </p>
                     {r.description && (
                       <p className="text-sm mt-2">{r.description}</p>
+                    )}
+                    {r.reviewed_at && (
+                      <p className="text-[11px] text-muted-foreground mt-2">
+                        Révisée le {new Date(r.reviewed_at).toLocaleString("fr-CA")}
+                        {r.reviewed_by ? ` · par ${r.reviewed_by.slice(0, 8)}...` : ""}
+                      </p>
                     )}
                   </div>
                   <Badge variant="secondary">

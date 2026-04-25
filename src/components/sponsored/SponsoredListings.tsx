@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import {
   useApprovedSponsoredListings,
 } from "@/hooks/useSponsoredCampaigns";
-import { trackSponsoredEvent, type SponsoredPlacement } from "@/lib/sponsored";
+import {
+  shouldRecordImpression,
+  trackSponsoredEvent,
+  type SponsoredPlacement,
+} from "@/lib/sponsored";
 import StarRating from "@/components/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
@@ -34,17 +38,25 @@ const SponsoredListings = ({
 
   useEffect(() => {
     listings.forEach((l) => {
-      if (!trackedRef.current.has(l.id) && l.business) {
-        trackedRef.current.add(l.id);
-        trackSponsoredEvent(l.id, l.business.id, "impression", placement);
-      }
+      if (!l.business) return;
+      const refKey = `${l.id}:${placement}`;
+      if (trackedRef.current.has(refKey)) return;
+      trackedRef.current.add(refKey);
+      if (!shouldRecordImpression(l.id, placement)) return;
+      trackSponsoredEvent(l.id, l.business.id, "impression", placement, {
+        city: city ?? null,
+        category_id: categoryId ?? null,
+      });
     });
-  }, [listings, placement]);
+  }, [listings, placement, city, categoryId]);
 
   if (loading || listings.length === 0) return null;
 
   const handleClick = (campaignId: string, businessId: string) => {
-    trackSponsoredEvent(campaignId, businessId, "click", placement);
+    trackSponsoredEvent(campaignId, businessId, "click", placement, {
+      city: city ?? null,
+      category_id: categoryId ?? null,
+    });
     navigate(`/business/${businessId}`);
   };
 

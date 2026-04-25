@@ -21,6 +21,46 @@ export type SponsoredEventType = "impression" | "click";
 /**
  * Fire-and-forget sponsored event tracker. Never throws, never blocks UI.
  */
+const SESSION_DEDUPE_KEY = "qmaps:sponsored:impressions";
+
+const getSessionDedupeSet = (): Set<string> => {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.sessionStorage.getItem(SESSION_DEDUPE_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const persistSessionDedupe = (set: Set<string>): void => {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(
+      SESSION_DEDUPE_KEY,
+      JSON.stringify(Array.from(set)),
+    );
+  } catch {
+    // silent
+  }
+};
+
+/**
+ * Returns true the first time (campaignId, placement) is seen this session,
+ * false on subsequent calls. Lets callers avoid spamming impressions on rerenders.
+ */
+export const shouldRecordImpression = (
+  campaignId: string,
+  placement?: string,
+): boolean => {
+  const key = `${campaignId}:${placement ?? "_"}`;
+  const set = getSessionDedupeSet();
+  if (set.has(key)) return false;
+  set.add(key);
+  persistSessionDedupe(set);
+  return true;
+};
+
 export const trackSponsoredEvent = (
   campaignId: string,
   businessId: string,
