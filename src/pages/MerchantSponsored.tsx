@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Sparkles, Pause, Send } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, Pause, Send, Info, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -36,8 +36,46 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+
+const dayLabelFormatter = new Intl.DateTimeFormat("fr-CA", {
+  day: "2-digit",
+  month: "short",
+});
+
+const formatDayLabel = (isoDay: string): string => {
+  // isoDay = "YYYY-MM-DD"; build a local-noon date to avoid TZ off-by-one.
+  const [y, m, d] = isoDay.split("-").map((n) => parseInt(n, 10));
+  if (!y || !m || !d) return isoDay;
+  const dt = new Date(y, m - 1, d, 12, 0, 0);
+  return dayLabelFormatter.format(dt);
+};
+
+const csvEscape = (v: unknown): string => {
+  const s = v === null || v === undefined ? "" : String(v);
+  if (/[",\n;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+};
+
+const downloadCsv = (filename: string, rows: string[][]): void => {
+  const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
 const STATUS_VARIANTS: Record<SponsoredStatus, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -319,6 +357,43 @@ const CampaignCard = ({
     { key: "all", label: "Tout" },
   ];
 
+  const trendPct = (current: number, previous?: number): number | null => {
+    if (previous === undefined || previous === null) return null;
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  const handleExport = () => {
+    const safeTitle = (campaign.headline || "campagne")
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "campagne";
+    const rows: string[][] = [
+      ["Campagne", campaign.headline || ""],
+      ["Période", SPONSORED_RANGE_LABELS[range]],
+      ["Statut", SPONSORED_STATUS_LABELS[status]],
+      [],
+      ["Métrique", "Valeur"],
+      ["Impressions", String(metrics.impressions)],
+      ["Clics", String(metrics.clicks)],
+      ["CTR", formatCtr(metrics.impressions, metrics.clicks)],
+      [],
+      ["Emplacement", "Impressions", "Clics", "CTR"],
+      ...metrics.byPlacement.map((p) => [
+        SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement,
+        String(p.impressions),
+        String(p.clicks),
+        formatCtr(p.impressions, p.clicks),
+      ]),
+      [],
+      ["Date", "Impressions", "Clics"],
+      ...metrics.byDay.map((d) => [d.day, String(d.impressions), String(d.clicks)]),
+    ];
+    downloadCsv(`sponsored-${safeTitle}-${range}.csv`, rows);
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-3">
       <div className="flex items-start justify-between gap-2">
@@ -358,9 +433,33 @@ const CampaignCard = ({
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-        <Metric label="Impressions" value={metrics.impressions} />
-        <Metric label="Clics" value={metrics.clicks} />
-        <Metric label="CTR" value={formatCtr(metrics.impressions, metrics.clicks)} />
+        <Metric
+          label="Impressions"
+          value={metrics.impressions}
+          trend={trendPct(metrics.impressions, metrics.previous?.impressions)}
+        />
+        <Metric
+          label="Clics"
+          value={metrics.clicks}
+          trend={trendPct(metrics.clicks, metrics.previous?.clicks)}
+        />
+        <Metric
+          label="CTR"
+          value={formatCtr(metrics.impressions, metrics.clicks)}
+          tooltip="CTR = clics ÷ impressions. Indique le pourcentage d'utilisateurs qui ont cliqué après avoir vu votre annonce."
+        />
+      </div>
+
+      <div className="flex justify-end mt-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-[11px] text-muted-foreground"
+          onClick={handleExport}
+          disabled={metrics.impressions === 0 && metrics.clicks === 0}
+        >
+          <Download size={12} className="mr-1" /> Exporter CSV
+        </Button>
       </div>
 
       <div className="mt-3">
@@ -464,12 +563,69 @@ const CampaignCard = ({
   );
 };
 
-const Metric = ({ label, value }: { label: string; value: number | string }) => (
-  <div>
-    <p className="font-heading text-base font-bold">{value}</p>
-    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-  </div>
-);
+const Metric = ({
+  label,
+  value,
+  trend,
+  tooltip,
+}: {
+  label: string;
+  value: number | string;
+  trend?: number | null;
+  tooltip?: string;
+}) => {
+  const TrendIcon =
+    trend === null || trend === undefined
+      ? null
+      : trend > 0
+        ? TrendingUp
+        : trend < 0
+          ? TrendingDown
+          : Minus;
+  const trendClass =
+    trend === null || trend === undefined
+      ? "text-muted-foreground"
+      : trend > 0
+        ? "text-emerald-600 dark:text-emerald-400"
+        : trend < 0
+          ? "text-destructive"
+          : "text-muted-foreground";
+  return (
+    <div>
+      <p className="font-heading text-base font-bold">{value}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center justify-center gap-1">
+        {label}
+        {tooltip && (
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={`À propos de ${label}`}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Info size={10} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[220px] text-xs">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </p>
+      {TrendIcon && (
+        <p
+          className={`text-[10px] mt-0.5 flex items-center justify-center gap-0.5 tabular-nums ${trendClass}`}
+        >
+          <TrendIcon size={10} />
+          {trend! > 0 ? "+" : ""}
+          {trend!.toFixed(0)}%
+        </p>
+      )}
+    </div>
+  );
+};
 
 const DayActivityBars = ({
   data,
@@ -484,7 +640,7 @@ const DayActivityBars = ({
         return (
           <div key={d.day} className="flex items-center gap-2 text-[11px]">
             <span className="w-14 shrink-0 text-muted-foreground tabular-nums">
-              {d.day.slice(5)}
+              {formatDayLabel(d.day)}
             </span>
             <div className="flex-1 h-2 rounded bg-muted overflow-hidden">
               <div
