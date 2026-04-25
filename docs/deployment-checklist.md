@@ -8,6 +8,7 @@ ownership so a single human can sign off in one pass.
 ## 1. Backend (Lovable Cloud / Supabase)
 
 - [ ] `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` populated in `.env`
+- [ ] `.env.example` matches current required variables (see `docs/environment-setup.md`)
 - [ ] All migrations applied (run `supabase--linter` for security warnings)
 - [ ] RLS enabled on every public table (verify in Cloud dashboard)
 - [ ] Edge functions deployed and reachable:
