@@ -29,9 +29,11 @@ const ctaLabel = (cta: PlanDefinition["cta"]): string => {
 
 const MerchantBillingPlans = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const [businesses, setBusinesses] = useState<Pick<Tables<"businesses">, "id" | "name">[]>([]);
   const [selectedBizId, setSelectedBizId] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<PlanKey | null>(null);
   const { plan: currentPlan, loading: subLoading } = useMerchantSubscription(selectedBizId);
 
   useEffect(() => {
@@ -46,6 +48,59 @@ const MerchantBillingPlans = () => {
       if (list.length > 0) setSelectedBizId(list[0].id);
     })();
   }, [user, authLoading]);
+
+  const startCheckout = async (plan: PlanKey) => {
+    if (!selectedBizId) {
+      toast({
+        title: "Aucune entreprise",
+        description: "Réclamez d'abord une entreprise pour souscrire à un plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setCheckoutLoading(plan);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "create-merchant-checkout-session",
+        { body: { business_id: selectedBizId, plan } }
+      );
+      if (error) throw error;
+      const payload = data as { url?: string; error?: string; message?: string };
+      if (payload?.url) {
+        window.location.href = payload.url;
+        return;
+      }
+      if (payload?.error === "provider_not_configured" || payload?.error === "price_not_configured") {
+        toast({
+          title: "Bientôt disponible",
+          description: payload.message || "Les paiements ne sont pas encore activés.",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: payload?.message || "Impossible de démarrer le paiement.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Edge function returns 503 with provider_not_configured when Stripe isn't set up.
+      if (msg.includes("provider_not_configured") || msg.includes("503")) {
+        toast({
+          title: "Bientôt disponible",
+          description: "Les paiements arrivent bientôt sur QMaps.",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible de démarrer le paiement.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background max-w-2xl mx-auto pb-20">
