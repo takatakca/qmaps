@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
+import { planLabel, statusLabel } from "@/lib/billing";
+import type { Tables } from "@/integrations/supabase/types";
 
 const MerchantBilling = () => {
   const navigate = useNavigate();
