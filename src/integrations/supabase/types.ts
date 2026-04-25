@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_request_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          new_status: string | null
+          note: string | null
+          previous_status: string | null
+          request_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          new_status?: string | null
+          note?: string | null
+          previous_status?: string | null
+          request_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          new_status?: string | null
+          note?: string | null
+          previous_status?: string | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_deletion_request_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "account_deletion_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       account_deletion_requests: {
         Row: {
           created_at: string

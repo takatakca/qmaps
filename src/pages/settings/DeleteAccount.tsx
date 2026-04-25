@@ -139,17 +139,18 @@ const DeleteAccount = () => {
             <Loader2 size={16} className="animate-spin" /> Vérification…
           </div>
         ) : existing ? (
-          <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-2">
-            <p className="text-sm font-semibold text-foreground">
-              Une demande est déjà enregistrée
+          <div className="bg-muted/50 border border-destructive/30 rounded-xl p-4 space-y-2">
+            <p className="text-sm font-semibold text-destructive">
+              Une demande est déjà active.
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-foreground">
               Statut : <strong>{STATUS_LABELS_FR[existing.status]}</strong>
               <br />
               Soumise le {new Date(existing.requested_at).toLocaleDateString("fr-CA")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Pour annuler ou modifier votre demande, contactez le support.
+              Pour annuler ou modifier votre demande, contactez le support à{" "}
+              <span className="font-mono">support@qmaps.app</span>. Aucune nouvelle demande ne peut être créée tant que celle-ci est active.
             </p>
           </div>
         ) : (

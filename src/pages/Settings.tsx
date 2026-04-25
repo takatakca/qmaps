@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, LogOut } from "lucide-react";
+import { ArrowLeft, ChevronRight, LogOut, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
+import { STATUS_LABELS_FR, type AccountDeletionStatus } from "@/lib/accountDeletion";
 
 const settingsItems = [
   { label: "Notifications push", path: "" },
@@ -16,9 +19,29 @@ const settingsItems = [
   { label: "Fermer le compte", path: "/settings/delete-account", danger: true },
 ];
 
+interface PendingRequest {
+  id: string;
+  status: AccountDeletionStatus;
+  requested_at: string;
+}
+
 const Settings = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const [pending, setPending] = useState<PendingRequest | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("account_deletion_requests")
+      .select("id, status, requested_at")
+      .eq("user_id", user.id)
+      .in("status", ["pending", "processing"])
+      .order("requested_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setPending((data as PendingRequest) ?? null));
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -26,6 +49,26 @@ const Settings = () => {
         <button onClick={() => navigate(-1)}><ArrowLeft size={22} className="text-foreground" /></button>
         <h1 className="font-heading text-lg font-bold text-foreground">Paramètres</h1>
       </div>
+
+      {pending && (
+        <button
+          onClick={() => navigate("/settings/delete-account")}
+          className="w-full text-left mx-4 mt-4 mb-2 bg-destructive/5 border border-destructive/20 rounded-xl p-3 flex items-start gap-3 hover:bg-destructive/10 transition-colors"
+          style={{ width: "calc(100% - 2rem)" }}
+        >
+          <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-destructive">
+              Demande de fermeture de compte active
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Statut : {STATUS_LABELS_FR[pending.status]} · Soumise le{" "}
+              {new Date(pending.requested_at).toLocaleDateString("fr-CA")}
+            </p>
+          </div>
+          <ChevronRight size={16} className="text-muted-foreground shrink-0 mt-0.5" />
+        </button>
+      )}
 
       <div className="divide-y divide-border">
         {settingsItems.map((item, i) => (
