@@ -27,6 +27,7 @@ const AdminSponsored = lazy(() => import("./pages/admin/AdminSponsored"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminReviewModeration = lazy(() => import("./pages/admin/AdminReviewModeration"));
 const AdminAccountDeletions = lazy(() => import("./pages/admin/AdminAccountDeletions"));
+const AdminLaunchStatus = lazy(() => import("./pages/admin/AdminLaunchStatus"));
 
 // Lazy: merchant
 const MerchantSponsored = lazy(() => import("./pages/MerchantSponsored"));
@@ -208,6 +209,7 @@ const App = () => (
               <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
               <Route path="/admin/review-moderation" element={<ProtectedAdminRoute><AdminReviewModeration /></ProtectedAdminRoute>} />
               <Route path="/admin/account-deletions" element={<ProtectedAdminRoute><AdminAccountDeletions /></ProtectedAdminRoute>} />
+              <Route path="/admin/launch-status" element={<ProtectedAdminRoute><AdminLaunchStatus /></ProtectedAdminRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
