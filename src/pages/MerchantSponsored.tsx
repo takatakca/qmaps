@@ -256,11 +256,14 @@ const MerchantSponsored = () => {
             {loading ? (
               <p className="text-sm text-muted-foreground">Chargement...</p>
             ) : campaigns.length === 0 ? (
-              <div className="bg-muted/50 rounded-xl p-6 text-center">
-                <Sparkles size={20} className="mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Aucune campagne. Créez un brouillon, soumettez-le, et notre équipe
-                  l'examinera.
+              <div className="bg-muted/50 rounded-xl p-8 text-center">
+                <Sparkles size={28} className="mx-auto text-primary mb-3" />
+                <p className="font-heading font-bold text-sm mb-1">
+                  Aucune campagne pour le moment
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Créez un brouillon, soumettez-le pour révision, et notre équipe
+                  l'examinera sous 1-2 jours ouvrables.
                 </p>
               </div>
             ) : (
