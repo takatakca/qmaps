@@ -444,6 +444,80 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_service_areas: {
+        Row: {
+          business_id: string
+          city: string | null
+          created_at: string
+          id: string
+          postal_code_prefix: string | null
+          radius_km: number | null
+          region: string | null
+        }
+        Insert: {
+          business_id: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          postal_code_prefix?: string | null
+          radius_km?: number | null
+          region?: string | null
+        }
+        Update: {
+          business_id?: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          postal_code_prefix?: string | null
+          radius_km?: number | null
+          region?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_service_areas_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_service_categories: {
+        Row: {
+          business_id: string
+          category_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          business_id: string
+          category_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          business_id?: string
+          category_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_service_categories_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_service_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
@@ -541,6 +615,192 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      project_quote_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          quote_id: string
+          sender_user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          quote_id: string
+          sender_user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          quote_id?: string
+          sender_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_quote_messages_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "project_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_quotes: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          message: string | null
+          project_request_id: string
+          quoted_price_max: number | null
+          quoted_price_min: number | null
+          sender_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          project_request_id: string
+          quoted_price_max?: number | null
+          quoted_price_min?: number | null
+          sender_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          project_request_id?: string
+          quoted_price_max?: number | null
+          quoted_price_min?: number | null
+          sender_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_quotes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_quotes_project_request_id_fkey"
+            columns: ["project_request_id"]
+            isOneToOne: false
+            referencedRelation: "project_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_request_media: {
+        Row: {
+          created_at: string
+          id: string
+          media_type: string
+          project_request_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_type?: string
+          project_request_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_type?: string
+          project_request_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_request_media_project_request_id_fkey"
+            columns: ["project_request_id"]
+            isOneToOne: false
+            referencedRelation: "project_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_requests: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          category_id: string | null
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          postal_code: string | null
+          preferred_contact_method: string
+          region: string | null
+          status: string
+          title: string
+          updated_at: string
+          urgency: string
+          user_id: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category_id?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string | null
+          preferred_contact_method?: string
+          region?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          urgency?: string
+          user_id: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category_id?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string | null
+          preferred_contact_method?: string
+          region?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          urgency?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_photos: {
         Row: {
@@ -871,6 +1131,10 @@ export type Database = {
             }
             Returns: string
           }
+      can_access_quote: {
+        Args: { _quote_id: string; _user_id: string }
+        Returns: boolean
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -1648,6 +1912,14 @@ export type Database = {
           table_name: string
         }
         Returns: string
+      }
+      user_owns_business: {
+        Args: { _business_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_serves_category: {
+        Args: { _category_id: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
