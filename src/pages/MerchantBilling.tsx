@@ -1,6 +1,18 @@
+// Phase 7C — Stripe test-mode checklist (developer reference, not user-facing):
+//   1. Add secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+//      STRIPE_STARTER_PRICE_ID, STRIPE_PRO_PRICE_ID, STRIPE_PREMIUM_PRICE_ID
+//   2. Deploy edge functions (checkout, portal, webhook)
+//   3. Configure Stripe webhook endpoint -> /functions/v1/stripe-webhook
+//   4. Create test prices in Stripe (test mode) and copy IDs into the secrets above
+//   5. From /merchant/billing/plans click "Choisir ce plan"
+//   6. Complete checkout with test card 4242 4242 4242 4242
+//   7. Verify a row appears/updates in merchant_subscriptions for the business
+//   8. Verify a row appears in merchant_billing_events with provider_event_id
+//   9. Open billing portal via "Gérer l'abonnement"
+//  10. Cancel subscription in Stripe portal — verify cancel_at_period_end + status
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight } from "lucide-react";
+import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +36,7 @@ const MerchantBilling = () => {
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [cardName, setCardName] = useState("");
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [events, setEvents] = useState<Tables<"merchant_billing_events">[]>([]);
@@ -110,31 +123,55 @@ const MerchantBilling = () => {
                 {subscription?.provider_customer_id ? (
                   <Button
                     className="w-full justify-between rounded-full"
+                    disabled={portalLoading}
                     onClick={async () => {
-                      const { data, error } = await supabase.functions.invoke(
-                        "create-merchant-billing-portal-session",
-                        { body: { business_id: businessId } }
-                      );
-                      const payload = data as { url?: string; error?: string; message?: string };
-                      if (!error && payload?.url) {
-                        window.location.href = payload.url;
-                        return;
-                      }
-                      if (payload?.error === "provider_not_configured") {
-                        toast({ title: "Bientôt disponible", description: payload.message });
-                      } else if (payload?.error === "no_customer") {
-                        navigate("/merchant/billing/plans");
-                      } else {
-                        toast({
-                          title: "Erreur",
-                          description: payload?.message || "Impossible d'ouvrir le portail.",
-                          variant: "destructive",
-                        });
+                      if (portalLoading) return;
+                      setPortalLoading(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke(
+                          "create-merchant-billing-portal-session",
+                          { body: { business_id: businessId } }
+                        );
+                        let payload = data as { url?: string; error?: string; message?: string } | null;
+                        if (error && !payload) {
+                          const ctx = (error as { context?: Response }).context;
+                          if (ctx && typeof ctx.json === "function") {
+                            try { payload = await ctx.json(); } catch { /* ignore */ }
+                          }
+                        }
+                        if (payload?.url) {
+                          window.location.href = payload.url;
+                          return;
+                        }
+                        const code = payload?.error;
+                        if (code === "provider_not_configured") {
+                          toast({ title: "Bientôt disponible", description: payload?.message });
+                        } else if (code === "no_customer") {
+                          toast({
+                            title: "Aucun abonnement actif",
+                            description: "Choisissez un plan pour commencer.",
+                          });
+                          navigate("/merchant/billing/plans");
+                        } else if (code === "forbidden") {
+                          toast({
+                            title: "Accès refusé",
+                            description: "Cette entreprise ne vous appartient pas.",
+                            variant: "destructive",
+                          });
+                        } else {
+                          toast({
+                            title: "Impossible d'ouvrir le portail",
+                            description: payload?.message || "Veuillez réessayer plus tard.",
+                            variant: "destructive",
+                          });
+                        }
+                      } finally {
+                        setPortalLoading(false);
                       }
                     }}
                   >
-                    <span>Gérer l'abonnement</span>
-                    <ChevronRight size={16} />
+                    <span>{portalLoading ? "Ouverture..." : "Gérer l'abonnement"}</span>
+                    {portalLoading ? <Loader2 size={16} className="animate-spin" /> : <ChevronRight size={16} />}
                   </Button>
                 ) : (
                   <Button

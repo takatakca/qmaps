@@ -58,22 +58,52 @@ const MerchantBillingPlans = () => {
       });
       return;
     }
+    if (checkoutLoading) return; // guard against double-click
     setCheckoutLoading(plan);
     try {
       const { data, error } = await supabase.functions.invoke(
         "create-merchant-checkout-session",
         { body: { business_id: selectedBizId, plan } }
       );
-      if (error) throw error;
-      const payload = data as { url?: string; error?: string; message?: string };
+      // FunctionsHttpError stashes the parsed body on `context`; try to recover it.
+      let payload = data as { url?: string; error?: string; message?: string } | null;
+      if (error && !payload) {
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") {
+          try {
+            payload = await ctx.json();
+          } catch {
+            /* ignore */
+          }
+        }
+      }
       if (payload?.url) {
         window.location.href = payload.url;
         return;
       }
-      if (payload?.error === "provider_not_configured" || payload?.error === "price_not_configured") {
+      const code = payload?.error ?? "internal_error";
+      if (code === "provider_not_configured" || code === "price_not_configured") {
         toast({
           title: "Bientôt disponible",
-          description: payload.message || "Les paiements ne sont pas encore activés.",
+          description: payload?.message || "Les paiements ne sont pas encore activés.",
+        });
+      } else if (code === "forbidden") {
+        toast({
+          title: "Accès refusé",
+          description: "Vous ne pouvez pas souscrire pour cette entreprise.",
+          variant: "destructive",
+        });
+      } else if (code === "invalid_input") {
+        toast({
+          title: "Requête invalide",
+          description: "Plan ou entreprise invalide.",
+          variant: "destructive",
+        });
+      } else if (code === "unauthorized") {
+        toast({
+          title: "Connexion requise",
+          description: "Veuillez vous reconnecter.",
+          variant: "destructive",
         });
       } else {
         toast({
@@ -84,7 +114,6 @@ const MerchantBillingPlans = () => {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      // Edge function returns 503 with provider_not_configured when Stripe isn't set up.
       if (msg.includes("provider_not_configured") || msg.includes("503")) {
         toast({
           title: "Bientôt disponible",
