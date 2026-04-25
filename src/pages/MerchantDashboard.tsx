@@ -1,15 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
-import MerchantOverview from "@/components/merchant/MerchantOverview";
-import MerchantPerformance from "@/components/merchant/MerchantPerformance";
-import MerchantEditForm from "@/components/merchant/MerchantEditForm";
-import MerchantReviews from "@/components/merchant/MerchantReviews";
 import { ArrowLeft, Plus, Store, LayoutDashboard, BarChart3, Settings, MessageSquare, Sparkles } from "lucide-react";
+
+const MerchantOverview = lazy(() => import("@/components/merchant/MerchantOverview"));
+const MerchantPerformance = lazy(() => import("@/components/merchant/MerchantPerformance"));
+const MerchantEditForm = lazy(() => import("@/components/merchant/MerchantEditForm"));
+const MerchantReviews = lazy(() => import("@/components/merchant/MerchantReviews"));
+
+const PanelFallback = () => (
+  <div className="space-y-3" role="status" aria-label="Chargement">
+    <div className="h-32 w-full rounded-xl bg-muted animate-pulse" />
+    <div className="h-24 w-full rounded-xl bg-muted animate-pulse" />
+  </div>
+);
 import type { Tables } from "@/integrations/supabase/types";
 import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
 import { planLabel } from "@/lib/billing";
@@ -140,10 +148,12 @@ const MerchantDashboard = () => {
               </button>
             )}
 
-            {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
-            {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}
-            {selectedBiz && tab === "edit" && <MerchantEditForm business={selectedBiz} onSaved={fetchBusinesses} />}
-            {selectedBiz && tab === "reviews" && <MerchantReviews reviews={reviews} />}
+            <Suspense fallback={<PanelFallback />}>
+              {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
+              {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}
+              {selectedBiz && tab === "edit" && <MerchantEditForm business={selectedBiz} onSaved={fetchBusinesses} />}
+              {selectedBiz && tab === "reviews" && <MerchantReviews reviews={reviews} />}
+            </Suspense>
           </>
         )}
       </div>
