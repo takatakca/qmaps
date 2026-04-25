@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
-import { PLANS, type PlanDefinition } from "@/lib/billing";
+import { PLANS, type PlanDefinition, type PlanKey } from "@/lib/billing";
+import { useToast } from "@/hooks/use-toast";
 import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -19,6 +20,8 @@ const ctaLabel = (cta: PlanDefinition["cta"]): string => {
       return "Bientôt disponible";
     case "contact":
       return "Contacter QMaps";
+    case "checkout":
+      return "Choisir ce plan";
     default:
       return "Choisir";
   }
