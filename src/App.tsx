@@ -5,6 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedMerchantRoute from "@/components/ProtectedMerchantRoute";
+import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminBusinesses from "./pages/admin/AdminBusinesses";
+import AdminReviews from "./pages/admin/AdminReviews";
+import AdminPhotos from "./pages/admin/AdminPhotos";
+import AdminProjects from "./pages/admin/AdminProjects";
+import AdminUsers from "./pages/admin/AdminUsers";
 import Index from "./pages/Index";
 import BusinessDetail from "./pages/BusinessDetail";
 import Profile from "./pages/Profile";
@@ -139,6 +147,15 @@ const App = () => (
             <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
             <Route path="/merchant/leads" element={<ProtectedMerchantRoute><MerchantLeads /></ProtectedMerchantRoute>} />
             <Route path="/merchant/services" element={<ProtectedMerchantRoute><MerchantServiceSetup /></ProtectedMerchantRoute>} />
+
+            {/* Admin routes */}
+            <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+            <Route path="/admin/reports" element={<ProtectedAdminRoute><AdminReports /></ProtectedAdminRoute>} />
+            <Route path="/admin/businesses" element={<ProtectedAdminRoute><AdminBusinesses /></ProtectedAdminRoute>} />
+            <Route path="/admin/reviews" element={<ProtectedAdminRoute><AdminReviews /></ProtectedAdminRoute>} />
+            <Route path="/admin/photos" element={<ProtectedAdminRoute><AdminPhotos /></ProtectedAdminRoute>} />
+            <Route path="/admin/projects" element={<ProtectedAdminRoute><AdminProjects /></ProtectedAdminRoute>} />
+            <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

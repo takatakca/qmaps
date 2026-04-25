@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import ReviewReactionButtons from "@/components/social/ReviewReactionButtons";
 import { useReviewReactions } from "@/hooks/useReviewReactions";
+import ReportButton from "@/components/reports/ReportButton";
 
 interface BusinessReviewsTabProps {
   businessId: string;
@@ -161,7 +162,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
               )}
 
               {/* Reaction buttons */}
-              <div className="mt-3">
+              <div className="mt-3 flex items-center justify-between gap-2">
                 <ReviewReactionButtons
                   reviewId={review.id}
                   counts={byReview[review.id]?.counts || { useful: review.useful, funny: review.funny, cool: review.cool }}
@@ -179,6 +180,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                     }
                   }}
                 />
+                <ReportButton targetType="review" targetId={review.id} iconOnly size="icon" />
               </div>
             </div>
           );
