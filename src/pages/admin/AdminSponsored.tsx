@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
+import { Info } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import {
   SPONSORED_PLACEMENT_LABELS,
