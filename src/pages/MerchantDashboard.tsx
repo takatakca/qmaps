@@ -9,8 +9,11 @@ import MerchantOverview from "@/components/merchant/MerchantOverview";
 import MerchantPerformance from "@/components/merchant/MerchantPerformance";
 import MerchantEditForm from "@/components/merchant/MerchantEditForm";
 import MerchantReviews from "@/components/merchant/MerchantReviews";
-import { ArrowLeft, Plus, Store, LayoutDashboard, BarChart3, Settings, MessageSquare } from "lucide-react";
+import { ArrowLeft, Plus, Store, LayoutDashboard, BarChart3, Settings, MessageSquare, Sparkles } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
+import { planLabel } from "@/lib/billing";
+import { Badge } from "@/components/ui/badge";
 
 const MerchantDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -21,6 +24,7 @@ const MerchantDashboard = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "performance" | "edit" | "reviews">("overview");
+  const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
 
   useEffect(() => {
     if (authLoading) return;
