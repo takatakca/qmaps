@@ -13,6 +13,7 @@ import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
 import SimilarBusinessesSection from "@/components/recommendations/SimilarBusinessesSection";
 import { trackBusinessEvent } from "@/lib/analytics";
+import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
 import { slugify } from "@/lib/seo";
 import type { Tables } from "@/integrations/supabase/types";
