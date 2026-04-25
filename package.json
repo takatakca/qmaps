@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "launch:check": "node scripts/launch-checks.mjs"
+    "launch:check": "node scripts/launch-checks.mjs",
+    "launch:check:json": "node scripts/launch-checks.mjs --json"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
