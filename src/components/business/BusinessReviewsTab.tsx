@@ -147,23 +147,24 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
       )}
 
       {/* Rating distribution */}
-      <RatingDistribution reviews={reviews} avgRating={avgRating} reviewsCount={reviewsCount} />
+      <RatingDistribution reviews={visibleReviews} avgRating={avgRating} reviewsCount={reviewsCount} />
 
       {/* Filters */}
       <button className="flex items-center gap-1 text-sm text-foreground font-medium">
-        Voir {reviews.length > 0 ? reviews.length : ""} filtres <ChevronDown size={14} />
+        Voir {visibleReviews.length > 0 ? visibleReviews.length : ""} filtres <ChevronDown size={14} />
       </button>
 
       {/* Review list */}
       <div className="space-y-4">
-        {reviews.length === 0 && (
+        {visibleReviews.length === 0 && (
           <div className="text-center py-8">
             <p className="text-muted-foreground text-sm">Aucun avis pour le moment</p>
             <p className="text-muted-foreground text-xs mt-1">Soyez le premier à partager votre expérience!</p>
           </div>
         )}
-        {reviews.map((review) => {
+        {visibleReviews.map((review) => {
           const displayName = (review as any).profiles?.display_name || "Utilisateur";
+          const trust = trustByReview[review.id];
           return (
             <div key={review.id} className="border-b border-border pb-4 last:border-0">
               {/* User header */}
@@ -181,6 +182,16 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                 </div>
                 <button><MoreVertical size={16} className="text-muted-foreground" /></button>
               </div>
+
+              {/* Admin-only risk badge (never shown to public users or merchants) */}
+              {isAdmin && trust && (trust.risk_level !== "low" || trust.status !== "visible") && (
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                  <Badge variant={riskLevelTone(trust.risk_level)} className="gap-1">
+                    <ShieldAlert size={12} /> {formatRiskLevelAdmin(trust.risk_level)}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">{trust.status}</Badge>
+                </div>
+              )}
 
               {/* Rating + date */}
               <div className="flex items-center gap-2 mt-2">
