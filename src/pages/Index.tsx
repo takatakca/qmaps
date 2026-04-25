@@ -12,6 +12,7 @@ import RecommendedSection from "@/components/recommendations/RecommendedSection"
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { mapBusinessToCard } from "@/lib/business";
+import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
 
 const Index = () => {
@@ -34,6 +35,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="QMaps Montréal — Commerces, avis et pros locaux"
+        description="Découvrez des commerces, lisez des avis et trouvez des pros locaux à Montréal avec QMaps."
+        canonicalPath="/"
+      />
       {/* Header */}
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center justify-between mb-4">

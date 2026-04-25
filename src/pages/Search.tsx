@@ -11,6 +11,7 @@ import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { formatDistance } from "@/lib/geo";
 import { mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
+import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
@@ -98,6 +99,15 @@ const Search = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title={query ? `Recherche : ${query} — QMaps` : "Recherche de commerces — QMaps"}
+        description={
+          query
+            ? `Résultats pour « ${query} » sur QMaps Montréal.`
+            : "Recherchez des commerces, restaurants et services locaux à Montréal."
+        }
+        canonicalPath="/search"
+      />
       <div className="px-4 pt-4">
         <SearchBar initialValue={query} />
 

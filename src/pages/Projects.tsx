@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Truck, Droplets, Zap, Wrench, Car, HardHat, Sparkles, MoreHorizontal, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,6 +83,11 @@ const Projects = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="Projets QMaps — Trouvez des pros locaux à Montréal"
+        description="Décrivez votre projet et recevez des devis de professionnels locaux vérifiés à Montréal."
+        canonicalPath="/projects"
+      />
       <div className="px-4 pt-6">
         <div className="flex items-start justify-between gap-3">
           <div>
