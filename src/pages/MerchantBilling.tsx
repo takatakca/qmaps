@@ -123,31 +123,55 @@ const MerchantBilling = () => {
                 {subscription?.provider_customer_id ? (
                   <Button
                     className="w-full justify-between rounded-full"
+                    disabled={portalLoading}
                     onClick={async () => {
-                      const { data, error } = await supabase.functions.invoke(
-                        "create-merchant-billing-portal-session",
-                        { body: { business_id: businessId } }
-                      );
-                      const payload = data as { url?: string; error?: string; message?: string };
-                      if (!error && payload?.url) {
-                        window.location.href = payload.url;
-                        return;
-                      }
-                      if (payload?.error === "provider_not_configured") {
-                        toast({ title: "Bientôt disponible", description: payload.message });
-                      } else if (payload?.error === "no_customer") {
-                        navigate("/merchant/billing/plans");
-                      } else {
-                        toast({
-                          title: "Erreur",
-                          description: payload?.message || "Impossible d'ouvrir le portail.",
-                          variant: "destructive",
-                        });
+                      if (portalLoading) return;
+                      setPortalLoading(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke(
+                          "create-merchant-billing-portal-session",
+                          { body: { business_id: businessId } }
+                        );
+                        let payload = data as { url?: string; error?: string; message?: string } | null;
+                        if (error && !payload) {
+                          const ctx = (error as { context?: Response }).context;
+                          if (ctx && typeof ctx.json === "function") {
+                            try { payload = await ctx.json(); } catch { /* ignore */ }
+                          }
+                        }
+                        if (payload?.url) {
+                          window.location.href = payload.url;
+                          return;
+                        }
+                        const code = payload?.error;
+                        if (code === "provider_not_configured") {
+                          toast({ title: "Bientôt disponible", description: payload?.message });
+                        } else if (code === "no_customer") {
+                          toast({
+                            title: "Aucun abonnement actif",
+                            description: "Choisissez un plan pour commencer.",
+                          });
+                          navigate("/merchant/billing/plans");
+                        } else if (code === "forbidden") {
+                          toast({
+                            title: "Accès refusé",
+                            description: "Cette entreprise ne vous appartient pas.",
+                            variant: "destructive",
+                          });
+                        } else {
+                          toast({
+                            title: "Impossible d'ouvrir le portail",
+                            description: payload?.message || "Veuillez réessayer plus tard.",
+                            variant: "destructive",
+                          });
+                        }
+                      } finally {
+                        setPortalLoading(false);
                       }
                     }}
                   >
-                    <span>Gérer l'abonnement</span>
-                    <ChevronRight size={16} />
+                    <span>{portalLoading ? "Ouverture..." : "Gérer l'abonnement"}</span>
+                    {portalLoading ? <Loader2 size={16} className="animate-spin" /> : <ChevronRight size={16} />}
                   </Button>
                 ) : (
                   <Button
