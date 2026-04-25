@@ -471,4 +471,36 @@ const Metric = ({ label, value }: { label: string; value: number | string }) => 
   </div>
 );
 
+const DayActivityBars = ({
+  data,
+}: {
+  data: Array<{ day: string; impressions: number; clicks: number }>;
+}) => {
+  const max = Math.max(1, ...data.map((d) => d.impressions));
+  return (
+    <div className="space-y-1">
+      {data.map((d) => {
+        const pct = (d.impressions / max) * 100;
+        return (
+          <div key={d.day} className="flex items-center gap-2 text-[11px]">
+            <span className="w-14 shrink-0 text-muted-foreground tabular-nums">
+              {d.day.slice(5)}
+            </span>
+            <div className="flex-1 h-2 rounded bg-muted overflow-hidden">
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${pct}%` }}
+                aria-hidden
+              />
+            </div>
+            <span className="w-20 shrink-0 text-right text-muted-foreground tabular-nums">
+              {d.impressions} / {d.clicks}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 export default MerchantSponsored;
