@@ -137,6 +137,8 @@ const App = () => (
             <Route path="/merchant/photos" element={<ProtectedMerchantRoute><MerchantPhotos /></ProtectedMerchantRoute>} />
             <Route path="/merchant/inbox" element={<ProtectedMerchantRoute><MerchantInbox /></ProtectedMerchantRoute>} />
             <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/leads" element={<ProtectedMerchantRoute><MerchantLeads /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/services" element={<ProtectedMerchantRoute><MerchantServiceSetup /></ProtectedMerchantRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
