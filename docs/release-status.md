@@ -28,6 +28,13 @@ sign-off).
 
 For machine-readable JSON: `bun run launch:check:json`.
 For a generated markdown snapshot: `bun run release:status`.
+For the full release gate JSON: [`docs/go-no-go-report.generated.json`](./go-no-go-report.generated.json)
+(refresh with `bun run go:no-go:report`).
+
+For the launch owner handoff pack and final sign-off form, see:
+
+- [`docs/final-launch-handoff.md`](./final-launch-handoff.md)
+- [`docs/final-owner-signoff.md`](./final-owner-signoff.md)
 
 ## 3. Manual launch blockers
 
