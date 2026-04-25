@@ -83,19 +83,36 @@ for (const d of docs) {
 // Report
 const passed = results.filter((r) => r.ok).length;
 const failed = results.filter((r) => !r.ok);
+const total = results.length;
 
-const PAD = 50;
-console.log("\nQMAPS launch checks\n===================");
-for (const r of results) {
-  const icon = r.ok ? "✅" : "❌";
-  const detail = !r.ok && r.detail ? `  — ${r.detail}` : "";
-  console.log(`${icon}  ${r.name.padEnd(PAD)}${detail}`);
+const jsonMode = process.argv.includes("--json");
+
+if (jsonMode) {
+  const checks = results.map((r) => {
+    const out = { name: r.name, ok: r.ok };
+    if (r.detail) out.detail = r.detail;
+    return out;
+  });
+  process.stdout.write(
+    JSON.stringify({ passed, failed: failed.length, total, checks }, null, 2) + "\n",
+  );
+} else {
+  const PAD = 50;
+  console.log("\nQMAPS launch checks\n===================");
+  for (const r of results) {
+    const icon = r.ok ? "✅" : "❌";
+    const detail = !r.ok && r.detail ? `  — ${r.detail}` : "";
+    console.log(`${icon}  ${r.name.padEnd(PAD)}${detail}`);
+  }
+  console.log(
+    `\n${passed}/${total} passed${failed.length ? `, ${failed.length} failed` : ""}.`,
+  );
+  if (failed.length) {
+    console.error("\nLaunch checks failed. See ❌ rows above.\n");
+  }
 }
-console.log(
-  `\n${passed}/${results.length} passed${failed.length ? `, ${failed.length} failed` : ""}.`,
-);
 
 if (failed.length) {
-  console.error("\nLaunch checks failed. See ❌ rows above.\n");
   process.exit(1);
 }
+
