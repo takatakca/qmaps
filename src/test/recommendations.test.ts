@@ -133,3 +133,24 @@ describe("recommendations: applyRecommendationFallback (Phase 9D)", () => {
     expect(out).toHaveLength(3);
   });
 });
+
+describe("recommendations: applyRecommendationFallback ordering & dedup", () => {
+  it("orders local fallback by rating desc then reviews desc", () => {
+    const local = [
+      biz({ id: "a", avg_rating: 4.0, reviews_count: 100 }),
+      biz({ id: "b", avg_rating: 4.8, reviews_count: 5 }),
+      biz({ id: "c", avg_rating: 4.8, reviews_count: 50 }),
+    ];
+    const out = applyRecommendationFallback([], { localPool: local, limit: 3 });
+    expect(out.map((e) => e.business.id)).toEqual(["c", "b", "a"]);
+  });
+
+  it("never returns duplicate business ids across pools", () => {
+    const primary = [{ business: biz({ id: "dup" }), score: 5, reasonCodes: ["popular" as const] }];
+    const local = [biz({ id: "dup" }), biz({ id: "dup" })];
+    const global = [biz({ id: "dup" })];
+    const out = applyRecommendationFallback(primary, { localPool: local, globalPool: global, limit: 5 });
+    const ids = out.map((e) => e.business.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
