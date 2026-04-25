@@ -89,3 +89,47 @@ describe("recommendations: fallbackRecommendationOrder + normalizeCity", () => {
     expect(normalizeCity(null)).toBe("");
   });
 });
+
+import { applyRecommendationFallback } from "@/lib/recommendations";
+
+describe("recommendations: applyRecommendationFallback (Phase 9D)", () => {
+  it("returns primary entries when sufficient", () => {
+    const primary = [
+      { business: biz({ id: "p1" }), score: 50, reasonCodes: ["highly_rated" as const] },
+      { business: biz({ id: "p2" }), score: 40, reasonCodes: ["popular" as const] },
+    ];
+    const out = applyRecommendationFallback(primary, { limit: 2 });
+    expect(out.map((e) => e.business.id)).toEqual(["p1", "p2"]);
+  });
+
+  it("falls back to local pool when primary is empty", () => {
+    const local = [biz({ id: "l1", avg_rating: 4.9 }), biz({ id: "l2", avg_rating: 4.7 })];
+    const out = applyRecommendationFallback([], { localPool: local, limit: 2 });
+    expect(out).toHaveLength(2);
+    expect(out[0].reasonCodes).toContain("fallback_top_rated");
+  });
+
+  it("falls back to global pool when local also empty", () => {
+    const global = [biz({ id: "g1", avg_rating: 5.0 })];
+    const out = applyRecommendationFallback([], { globalPool: global, limit: 5 });
+    expect(out.map((e) => e.business.id)).toEqual(["g1"]);
+  });
+
+  it("deduplicates ids across primary, local, and global pools", () => {
+    const primary = [{ business: biz({ id: "x1" }), score: 10, reasonCodes: ["popular" as const] }];
+    const local = [biz({ id: "x1" }), biz({ id: "x2" })];
+    const global = [biz({ id: "x2" }), biz({ id: "x3" })];
+    const out = applyRecommendationFallback(primary, { localPool: local, globalPool: global, limit: 5 });
+    expect(out.map((e) => e.business.id)).toEqual(["x1", "x2", "x3"]);
+  });
+
+  it("respects limit", () => {
+    const primary = Array.from({ length: 10 }).map((_, i) => ({
+      business: biz({ id: `p${i}` }),
+      score: 10 - i,
+      reasonCodes: ["popular" as const],
+    }));
+    const out = applyRecommendationFallback(primary, { limit: 3 });
+    expect(out).toHaveLength(3);
+  });
+});

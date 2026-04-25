@@ -13,6 +13,7 @@ import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
 import SimilarBusinessesSection from "@/components/recommendations/SimilarBusinessesSection";
 import { trackBusinessEvent } from "@/lib/analytics";
+import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
 import { slugify } from "@/lib/seo";
 import type { Tables } from "@/integrations/supabase/types";
@@ -59,16 +60,40 @@ const BusinessDetail = () => {
     if (id) trackBusinessEvent(id, "profile_view", { source: "business_detail" });
   }, [id]);
 
+  // Phase 9D — recommendation signal: business_view
+  useEffect(() => {
+    if (business?.id) {
+      trackRecommendationEvent({
+        business_id: business.id,
+        event_type: "business_view",
+        source: "business_detail",
+        city: business.city ?? null,
+      });
+    }
+  }, [business?.id, business?.city]);
+
   const handleBookmark = async () => {
     if (!user) { navigate("/auth"); return; }
     if (!id) return;
     if (bookmarked) {
       await supabase.from("bookmarks").delete().eq("user_id", user.id).eq("business_id", id);
       setBookmarked(false);
+      trackRecommendationEvent({
+        business_id: id,
+        event_type: "bookmark_remove",
+        source: "business_detail",
+        city: business?.city ?? null,
+      });
     } else {
       await supabase.from("bookmarks").insert({ user_id: user.id, business_id: id });
       setBookmarked(true);
       trackBusinessEvent(id, "save_click", { source: "business_detail" });
+      trackRecommendationEvent({
+        business_id: id,
+        event_type: "bookmark_add",
+        source: "business_detail",
+        city: business?.city ?? null,
+      });
     }
   };
 

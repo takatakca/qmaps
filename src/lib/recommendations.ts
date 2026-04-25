@@ -241,3 +241,51 @@ export const rankRecommendations = <T extends ScoringBusiness>(
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, limit);
 };
+
+/**
+ * Phase 9D — Fallback chain helper.
+ *
+ * Given a primary list (already-scored recommendations) and optional pools of
+ * local + global businesses, return at least `limit` items by walking the
+ * fallback chain: primary → local top-rated → global top-rated. Pure function,
+ * no side effects, never throws. Items are deduplicated by id.
+ */
+export const applyRecommendationFallback = <T extends ScoringBusiness>(
+  primary: Array<{ business: T; score: number; reasonCodes: RecommendationReasonCode[] }>,
+  options: {
+    localPool?: T[];
+    globalPool?: T[];
+    limit?: number;
+  } = {}
+): Array<{ business: T; score: number; reasonCodes: RecommendationReasonCode[] }> => {
+  const limit = options.limit ?? 8;
+  const seen = new Set<string>();
+  const out: Array<{ business: T; score: number; reasonCodes: RecommendationReasonCode[] }> = [];
+
+  for (const entry of primary ?? []) {
+    if (!entry?.business?.id || seen.has(entry.business.id)) continue;
+    seen.add(entry.business.id);
+    out.push(entry);
+    if (out.length >= limit) return out;
+  }
+
+  if (out.length < limit && options.localPool?.length) {
+    for (const b of fallbackRecommendationOrder(options.localPool)) {
+      if (!b?.id || seen.has(b.id)) continue;
+      seen.add(b.id);
+      out.push({ business: b, score: 0, reasonCodes: ["fallback_top_rated"] });
+      if (out.length >= limit) return out;
+    }
+  }
+
+  if (out.length < limit && options.globalPool?.length) {
+    for (const b of fallbackRecommendationOrder(options.globalPool)) {
+      if (!b?.id || seen.has(b.id)) continue;
+      seen.add(b.id);
+      out.push({ business: b, score: 0, reasonCodes: ["fallback_top_rated"] });
+      if (out.length >= limit) return out;
+    }
+  }
+
+  return out;
+};

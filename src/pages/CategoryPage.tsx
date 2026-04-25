@@ -10,6 +10,7 @@ import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityFromSlug } from "@/lib/seo";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
+import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import type { Tables } from "@/integrations/supabase/types";
 
 const CategoryPage = () => {
@@ -23,6 +24,20 @@ const CategoryPage = () => {
     city: cityLabel,
     limit: 4,
   });
+
+  // Phase 9D — fire one category_view event tied to the first business listed
+  useEffect(() => {
+    const first = businesses[0];
+    if (!first || !category?.id) return;
+    trackRecommendationEvent({
+      business_id: first.id,
+      event_type: "category_view",
+      source: "category_page",
+      category_id: category.id,
+      city: cityLabel ?? null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businesses[0]?.id, category?.id, cityLabel]);
 
   useEffect(() => {
     let cancelled = false;

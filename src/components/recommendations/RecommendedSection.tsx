@@ -30,7 +30,12 @@ interface Props {
   showReasonChips?: boolean;
   emptyHint?: string;
   loading?: boolean;
+  /** Friendly explanation shown under the title. Phase 9D. */
+  helperText?: string;
 }
+
+const DEFAULT_HELPER_TEXT =
+  "Les recommandations s'améliorent à mesure que vous consultez, sauvegardez et notez des commerces.";
 
 const RecommendedSection = ({
   title,
@@ -40,6 +45,7 @@ const RecommendedSection = ({
   showReasonChips = true,
   emptyHint,
   loading,
+  helperText = DEFAULT_HELPER_TEXT,
 }: Props) => {
   const { user } = useAuth();
   const seen = useRef<Set<string>>(new Set());
@@ -134,6 +140,9 @@ const RecommendedSection = ({
       <div>
         <h2 className="font-heading text-lg font-bold text-foreground">{title}</h2>
         {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        {helperText && (
+          <p className="text-[11px] text-muted-foreground/80 mt-1">{helperText}</p>
+        )}
       </div>
       <div className="space-y-3">
         {visible.map((it) => (
@@ -150,10 +159,12 @@ const RecommendedSection = ({
               <button
                 type="button"
                 onClick={() => handleDismiss(it)}
-                aria-label="Masquer cette recommandation"
-                className="text-muted-foreground hover:text-foreground p-1"
+                aria-label="Pas intéressé"
+                title="Pas intéressé"
+                className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground p-1"
               >
-                <X size={14} />
+                <X size={12} />
+                <span>Pas intéressé</span>
               </button>
             </div>
           </div>
