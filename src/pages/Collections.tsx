@@ -164,6 +164,18 @@ const Collections = () => {
         )}
       </div>
 
+      {showRecs && recItems.length > 0 && (
+        <div className="px-4 pb-6">
+          <RecommendedSection
+            title="Vous pourriez aussi aimer"
+            subtitle="Inspiré de vos commerces enregistrés"
+            source="collections_because_you_saved"
+            items={recItems.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
+            loading={recLoading}
+          />
+        </div>
+      )}
+
       <BottomNav />
     </div>
   );

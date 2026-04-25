@@ -6,6 +6,8 @@ import BottomNav from "@/components/BottomNav";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
 import SuggestedUsersList from "@/components/social/SuggestedUsersList";
 import { formatRelativeTime } from "@/lib/social";
+import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 
 type Tab = "all" | "friends" | "nearby";
 
@@ -13,6 +15,7 @@ const Activity = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("all");
   const { all, friends, nearby, loading } = useActivityFeed();
+  const { trending, loading: recLoading } = useRecommendedBusinesses({ limit: 4 });
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "all", label: "TOUT" },
@@ -58,9 +61,18 @@ const Activity = () => {
       {loading ? (
         <p className="text-sm text-muted-foreground text-center py-16">Chargement...</p>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 px-8">
-          <MapPin size={40} className="text-muted-foreground mb-4" />
-          <p className="text-sm text-muted-foreground text-center">Aucune activité disponible pour cet onglet.</p>
+        <div className="px-4 py-10 space-y-6">
+          <div className="flex flex-col items-center justify-center">
+            <MapPin size={40} className="text-muted-foreground mb-4" />
+            <p className="text-sm text-muted-foreground text-center">Aucune activité disponible pour cet onglet.</p>
+          </div>
+          <RecommendedSection
+            title="Tendances de la communauté"
+            subtitle="Suggéré pour vous en attendant"
+            source="activity_empty_trending"
+            items={trending.slice(0, 4).map((b) => ({ business: b as any, reasonCodes: ["popular"] }))}
+            loading={recLoading}
+          />
         </div>
       ) : (
         <div className="divide-y divide-border">
