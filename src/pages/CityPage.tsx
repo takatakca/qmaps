@@ -21,6 +21,28 @@ const CityPage = () => {
   const [loading, setLoading] = useState(true);
   const { recommended, loading: recLoading } = useRecommendedBusinesses({ city: cityLabel, limit: 4 });
 
+  // Phase 9D — track city_view once per city
+  useEffect(() => {
+    if (!cityLabel) return;
+    // Use a sentinel business_id of "city" since events table requires non-null business_id;
+    // skip tracking if we can't tie it to a real business. Lightweight surrogate: only track
+    // once a business from this city loads.
+    // (deferred to per-business effect below)
+  }, [cityLabel]);
+
+  // Fire one city_view event tied to the first listed business so RLS-safe insert succeeds.
+  useEffect(() => {
+    const first = businesses[0];
+    if (!first || !cityLabel) return;
+    trackRecommendationEvent({
+      business_id: first.id,
+      event_type: "city_view",
+      source: "city_page",
+      city: cityLabel,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businesses[0]?.id, cityLabel]);
+
   useEffect(() => {
     let cancelled = false;
     void (async () => {
