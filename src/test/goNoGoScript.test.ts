@@ -37,10 +37,11 @@ describe("scripts/go-no-go.mjs", () => {
     const out = join(dir, "report.json");
     try {
       try {
-        execSync(`node ${SCRIPT} --out ${out} --fail-fast`, {
+        execSync(`node ${SCRIPT} --out ${out}`, {
           cwd: ROOT,
           stdio: "pipe",
-          timeout: 120_000,
+          timeout: 60_000,
+          env: { ...process.env, GO_NO_GO_STEPS: "Launch checks" },
         });
       } catch {
         // Non-zero exit is fine; we only need the JSON artifact.

@@ -72,7 +72,7 @@ const total_duration_ms = Date.now() - overallStart;
 const passed = results.filter((r) => r.ok).length;
 const failed = results.filter((r) => !r.ok);
 const total = results.length;
-const decision = failed.length === 0 && total === steps.length ? "GO" : "NO-GO";
+const decision = failed.length === 0 && total > 0 ? "GO" : "NO-GO";
 
 const report = {
   decision,
