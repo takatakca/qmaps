@@ -21,6 +21,7 @@ import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import MerchantLeads from "./pages/MerchantLeads";
 import MerchantServiceSetup from "./pages/MerchantServiceSetup";
+import MerchantAnalytics from "./pages/MerchantAnalytics";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import MerchantAuth from "./pages/MerchantAuth";
@@ -147,6 +148,7 @@ const App = () => (
             <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
             <Route path="/merchant/leads" element={<ProtectedMerchantRoute><MerchantLeads /></ProtectedMerchantRoute>} />
             <Route path="/merchant/services" element={<ProtectedMerchantRoute><MerchantServiceSetup /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/analytics" element={<ProtectedMerchantRoute><MerchantAnalytics /></ProtectedMerchantRoute>} />
 
             {/* Admin routes */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
