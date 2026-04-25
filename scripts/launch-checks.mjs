@@ -88,7 +88,7 @@ const PAD = 50;
 console.log("\nQMAPS launch checks\n===================");
 for (const r of results) {
   const icon = r.ok ? "✅" : "❌";
-  const detail = r.detail ? `  — ${r.detail}` : "";
+  const detail = !r.ok && r.detail ? `  — ${r.detail}` : "";
   console.log(`${icon}  ${r.name.padEnd(PAD)}${detail}`);
 }
 console.log(
