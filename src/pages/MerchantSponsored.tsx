@@ -574,23 +574,27 @@ const Metric = ({
 }: {
   label: string;
   value: number | string;
-  trend?: number | null;
+  trend?: number | "new" | null;
   tooltip?: string;
 }) => {
-  const TrendIcon =
-    trend === null || trend === undefined
+  const isNew = trend === "new";
+  const numericTrend = typeof trend === "number" ? trend : null;
+  const TrendIcon = isNew
+    ? TrendingUp
+    : numericTrend === null
       ? null
-      : trend > 0
+      : numericTrend > 0
         ? TrendingUp
-        : trend < 0
+        : numericTrend < 0
           ? TrendingDown
           : Minus;
-  const trendClass =
-    trend === null || trend === undefined
+  const trendClass = isNew
+    ? "text-emerald-600 dark:text-emerald-400"
+    : numericTrend === null
       ? "text-muted-foreground"
-      : trend > 0
+      : numericTrend > 0
         ? "text-emerald-600 dark:text-emerald-400"
-        : trend < 0
+        : numericTrend < 0
           ? "text-destructive"
           : "text-muted-foreground";
   return (
@@ -622,8 +626,9 @@ const Metric = ({
           className={`text-[10px] mt-0.5 flex items-center justify-center gap-0.5 tabular-nums ${trendClass}`}
         >
           <TrendIcon size={10} />
-          {trend! > 0 ? "+" : ""}
-          {trend!.toFixed(0)}%
+          {isNew
+            ? "nouveau"
+            : `${numericTrend! > 0 ? "+" : ""}${numericTrend!.toFixed(0)}%`}
         </p>
       )}
     </div>
