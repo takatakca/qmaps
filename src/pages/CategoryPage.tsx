@@ -23,6 +23,8 @@ const CategoryPage = () => {
     city: cityLabel,
     limit: 4,
   });
+
+  useEffect(() => {
     let cancelled = false;
     void (async () => {
       setLoading(true);
