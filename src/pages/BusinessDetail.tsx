@@ -11,6 +11,7 @@ import BusinessInfoTab from "@/components/business/BusinessInfoTab";
 import BusinessReviewsTab from "@/components/business/BusinessReviewsTab";
 import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
+import { trackBusinessEvent } from "@/lib/analytics";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
@@ -50,6 +51,11 @@ const BusinessDetail = () => {
 
   useEffect(() => { fetchData(); }, [id, user]);
 
+  // Track profile view once per business id
+  useEffect(() => {
+    if (id) trackBusinessEvent(id, "profile_view", { source: "business_detail" });
+  }, [id]);
+
   const handleBookmark = async () => {
     if (!user) { navigate("/auth"); return; }
     if (!id) return;
@@ -59,6 +65,7 @@ const BusinessDetail = () => {
     } else {
       await supabase.from("bookmarks").insert({ user_id: user.id, business_id: id });
       setBookmarked(true);
+      trackBusinessEvent(id, "save_click", { source: "business_detail" });
     }
   };
 
