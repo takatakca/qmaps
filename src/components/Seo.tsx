@@ -77,16 +77,22 @@ const Seo = ({
     upsertMeta("meta[property='og:type']", "property", "og:type", type);
     upsertMeta("meta[property='og:site_name']", "property", "og:site_name", SITE_NAME);
 
-    if (image) {
-      upsertMeta("meta[property='og:image']", "property", "og:image", image);
-      upsertMeta("meta[name='twitter:image']", "name", "twitter:image", image);
-    }
+    const ogImage = image || DEFAULT_OG_IMAGE;
+    upsertMeta("meta[property='og:image']", "property", "og:image", ogImage);
+    upsertMeta("meta[name='twitter:image']", "name", "twitter:image", ogImage);
 
     if (canonicalPath) {
       const url = canonicalPath.startsWith("http") ? canonicalPath : `${origin}${canonicalPath}`;
       upsertCanonical(url);
       upsertMeta("meta[property='og:url']", "property", "og:url", url);
     }
+
+    upsertMeta(
+      "meta[name='robots']",
+      "name",
+      "robots",
+      noindex ? "noindex,follow" : "index,follow"
+    );
 
     if (jsonLd) {
       upsertJsonLd(jsonLdId, jsonLd);
@@ -98,7 +104,7 @@ const Seo = ({
         el?.remove();
       }
     };
-  }, [title, description, canonicalPath, image, type, jsonLd, jsonLdId]);
+  }, [title, description, canonicalPath, image, type, jsonLd, jsonLdId, noindex]);
 
   return null;
 };
