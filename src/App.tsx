@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedMerchantRoute from "@/components/ProtectedMerchantRoute";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
+import OfflineBanner from "@/components/OfflineBanner";
 
 // Eager: critical public pages
 import Index from "./pages/Index";
@@ -93,8 +94,11 @@ const Sitemap = lazy(() => import("./pages/Sitemap"));
 const queryClient = new QueryClient();
 
 const RouteFallback = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" aria-label="Chargement" />
+  <div className="min-h-screen bg-background pb-safe pt-safe max-w-lg mx-auto px-4 py-6 space-y-3" role="status" aria-label="Chargement de la page">
+    <div className="h-8 w-2/3 rounded-md bg-muted animate-pulse" />
+    <div className="h-44 w-full rounded-xl bg-muted animate-pulse" />
+    <div className="h-24 w-full rounded-xl bg-muted animate-pulse" />
+    <div className="h-24 w-full rounded-xl bg-muted animate-pulse" />
   </div>
 );
 
@@ -104,6 +108,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <OfflineBanner />
         <BrowserRouter>
           <Suspense fallback={<RouteFallback />}>
             <Routes>

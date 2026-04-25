@@ -30,7 +30,7 @@ const MerchantBottomNav = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border pb-safe">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
@@ -39,7 +39,9 @@ const MerchantBottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 min-w-[56px] transition-colors ${
+              aria-label={tab.label}
+              aria-current={active ? "page" : undefined}
+              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 min-w-[56px] min-h-[44px] transition-colors ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >
