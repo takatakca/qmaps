@@ -10,6 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   rankRecommendations,
   fallbackRecommendationOrder,
+  applyRecommendationFallback,
+  normalizeCity,
   type RecommendationReasonCode,
   type ScoringContext,
 } from "@/lib/recommendations";
