@@ -157,6 +157,18 @@ Deno.serve(async (req) => {
         break;
     }
 
+    // Build a compact, safe metadata payload — never the full Stripe object.
+    const safeMetadata: Record<string, unknown> = {
+      plan,
+      raw_type: event.type,
+    };
+    if (event.type.startsWith("invoice.")) {
+      const inv = event.data.object as Stripe.Invoice;
+      safeMetadata.amount_due = inv.amount_due;
+      safeMetadata.amount_paid = inv.amount_paid;
+      safeMetadata.currency = inv.currency;
+    }
+
     if (businessId) {
       await admin.from("merchant_billing_events").insert({
         business_id: businessId,
@@ -164,7 +176,7 @@ Deno.serve(async (req) => {
         event_type: event.type,
         provider: "stripe",
         provider_event_id: event.id,
-        metadata: { plan, raw_type: event.type } as never,
+        metadata: safeMetadata as never,
       });
     } else {
       console.warn("Webhook event without business_id metadata", event.id, event.type);
