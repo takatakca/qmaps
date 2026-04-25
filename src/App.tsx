@@ -26,6 +26,7 @@ const AdminProjects = lazy(() => import("./pages/admin/AdminProjects"));
 const AdminSponsored = lazy(() => import("./pages/admin/AdminSponsored"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminReviewModeration = lazy(() => import("./pages/admin/AdminReviewModeration"));
+const AdminAccountDeletions = lazy(() => import("./pages/admin/AdminAccountDeletions"));
 
 // Lazy: merchant
 const MerchantSponsored = lazy(() => import("./pages/MerchantSponsored"));
@@ -87,6 +88,7 @@ const ClearHistory = lazy(() => import("./pages/settings/ClearHistory"));
 const DistanceUnits = lazy(() => import("./pages/settings/DistanceUnits"));
 const PrivacySettings = lazy(() => import("./pages/settings/PrivacySettings"));
 const AppPreferences = lazy(() => import("./pages/settings/AppPreferences"));
+const DeleteAccount = lazy(() => import("./pages/settings/DeleteAccount"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
@@ -153,6 +155,7 @@ const App = () => (
               <Route path="/settings/distance-units" element={<DistanceUnits />} />
               <Route path="/settings/privacy" element={<PrivacySettings />} />
               <Route path="/settings/app-preferences" element={<AppPreferences />} />
+              <Route path="/settings/delete-account" element={<DeleteAccount />} />
 
               {/* Merchant auth (public) */}
               <Route path="/merchant/login" element={<MerchantAuth />} />
@@ -194,6 +197,7 @@ const App = () => (
               <Route path="/admin/sponsored" element={<ProtectedAdminRoute><AdminSponsored /></ProtectedAdminRoute>} />
               <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
               <Route path="/admin/review-moderation" element={<ProtectedAdminRoute><AdminReviewModeration /></ProtectedAdminRoute>} />
+              <Route path="/admin/account-deletions" element={<ProtectedAdminRoute><AdminAccountDeletions /></ProtectedAdminRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
