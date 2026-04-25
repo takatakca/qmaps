@@ -124,7 +124,6 @@ const More = () => {
             </div>
           </div>
         </div>
-      </div>
 
         <div>
           <h2 className="font-heading font-semibold text-foreground mb-2 text-sm">Légal & support</h2>
