@@ -102,6 +102,7 @@ const Projects = () => {
             </div>
           </div>
         )}
+        <h2 className="font-heading text-lg font-bold text-foreground mt-8 mb-4">Quoi de neuf sur votre liste?</h2>
         <div className="space-y-4">
           {projectItems.map(item => (
             <div key={item.name} className="flex items-center gap-4">
@@ -112,8 +113,8 @@ const Projects = () => {
                 <p className="text-sm font-semibold text-foreground">{item.name}</p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" className="rounded-full text-xs h-8">Commencer</Button>
-                <Button size="sm" variant="outline" className="rounded-full text-xs h-8">Ajouter au plan</Button>
+                <Button size="sm" className="rounded-full text-xs h-8" onClick={() => setStartOpen(true)}>Commencer</Button>
+                <Button size="sm" variant="outline" className="rounded-full text-xs h-8" onClick={() => setStartOpen(true)}>Ajouter au plan</Button>
               </div>
             </div>
           ))}
