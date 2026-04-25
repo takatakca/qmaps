@@ -152,7 +152,7 @@ const Projects = () => {
       </div>
 
       <BottomNav />
-      <StartProjectSheet open={startOpen} onOpenChange={setStartOpen} />
+      <StartProjectSheet open={startOpen} onOpenChange={setStartOpen} defaultCategoryId={presetCategoryId} />
     </div>
   );
 };
