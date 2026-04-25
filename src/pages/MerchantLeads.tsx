@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Inbox } from "lucide-react";
+import { ArrowLeft, Inbox, MapPin, Clock, CheckCheck } from "lucide-react";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMerchantLeads } from "@/hooks/useMerchantLeads";
 import SubmitQuoteSheet from "@/components/projects/SubmitQuoteSheet";
+
+const formatDate = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleDateString("fr-CA", { day: "numeric", month: "short" });
+  } catch { return ""; }
+};
 
 const MerchantLeads = () => {
   const navigate = useNavigate();
@@ -30,7 +36,7 @@ const MerchantLeads = () => {
             <Inbox size={40} className="mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground">Aucune demande pour le moment.</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Configurez vos catégories de service pour recevoir des demandes.
+              Configurez vos catégories et zones pour recevoir des demandes ciblées.
             </p>
             <Button className="mt-4" onClick={() => navigate("/merchant/services")}>
               Configurer mes services
@@ -42,24 +48,49 @@ const MerchantLeads = () => {
               <Card key={lead.id} className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold text-sm text-foreground flex-1">{lead.title}</p>
-                  <Badge variant="secondary" className="text-[10px] capitalize">{lead.urgency}</Badge>
+                  <Badge variant="secondary" className="text-[10px] capitalize shrink-0">{lead.urgency}</Badge>
                 </div>
-                {lead.description && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{lead.description}</p>
+
+                {lead.category_name && (
+                  <Badge variant="outline" className="text-[10px] mt-1.5">{lead.category_name}</Badge>
                 )}
-                <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-muted-foreground">
-                  {lead.city && <span>{lead.city}</span>}
+
+                {lead.description && (
+                  <p className="text-xs text-muted-foreground mt-2 line-clamp-3">{lead.description}</p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-muted-foreground">
+                  {lead.city && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin size={10} /> {lead.city}
+                    </span>
+                  )}
                   {(lead.budget_min || lead.budget_max) && (
                     <span>{lead.budget_min ?? "?"}–{lead.budget_max ?? "?"} $</span>
                   )}
+                  <span className="inline-flex items-center gap-1">
+                    <Clock size={10} /> {formatDate(lead.created_at)}
+                  </span>
                 </div>
-                <Button
-                  size="sm"
-                  className="mt-3 rounded-full"
-                  onClick={() => setQuoteFor(lead.id)}
-                >
-                  Envoyer un devis
-                </Button>
+
+                {lead.already_quoted ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-3 rounded-full gap-1"
+                    disabled
+                  >
+                    <CheckCheck size={14} /> Devis envoyé
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="mt-3 rounded-full"
+                    onClick={() => setQuoteFor(lead.id)}
+                  >
+                    Envoyer un devis
+                  </Button>
+                )}
               </Card>
             ))}
           </div>
