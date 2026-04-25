@@ -640,7 +640,7 @@ const DayActivityBars = ({
         return (
           <div key={d.day} className="flex items-center gap-2 text-[11px]">
             <span className="w-14 shrink-0 text-muted-foreground tabular-nums">
-              {d.day.slice(5)}
+              {formatDayLabel(d.day)}
             </span>
             <div className="flex-1 h-2 rounded bg-muted overflow-hidden">
               <div
