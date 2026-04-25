@@ -205,4 +205,31 @@ const AdminSponsored = () => {
   );
 };
 
+const CampaignMetricsRow = ({ campaignId }: { campaignId: string }) => {
+  const m = useSponsoredCampaignMetrics(campaignId, "30d");
+  if (m.loading) return null;
+  return (
+    <div className="mt-3 rounded-lg bg-muted/40 p-2">
+      <div className="flex items-center gap-3 text-xs">
+        <span><b className="font-heading">{m.impressions}</b> imp</span>
+        <span><b className="font-heading">{m.clicks}</b> clic</span>
+        <span><b className="font-heading">{(m.ctr * 100).toFixed(1)}%</b> CTR</span>
+        <span className="text-muted-foreground">· 30 j</span>
+      </div>
+      {m.byPlacement.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {m.byPlacement.map((p) => (
+            <span
+              key={p.placement}
+              className="text-[10px] px-1.5 py-0.5 rounded-full bg-card border border-border"
+            >
+              {SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement}: {p.impressions}/{p.clicks}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default AdminSponsored;
