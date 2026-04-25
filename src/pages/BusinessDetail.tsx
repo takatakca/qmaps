@@ -11,6 +11,7 @@ import BusinessInfoTab from "@/components/business/BusinessInfoTab";
 import BusinessReviewsTab from "@/components/business/BusinessReviewsTab";
 import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
+import SimilarBusinessesSection from "@/components/recommendations/SimilarBusinessesSection";
 import { trackBusinessEvent } from "@/lib/analytics";
 import Seo from "@/components/Seo";
 import { slugify } from "@/lib/seo";
@@ -213,6 +214,9 @@ const BusinessDetail = () => {
 
       {/* Vibe section */}
       <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
+
+      {/* Similar businesses (Phase 9F) */}
+      <SimilarBusinessesSection businessId={business.id} />
 
       {/* Nearby */}
       <BusinessNearbySection currentBusinessId={business.id} city={business.city} isClaimed={business.is_claimed} />
