@@ -28,6 +28,9 @@ jobs:
       - name: Test
         run: bun run test
 
+      - name: Launch checks
+        run: bun run launch:check
+
       - name: Build
         run: bun run build
         env:
