@@ -59,6 +59,14 @@ const AdminSponsored = () => {
   }, [filter]);
 
   const updateStatus = async (id: string, status: SponsoredStatus) => {
+    if (status === "rejected" && !(notes[id] && notes[id].trim())) {
+      toast({
+        title: "Note requise",
+        description: "Ajoutez une note expliquant le rejet avant de rejeter la campagne.",
+        variant: "destructive",
+      });
+      return;
+    }
     const patch: any = {
       status,
       reviewed_at: new Date().toISOString(),
