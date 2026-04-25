@@ -1,32 +1,32 @@
 {
-  "decision": "NO-GO",
-  "passed": 3,
-  "failed": 1,
+  "decision": "GO",
+  "passed": 4,
+  "failed": 0,
   "total": 4,
-  "duration_ms": 159304,
+  "duration_ms": 22360,
   "steps": [
     {
       "name": "Launch checks",
       "ok": true,
-      "duration_ms": 106,
+      "duration_ms": 145,
       "command": "bun run launch:check"
     },
     {
       "name": "Tests",
-      "ok": false,
-      "duration_ms": 129497,
+      "ok": true,
+      "duration_ms": 7193,
       "command": "bunx vitest run"
     },
     {
       "name": "Build",
       "ok": true,
-      "duration_ms": 29316,
+      "duration_ms": 14777,
       "command": "bun run build"
     },
     {
       "name": "Release status snapshot",
       "ok": true,
-      "duration_ms": 385,
+      "duration_ms": 245,
       "command": "bun run release:status:file"
     }
   ]
