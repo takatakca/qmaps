@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import {
   SPONSORED_PLACEMENT_LABELS,
+  SPONSORED_RANGE_LABELS,
   SPONSORED_STATUS_LABELS,
+  formatCtr,
   type SponsoredPlacement,
   type SponsoredStatus,
 } from "@/lib/sponsored";
@@ -208,26 +210,31 @@ const AdminSponsored = () => {
 const CampaignMetricsRow = ({ campaignId }: { campaignId: string }) => {
   const m = useSponsoredCampaignMetrics(campaignId, "30d");
   if (m.loading) return null;
+  const hasEvents = m.impressions > 0 || m.clicks > 0;
   return (
     <div className="mt-3 rounded-lg bg-muted/40 p-2">
       <div className="flex items-center gap-3 text-xs">
         <span><b className="font-heading">{m.impressions}</b> imp</span>
         <span><b className="font-heading">{m.clicks}</b> clic</span>
-        <span><b className="font-heading">{(m.ctr * 100).toFixed(1)}%</b> CTR</span>
-        <span className="text-muted-foreground">· 30 j</span>
+        <span><b className="font-heading">{formatCtr(m.impressions, m.clicks)}</b> CTR</span>
+        <span className="text-muted-foreground">· {SPONSORED_RANGE_LABELS["30d"]}</span>
       </div>
-      {m.byPlacement.length > 0 && (
+      {!hasEvents ? (
+        <p className="text-[10px] text-muted-foreground mt-1">
+          Aucun événement sur cette période.
+        </p>
+      ) : m.byPlacement.length > 0 ? (
         <div className="flex flex-wrap gap-1 mt-2">
           {m.byPlacement.map((p) => (
             <span
               key={p.placement}
               className="text-[10px] px-1.5 py-0.5 rounded-full bg-card border border-border"
             >
-              {SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement}: {p.impressions}/{p.clicks}
+              {SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement}: {p.impressions}/{p.clicks} · {formatCtr(p.impressions, p.clicks)}
             </span>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

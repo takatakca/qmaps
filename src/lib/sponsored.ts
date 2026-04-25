@@ -86,6 +86,18 @@ export const trackSponsoredEvent = (
   })();
 };
 
+/** Format CTR: "—" when no impressions, else one-decimal percent. */
+export const formatCtr = (impressions: number, clicks: number): string => {
+  if (!impressions || impressions <= 0) return "—";
+  return `${((clicks / impressions) * 100).toFixed(1)}%`;
+};
+
+export const SPONSORED_RANGE_LABELS: Record<"7d" | "30d" | "all", string> = {
+  "7d": "Derniers 7 jours",
+  "30d": "Derniers 30 jours",
+  all: "Toute la période",
+};
+
 export const SPONSORED_STATUS_LABELS: Record<SponsoredStatus, string> = {
   draft: "Brouillon",
   pending_review: "En attente",
