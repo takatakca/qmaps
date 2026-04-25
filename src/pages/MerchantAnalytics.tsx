@@ -57,7 +57,7 @@ const MerchantAnalytics = () => {
   const { events, totals, loading } = useMerchantAnalytics(businessId, days);
 
   const totalEvents = useMemo(
-    () => Object.values(totals as Record<string, number>).reduce((a, b) => a + (b || 0), 0),
+    () => Object.values(totals as unknown as Record<string, number>).reduce((a, b) => a + (b || 0), 0),
     [totals]
   );
 
