@@ -152,12 +152,17 @@ export const useRecommendedBusinesses = (
   const recommended = useMemo(() => {
     if (!businesses.length) return [];
     const ranked = rankRecommendations(businesses, ctx, limit);
-    if (ranked.length > 0) return ranked;
-    // Defensive fallback
-    return fallbackRecommendationOrder(businesses)
-      .slice(0, limit)
-      .map((b) => ({ business: b, score: 0, reasonCodes: ["fallback_top_rated" as RecommendationReasonCode] }));
-  }, [businesses, ctx, limit]);
+    // Phase 9E — guarantee non-empty via fallback chain (local city → global).
+    const cityNeedle = cityHint ? normalizeCity(cityHint) : null;
+    const localPool = cityNeedle
+      ? businesses.filter((b) => normalizeCity(b.city) === cityNeedle)
+      : [];
+    return applyRecommendationFallback(ranked, {
+      localPool,
+      globalPool: businesses,
+      limit,
+    });
+  }, [businesses, ctx, limit, cityHint]);
 
   const trending = useMemo(() => {
     return [...businesses]
