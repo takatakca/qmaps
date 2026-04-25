@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
-import { PLANS, type PlanKey } from "@/lib/billing";
+import { PLANS, type PlanDefinition } from "@/lib/billing";
 import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
 
-const ctaLabel = (cta: typeof PLANS[number]["cta"]): string => {
+const ctaLabel = (cta: PlanDefinition["cta"]): string => {
   switch (cta) {
     case "current":
       return "Plan actuel";
@@ -27,7 +27,7 @@ const ctaLabel = (cta: typeof PLANS[number]["cta"]): string => {
 const MerchantBillingPlans = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
+  const [businesses, setBusinesses] = useState<Pick<Tables<"businesses">, "id" | "name">[]>([]);
   const [selectedBizId, setSelectedBizId] = useState<string | null>(null);
   const { plan: currentPlan, loading: subLoading } = useMerchantSubscription(selectedBizId);
 
@@ -38,7 +38,7 @@ const MerchantBillingPlans = () => {
         .from("businesses")
         .select("id, name")
         .eq("owner_user_id", user.id);
-      const list = (data as Tables<"businesses">[]) || [];
+      const list = data || [];
       setBusinesses(list);
       if (list.length > 0) setSelectedBizId(list[0].id);
     })();
@@ -85,7 +85,7 @@ const MerchantBillingPlans = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {PLANS.map((p) => {
             const isCurrent = !subLoading && currentPlan === p.key;
-            const cta: typeof PLANS[number]["cta"] = isCurrent ? "current" : p.cta;
+            const cta: PlanDefinition["cta"] = isCurrent ? "current" : p.cta;
             const disabled = cta === "current" || cta === "coming_soon";
             return (
               <Card
@@ -125,7 +125,8 @@ const MerchantBillingPlans = () => {
                     disabled={disabled}
                     onClick={() => {
                       if (cta === "contact") {
-                        window.location.href = "mailto:hello@qmaps.app?subject=Plan Premium";
+                        window.location.href =
+                          "mailto:hello@qmaps.app?subject=Plan Premium";
                       }
                     }}
                   >
