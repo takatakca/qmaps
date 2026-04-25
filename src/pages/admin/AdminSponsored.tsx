@@ -27,6 +27,8 @@ interface Row {
   starts_at: string | null;
   ends_at: string | null;
   admin_note: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   created_at: string;
   business: { id: string; name: string; city: string } | null;
 }
