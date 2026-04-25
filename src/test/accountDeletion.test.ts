@@ -29,12 +29,9 @@ describe("accountDeletion helpers", () => {
     });
 
     it("rejects non-string input", () => {
-      // @ts-expect-error testing runtime safety
-      expect(isDeletionConfirmationValid(null)).toBe(false);
-      // @ts-expect-error testing runtime safety
-      expect(isDeletionConfirmationValid(undefined)).toBe(false);
-      // @ts-expect-error testing runtime safety
-      expect(isDeletionConfirmationValid(123)).toBe(false);
+      expect(isDeletionConfirmationValid(null as unknown as string)).toBe(false);
+      expect(isDeletionConfirmationValid(undefined as unknown as string)).toBe(false);
+      expect(isDeletionConfirmationValid(123 as unknown as string)).toBe(false);
     });
 
     it("token is the documented constant", () => {
