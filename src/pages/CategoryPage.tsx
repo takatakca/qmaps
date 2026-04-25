@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityFromSlug } from "@/lib/seo";
+import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import type { Tables } from "@/integrations/supabase/types";
 
 const CategoryPage = () => {
@@ -17,8 +19,10 @@ const CategoryPage = () => {
   const [category, setCategory] = useState<Tables<"categories"> | null>(null);
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const { recommended, loading: recLoading } = useRecommendedBusinesses({
+    city: cityLabel,
+    limit: 4,
+  });
     let cancelled = false;
     void (async () => {
       setLoading(true);
