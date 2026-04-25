@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Truck, Droplets, Zap, Wrench, Car, HardHat, Sparkles, MoreHorizontal, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectRequests } from "@/hooks/useProjectRequests";
+import { useProjectCategories } from "@/hooks/useProjectCategories";
 import StartProjectSheet from "@/components/projects/StartProjectSheet";
 import ProjectRequestCard from "@/components/projects/ProjectRequestCard";
 import cafeImg from "@/assets/cafe-1.jpg";
@@ -12,15 +13,16 @@ import restaurantImg from "@/assets/restaurant-1.jpg";
 import cleaningImg from "@/assets/cleaning.jpg";
 import salonImg from "@/assets/salon.jpg";
 
-const serviceCategories = [
-  { icon: Truck, label: "Déménageurs" },
-  { icon: Sparkles, label: "Nettoyage" },
-  { icon: Droplets, label: "Plombiers" },
-  { icon: Wrench, label: "Réparation" },
-  { icon: Zap, label: "Électriciens" },
-  { icon: Car, label: "Auto" },
-  { icon: HardHat, label: "Entrepreneurs" },
-  { icon: MoreHorizontal, label: "Plus" },
+// Map service category slugs to icons + display labels.
+const serviceCategories: { slug: string; icon: typeof Truck; label: string }[] = [
+  { slug: "movers", icon: Truck, label: "Déménageurs" },
+  { slug: "cleaning", icon: Sparkles, label: "Nettoyage" },
+  { slug: "plumbers", icon: Droplets, label: "Plombiers" },
+  { slug: "auto-repair", icon: Wrench, label: "Réparation" },
+  { slug: "electricians", icon: Zap, label: "Électriciens" },
+  { slug: "auto-repair", icon: Car, label: "Auto" },
+  { slug: "contractors", icon: HardHat, label: "Entrepreneurs" },
+  { slug: "__more__", icon: MoreHorizontal, label: "Plus" },
 ];
 
 const projectItems = [
