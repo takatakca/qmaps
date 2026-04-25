@@ -36,9 +36,12 @@ const Index = () => {
           <h1 className="font-heading text-2xl font-bold text-foreground tracking-tight">
             Q<span className="text-primary">Maps</span>
           </h1>
-          <span className="text-xs text-muted-foreground font-medium bg-secondary px-2 py-1 rounded-full">
+          <a
+            href="/city/montreal"
+            className="text-xs text-muted-foreground font-medium bg-secondary px-2 py-1 rounded-full hover:bg-accent transition-colors"
+          >
             📍 Montréal
-          </span>
+          </a>
         </div>
         <SearchBar />
       </div>
