@@ -76,6 +76,8 @@ const SMOKE_ROUTES = [
   "/admin/sponsored",
   "/admin/users",
   "/admin/review-moderation",
+  "/admin/account-deletions",
+  "/settings/delete-account",
 ];
 
 describe("smoke: route inventory (App.tsx)", () => {

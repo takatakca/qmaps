@@ -13,7 +13,7 @@ const settingsItems = [
   { label: "Paramètres de confidentialité", path: "/settings/privacy" },
   { label: "Paramètres de sécurité", path: "" },
   { label: "Préférences de l'app", path: "/settings/app-preferences" },
-  { label: "Fermer le compte", path: "", danger: true },
+  { label: "Fermer le compte", path: "/settings/delete-account", danger: true },
 ];
 
 const Settings = () => {

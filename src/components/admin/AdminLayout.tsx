@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users, Briefcase, Sparkles, ArrowLeft, ShieldAlert } from "lucide-react";
+import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users, Briefcase, Sparkles, ArrowLeft, ShieldAlert, UserMinus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/admin/projects", label: "Projets", icon: Briefcase },
   { to: "/admin/sponsored", label: "Sponsorisé", icon: Sparkles },
   { to: "/admin/users", label: "Utilisateurs", icon: Users },
+  { to: "/admin/account-deletions", label: "Suppressions", icon: UserMinus },
 ];
 
 const AdminLayout = ({ children, title }: { children: React.ReactNode; title: string }) => {
