@@ -73,6 +73,9 @@ import DistanceUnits from "./pages/settings/DistanceUnits";
 import PrivacySettings from "./pages/settings/PrivacySettings";
 import AppPreferences from "./pages/settings/AppPreferences";
 import NotFound from "./pages/NotFound";
+import CityPage from "./pages/CityPage";
+import CategoryPage from "./pages/CategoryPage";
+import Sitemap from "./pages/Sitemap";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +93,10 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/search" element={<Search />} />
             <Route path="/business/:id" element={<BusinessDetail />} />
+            <Route path="/c/:categorySlug" element={<CategoryPage />} />
+            <Route path="/city/:citySlug" element={<CityPage />} />
+            <Route path="/city/:citySlug/:categorySlug" element={<CategoryPage />} />
+            <Route path="/sitemap.xml" element={<Sitemap />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/collections" element={<Collections />} />
             <Route path="/projects" element={<Projects />} />
