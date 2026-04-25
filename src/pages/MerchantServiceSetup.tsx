@@ -48,8 +48,14 @@ const MerchantServiceSetup = () => {
   const handleAddCat = async () => {
     if (!newCat) return;
     const { error } = await addCategory(newCat);
-    if (error) toast({ title: "Erreur", description: error, variant: "destructive" });
-    else { toast({ title: "Catégorie ajoutée" }); setNewCat(undefined); }
+    if (error) {
+      const dup = /duplicate|unique|23505/i.test(error);
+      toast({
+        title: dup ? "Déjà ajoutée" : "Erreur",
+        description: dup ? "Cette catégorie est déjà dans votre liste." : error,
+        variant: "destructive",
+      });
+    } else { toast({ title: "Catégorie ajoutée" }); setNewCat(undefined); }
   };
 
   const handleAddArea = async () => {
@@ -63,8 +69,14 @@ const MerchantServiceSetup = () => {
       postal_code_prefix: postal.trim() || null,
       radius_km: radius ? Number(radius) : null,
     });
-    if (error) toast({ title: "Erreur", description: error, variant: "destructive" });
-    else { toast({ title: "Zone ajoutée" }); setCity(""); setPostal(""); setRadius(""); }
+    if (error) {
+      const dup = /duplicate|unique|23505/i.test(error);
+      toast({
+        title: dup ? "Zone déjà ajoutée" : "Erreur",
+        description: dup ? "Cette zone existe déjà pour cette entreprise." : error,
+        variant: "destructive",
+      });
+    } else { toast({ title: "Zone ajoutée" }); setCity(""); setPostal(""); setRadius(""); }
   };
 
   const catName = (id: string) => categories.find(c => c.id === id)?.name ?? "Catégorie";

@@ -51,6 +51,13 @@ const SubmitQuoteSheet = ({ open, onOpenChange, projectRequestId, onSubmitted }:
       toast({ title: "Choisissez une entreprise", variant: "destructive" });
       return;
     }
+    if (!message.trim() && !priceMin && !priceMax) {
+      toast({
+        title: "Ajoutez une fourchette de prix ou un message",
+        variant: "destructive",
+      });
+      return;
+    }
     setSubmitting(true);
     const { error } = await createQuote({
       project_request_id: projectRequestId,
@@ -61,7 +68,15 @@ const SubmitQuoteSheet = ({ open, onOpenChange, projectRequestId, onSubmitted }:
     });
     setSubmitting(false);
     if (error) {
-      toast({ title: "Erreur", description: error, variant: "destructive" });
+      // Detect Postgres unique violation (code 23505) surfaced as message
+      const isDup = /duplicate|unique|23505/i.test(error);
+      toast({
+        title: isDup ? "Devis déjà envoyé" : "Erreur",
+        description: isDup
+          ? "Cette entreprise a déjà soumis un devis pour ce projet."
+          : error,
+        variant: "destructive",
+      });
       return;
     }
     toast({ title: "Devis envoyé" });
