@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Truck, Droplets, Zap, Wrench, Paintbrush, Car, HardHat, Sparkles, MoreHorizontal } from "lucide-react";
+import { Truck, Droplets, Zap, Wrench, Car, HardHat, Sparkles, MoreHorizontal, Plus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useProjectRequests } from "@/hooks/useProjectRequests";
+import StartProjectSheet from "@/components/projects/StartProjectSheet";
+import ProjectRequestCard from "@/components/projects/ProjectRequestCard";
 import cafeImg from "@/assets/cafe-1.jpg";
 import restaurantImg from "@/assets/restaurant-1.jpg";
 import cleaningImg from "@/assets/cleaning.jpg";
@@ -59,17 +62,27 @@ const curatedSections = [
 
 const Projects = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { requests } = useProjectRequests();
+  const [startOpen, setStartOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       <div className="px-4 pt-6">
-        <h1 className="font-heading text-2xl font-bold text-foreground">Projets QMAPS</h1>
-        <p className="text-muted-foreground text-sm mt-1">Engagez un professionnel local</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-heading text-2xl font-bold text-foreground">Projets QMAPS</h1>
+            <p className="text-muted-foreground text-sm mt-1">Engagez un professionnel local</p>
+          </div>
+          <Button onClick={() => setStartOpen(true)} size="sm" className="rounded-full gap-1 shrink-0">
+            <Plus size={14} /> Démarrer
+          </Button>
+        </div>
 
         {/* Service Categories */}
         <div className="grid grid-cols-4 gap-3 mt-5">
           {serviceCategories.map(cat => (
-            <button key={cat.label} className="flex flex-col items-center gap-1.5">
+            <button key={cat.label} onClick={() => setStartOpen(true)} className="flex flex-col items-center gap-1.5">
               <div className="w-14 h-14 rounded-full bg-card border border-border flex items-center justify-center shadow-sm hover:bg-accent transition-colors">
                 <cat.icon size={24} className="text-primary" />
               </div>
@@ -78,7 +91,17 @@ const Projects = () => {
           ))}
         </div>
 
-        {/* What's next */}
+        {/* My recent project requests */}
+        {user && requests.length > 0 && (
+          <div className="mt-7">
+            <h2 className="font-heading text-lg font-bold text-foreground mb-3">Mes projets</h2>
+            <div className="space-y-2">
+              {requests.slice(0, 5).map(r => (
+                <ProjectRequestCard key={r.id} request={r} to={`/projects/${r.id}`} />
+              ))}
+            </div>
+          </div>
+        )}
         <h2 className="font-heading text-lg font-bold text-foreground mt-8 mb-4">Quoi de neuf sur votre liste?</h2>
         <div className="space-y-4">
           {projectItems.map(item => (
@@ -90,8 +113,8 @@ const Projects = () => {
                 <p className="text-sm font-semibold text-foreground">{item.name}</p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" className="rounded-full text-xs h-8">Commencer</Button>
-                <Button size="sm" variant="outline" className="rounded-full text-xs h-8">Ajouter au plan</Button>
+                <Button size="sm" className="rounded-full text-xs h-8" onClick={() => setStartOpen(true)}>Commencer</Button>
+                <Button size="sm" variant="outline" className="rounded-full text-xs h-8" onClick={() => setStartOpen(true)}>Ajouter au plan</Button>
               </div>
             </div>
           ))}
@@ -115,6 +138,7 @@ const Projects = () => {
       </div>
 
       <BottomNav />
+      <StartProjectSheet open={startOpen} onOpenChange={setStartOpen} />
     </div>
   );
 };

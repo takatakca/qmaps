@@ -10,6 +10,9 @@ import BusinessDetail from "./pages/BusinessDetail";
 import Profile from "./pages/Profile";
 import Collections from "./pages/Collections";
 import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
+import MerchantLeads from "./pages/MerchantLeads";
+import MerchantServiceSetup from "./pages/MerchantServiceSetup";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import MerchantAuth from "./pages/MerchantAuth";
@@ -81,6 +84,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/collections" element={<Collections />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/more" element={<More />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/add-business" element={<AddBusiness />} />
@@ -133,6 +137,8 @@ const App = () => (
             <Route path="/merchant/photos" element={<ProtectedMerchantRoute><MerchantPhotos /></ProtectedMerchantRoute>} />
             <Route path="/merchant/inbox" element={<ProtectedMerchantRoute><MerchantInbox /></ProtectedMerchantRoute>} />
             <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/leads" element={<ProtectedMerchantRoute><MerchantLeads /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/services" element={<ProtectedMerchantRoute><MerchantServiceSetup /></ProtectedMerchantRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
