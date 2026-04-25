@@ -1112,6 +1112,132 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsored_campaign_events: {
+        Row: {
+          business_id: string
+          campaign_id: string
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          placement: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          business_id: string
+          campaign_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          placement?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          campaign_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          placement?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_campaign_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "sponsored_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsored_campaigns: {
+        Row: {
+          admin_note: string | null
+          business_id: string
+          created_at: string
+          daily_budget_cents: number | null
+          description: string | null
+          ends_at: string | null
+          headline: string | null
+          id: string
+          placement: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          starts_at: string | null
+          status: string
+          target_category_id: string | null
+          target_city: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          business_id: string
+          created_at?: string
+          daily_budget_cents?: number | null
+          description?: string | null
+          ends_at?: string | null
+          headline?: string | null
+          id?: string
+          placement?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_at?: string | null
+          status?: string
+          target_category_id?: string | null
+          target_city?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          business_id?: string
+          created_at?: string
+          daily_budget_cents?: number | null
+          description?: string | null
+          ends_at?: string | null
+          headline?: string | null
+          id?: string
+          placement?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_at?: string | null
+          status?: string
+          target_category_id?: string | null
+          target_city?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_campaigns_target_category_id_fkey"
+            columns: ["target_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
