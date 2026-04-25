@@ -8,9 +8,9 @@ import { CheckCircle2, XCircle, AlertCircle, ExternalLink, FileText } from "luci
 type CheckState = "ok" | "fail" | "manual" | "unknown";
 
 const StatusIcon = ({ state }: { state: CheckState }) => {
-  if (state === "ok") return <CheckCircle2 size={18} className="text-emerald-500" />;
+  if (state === "ok") return <CheckCircle2 size={18} className="text-primary" />;
   if (state === "fail") return <XCircle size={18} className="text-destructive" />;
-  return <AlertCircle size={18} className="text-amber-500" />;
+  return <AlertCircle size={18} className="text-muted-foreground" />;
 };
 
 const StatusBadge = ({ state }: { state: CheckState }) => {
