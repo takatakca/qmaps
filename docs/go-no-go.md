@@ -64,3 +64,50 @@ to block merges when the gate is red.
 1. Read the failing step’s output above the summary.
 2. Fix the root cause (code, tests, missing doc, or broken asset).
 3. Re-run `bun run go:no-go` until it turns green.
+
+## CLI flags (Phase 13G)
+
+The script accepts additional flags for CI/automation:
+
+| Flag | Purpose |
+|------|---------|
+| `--json` | Emit a machine-readable JSON report to stdout instead of the readable summary. |
+| `--out <path>` | Write the JSON report to `<path>` (implies `--json` for the file content). |
+| `--fail-fast` | Stop at the first failing step instead of running all four. |
+
+### Examples
+
+```bash
+# Readable, human-friendly output (default)
+bun run go:no-go
+
+# JSON to stdout (CI-friendly)
+bun run go:no-go:json
+
+# Write a JSON report file
+bun run go:no-go:report
+# → docs/go-no-go-report.generated.json
+```
+
+### JSON shape
+
+```json
+{
+  "decision": "GO",
+  "passed": 4,
+  "failed": 0,
+  "total": 4,
+  "duration_ms": 12345,
+  "steps": [
+    {
+      "name": "Launch checks",
+      "ok": true,
+      "duration_ms": 120,
+      "command": "bun run launch:check"
+    }
+  ]
+}
+```
+
+`decision` is `"GO"` only when every step passed; otherwise `"NO-GO"`. The
+process exit code mirrors the decision (`0` = GO, `1` = NO-GO).

@@ -15,7 +15,9 @@
     "launch:check:json": "node scripts/launch-checks.mjs --json",
     "release:status": "node scripts/release-status.mjs",
     "release:status:file": "node scripts/release-status.mjs --out docs/release-status.generated.md",
-    "go:no-go": "node scripts/go-no-go.mjs"
+    "go:no-go": "node scripts/go-no-go.mjs",
+    "go:no-go:json": "node scripts/go-no-go.mjs --json",
+    "go:no-go:report": "node scripts/go-no-go.mjs --out docs/go-no-go-report.generated.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
