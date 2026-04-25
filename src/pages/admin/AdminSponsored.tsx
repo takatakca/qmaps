@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
+import { Info } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import {
   SPONSORED_PLACEMENT_LABELS,
@@ -211,30 +218,74 @@ const CampaignMetricsRow = ({ campaignId }: { campaignId: string }) => {
   const m = useSponsoredCampaignMetrics(campaignId, "30d");
   if (m.loading) return null;
   const hasEvents = m.impressions > 0 || m.clicks > 0;
+  // Compact 14-day sparkline: last 14 entries from byDay (already chronologically sorted).
+  const sparkDays = m.byDay.slice(-14);
+  const sparkMax = Math.max(1, ...sparkDays.map((d) => d.impressions));
   return (
     <div className="mt-3 rounded-lg bg-muted/40 p-2">
-      <div className="flex items-center gap-3 text-xs">
+      <div className="flex items-center gap-3 text-xs flex-wrap">
         <span><b className="font-heading">{m.impressions}</b> imp</span>
         <span><b className="font-heading">{m.clicks}</b> clic</span>
-        <span><b className="font-heading">{formatCtr(m.impressions, m.clicks)}</b> CTR</span>
+        <span className="flex items-center gap-1">
+          <b className="font-heading">{formatCtr(m.impressions, m.clicks)}</b> CTR
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="À propos du CTR"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Info size={11} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[220px] text-xs">
+                CTR = clics ÷ impressions.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </span>
         <span className="text-muted-foreground">· {SPONSORED_RANGE_LABELS["30d"]}</span>
       </div>
       {!hasEvents ? (
         <p className="text-[10px] text-muted-foreground mt-1">
           Aucun événement sur cette période.
         </p>
-      ) : m.byPlacement.length > 0 ? (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {m.byPlacement.map((p) => (
-            <span
-              key={p.placement}
-              className="text-[10px] px-1.5 py-0.5 rounded-full bg-card border border-border"
+      ) : (
+        <>
+          {m.byPlacement.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {m.byPlacement.map((p) => (
+                <span
+                  key={p.placement}
+                  className="text-[10px] px-1.5 py-0.5 rounded-full bg-card border border-border"
+                >
+                  {SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement}: {p.impressions}/{p.clicks} · {formatCtr(p.impressions, p.clicks)}
+                </span>
+              ))}
+            </div>
+          )}
+          {sparkDays.length > 0 && (
+            <div
+              className="flex items-end gap-[2px] h-6 mt-2"
+              aria-label="Activité des 14 derniers jours"
+              title={`${sparkDays.length} jour(s) avec activité`}
             >
-              {SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement}: {p.impressions}/{p.clicks} · {formatCtr(p.impressions, p.clicks)}
-            </span>
-          ))}
-        </div>
-      ) : null}
+              {sparkDays.map((d) => {
+                const h = Math.max(2, Math.round((d.impressions / sparkMax) * 24));
+                return (
+                  <div
+                    key={d.day}
+                    className="w-1.5 rounded-sm bg-primary/70"
+                    style={{ height: `${h}px` }}
+                    title={`${d.day}: ${d.impressions} imp / ${d.clicks} clic`}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
