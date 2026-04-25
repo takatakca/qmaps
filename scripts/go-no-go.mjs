@@ -29,12 +29,19 @@ const failFast = argv.includes("--fail-fast");
 const outIdx = argv.indexOf("--out");
 const outPath = outIdx >= 0 ? argv[outIdx + 1] : null;
 
-const steps = [
+const allSteps = [
   { name: "Launch checks", cmd: "bun", args: ["run", "launch:check"] },
   { name: "Tests", cmd: "bunx", args: ["vitest", "run"] },
   { name: "Build", cmd: "bun", args: ["run", "build"] },
   { name: "Release status snapshot", cmd: "bun", args: ["run", "release:status:file"] },
 ];
+
+// Internal: GO_NO_GO_STEPS filters which steps run (comma-separated names).
+// Used by tests to keep CI runs cheap. Not part of the public CLI.
+const stepFilter = process.env.GO_NO_GO_STEPS
+  ? new Set(process.env.GO_NO_GO_STEPS.split(",").map((s) => s.trim()))
+  : null;
+const steps = stepFilter ? allSteps.filter((s) => stepFilter.has(s.name)) : allSteps;
 
 const results = [];
 const overallStart = Date.now();
