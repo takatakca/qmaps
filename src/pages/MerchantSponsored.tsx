@@ -563,12 +563,69 @@ const CampaignCard = ({
   );
 };
 
-const Metric = ({ label, value }: { label: string; value: number | string }) => (
-  <div>
-    <p className="font-heading text-base font-bold">{value}</p>
-    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-  </div>
-);
+const Metric = ({
+  label,
+  value,
+  trend,
+  tooltip,
+}: {
+  label: string;
+  value: number | string;
+  trend?: number | null;
+  tooltip?: string;
+}) => {
+  const TrendIcon =
+    trend === null || trend === undefined
+      ? null
+      : trend > 0
+        ? TrendingUp
+        : trend < 0
+          ? TrendingDown
+          : Minus;
+  const trendClass =
+    trend === null || trend === undefined
+      ? "text-muted-foreground"
+      : trend > 0
+        ? "text-emerald-600 dark:text-emerald-400"
+        : trend < 0
+          ? "text-destructive"
+          : "text-muted-foreground";
+  return (
+    <div>
+      <p className="font-heading text-base font-bold">{value}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wide flex items-center justify-center gap-1">
+        {label}
+        {tooltip && (
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={`À propos de ${label}`}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Info size={10} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[220px] text-xs">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </p>
+      {TrendIcon && (
+        <p
+          className={`text-[10px] mt-0.5 flex items-center justify-center gap-0.5 tabular-nums ${trendClass}`}
+        >
+          <TrendIcon size={10} />
+          {trend! > 0 ? "+" : ""}
+          {trend!.toFixed(0)}%
+        </p>
+      )}
+    </div>
+  );
+};
 
 const DayActivityBars = ({
   data,
