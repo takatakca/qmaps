@@ -212,26 +212,35 @@ export const useSponsoredCampaignMetrics = (
     ctr: 0,
     byPlacement: [],
     byDay: [],
+    previous: null,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!campaignId) {
-      setState({ impressions: 0, clicks: 0, ctr: 0, byPlacement: [], byDay: [] });
+      setState({
+        impressions: 0,
+        clicks: 0,
+        ctr: 0,
+        byPlacement: [],
+        byDay: [],
+        previous: null,
+      });
       setLoading(false);
       return;
     }
     let cancelled = false;
     const run = async () => {
       setLoading(true);
+      const days = range === "7d" ? 7 : range === "30d" ? 30 : null;
       let q = supabase
         .from("sponsored_campaign_events" as any)
         .select("event_type, placement, created_at")
         .eq("campaign_id", campaignId);
-      if (range !== "all") {
-        const days = range === "7d" ? 7 : 30;
-        const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-        q = q.gte("created_at", since);
+      let sinceIso: string | null = null;
+      if (days !== null) {
+        sinceIso = new Date(Date.now() - days * 86400000).toISOString();
+        q = q.gte("created_at", sinceIso);
       }
       const { data } = await q;
       if (cancelled) return;
@@ -264,7 +273,25 @@ export const useSponsoredCampaignMetrics = (
         .map(([day, v]) => ({ day, ...v }))
         .sort((a, b) => a.day.localeCompare(b.day));
 
-      setState({ impressions, clicks, ctr, byPlacement, byDay });
+      // Previous equal-length window for trend (only for 7d/30d).
+      let previous: { impressions: number; clicks: number } | null = null;
+      if (days !== null && sinceIso) {
+        const prevStart = new Date(Date.now() - 2 * days * 86400000).toISOString();
+        const { data: prevData } = await supabase
+          .from("sponsored_campaign_events" as any)
+          .select("event_type")
+          .eq("campaign_id", campaignId)
+          .gte("created_at", prevStart)
+          .lt("created_at", sinceIso);
+        if (cancelled) return;
+        const prevRows = (prevData as any[]) ?? [];
+        previous = {
+          impressions: prevRows.filter((r) => r.event_type === "impression").length,
+          clicks: prevRows.filter((r) => r.event_type === "click").length,
+        };
+      }
+
+      setState({ impressions, clicks, ctr, byPlacement, byDay, previous });
       setLoading(false);
     };
     run();
