@@ -1,22 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
+import { planLabel, statusLabel } from "@/lib/billing";
+import type { Tables } from "@/integrations/supabase/types";
 
 const MerchantBilling = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showAddCard, setShowAddCard] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [cardName, setCardName] = useState("");
+
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [events, setEvents] = useState<Tables<"merchant_billing_events">[]>([]);
+  const { subscription, plan, status, isFree, loading: subLoading } = useMerchantSubscription(businessId);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) setBusinessId(data.id);
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (!businessId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("merchant_billing_events")
+        .select("*")
+        .eq("business_id", businessId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      setEvents(data || []);
+    })();
+  }, [businessId]);
 
   const handleAddCard = () => {
     if (!cardNumber || !expiry || !cvc || !cardName) {
@@ -27,6 +64,10 @@ const MerchantBilling = () => {
     setShowAddCard(false);
     setCardNumber(""); setExpiry(""); setCvc(""); setCardName("");
   };
+
+  const periodEnd = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString("fr-CA")
+    : null;
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto">
@@ -39,6 +80,46 @@ const MerchantBilling = () => {
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Current plan */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              Plan actuel <Sparkles size={16} className="text-primary" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {subLoading ? (
+              <p className="text-sm text-muted-foreground">Chargement...</p>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-foreground">{planLabel(plan)}</span>
+                  <Badge variant={isFree ? "secondary" : "default"}>{statusLabel(status)}</Badge>
+                </div>
+                {periodEnd && (
+                  <p className="text-xs text-muted-foreground">
+                    Période en cours jusqu'au {periodEnd}
+                    {subscription?.cancel_at_period_end ? " — annulation prévue" : ""}
+                  </p>
+                )}
+                {isFree && (
+                  <p className="text-xs text-muted-foreground">
+                    Vous êtes sur le plan gratuit. Découvrez ce que les plans payants offrent.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full justify-between rounded-full"
+                  onClick={() => navigate("/merchant/billing/plans")}
+                >
+                  <span>Voir les plans</span>
+                  <ChevronRight size={16} />
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Billing Summary */}
         <Card>
           <CardHeader className="pb-2">
@@ -68,7 +149,29 @@ const MerchantBilling = () => {
           </CardContent>
         </Card>
 
-        {/* Mobile app CTA */}
+        {/* Billing events */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold">Historique de facturation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {events.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Aucun événement de facturation pour le moment.
+              </p>
+            ) : (
+              events.map((e) => (
+                <div key={e.id} className="flex justify-between text-sm">
+                  <span className="text-foreground">{e.event_type}</span>
+                  <span className="text-muted-foreground">
+                    {new Date(e.created_at).toLocaleDateString("fr-CA")}
+                  </span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="bg-secondary/50 border-primary/20">
           <CardContent className="flex items-center gap-3 py-4">
             <Smartphone size={28} className="text-primary shrink-0" />

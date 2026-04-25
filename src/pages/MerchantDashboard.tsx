@@ -9,8 +9,11 @@ import MerchantOverview from "@/components/merchant/MerchantOverview";
 import MerchantPerformance from "@/components/merchant/MerchantPerformance";
 import MerchantEditForm from "@/components/merchant/MerchantEditForm";
 import MerchantReviews from "@/components/merchant/MerchantReviews";
-import { ArrowLeft, Plus, Store, LayoutDashboard, BarChart3, Settings, MessageSquare } from "lucide-react";
+import { ArrowLeft, Plus, Store, LayoutDashboard, BarChart3, Settings, MessageSquare, Sparkles } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
+import { planLabel } from "@/lib/billing";
+import { Badge } from "@/components/ui/badge";
 
 const MerchantDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -21,6 +24,7 @@ const MerchantDashboard = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "performance" | "edit" | "reviews">("overview");
+  const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -119,6 +123,22 @@ const MerchantDashboard = () => {
                 </button>
               ))}
             </div>
+
+            {selectedBiz && (
+              <button
+                onClick={() => navigate("/merchant/billing/plans")}
+                className="w-full flex items-center justify-between gap-2 mb-4 px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+              >
+                <div className="flex items-center gap-2 text-sm">
+                  <Sparkles size={14} className="text-primary" />
+                  <span className="text-muted-foreground">Plan :</span>
+                  <Badge variant={isFree ? "secondary" : "default"}>{planLabel(plan)}</Badge>
+                </div>
+                <span className="text-xs text-primary font-semibold">
+                  {isFree ? "Améliorer" : "Gérer"}
+                </span>
+              </button>
+            )}
 
             {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
             {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}

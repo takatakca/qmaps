@@ -39,6 +39,7 @@ import MerchantGuestManager from "./pages/MerchantGuestManager";
 import MerchantPhotos from "./pages/MerchantPhotos";
 import MerchantInbox from "./pages/MerchantInbox";
 import MerchantBilling from "./pages/MerchantBilling";
+import MerchantBillingPlans from "./pages/MerchantBillingPlans";
 import MerchantHome from "./pages/MerchantHome";
 import MerchantOptimization from "./pages/MerchantOptimization";
 import MerchantMarketplace from "./pages/MerchantMarketplace";
@@ -153,6 +154,7 @@ const App = () => (
             <Route path="/merchant/photos" element={<ProtectedMerchantRoute><MerchantPhotos /></ProtectedMerchantRoute>} />
             <Route path="/merchant/inbox" element={<ProtectedMerchantRoute><MerchantInbox /></ProtectedMerchantRoute>} />
             <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/billing/plans" element={<ProtectedMerchantRoute><MerchantBillingPlans /></ProtectedMerchantRoute>} />
             <Route path="/merchant/leads" element={<ProtectedMerchantRoute><MerchantLeads /></ProtectedMerchantRoute>} />
             <Route path="/merchant/services" element={<ProtectedMerchantRoute><MerchantServiceSetup /></ProtectedMerchantRoute>} />
             <Route path="/merchant/analytics" element={<ProtectedMerchantRoute><MerchantAnalytics /></ProtectedMerchantRoute>} />
