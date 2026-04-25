@@ -95,9 +95,10 @@ const Settings = () => {
 
       <div className="px-4 py-6 text-center space-y-1">
         <p className="text-xs text-muted-foreground">
-          <button className="text-primary">Conditions d'utilisation</button>,{" "}
-          <button className="text-primary">Politique de confidentialité</button> et{" "}
-          <button className="text-primary">Directives de contenu</button>
+          <button onClick={() => navigate("/terms")} className="text-primary">Conditions d'utilisation</button>,{" "}
+          <button onClick={() => navigate("/privacy")} className="text-primary">Politique de confidentialité</button>,{" "}
+          <button onClick={() => navigate("/account-deletion-policy")} className="text-primary">Suppression de compte</button> et{" "}
+          <button onClick={() => navigate("/support-policy")} className="text-primary">Support</button>
         </p>
         <p className="text-xs text-muted-foreground">Copyright © 2024–2026 QMAPS Inc.</p>
         <p className="text-xs text-muted-foreground">QMAPS v1.0.0</p>
