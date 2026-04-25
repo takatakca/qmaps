@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Lightweight client-side sitemap. Browsers and basic crawlers can read it.
-// For real-world SEO an edge-function-rendered XML is preferable; this is a
-// safe additive baseline that works with the static SPA.
+// TODO (production SEO): move to an edge-function-rendered sitemap that returns
+// Content-Type: application/xml. Crawlers may execute JS but a server-rendered
+// XML route is more reliable for indexing at scale.
+
+const escapeXml = (s: string) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
 const Sitemap = () => {
   const [xml, setXml] = useState<string>("");
 
@@ -24,7 +33,15 @@ const Sitemap = () => {
       const citySlugs = Array.from(
         new Set(
           (cities || [])
-            .map((c) => (c.city || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, "-"))
+            .map((c) =>
+              (c.city || "")
+                .toString()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim()
+                .replace(/\s+/g, "-")
+            )
             .filter(Boolean)
         )
       );
@@ -39,7 +56,7 @@ const Sitemap = () => {
       const body = urls
         .map(
           (u) =>
-            `  <url><loc>${u.replace(/&/g, "&amp;")}</loc><changefreq>weekly</changefreq></url>`
+            `  <url>\n    <loc>${escapeXml(u)}</loc>\n    <changefreq>weekly</changefreq>\n  </url>`
         )
         .join("\n");
       const out = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>`;
