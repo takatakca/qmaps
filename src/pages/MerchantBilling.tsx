@@ -149,7 +149,29 @@ const MerchantBilling = () => {
           </CardContent>
         </Card>
 
-        {/* Mobile app CTA */}
+        {/* Billing events */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold">Historique de facturation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {events.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Aucun événement de facturation pour le moment.
+              </p>
+            ) : (
+              events.map((e) => (
+                <div key={e.id} className="flex justify-between text-sm">
+                  <span className="text-foreground">{e.event_type}</span>
+                  <span className="text-muted-foreground">
+                    {new Date(e.created_at).toLocaleDateString("fr-CA")}
+                  </span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="bg-secondary/50 border-primary/20">
           <CardContent className="flex items-center gap-3 py-4">
             <Smartphone size={28} className="text-primary shrink-0" />
