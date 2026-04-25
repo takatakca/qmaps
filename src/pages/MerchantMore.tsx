@@ -99,6 +99,8 @@ const MerchantMore = () => {
       <div className="px-4 pt-5 space-y-5">
         {/* YOUR BUSINESS */}
         <Section title="Votre entreprise">
+          <MenuItem icon={Inbox} label="Demandes de projet" badge="Nouveau" onClick={() => navigate("/merchant/leads")} />
+          <MenuItem icon={Briefcase} label="Mes services" onClick={() => navigate("/merchant/services")} />
           <MenuItem icon={Users} label="QMAPS Host" badge="Nouveau" onClick={() => navigate("/merchant/host")} />
           <MenuItem icon={Star} label="Avis" onClick={() => navigate("/merchant/reviews")} />
           <MenuItem icon={Camera} label="Photos & Vidéos" onClick={() => navigate("/merchant/photos")} />
