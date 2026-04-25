@@ -1,5 +1,5 @@
 {
-  "name": "QMAPS",
+  "name": "QMAPS — Commerces & avis Montréal",
   "short_name": "QMAPS",
   "description": "Découvrez des commerces, lisez des avis et trouvez des pros locaux à Montréal.",
   "start_url": "/",
@@ -9,11 +9,31 @@
   "background_color": "#fafafa",
   "theme_color": "#cf1f1f",
   "lang": "fr-CA",
+  "dir": "ltr",
+  "categories": ["business", "lifestyle", "navigation"],
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "48x48",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     },
     {
       "src": "/placeholder.svg",
