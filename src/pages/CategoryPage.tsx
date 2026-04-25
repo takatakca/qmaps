@@ -10,6 +10,7 @@ import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityFromSlug } from "@/lib/seo";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
+import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import type { Tables } from "@/integrations/supabase/types";
 
 const CategoryPage = () => {
