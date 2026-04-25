@@ -189,36 +189,87 @@ export const useApprovedSponsoredListings = (params: {
   return { listings, loading };
 };
 
-export const useSponsoredCampaignMetrics = (campaignId?: string | null) => {
-  const [metrics, setMetrics] = useState({ impressions: 0, clicks: 0, ctr: 0 });
+export type SponsoredMetricsRange = "7d" | "30d" | "all";
+
+export interface SponsoredMetricsBreakdown {
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  byPlacement: Array<{ placement: string; impressions: number; clicks: number }>;
+  byDay: Array<{ day: string; impressions: number; clicks: number }>;
+  loading: boolean;
+}
+
+export const useSponsoredCampaignMetrics = (
+  campaignId?: string | null,
+  range: SponsoredMetricsRange = "all",
+): SponsoredMetricsBreakdown => {
+  const [state, setState] = useState<Omit<SponsoredMetricsBreakdown, "loading">>({
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    byPlacement: [],
+    byDay: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!campaignId) {
-      setMetrics({ impressions: 0, clicks: 0, ctr: 0 });
+      setState({ impressions: 0, clicks: 0, ctr: 0, byPlacement: [], byDay: [] });
       setLoading(false);
       return;
     }
     let cancelled = false;
     const run = async () => {
       setLoading(true);
-      const { data } = await supabase
+      let q = supabase
         .from("sponsored_campaign_events" as any)
-        .select("event_type")
+        .select("event_type, placement, created_at")
         .eq("campaign_id", campaignId);
+      if (range !== "all") {
+        const days = range === "7d" ? 7 : 30;
+        const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+        q = q.gte("created_at", since);
+      }
+      const { data } = await q;
       if (cancelled) return;
       const rows = (data as any[]) ?? [];
       const impressions = rows.filter((r) => r.event_type === "impression").length;
       const clicks = rows.filter((r) => r.event_type === "click").length;
       const ctr = impressions > 0 ? clicks / impressions : 0;
-      setMetrics({ impressions, clicks, ctr });
+
+      const placementMap = new Map<string, { impressions: number; clicks: number }>();
+      const dayMap = new Map<string, { impressions: number; clicks: number }>();
+      for (const r of rows) {
+        const p = (r.placement as string) ?? "unknown";
+        const day = (r.created_at as string).slice(0, 10);
+        const pe = placementMap.get(p) ?? { impressions: 0, clicks: 0 };
+        const de = dayMap.get(day) ?? { impressions: 0, clicks: 0 };
+        if (r.event_type === "impression") {
+          pe.impressions++;
+          de.impressions++;
+        } else if (r.event_type === "click") {
+          pe.clicks++;
+          de.clicks++;
+        }
+        placementMap.set(p, pe);
+        dayMap.set(day, de);
+      }
+      const byPlacement = Array.from(placementMap.entries())
+        .map(([placement, v]) => ({ placement, ...v }))
+        .sort((a, b) => b.impressions - a.impressions);
+      const byDay = Array.from(dayMap.entries())
+        .map(([day, v]) => ({ day, ...v }))
+        .sort((a, b) => a.day.localeCompare(b.day));
+
+      setState({ impressions, clicks, ctr, byPlacement, byDay });
       setLoading(false);
     };
     run();
     return () => {
       cancelled = true;
     };
-  }, [campaignId]);
+  }, [campaignId, range]);
 
-  return { ...metrics, loading };
+  return { ...state, loading };
 };

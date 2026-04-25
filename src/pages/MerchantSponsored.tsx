@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   useSponsoredCampaigns,
   useSponsoredCampaignMetrics,
+  type SponsoredMetricsRange,
 } from "@/hooks/useSponsoredCampaigns";
 import {
   SPONSORED_PLACEMENT_LABELS,
@@ -295,7 +296,8 @@ const CampaignCard = ({
   onSubmit: () => Promise<void>;
   onPause: () => Promise<void>;
 }) => {
-  const metrics = useSponsoredCampaignMetrics(campaign.id);
+  const [range, setRange] = useState<SponsoredMetricsRange>("all");
+  const metrics = useSponsoredCampaignMetrics(campaign.id, range);
   const [acting, setActing] = useState(false);
   const status = campaign.status as SponsoredStatus;
   const isRejected = status === "rejected";
@@ -308,6 +310,12 @@ const CampaignCard = ({
       setActing(false);
     }
   };
+
+  const RANGES: { key: SponsoredMetricsRange; label: string }[] = [
+    { key: "7d", label: "7 j" },
+    { key: "30d", label: "30 j" },
+    { key: "all", label: "Tout" },
+  ];
 
   return (
     <div className="bg-card border border-border rounded-xl p-3">
@@ -326,11 +334,52 @@ const CampaignCard = ({
         </Badge>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+      <div className="flex gap-1 mt-3" role="tablist" aria-label="Période">
+        {RANGES.map((r) => (
+          <button
+            key={r.key}
+            onClick={() => setRange(r.key)}
+            className={`text-[11px] px-2 py-0.5 rounded-full border ${
+              range === r.key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border"
+            }`}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mt-2 text-center">
         <Metric label="Impressions" value={metrics.impressions} />
         <Metric label="Clics" value={metrics.clicks} />
         <Metric label="CTR" value={`${(metrics.ctr * 100).toFixed(1)}%`} />
       </div>
+
+      {metrics.byPlacement.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+            Par emplacement
+          </p>
+          <div className="space-y-1">
+            {metrics.byPlacement.map((p) => (
+              <div
+                key={p.placement}
+                className="flex items-center justify-between text-xs bg-muted/40 rounded px-2 py-1"
+              >
+                <span className="truncate">
+                  {SPONSORED_PLACEMENT_LABELS[
+                    p.placement as SponsoredPlacement
+                  ] ?? p.placement}
+                </span>
+                <span className="text-muted-foreground tabular-nums">
+                  {p.impressions} imp · {p.clicks} clic
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {isRejected && campaign.admin_note && (
         <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
