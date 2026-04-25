@@ -30,6 +30,8 @@ interface Props {
   showReasonChips?: boolean;
   emptyHint?: string;
   loading?: boolean;
+  /** Friendly explanation shown under the title. Phase 9D. */
+  helperText?: string;
 }
 
 const RecommendedSection = ({
