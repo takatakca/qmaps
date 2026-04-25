@@ -46,25 +46,27 @@ export const PLANS: PlanDefinition[] = [
     key: "starter",
     name: "Starter",
     tagline: "Pour les petites entreprises actives",
-    priceLabel: "Bientôt disponible",
+    priceLabel: "À partir de 19 $ / mois",
     features: [
       "Profil enrichi",
       "Statistiques sur 30 jours",
       "Demandes de projets (leads)",
     ],
-    cta: "coming_soon",
+    cta: "checkout",
+    checkoutEligible: true,
   },
   {
     key: "pro",
     name: "Pro",
     tagline: "Pour les commerces qui veulent plus de visibilité",
-    priceLabel: "Bientôt disponible",
+    priceLabel: "À partir de 49 $ / mois",
     features: [
       "Support prioritaire",
       "Statistiques avancées",
       "Outils de gestion des leads",
     ],
-    cta: "coming_soon",
+    cta: "checkout",
+    checkoutEligible: true,
     highlighted: true,
   },
   {
@@ -77,7 +79,8 @@ export const PLANS: PlanDefinition[] = [
       "Visibilité avancée",
       "Placements sponsorisés (à venir)",
     ],
-    cta: "contact",
+    cta: "checkout",
+    checkoutEligible: true,
   },
 ];
 
