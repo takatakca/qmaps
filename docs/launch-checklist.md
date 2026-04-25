@@ -14,6 +14,7 @@ see `docs/deployment-checklist.md`.
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_PUBLISHABLE_KEY`
   - `VITE_SUPABASE_PROJECT_ID`
+- [ ] `.env.example` kept in sync with required variables (see `docs/environment-setup.md`)
 - [ ] Edge function secrets configured:
   - `STRIPE_SECRET_KEY` (live)
   - `STRIPE_WEBHOOK_SECRET` (live)
@@ -73,6 +74,7 @@ see `docs/deployment-checklist.md`.
 
 - [ ] `bunx vitest run` — all green
 - [ ] `bun run build` — succeeds, no fatal warnings
+- [ ] GitHub Actions CI passes on the release branch
 
 ## 9. Final go/no-go
 
