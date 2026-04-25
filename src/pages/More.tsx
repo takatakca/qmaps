@@ -131,6 +131,7 @@ const More = () => {
             {[
               { to: "/privacy", label: "Politique de confidentialité" },
               { to: "/terms", label: "Conditions d'utilisation" },
+              { to: "/cookies", label: "Témoins et suivi" },
               { to: "/account-deletion-policy", label: "Suppression de compte" },
               { to: "/support-policy", label: "Politique de support" },
             ].map((l, i) => (

@@ -97,6 +97,7 @@ const Settings = () => {
         <p className="text-xs text-muted-foreground">
           <button onClick={() => navigate("/terms")} className="text-primary">Conditions d'utilisation</button>,{" "}
           <button onClick={() => navigate("/privacy")} className="text-primary">Politique de confidentialité</button>,{" "}
+          <button onClick={() => navigate("/cookies")} className="text-primary">Témoins</button>,{" "}
           <button onClick={() => navigate("/account-deletion-policy")} className="text-primary">Suppression de compte</button> et{" "}
           <button onClick={() => navigate("/support-policy")} className="text-primary">Support</button>
         </p>
