@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import {
   SPONSORED_PLACEMENT_LABELS,
+  SPONSORED_RANGE_LABELS,
   SPONSORED_STATUS_LABELS,
+  formatCtr,
   type SponsoredPlacement,
   type SponsoredStatus,
 } from "@/lib/sponsored";
