@@ -3,9 +3,13 @@
 _Last reviewed: 2026-04-25_
 
 This checklist drives the **first 72 hours** after publishing QMAPS to
-production. It is owned by the launch on-call. Pair it with
-[`admin/incident-response-playbook.md`](./admin/incident-response-playbook.md)
-and [`admin/post-launch-daily-checks.md`](./admin/post-launch-daily-checks.md).
+production. It is owned by the launch on-call. Pair it with:
+
+- [`admin/first-72-hours-monitoring.md`](./admin/first-72-hours-monitoring.md) — hour-by-hour plan
+- [`admin/incident-response-playbook.md`](./admin/incident-response-playbook.md)
+- [`admin/post-launch-daily-checks.md`](./admin/post-launch-daily-checks.md)
+- [`production-verification-log.md`](./production-verification-log.md) — fill-in-the-blanks log
+- [`post-launch-issue-tracker.md`](./post-launch-issue-tracker.md) — issues filed during the window
 
 ---
 
