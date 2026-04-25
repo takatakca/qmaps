@@ -1,20 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Seo from "@/components/Seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, AlertCircle, ExternalLink, FileText } from "lucide-react";
+import {
+  LAUNCH_CHECK_GROUPS,
+  computeEnvStates,
+  type LaunchCheckItem,
+  type LaunchCheckState,
+} from "@/lib/launchChecks";
 
-type CheckState = "ok" | "fail" | "manual" | "unknown";
-
-const StatusIcon = ({ state }: { state: CheckState }) => {
+const StatusIcon = ({ state }: { state: LaunchCheckState }) => {
   if (state === "ok") return <CheckCircle2 size={18} className="text-primary" />;
   if (state === "fail") return <XCircle size={18} className="text-destructive" />;
   return <AlertCircle size={18} className="text-muted-foreground" />;
 };
 
-const StatusBadge = ({ state }: { state: CheckState }) => {
-  const map: Record<CheckState, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+const StatusBadge = ({ state }: { state: LaunchCheckState }) => {
+  const map: Record<LaunchCheckState, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
     ok: { label: "OK", variant: "default" },
     fail: { label: "Manquant", variant: "destructive" },
     manual: { label: "Vérif. manuelle", variant: "secondary" },
@@ -24,37 +28,42 @@ const StatusBadge = ({ state }: { state: CheckState }) => {
   return <Badge variant={v.variant}>{v.label}</Badge>;
 };
 
-interface CheckRow {
-  label: string;
-  state: CheckState;
-  detail?: string;
-}
-
-const CheckCard = ({ title, rows }: { title: string; rows: CheckRow[] }) => (
+const CheckCard = ({
+  title,
+  items,
+  states,
+}: {
+  title: string;
+  items: LaunchCheckItem[];
+  states: Record<string, LaunchCheckState>;
+}) => (
   <Card>
     <CardHeader className="pb-3">
       <CardTitle className="text-base">{title}</CardTitle>
     </CardHeader>
     <CardContent className="space-y-2">
-      {rows.map((r) => (
-        <div key={r.label} className="flex items-start gap-3 py-1">
-          <StatusIcon state={r.state} />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-sm">{r.label}</span>
-              <StatusBadge state={r.state} />
+      {items.map((it) => {
+        const state = states[it.id] ?? it.defaultState;
+        return (
+          <div key={it.id} className="flex items-start gap-3 py-1">
+            <StatusIcon state={state} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm">{it.label}</span>
+                <StatusBadge state={state} />
+              </div>
+              {it.detail && (
+                <p className="text-xs text-muted-foreground mt-0.5 break-all">{it.detail}</p>
+              )}
             </div>
-            {r.detail && (
-              <p className="text-xs text-muted-foreground mt-0.5 break-all">{r.detail}</p>
-            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </CardContent>
   </Card>
 );
 
-const checkUrl = async (path: string): Promise<CheckState> => {
+const checkUrl = async (path: string): Promise<LaunchCheckState> => {
   try {
     const res = await fetch(path, { method: "GET", cache: "no-store" });
     return res.ok ? "ok" : "fail";
@@ -64,10 +73,7 @@ const checkUrl = async (path: string): Promise<CheckState> => {
 };
 
 const AdminLaunchStatus = () => {
-  const [manifest, setManifest] = useState<CheckState>("unknown");
-  const [robots, setRobots] = useState<CheckState>("unknown");
-  const [sitemap, setSitemap] = useState<CheckState>("unknown");
-  const [legal, setLegal] = useState<Record<string, CheckState>>({});
+  const [runtimeStates, setRuntimeStates] = useState<Record<string, LaunchCheckState>>({});
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
@@ -76,33 +82,33 @@ const AdminLaunchStatus = () => {
   const buildDate = (import.meta.env.VITE_BUILD_DATE as string | undefined) || "unknown";
   const appVersion = (import.meta.env.VITE_APP_VERSION as string | undefined) || "unknown";
 
-  const legalRoutes = [
-    "/privacy",
-    "/terms",
-    "/cookies",
-    "/account-deletion-policy",
-    "/support-policy",
-  ];
+  const envStates = useMemo(
+    () => computeEnvStates({ supabaseUrl, supabaseKey, projectId }),
+    [supabaseUrl, supabaseKey, projectId],
+  );
 
   useEffect(() => {
     void (async () => {
-      setManifest(await checkUrl("/manifest.webmanifest"));
-      setRobots(await checkUrl("/robots.txt"));
-      // Sitemap is a SPA route; HEAD will 200 via SPA fallback. Treat presence
-      // of route in App.tsx as the truth — verify by attempting a GET.
-      setSitemap(await checkUrl("/sitemap.xml"));
-      const legalResults: Record<string, CheckState> = {};
-      for (const r of legalRoutes) {
-        legalResults[r] = await checkUrl(r);
+      const next: Record<string, LaunchCheckState> = {};
+      for (const group of LAUNCH_CHECK_GROUPS) {
+        if (group.id !== "pwa" && group.id !== "legal") continue;
+        for (const item of group.items) {
+          if (item.path) {
+            next[item.id] = await checkUrl(item.path);
+          }
+        }
       }
-      setLegal(legalResults);
+      setRuntimeStates(next);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const envState: CheckState = supabaseUrl && supabaseKey ? "ok" : "fail";
+  const states: Record<string, LaunchCheckState> = {
+    ...runtimeStates,
+    ...envStates,
+  };
 
   const docs = [
+    { label: "Release-candidate checklist", path: "docs/release-candidate-checklist.md" },
     { label: "Launch checklist", path: "docs/launch-checklist.md" },
     { label: "Deployment checklist", path: "docs/deployment-checklist.md" },
     { label: "Environment setup", path: "docs/environment-setup.md" },
@@ -134,71 +140,14 @@ const AdminLaunchStatus = () => {
           </CardContent>
         </Card>
 
-        <CheckCard
-          title="PWA & SEO"
-          rows={[
-            { label: "Manifest (/manifest.webmanifest)", state: manifest },
-            { label: "robots.txt", state: robots },
-            { label: "sitemap.xml", state: sitemap },
-          ]}
-        />
-
-        <CheckCard
-          title="Pages légales publiques"
-          rows={legalRoutes.map((r) => ({
-            label: r,
-            state: legal[r] ?? "unknown",
-          }))}
-        />
-
-        <CheckCard
-          title="Environnement (client)"
-          rows={[
-            {
-              label: "VITE_SUPABASE_URL",
-              state: supabaseUrl ? "ok" : "fail",
-              detail: supabaseUrl ? supabaseUrl : "Non défini",
-            },
-            {
-              label: "VITE_SUPABASE_PUBLISHABLE_KEY",
-              state: supabaseKey ? "ok" : "fail",
-              detail: supabaseKey ? "défini" : "Non défini",
-            },
-            {
-              label: "VITE_SUPABASE_PROJECT_ID",
-              state: projectId ? "ok" : "fail",
-              detail: projectId || "Non défini",
-            },
-            {
-              label: "Backend prêt",
-              state: envState,
-            },
-          ]}
-        />
-
-        <CheckCard
-          title="Stripe / facturation"
-          rows={[
-            {
-              label: "Configuration Stripe (clé secrète, webhook)",
-              state: "manual",
-              detail: "Vérifier dans les secrets des fonctions edge.",
-            },
-            {
-              label: "Webhook stripe-webhook joignable",
-              state: "manual",
-            },
-          ]}
-        />
-
-        <CheckCard
-          title="Tests & build"
-          rows={[
-            { label: "bunx vitest run", state: "manual", detail: "Lancer localement / en CI." },
-            { label: "bun run build", state: "manual", detail: "Lancer localement / en CI." },
-            { label: "GitHub Actions CI vert", state: "manual" },
-          ]}
-        />
+        {LAUNCH_CHECK_GROUPS.map((group) => (
+          <CheckCard
+            key={group.id}
+            title={group.title}
+            items={group.items}
+            states={states}
+          />
+        ))}
 
         <Card>
           <CardHeader className="pb-3">
