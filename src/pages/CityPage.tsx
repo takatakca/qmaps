@@ -20,19 +20,40 @@ const CityPage = () => {
     let cancelled = false;
     void (async () => {
       setLoading(true);
-      const [{ data: biz }, { data: cats }] = await Promise.all([
-        supabase
-          .from("businesses")
-          .select("*")
-          .ilike("city", cityLabel)
-          .eq("is_active", true)
-          .order("avg_rating", { ascending: false })
-          .limit(20),
-        supabase.from("categories").select("*").limit(12),
-      ]);
+      const { data: biz } = await supabase
+        .from("businesses")
+        .select("*")
+        .ilike("city", cityLabel)
+        .eq("is_active", true)
+        .order("avg_rating", { ascending: false })
+        .limit(20);
       if (cancelled) return;
       setBusinesses(biz || []);
-      setCategories(cats || []);
+
+      // Popular categories: prefer those linked to businesses in this city
+      const ids = (biz || []).map((b) => b.id);
+      let cityCats: Tables<"categories">[] = [];
+      if (ids.length > 0) {
+        const { data: links } = await supabase
+          .from("business_categories")
+          .select("category_id")
+          .in("business_id", ids);
+        const catIds = Array.from(new Set((links || []).map((l) => l.category_id)));
+        if (catIds.length > 0) {
+          const { data: cats } = await supabase
+            .from("categories")
+            .select("*")
+            .in("id", catIds)
+            .limit(12);
+          cityCats = cats || [];
+        }
+      }
+      if (cityCats.length === 0) {
+        const { data: cats } = await supabase.from("categories").select("*").limit(12);
+        cityCats = cats || [];
+      }
+      if (cancelled) return;
+      setCategories(cityCats);
       setLoading(false);
     })();
     return () => {

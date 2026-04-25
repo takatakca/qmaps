@@ -78,22 +78,27 @@ const CategoryPage = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       <Seo
-        title={title}
-        description={description}
+        title={category ? title : `Catégorie introuvable | QMaps`}
+        description={category ? description : `Cette catégorie n'existe pas sur QMaps.`}
         canonicalPath={canonical}
         image={businesses[0]?.image_url || undefined}
+        noindex={!loading && !category}
         jsonLdId="category"
-        jsonLd={{
+        jsonLd={category ? {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: title,
           description,
-        }}
+        } : undefined}
       />
 
       <header className="px-4 pt-6 pb-4">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {cityLabel ? `${cityLabel} · Catégorie` : "Catégorie"}
+          {cityLabel ? (
+            <Link to={`/city/${citySlug}`} className="hover:text-foreground">
+              {cityLabel} · Catégorie
+            </Link>
+          ) : "Catégorie"}
         </p>
         <h1 className="font-heading text-3xl font-bold mt-1">{heading}</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -101,6 +106,11 @@ const CategoryPage = () => {
             ? `Les meilleurs ${heading} à ${cityLabel}.`
             : `Découvrez les meilleurs ${heading} sur QMaps.`}
         </p>
+        {cityLabel && category && (
+          <Link to={`/c/${categorySlug}`} className="text-xs text-primary underline mt-2 inline-block">
+            Voir tous les {category.name} →
+          </Link>
+        )}
       </header>
 
       <section className="px-4 space-y-3">
