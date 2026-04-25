@@ -357,9 +357,12 @@ const CampaignCard = ({
     { key: "all", label: "Tout" },
   ];
 
-  const trendPct = (current: number, previous?: number): number | null => {
+  const trendPct = (
+    current: number,
+    previous?: number,
+  ): number | "new" | null => {
     if (previous === undefined || previous === null) return null;
-    if (previous === 0) return current > 0 ? 100 : 0;
+    if (previous === 0) return current > 0 ? "new" : null;
     return ((current - previous) / previous) * 100;
   };
 
