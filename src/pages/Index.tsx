@@ -8,6 +8,8 @@ import NearbySection from "@/components/home/NearbySection";
 import FeaturedBusinesses from "@/components/home/FeaturedBusinesses";
 import TrendingCollections from "@/components/home/TrendingCollections";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
+import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { mapBusinessToCard } from "@/lib/business";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,6 +18,7 @@ const Index = () => {
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [loading, setLoading] = useState(true);
   const { businesses: nearbyBusinesses } = useNearbyBusinesses(4);
+  const { recommended, trending, loading: recLoading } = useRecommendedBusinesses({ limit: 5 });
 
   useEffect(() => {
     const fetchBusinesses = async () => {
@@ -57,6 +60,21 @@ const Index = () => {
       {/* Feed */}
       <div className="px-4 mt-4 space-y-4">
         <NearbySection title="À proximité" businesses={nearbyBusinesses} />
+        <RecommendedSection
+          title="Recommandé pour vous"
+          subtitle="Basé sur ce que vous consultez et enregistrez"
+          source="home_for_you"
+          loading={recLoading}
+          items={recommended.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
+        />
+        <RecommendedSection
+          title="Tendance près de vous"
+          subtitle="Les commerces dont on parle en ce moment"
+          source="home_trending"
+          loading={recLoading}
+          showReasonChips={false}
+          items={trending.slice(0, 4).map((b) => ({ business: b }))}
+        />
         <FeaturedBusinesses businesses={businesses.slice(0, 3)} />
         <TrendingCollections />
 

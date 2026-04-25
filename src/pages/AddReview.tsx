@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import NearbyBusinessPicker from "@/components/business/NearbyBusinessPicker";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { useToast } from "@/hooks/use-toast";
+import { useReviewTrust } from "@/hooks/useReviewTrust";
 import BottomNav from "@/components/BottomNav";
 
 const AddReview = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { submitReviewForScoring } = useReviewTrust();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const { businesses: nearby, loading: nearbyLoading, error: nearbyError, refresh } = useNearbyBusinesses(8);
@@ -33,17 +35,19 @@ const AddReview = () => {
   const handleSave = async () => {
     if (!user || !selectedBusiness || rating < 1) return;
     setSaving(true);
-    const { error } = await supabase.from("reviews").upsert({
+    const { data: inserted, error } = await supabase.from("reviews").upsert({
       business_id: selectedBusiness.id,
       user_id: user.id,
       rating,
       body,
-    }, { onConflict: "business_id,user_id" });
+    }, { onConflict: "business_id,user_id" }).select("id").maybeSingle();
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Avis publié" });
+      // Fire-and-forget background scoring; never blocks UX
+      if (inserted?.id) void submitReviewForScoring(inserted.id);
       navigate(`/business/${selectedBusiness.id}?tab=reviews`);
     }
     setSaving(false);

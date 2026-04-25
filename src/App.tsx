@@ -14,6 +14,7 @@ import AdminPhotos from "./pages/admin/AdminPhotos";
 import AdminProjects from "./pages/admin/AdminProjects";
 import AdminSponsored from "./pages/admin/AdminSponsored";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminReviewModeration from "./pages/admin/AdminReviewModeration";
 import MerchantSponsored from "./pages/MerchantSponsored";
 import Index from "./pages/Index";
 import BusinessDetail from "./pages/BusinessDetail";
@@ -171,6 +172,7 @@ const App = () => (
             <Route path="/admin/projects" element={<ProtectedAdminRoute><AdminProjects /></ProtectedAdminRoute>} />
             <Route path="/admin/sponsored" element={<ProtectedAdminRoute><AdminSponsored /></ProtectedAdminRoute>} />
             <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
+            <Route path="/admin/review-moderation" element={<ProtectedAdminRoute><AdminReviewModeration /></ProtectedAdminRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
