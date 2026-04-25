@@ -11,6 +11,8 @@ admin routes and database tables it touches.
 | Account deletions | [`../account-deletion-support-workflow.md`](../account-deletion-support-workflow.md) |
 | Sponsored campaigns | [`sponsored-playbook.md`](./sponsored-playbook.md) |
 | Billing & subscriptions | [`billing-playbook.md`](./billing-playbook.md) |
+| Incident response | [`incident-response-playbook.md`](./incident-response-playbook.md) |
+| Post-launch daily checks | [`post-launch-daily-checks.md`](./post-launch-daily-checks.md) |
 
 For the production launch dashboard, see
 [`../launch-checklist.md`](../launch-checklist.md).

@@ -63,6 +63,14 @@ For the launch owner handoff pack and final sign-off form, see:
 - Account deletions — `docs/account-deletion-support-workflow.md`
 - Sponsored campaigns — `docs/admin/sponsored-playbook.md`
 - Billing & subscriptions — `docs/admin/billing-playbook.md`
+- Incident response — `docs/admin/incident-response-playbook.md`
+- Daily admin checks — `docs/admin/post-launch-daily-checks.md`
+
+## 5b. Post-launch operations
+
+- Post-launch checklist (T+0 → T+72h) — [`docs/post-launch-checklist.md`](./post-launch-checklist.md)
+- Incident response playbook — [`docs/admin/incident-response-playbook.md`](./admin/incident-response-playbook.md)
+- Daily admin checks — [`docs/admin/post-launch-daily-checks.md`](./admin/post-launch-daily-checks.md)
 
 ## 6. Rollback plan
 

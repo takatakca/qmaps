@@ -33,6 +33,9 @@ bun run go:no-go:report   # writes JSON to docs/go-no-go-report.generated.json
 | Generated release status snapshot | [`docs/release-status.generated.md`](./release-status.generated.md) |
 | Release notes (public) | [`docs/release-notes.md`](./release-notes.md) |
 | Owner sign-off form | [`docs/final-owner-signoff.md`](./final-owner-signoff.md) |
+| Post-launch checklist (T+0 → T+72h) | [`docs/post-launch-checklist.md`](./post-launch-checklist.md) |
+| Incident response playbook | [`docs/admin/incident-response-playbook.md`](./admin/incident-response-playbook.md) |
+| Daily admin checks | [`docs/admin/post-launch-daily-checks.md`](./admin/post-launch-daily-checks.md) |
 | App store readiness | [`docs/app-store-readiness.md`](./app-store-readiness.md) |
 | Mobile QA checklist | [`docs/mobile-qa-checklist.md`](./mobile-qa-checklist.md) |
 
