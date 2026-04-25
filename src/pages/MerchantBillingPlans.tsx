@@ -144,7 +144,9 @@ const MerchantBillingPlans = () => {
           {PLANS.map((p) => {
             const isCurrent = !subLoading && currentPlan === p.key;
             const cta: PlanDefinition["cta"] = isCurrent ? "current" : p.cta;
-            const disabled = cta === "current" || cta === "coming_soon";
+            const isLoading = checkoutLoading === p.key;
+            const disabled =
+              cta === "current" || cta === "coming_soon" || isLoading;
             return (
               <Card
                 key={p.key}
@@ -185,10 +187,18 @@ const MerchantBillingPlans = () => {
                       if (cta === "contact") {
                         window.location.href =
                           "mailto:hello@qmaps.app?subject=Plan Premium";
+                        return;
+                      }
+                      if (cta === "checkout") {
+                        startCheckout(p.key);
                       }
                     }}
                   >
-                    {ctaLabel(cta)}
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      ctaLabel(cta)
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -197,7 +207,7 @@ const MerchantBillingPlans = () => {
         </div>
 
         <div className="text-xs text-muted-foreground text-center pt-2">
-          Aucun paiement n'est traité pour le moment. Les plans payants arrivent bientôt.
+          Le paiement est traité de façon sécurisée. Vous pouvez annuler à tout moment.
         </div>
       </div>
     </div>
