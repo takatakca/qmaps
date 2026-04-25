@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
-import { PLANS, type PlanDefinition } from "@/lib/billing";
+import { PLANS, type PlanDefinition, type PlanKey } from "@/lib/billing";
+import { useToast } from "@/hooks/use-toast";
 import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -19,6 +20,8 @@ const ctaLabel = (cta: PlanDefinition["cta"]): string => {
       return "Bientôt disponible";
     case "contact":
       return "Contacter QMaps";
+    case "checkout":
+      return "Choisir ce plan";
     default:
       return "Choisir";
   }
@@ -26,9 +29,11 @@ const ctaLabel = (cta: PlanDefinition["cta"]): string => {
 
 const MerchantBillingPlans = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const [businesses, setBusinesses] = useState<Pick<Tables<"businesses">, "id" | "name">[]>([]);
   const [selectedBizId, setSelectedBizId] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<PlanKey | null>(null);
   const { plan: currentPlan, loading: subLoading } = useMerchantSubscription(selectedBizId);
 
   useEffect(() => {
@@ -43,6 +48,59 @@ const MerchantBillingPlans = () => {
       if (list.length > 0) setSelectedBizId(list[0].id);
     })();
   }, [user, authLoading]);
+
+  const startCheckout = async (plan: PlanKey) => {
+    if (!selectedBizId) {
+      toast({
+        title: "Aucune entreprise",
+        description: "Réclamez d'abord une entreprise pour souscrire à un plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setCheckoutLoading(plan);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "create-merchant-checkout-session",
+        { body: { business_id: selectedBizId, plan } }
+      );
+      if (error) throw error;
+      const payload = data as { url?: string; error?: string; message?: string };
+      if (payload?.url) {
+        window.location.href = payload.url;
+        return;
+      }
+      if (payload?.error === "provider_not_configured" || payload?.error === "price_not_configured") {
+        toast({
+          title: "Bientôt disponible",
+          description: payload.message || "Les paiements ne sont pas encore activés.",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: payload?.message || "Impossible de démarrer le paiement.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Edge function returns 503 with provider_not_configured when Stripe isn't set up.
+      if (msg.includes("provider_not_configured") || msg.includes("503")) {
+        toast({
+          title: "Bientôt disponible",
+          description: "Les paiements arrivent bientôt sur QMaps.",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible de démarrer le paiement.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background max-w-2xl mx-auto pb-20">
@@ -86,7 +144,9 @@ const MerchantBillingPlans = () => {
           {PLANS.map((p) => {
             const isCurrent = !subLoading && currentPlan === p.key;
             const cta: PlanDefinition["cta"] = isCurrent ? "current" : p.cta;
-            const disabled = cta === "current" || cta === "coming_soon";
+            const isLoading = checkoutLoading === p.key;
+            const disabled =
+              cta === "current" || cta === "coming_soon" || isLoading;
             return (
               <Card
                 key={p.key}
@@ -127,10 +187,18 @@ const MerchantBillingPlans = () => {
                       if (cta === "contact") {
                         window.location.href =
                           "mailto:hello@qmaps.app?subject=Plan Premium";
+                        return;
+                      }
+                      if (cta === "checkout") {
+                        startCheckout(p.key);
                       }
                     }}
                   >
-                    {ctaLabel(cta)}
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      ctaLabel(cta)
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -139,7 +207,7 @@ const MerchantBillingPlans = () => {
         </div>
 
         <div className="text-xs text-muted-foreground text-center pt-2">
-          Aucun paiement n'est traité pour le moment. Les plans payants arrivent bientôt.
+          Le paiement est traité de façon sécurisée. Vous pouvez annuler à tout moment.
         </div>
       </div>
     </div>
