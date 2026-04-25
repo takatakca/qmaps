@@ -1,6 +1,18 @@
+// Phase 7C — Stripe test-mode checklist (developer reference, not user-facing):
+//   1. Add secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+//      STRIPE_STARTER_PRICE_ID, STRIPE_PRO_PRICE_ID, STRIPE_PREMIUM_PRICE_ID
+//   2. Deploy edge functions (checkout, portal, webhook)
+//   3. Configure Stripe webhook endpoint -> /functions/v1/stripe-webhook
+//   4. Create test prices in Stripe (test mode) and copy IDs into the secrets above
+//   5. From /merchant/billing/plans click "Choisir ce plan"
+//   6. Complete checkout with test card 4242 4242 4242 4242
+//   7. Verify a row appears/updates in merchant_subscriptions for the business
+//   8. Verify a row appears in merchant_billing_events with provider_event_id
+//   9. Open billing portal via "Gérer l'abonnement"
+//  10. Cancel subscription in Stripe portal — verify cancel_at_period_end + status
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight } from "lucide-react";
+import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +36,7 @@ const MerchantBilling = () => {
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [cardName, setCardName] = useState("");
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [events, setEvents] = useState<Tables<"merchant_billing_events">[]>([]);
