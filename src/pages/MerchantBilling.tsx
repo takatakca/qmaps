@@ -107,14 +107,45 @@ const MerchantBilling = () => {
                     Vous êtes sur le plan gratuit. Découvrez ce que les plans payants offrent.
                   </p>
                 )}
-                <Button
-                  variant="outline"
-                  className="w-full justify-between rounded-full"
-                  onClick={() => navigate("/merchant/billing/plans")}
-                >
-                  <span>Voir les plans</span>
-                  <ChevronRight size={16} />
-                </Button>
+                {subscription?.provider_customer_id ? (
+                  <Button
+                    className="w-full justify-between rounded-full"
+                    onClick={async () => {
+                      const { data, error } = await supabase.functions.invoke(
+                        "create-merchant-billing-portal-session",
+                        { body: { business_id: businessId } }
+                      );
+                      const payload = data as { url?: string; error?: string; message?: string };
+                      if (!error && payload?.url) {
+                        window.location.href = payload.url;
+                        return;
+                      }
+                      if (payload?.error === "provider_not_configured") {
+                        toast({ title: "Bientôt disponible", description: payload.message });
+                      } else if (payload?.error === "no_customer") {
+                        navigate("/merchant/billing/plans");
+                      } else {
+                        toast({
+                          title: "Erreur",
+                          description: payload?.message || "Impossible d'ouvrir le portail.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    <span>Gérer l'abonnement</span>
+                    <ChevronRight size={16} />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between rounded-full"
+                    onClick={() => navigate("/merchant/billing/plans")}
+                  >
+                    <span>Voir les plans</span>
+                    <ChevronRight size={16} />
+                  </Button>
+                )}
               </>
             )}
           </CardContent>
