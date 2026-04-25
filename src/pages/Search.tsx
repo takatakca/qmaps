@@ -222,11 +222,22 @@ const Search = () => {
 
           <div className="space-y-4">
             {businesses.map(b => (
-              <BusinessCard key={b.id} business={mapBusinessToCard({
-                ...b,
-                category_name: categories.find(cat => cat.slug === selectedCategory)?.name || "Local",
-                distance_meters: nearbyBusinesses.find(item => item.id === b.id)?.distance_meters,
-              })} />
+              <div
+                key={b.id}
+                onMouseDown={() => trackRecommendationEvent({
+                  business_id: b.id,
+                  event_type: "search_click",
+                  source: "search_results",
+                  city: b.city ?? null,
+                  metadata: { query, category: selectedCategory || null },
+                })}
+              >
+                <BusinessCard business={mapBusinessToCard({
+                  ...b,
+                  category_name: categories.find(cat => cat.slug === selectedCategory)?.name || "Local",
+                  distance_meters: nearbyBusinesses.find(item => item.id === b.id)?.distance_meters,
+                })} />
+              </div>
             ))}
 
             {!query && nearbyBusinesses.length > 0 && (
