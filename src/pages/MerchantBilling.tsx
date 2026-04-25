@@ -18,11 +18,42 @@ import type { Tables } from "@/integrations/supabase/types";
 const MerchantBilling = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showAddCard, setShowAddCard] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [cardName, setCardName] = useState("");
+
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [events, setEvents] = useState<Tables<"merchant_billing_events">[]>([]);
+  const { subscription, plan, status, isFree, loading: subLoading } = useMerchantSubscription(businessId);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) setBusinessId(data.id);
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (!businessId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("merchant_billing_events")
+        .select("*")
+        .eq("business_id", businessId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      setEvents(data || []);
+    })();
+  }, [businessId]);
 
   const handleAddCard = () => {
     if (!cardNumber || !expiry || !cvc || !cardName) {
@@ -33,6 +64,10 @@ const MerchantBilling = () => {
     setShowAddCard(false);
     setCardNumber(""); setExpiry(""); setCvc(""); setCardName("");
   };
+
+  const periodEnd = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString("fr-CA")
+    : null;
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto">
