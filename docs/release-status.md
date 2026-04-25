@@ -69,6 +69,9 @@ For the launch owner handoff pack and final sign-off form, see:
 ## 5b. Post-launch operations
 
 - Post-launch checklist (T+0 → T+72h) — [`docs/post-launch-checklist.md`](./post-launch-checklist.md)
+- First 72 hours monitoring — [`docs/admin/first-72-hours-monitoring.md`](./admin/first-72-hours-monitoring.md)
+- Production verification log — [`docs/production-verification-log.md`](./production-verification-log.md)
+- Post-launch issue tracker — [`docs/post-launch-issue-tracker.md`](./post-launch-issue-tracker.md)
 - Incident response playbook — [`docs/admin/incident-response-playbook.md`](./admin/incident-response-playbook.md)
 - Daily admin checks — [`docs/admin/post-launch-daily-checks.md`](./admin/post-launch-daily-checks.md)
 
