@@ -223,6 +223,47 @@ export type Database = {
           },
         ]
       }
+      business_recommendation_scores: {
+        Row: {
+          business_id: string
+          computed_at: string
+          id: string
+          reason_codes: string[]
+          reasons: Json
+          score: number
+          source: string
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          computed_at?: string
+          id?: string
+          reason_codes?: string[]
+          reasons?: Json
+          score?: number
+          source?: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          computed_at?: string
+          id?: string
+          reason_codes?: string[]
+          reasons?: Json
+          score?: number
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_recommendation_scores_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string
@@ -929,6 +970,101 @@ export type Database = {
           },
         ]
       }
+      recommendation_events: {
+        Row: {
+          business_id: string
+          category_id: string | null
+          city: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          session_id: string | null
+          source: string | null
+          user_id: string | null
+          weight: number
+        }
+        Insert: {
+          business_id: string
+          category_id?: string | null
+          city?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+          weight?: number
+        }
+        Update: {
+          business_id?: string
+          category_id?: string | null
+          city?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recommendation_events_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recommendation_feedback: {
+        Row: {
+          business_id: string
+          created_at: string
+          feedback_type: string
+          id: string
+          metadata: Json
+          recommendation_source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          feedback_type: string
+          id?: string
+          metadata?: Json
+          recommendation_source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          metadata?: Json
+          recommendation_source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_feedback_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -973,6 +1109,91 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      review_moderation_actions: {
+        Row: {
+          action: string
+          actor_user_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          new_status: string | null
+          previous_status: string | null
+          reason: string | null
+          review_id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_status?: string | null
+          previous_status?: string | null
+          reason?: string | null
+          review_id: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_status?: string | null
+          previous_status?: string | null
+          reason?: string | null
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_moderation_actions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_moderation_signals: {
+        Row: {
+          created_at: string
+          explanation: string
+          id: string
+          metadata: Json
+          review_id: string
+          score: number
+          severity: string
+          signal_type: string
+        }
+        Insert: {
+          created_at?: string
+          explanation: string
+          id?: string
+          metadata?: Json
+          review_id: string
+          score?: number
+          severity?: string
+          signal_type: string
+        }
+        Update: {
+          created_at?: string
+          explanation?: string
+          id?: string
+          metadata?: Json
+          review_id?: string
+          score?: number
+          severity?: string
+          signal_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_moderation_signals_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_photos: {
         Row: {
@@ -1041,6 +1262,59 @@ export type Database = {
           },
         ]
       }
+      review_trust_scores: {
+        Row: {
+          computed_by: string
+          created_at: string
+          id: string
+          review_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_level: string
+          risk_score: number
+          status: string
+          summary: string | null
+          trust_score: number
+          updated_at: string
+        }
+        Insert: {
+          computed_by?: string
+          created_at?: string
+          id?: string
+          review_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_level?: string
+          risk_score?: number
+          status?: string
+          summary?: string | null
+          trust_score?: number
+          updated_at?: string
+        }
+        Update: {
+          computed_by?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_level?: string
+          risk_score?: number
+          status?: string
+          summary?: string | null
+          trust_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_trust_scores_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           body: string | null
@@ -1048,7 +1322,11 @@ export type Database = {
           cool: number
           created_at: string
           funny: number
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
           id: string
+          moderation_status: string
           rating: number
           updated_at: string
           useful: number
@@ -1060,7 +1338,11 @@ export type Database = {
           cool?: number
           created_at?: string
           funny?: number
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
           id?: string
+          moderation_status?: string
           rating: number
           updated_at?: string
           useful?: number
@@ -1072,7 +1354,11 @@ export type Database = {
           cool?: number
           created_at?: string
           funny?: number
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
           id?: string
+          moderation_status?: string
           rating?: number
           updated_at?: string
           useful?: number
@@ -1237,6 +1523,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_preference_profiles: {
+        Row: {
+          avg_rating_preference: number | null
+          created_at: string
+          id: string
+          last_computed_at: string | null
+          metadata: Json
+          price_preference: number | null
+          top_category_ids: string[]
+          top_cities: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_rating_preference?: number | null
+          created_at?: string
+          id?: string
+          last_computed_at?: string | null
+          metadata?: Json
+          price_preference?: number | null
+          top_category_ids?: string[]
+          top_cities?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_rating_preference?: number | null
+          created_at?: string
+          id?: string
+          last_computed_at?: string | null
+          metadata?: Json
+          price_preference?: number | null
+          top_category_ids?: string[]
+          top_cities?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
