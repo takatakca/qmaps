@@ -23,8 +23,10 @@ export interface PlanDefinition {
   tagline: string;
   priceLabel: string;
   features: string[];
-  cta: "current" | "coming_soon" | "contact" | "upgrade";
+  cta: "current" | "coming_soon" | "contact" | "upgrade" | "checkout";
   highlighted?: boolean;
+  /** Whether this plan can be purchased through a payment provider checkout flow. */
+  checkoutEligible?: boolean;
 }
 
 export const PLANS: PlanDefinition[] = [
