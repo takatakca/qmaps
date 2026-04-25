@@ -36,6 +36,7 @@ const SMOKE_ROUTES = [
   "/account-deletion-policy",
   "/support-policy",
   "/cookies",
+  "/release-notes",
 
   // Authenticated user
   "/profile",
