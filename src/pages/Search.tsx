@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { formatDistance } from "@/lib/geo";
 import { mapBusinessToCard } from "@/lib/business";
+import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
