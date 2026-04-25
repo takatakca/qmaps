@@ -357,6 +357,43 @@ const CampaignCard = ({
     { key: "all", label: "Tout" },
   ];
 
+  const trendPct = (current: number, previous?: number): number | null => {
+    if (previous === undefined || previous === null) return null;
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  const handleExport = () => {
+    const safeTitle = (campaign.headline || "campagne")
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "campagne";
+    const rows: string[][] = [
+      ["Campagne", campaign.headline || ""],
+      ["Période", SPONSORED_RANGE_LABELS[range]],
+      ["Statut", SPONSORED_STATUS_LABELS[status]],
+      [],
+      ["Métrique", "Valeur"],
+      ["Impressions", String(metrics.impressions)],
+      ["Clics", String(metrics.clicks)],
+      ["CTR", formatCtr(metrics.impressions, metrics.clicks)],
+      [],
+      ["Emplacement", "Impressions", "Clics", "CTR"],
+      ...metrics.byPlacement.map((p) => [
+        SPONSORED_PLACEMENT_LABELS[p.placement as SponsoredPlacement] ?? p.placement,
+        String(p.impressions),
+        String(p.clicks),
+        formatCtr(p.impressions, p.clicks),
+      ]),
+      [],
+      ["Date", "Impressions", "Clics"],
+      ...metrics.byDay.map((d) => [d.day, String(d.impressions), String(d.clicks)]),
+    ];
+    downloadCsv(`sponsored-${safeTitle}-${range}.csv`, rows);
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-3">
       <div className="flex items-start justify-between gap-2">
