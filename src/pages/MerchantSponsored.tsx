@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   useSponsoredCampaigns,
   useSponsoredCampaignMetrics,
+  type SponsoredMetricsRange,
 } from "@/hooks/useSponsoredCampaigns";
 import {
   SPONSORED_PLACEMENT_LABELS,
