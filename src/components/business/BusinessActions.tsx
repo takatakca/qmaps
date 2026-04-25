@@ -1,7 +1,9 @@
 import { Star, ExternalLink, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackBusinessEvent } from "@/lib/analytics";
 
 interface BusinessActionsProps {
+  businessId?: string;
   priceLevel: number | null;
   categoryName: string;
   isOpen: boolean;
@@ -13,7 +15,17 @@ interface BusinessActionsProps {
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
 
-const BusinessActions = ({ priceLevel, categoryName, isOpen, hours, website, phone, onWriteReview }: BusinessActionsProps) => {
+const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, website, phone, onWriteReview }: BusinessActionsProps) => {
+  const handleWebsite = () => {
+    if (!website) return;
+    if (businessId) trackBusinessEvent(businessId, "website_click", { source: "business_detail" });
+    window.open(website, "_blank");
+  };
+  const handlePhone = () => {
+    if (!phone) return;
+    if (businessId) trackBusinessEvent(businessId, "phone_click", { source: "business_detail" });
+    window.open(`tel:${phone}`);
+  };
   return (
     <div className="px-4 pt-4">
       {/* Category + status */}
@@ -43,7 +55,7 @@ const BusinessActions = ({ priceLevel, categoryName, isOpen, hours, website, pho
           <Button
             variant="outline"
             className="gap-2 rounded-full"
-            onClick={() => window.open(website, "_blank")}
+            onClick={handleWebsite}
           >
             <ExternalLink size={14} /> Site web
           </Button>
@@ -53,7 +65,7 @@ const BusinessActions = ({ priceLevel, categoryName, isOpen, hours, website, pho
             variant="outline"
             size="icon"
             className="rounded-full shrink-0"
-            onClick={() => window.open(`tel:${phone}`)}
+            onClick={handlePhone}
           >
             <Phone size={14} />
           </Button>

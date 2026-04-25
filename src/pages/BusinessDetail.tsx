@@ -100,6 +100,7 @@ const BusinessDetail = () => {
 
       {/* Actions */}
       <BusinessActions
+        businessId={business.id}
         priceLevel={business.price_level}
         categoryName=""
         isOpen={business.is_open}
