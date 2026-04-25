@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Truck, Droplets, Zap, Wrench, Paintbrush, Car, HardHat, Sparkles, MoreHorizontal } from "lucide-react";
+import { Truck, Droplets, Zap, Wrench, Car, HardHat, Sparkles, MoreHorizontal, Plus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useProjectRequests } from "@/hooks/useProjectRequests";
+import StartProjectSheet from "@/components/projects/StartProjectSheet";
+import ProjectRequestCard from "@/components/projects/ProjectRequestCard";
 import cafeImg from "@/assets/cafe-1.jpg";
 import restaurantImg from "@/assets/restaurant-1.jpg";
 import cleaningImg from "@/assets/cleaning.jpg";
