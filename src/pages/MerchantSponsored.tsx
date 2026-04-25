@@ -296,6 +296,19 @@ const CampaignCard = ({
   onPause: () => Promise<void>;
 }) => {
   const metrics = useSponsoredCampaignMetrics(campaign.id);
+  const [acting, setActing] = useState(false);
+  const status = campaign.status as SponsoredStatus;
+  const isRejected = status === "rejected";
+
+  const wrap = (fn: () => Promise<void>) => async () => {
+    setActing(true);
+    try {
+      await fn();
+    } finally {
+      setActing(false);
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-3">
       <div className="flex items-start justify-between gap-2">
@@ -308,42 +321,67 @@ const CampaignCard = ({
             {campaign.target_city ? ` · ${campaign.target_city}` : ""}
           </p>
         </div>
-        <Badge
-          variant="secondary"
-          className={STATUS_VARIANTS[campaign.status as SponsoredStatus]}
-        >
-          {SPONSORED_STATUS_LABELS[campaign.status as SponsoredStatus]}
+        <Badge variant="secondary" className={STATUS_VARIANTS[status]}>
+          {SPONSORED_STATUS_LABELS[status]}
         </Badge>
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-3 text-center">
         <Metric label="Impressions" value={metrics.impressions} />
         <Metric label="Clics" value={metrics.clicks} />
-        <Metric
-          label="CTR"
-          value={`${(metrics.ctr * 100).toFixed(1)}%`}
-        />
+        <Metric label="CTR" value={`${(metrics.ctr * 100).toFixed(1)}%`} />
       </div>
 
-      {campaign.admin_note && (
+      {isRejected && campaign.admin_note && (
+        <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+          <p className="text-xs font-bold text-destructive mb-1">
+            Campagne rejetée
+          </p>
+          <p className="text-xs text-destructive/90">{campaign.admin_note}</p>
+        </div>
+      )}
+      {!isRejected && campaign.admin_note && (
         <p className="text-xs text-muted-foreground mt-2 bg-muted/50 rounded p-2">
           Note admin: {campaign.admin_note}
         </p>
       )}
 
       <div className="flex gap-2 mt-3">
-        {campaign.status === "draft" && (
-          <Button size="sm" variant="outline" className="flex-1" onClick={onSubmit}>
+        {status === "draft" && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={wrap(onSubmit)}
+            disabled={acting}
+          >
             <Send size={14} className="mr-1" /> Soumettre
           </Button>
         )}
-        {(campaign.status === "approved" || campaign.status === "pending_review") && (
-          <Button size="sm" variant="outline" className="flex-1" onClick={onPause}>
+        {status === "pending_review" && (
+          <Button size="sm" variant="outline" className="flex-1" disabled>
+            En attente de révision
+          </Button>
+        )}
+        {status === "approved" && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={wrap(onPause)}
+            disabled={acting}
+          >
             <Pause size={14} className="mr-1" /> Mettre en pause
           </Button>
         )}
-        {campaign.status === "paused" && (
-          <Button size="sm" variant="outline" className="flex-1" onClick={onSubmit}>
+        {status === "paused" && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={wrap(onSubmit)}
+            disabled={acting}
+          >
             <Send size={14} className="mr-1" /> Resoumettre
           </Button>
         )}
