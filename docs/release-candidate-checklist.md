@@ -7,6 +7,10 @@ release-candidate sign-off. Use it for **each RC build** before tagging a
 production publish. It mirrors the structure of `src/lib/launchChecks.ts`
 so the in-app `/admin/launch-status` page and this doc stay aligned.
 
+> **Tip:** run `bun run launch:check` to validate static launch-blocking
+> artifacts (robots, manifest, legal pages, docs) in one shot. The same
+> script runs in CI between tests and build.
+
 ---
 
 ## 1. Environment & secrets
