@@ -6,6 +6,21 @@
 //
 // Auth: requires a valid Supabase JWT (any signed-in user can request scoring
 // of an existing review). All writes are performed with the service role.
+//
+// Environment variables (all optional except SUPABASE_SERVICE_ROLE_KEY):
+//   AI_REVIEW_ANALYSIS_ENABLED  "true" to allow the optional AI layer.
+//                               Default "false" (deterministic rules only).
+//   LOVABLE_API_KEY             Auto-provisioned by Lovable AI gateway. If
+//                               missing the function returns rules-only,
+//                               never throwing or breaking review publishing.
+//   REVIEW_AUTO_HIDE_ENABLED    "true" to auto-hide critical-risk reviews.
+//                               Default "false". High-risk never auto-hides;
+//                               it only sets moderation_status=needs_review.
+//   SUPABASE_SERVICE_ROLE_KEY   Required for DB writes (signals, trust,
+//                               moderation_status). Without it the function
+//                               returns a safe rules-only JSON envelope and
+//                               does NOT throw — review publishing keeps
+//                               working regardless.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
@@ -176,10 +191,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // User profile (created_at)
-    const { data: { users } } = await admin.auth.admin.listUsers({ page: 1, perPage: 1, filter: `id eq.${review.user_id}` } as any).catch(() => ({ data: { users: [] as any[] } } as any));
-    const reviewer = (users ?? []).find((u: any) => u.id === review.user_id);
-    const userCreatedAt: string | null = reviewer?.created_at ?? null;
+    // Reviewer account age — use getUserById (supported), never throw.
+    let userCreatedAt: string | null = null;
+    try {
+      const { data: userRes } = await admin.auth.admin.getUserById(review.user_id);
+      userCreatedAt = (userRes?.user as any)?.created_at ?? null;
+    } catch (_e) {
+      // Treat as unknown account age. new_account signal will simply not fire.
+      userCreatedAt = null;
+    }
 
     // User's recent reviews (24h burst)
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
