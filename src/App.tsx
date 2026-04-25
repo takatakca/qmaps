@@ -12,7 +12,9 @@ import AdminBusinesses from "./pages/admin/AdminBusinesses";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminPhotos from "./pages/admin/AdminPhotos";
 import AdminProjects from "./pages/admin/AdminProjects";
+import AdminSponsored from "./pages/admin/AdminSponsored";
 import AdminUsers from "./pages/admin/AdminUsers";
+import MerchantSponsored from "./pages/MerchantSponsored";
 import Index from "./pages/Index";
 import BusinessDetail from "./pages/BusinessDetail";
 import Profile from "./pages/Profile";
@@ -158,6 +160,7 @@ const App = () => (
             <Route path="/merchant/leads" element={<ProtectedMerchantRoute><MerchantLeads /></ProtectedMerchantRoute>} />
             <Route path="/merchant/services" element={<ProtectedMerchantRoute><MerchantServiceSetup /></ProtectedMerchantRoute>} />
             <Route path="/merchant/analytics" element={<ProtectedMerchantRoute><MerchantAnalytics /></ProtectedMerchantRoute>} />
+            <Route path="/merchant/sponsored" element={<ProtectedMerchantRoute><MerchantSponsored /></ProtectedMerchantRoute>} />
 
             {/* Admin routes */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
@@ -166,6 +169,7 @@ const App = () => (
             <Route path="/admin/reviews" element={<ProtectedAdminRoute><AdminReviews /></ProtectedAdminRoute>} />
             <Route path="/admin/photos" element={<ProtectedAdminRoute><AdminPhotos /></ProtectedAdminRoute>} />
             <Route path="/admin/projects" element={<ProtectedAdminRoute><AdminProjects /></ProtectedAdminRoute>} />
+            <Route path="/admin/sponsored" element={<ProtectedAdminRoute><AdminSponsored /></ProtectedAdminRoute>} />
             <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
 
             <Route path="*" element={<NotFound />} />
