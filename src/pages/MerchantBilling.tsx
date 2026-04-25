@@ -80,6 +80,46 @@ const MerchantBilling = () => {
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Current plan */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              Plan actuel <Sparkles size={16} className="text-primary" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {subLoading ? (
+              <p className="text-sm text-muted-foreground">Chargement...</p>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-foreground">{planLabel(plan)}</span>
+                  <Badge variant={isFree ? "secondary" : "default"}>{statusLabel(status)}</Badge>
+                </div>
+                {periodEnd && (
+                  <p className="text-xs text-muted-foreground">
+                    Période en cours jusqu'au {periodEnd}
+                    {subscription?.cancel_at_period_end ? " — annulation prévue" : ""}
+                  </p>
+                )}
+                {isFree && (
+                  <p className="text-xs text-muted-foreground">
+                    Vous êtes sur le plan gratuit. Découvrez ce que les plans payants offrent.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full justify-between rounded-full"
+                  onClick={() => navigate("/merchant/billing/plans")}
+                >
+                  <span>Voir les plans</span>
+                  <ChevronRight size={16} />
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Billing Summary */}
         <Card>
           <CardHeader className="pb-2">
