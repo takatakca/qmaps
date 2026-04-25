@@ -138,6 +138,7 @@ const Projects = () => {
       </div>
 
       <BottomNav />
+      <StartProjectSheet open={startOpen} onOpenChange={setStartOpen} />
     </div>
   );
 };
