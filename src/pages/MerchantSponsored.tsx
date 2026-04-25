@@ -396,9 +396,33 @@ const CampaignCard = ({
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-        <Metric label="Impressions" value={metrics.impressions} />
-        <Metric label="Clics" value={metrics.clicks} />
-        <Metric label="CTR" value={formatCtr(metrics.impressions, metrics.clicks)} />
+        <Metric
+          label="Impressions"
+          value={metrics.impressions}
+          trend={trendPct(metrics.impressions, metrics.previous?.impressions)}
+        />
+        <Metric
+          label="Clics"
+          value={metrics.clicks}
+          trend={trendPct(metrics.clicks, metrics.previous?.clicks)}
+        />
+        <Metric
+          label="CTR"
+          value={formatCtr(metrics.impressions, metrics.clicks)}
+          tooltip="CTR = clics ÷ impressions. Indique le pourcentage d'utilisateurs qui ont cliqué après avoir vu votre annonce."
+        />
+      </div>
+
+      <div className="flex justify-end mt-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-[11px] text-muted-foreground"
+          onClick={handleExport}
+          disabled={metrics.impressions === 0 && metrics.clicks === 0}
+        >
+          <Download size={12} className="mr-1" /> Exporter CSV
+        </Button>
       </div>
 
       <div className="mt-3">
