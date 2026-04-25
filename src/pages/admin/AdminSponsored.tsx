@@ -151,6 +151,8 @@ const AdminSponsored = () => {
                   </Badge>
                 </div>
 
+                <CampaignMetricsRow campaignId={r.id} />
+
                 <Textarea
                   className="mt-3"
                   placeholder="Note admin (optionnel)"
