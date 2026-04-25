@@ -36,8 +36,46 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+
+const dayLabelFormatter = new Intl.DateTimeFormat("fr-CA", {
+  day: "2-digit",
+  month: "short",
+});
+
+const formatDayLabel = (isoDay: string): string => {
+  // isoDay = "YYYY-MM-DD"; build a local-noon date to avoid TZ off-by-one.
+  const [y, m, d] = isoDay.split("-").map((n) => parseInt(n, 10));
+  if (!y || !m || !d) return isoDay;
+  const dt = new Date(y, m - 1, d, 12, 0, 0);
+  return dayLabelFormatter.format(dt);
+};
+
+const csvEscape = (v: unknown): string => {
+  const s = v === null || v === undefined ? "" : String(v);
+  if (/[",\n;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+};
+
+const downloadCsv = (filename: string, rows: string[][]): void => {
+  const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
 const STATUS_VARIANTS: Record<SponsoredStatus, string> = {
   draft: "bg-muted text-muted-foreground",
