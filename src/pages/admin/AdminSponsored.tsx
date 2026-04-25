@@ -138,6 +138,12 @@ const AdminSponsored = () => {
                     {r.description && (
                       <p className="text-sm mt-2">{r.description}</p>
                     )}
+                    {r.reviewed_at && (
+                      <p className="text-[11px] text-muted-foreground mt-2">
+                        Révisée le {new Date(r.reviewed_at).toLocaleString("fr-CA")}
+                        {r.reviewed_by ? ` · par ${r.reviewed_by.slice(0, 8)}...` : ""}
+                      </p>
+                    )}
                   </div>
                   <Badge variant="secondary">
                     {SPONSORED_STATUS_LABELS[r.status]}
