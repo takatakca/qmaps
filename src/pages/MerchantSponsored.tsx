@@ -1,0 +1,359 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Plus, Sparkles, Pause, Send } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  useSponsoredCampaigns,
+  useSponsoredCampaignMetrics,
+} from "@/hooks/useSponsoredCampaigns";
+import {
+  SPONSORED_PLACEMENT_LABELS,
+  SPONSORED_STATUS_LABELS,
+  type SponsoredPlacement,
+  type SponsoredStatus,
+} from "@/lib/sponsored";
+import MerchantBottomNav from "@/components/MerchantBottomNav";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
+import type { Tables } from "@/integrations/supabase/types";
+
+const STATUS_VARIANTS: Record<SponsoredStatus, string> = {
+  draft: "bg-muted text-muted-foreground",
+  pending_review: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  approved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  paused: "bg-muted text-muted-foreground",
+  rejected: "bg-destructive/15 text-destructive",
+  ended: "bg-muted text-muted-foreground",
+};
+
+const MerchantSponsored = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
+  const [activeBusinessId, setActiveBusinessId] = useState<string | null>(null);
+  const [loadingBiz, setLoadingBiz] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    headline: "",
+    description: "",
+    placement: "all" as SponsoredPlacement,
+    target_city: "",
+    daily_budget_cents: "",
+  });
+
+  useEffect(() => {
+    if (!user) return;
+    void (async () => {
+      setLoadingBiz(true);
+      const { data } = await supabase
+        .from("businesses")
+        .select("*")
+        .eq("owner_user_id", user.id);
+      setBusinesses(data || []);
+      if (data && data.length > 0) setActiveBusinessId(data[0].id);
+      setLoadingBiz(false);
+    })();
+  }, [user]);
+
+  const {
+    campaigns,
+    loading,
+    createDraft,
+    submitForReview,
+    pauseCampaign,
+  } = useSponsoredCampaigns(activeBusinessId);
+
+  const handleCreate = async () => {
+    if (!activeBusinessId) return;
+    setSubmitting(true);
+    try {
+      await createDraft({
+        business_id: activeBusinessId,
+        placement: form.placement,
+        headline: form.headline || undefined,
+        description: form.description || undefined,
+        target_city: form.target_city || null,
+        daily_budget_cents: form.daily_budget_cents
+          ? Math.round(parseFloat(form.daily_budget_cents) * 100)
+          : null,
+      });
+      setForm({
+        headline: "",
+        description: "",
+        placement: "all",
+        target_city: "",
+        daily_budget_cents: "",
+      });
+      setOpen(false);
+      toast({ title: "Brouillon créé" });
+    } catch {
+      toast({ title: "Impossible de créer la campagne", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <header className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
+        <button onClick={() => navigate("/merchant/more")}>
+          <ArrowLeft size={20} className="text-muted-foreground" />
+        </button>
+        <Sparkles size={18} className="text-primary" />
+        <h1 className="font-heading text-lg font-bold text-foreground">
+          Visibilité sponsorisée
+        </h1>
+      </header>
+
+      <div className="px-4 py-4 space-y-4">
+        {loadingBiz ? (
+          <p className="text-sm text-muted-foreground">Chargement...</p>
+        ) : businesses.length === 0 ? (
+          <div className="bg-muted/50 rounded-xl p-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Vous devez d'abord revendiquer une entreprise pour créer une campagne.
+            </p>
+          </div>
+        ) : (
+          <>
+            {businesses.length > 1 && (
+              <div>
+                <Label className="text-xs">Entreprise</Label>
+                <Select
+                  value={activeBusinessId || ""}
+                  onValueChange={setActiveBusinessId}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {businesses.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading font-bold text-base">Mes campagnes</h2>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" disabled={!activeBusinessId}>
+                    <Plus size={14} className="mr-1" /> Nouvelle
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Nouvelle campagne</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="headline">Titre</Label>
+                      <Input
+                        id="headline"
+                        value={form.headline}
+                        onChange={(e) =>
+                          setForm({ ...form, headline: e.target.value })
+                        }
+                        placeholder="Ex: Promo printemps -20%"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="desc">Description</Label>
+                      <Textarea
+                        id="desc"
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm({ ...form, description: e.target.value })
+                        }
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <Label>Emplacement</Label>
+                      <Select
+                        value={form.placement}
+                        onValueChange={(v) =>
+                          setForm({ ...form, placement: v as SponsoredPlacement })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(Object.keys(SPONSORED_PLACEMENT_LABELS) as SponsoredPlacement[]).map(
+                            (p) => (
+                              <SelectItem key={p} value={p}>
+                                {SPONSORED_PLACEMENT_LABELS[p]}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="city">Ville cible (optionnel)</Label>
+                      <Input
+                        id="city"
+                        value={form.target_city}
+                        onChange={(e) =>
+                          setForm({ ...form, target_city: e.target.value })
+                        }
+                        placeholder="Ex: Montréal"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="budget">Budget quotidien CAD (optionnel)</Label>
+                      <Input
+                        id="budget"
+                        type="number"
+                        step="0.01"
+                        value={form.daily_budget_cents}
+                        onChange={(e) =>
+                          setForm({ ...form, daily_budget_cents: e.target.value })
+                        }
+                        placeholder="0.00"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        Indicatif. Aucun prélèvement automatique pour le moment.
+                      </p>
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={handleCreate}
+                      disabled={submitting}
+                    >
+                      {submitting ? "Création..." : "Créer le brouillon"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Chargement...</p>
+            ) : campaigns.length === 0 ? (
+              <div className="bg-muted/50 rounded-xl p-6 text-center">
+                <Sparkles size={20} className="mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Aucune campagne. Créez un brouillon, soumettez-le, et notre équipe
+                  l'examinera.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {campaigns.map((c) => (
+                  <CampaignCard
+                    key={c.id}
+                    campaign={c}
+                    onSubmit={() => submitForReview(c.id)}
+                    onPause={() => pauseCampaign(c.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      <MerchantBottomNav />
+    </div>
+  );
+};
+
+const CampaignCard = ({
+  campaign,
+  onSubmit,
+  onPause,
+}: {
+  campaign: any;
+  onSubmit: () => Promise<void>;
+  onPause: () => Promise<void>;
+}) => {
+  const metrics = useSponsoredCampaignMetrics(campaign.id);
+  return (
+    <div className="bg-card border border-border rounded-xl p-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-heading font-bold text-sm truncate">
+            {campaign.headline || "Campagne sans titre"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {SPONSORED_PLACEMENT_LABELS[campaign.placement as SponsoredPlacement]}
+            {campaign.target_city ? ` · ${campaign.target_city}` : ""}
+          </p>
+        </div>
+        <Badge
+          variant="secondary"
+          className={STATUS_VARIANTS[campaign.status as SponsoredStatus]}
+        >
+          {SPONSORED_STATUS_LABELS[campaign.status as SponsoredStatus]}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+        <Metric label="Impressions" value={metrics.impressions} />
+        <Metric label="Clics" value={metrics.clicks} />
+        <Metric
+          label="CTR"
+          value={`${(metrics.ctr * 100).toFixed(1)}%`}
+        />
+      </div>
+
+      {campaign.admin_note && (
+        <p className="text-xs text-muted-foreground mt-2 bg-muted/50 rounded p-2">
+          Note admin: {campaign.admin_note}
+        </p>
+      )}
+
+      <div className="flex gap-2 mt-3">
+        {campaign.status === "draft" && (
+          <Button size="sm" variant="outline" className="flex-1" onClick={onSubmit}>
+            <Send size={14} className="mr-1" /> Soumettre
+          </Button>
+        )}
+        {(campaign.status === "approved" || campaign.status === "pending_review") && (
+          <Button size="sm" variant="outline" className="flex-1" onClick={onPause}>
+            <Pause size={14} className="mr-1" /> Mettre en pause
+          </Button>
+        )}
+        {campaign.status === "paused" && (
+          <Button size="sm" variant="outline" className="flex-1" onClick={onSubmit}>
+            <Send size={14} className="mr-1" /> Resoumettre
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Metric = ({ label, value }: { label: string; value: number | string }) => (
+  <div>
+    <p className="font-heading text-base font-bold">{value}</p>
+    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+  </div>
+);
+
+export default MerchantSponsored;
