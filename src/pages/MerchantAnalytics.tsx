@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Phone, Globe, MapPin, MessageSquare, Bookmark, Image as ImageIcon, Briefcase, Send } from "lucide-react";
+import { ArrowLeft, Eye, Phone, Globe, MapPin, MessageSquare, Bookmark, Image as ImageIcon, Briefcase, Send, CheckCircle2, Circle, ChevronRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMerchantAnalytics } from "@/hooks/useMerchantAnalytics";
