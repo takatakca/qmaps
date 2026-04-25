@@ -178,13 +178,24 @@ const MerchantAnalytics = () => {
         </div>
 
         {!businessId && !loading ? (
-          <Card className="p-6 text-center">
-            <p className="text-muted-foreground">Aucune entreprise associée à votre compte.</p>
-          </Card>
+          <>
+            <Card className="p-6 text-center space-y-3">
+              <p className="text-muted-foreground">Aucune entreprise associée à votre compte.</p>
+              <Button onClick={() => navigate("/merchant/onboarding")}>Réclamer ma fiche</Button>
+            </Card>
+          </>
         ) : loading ? (
           <p className="text-muted-foreground text-sm">Chargement...</p>
         ) : (
           <>
+            {/* Zero-activity hero checklist */}
+            {totalEvents === 0 && (
+              <ChecklistCard
+                title="Faites décoller vos statistiques"
+                subtitle="Complétez ces étapes pour générer vos premières vues et interactions."
+              />
+            )}
+
             {/* Stat grid */}
             <div className="grid grid-cols-2 gap-3">
               {Object.entries(EVENT_LABELS).map(([key, def]) => {
@@ -206,9 +217,18 @@ const MerchantAnalytics = () => {
             <div>
               <h2 className="font-heading font-bold mb-2">Activité récente</h2>
               {events.length === 0 ? (
-                <Card className="p-6 text-center">
-                  <p className="text-muted-foreground text-sm">Aucune activité sur cette période.</p>
-                </Card>
+                totalEvents === 0 ? (
+                  <Card className="p-6 text-center space-y-1">
+                    <p className="text-sm font-medium">Pas encore d'activité</p>
+                    <p className="text-xs text-muted-foreground">
+                      Complétez la checklist ci-dessus pour attirer vos premiers visiteurs.
+                    </p>
+                  </Card>
+                ) : (
+                  <Card className="p-6 text-center">
+                    <p className="text-muted-foreground text-sm">Aucune activité sur cette période.</p>
+                  </Card>
+                )
               ) : (
                 <Card className="divide-y divide-border">
                   {events.slice(0, 30).map((e) => {
@@ -232,6 +252,14 @@ const MerchantAnalytics = () => {
                 </Card>
               )}
             </div>
+
+            {/* Persistent checklist when there's some activity but room to improve */}
+            {totalEvents > 0 && checklist.some((c) => !c.done) && (
+              <ChecklistCard
+                title="Optimisez votre fiche"
+                subtitle="Quelques actions rapides pour augmenter encore vos statistiques."
+              />
+            )}
           </>
         )}
       </div>
