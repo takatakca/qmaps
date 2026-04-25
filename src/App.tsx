@@ -98,6 +98,7 @@ const Terms = lazy(() => import("./pages/legal/Terms"));
 const AccountDeletionPolicy = lazy(() => import("./pages/legal/AccountDeletionPolicy"));
 const SupportPolicy = lazy(() => import("./pages/legal/SupportPolicy"));
 const Cookies = lazy(() => import("./pages/legal/Cookies"));
+const ReleaseNotes = lazy(() => import("./pages/ReleaseNotes"));
 
 const queryClient = new QueryClient();
 
@@ -135,6 +136,7 @@ const App = () => (
               <Route path="/account-deletion-policy" element={<AccountDeletionPolicy />} />
               <Route path="/support-policy" element={<SupportPolicy />} />
               <Route path="/cookies" element={<Cookies />} />
+              <Route path="/release-notes" element={<ReleaseNotes />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/collections" element={<Collections />} />
               <Route path="/projects" element={<Projects />} />

@@ -134,6 +134,7 @@ const More = () => {
               { to: "/cookies", label: "Témoins et suivi" },
               { to: "/account-deletion-policy", label: "Suppression de compte" },
               { to: "/support-policy", label: "Politique de support" },
+              { to: "/release-notes", label: "Notes de version" },
             ].map((l, i) => (
               <Link
                 key={l.to}

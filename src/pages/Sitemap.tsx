@@ -54,6 +54,7 @@ const Sitemap = () => {
       urls.push(`${origin}/cookies`);
       urls.push(`${origin}/account-deletion-policy`);
       urls.push(`${origin}/support-policy`);
+      urls.push(`${origin}/release-notes`);
       (cats || []).forEach((c) => urls.push(`${origin}/c/${c.slug}`));
       citySlugs.forEach((s) => urls.push(`${origin}/city/${s}`));
       (biz || []).forEach((b) => urls.push(`${origin}/business/${b.id}`));
