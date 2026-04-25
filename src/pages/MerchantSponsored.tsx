@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Sparkles, Pause, Send } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, Pause, Send, Info, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
