@@ -15,6 +15,10 @@ admin routes and database tables it touches.
 | Post-launch daily checks | [`post-launch-daily-checks.md`](./post-launch-daily-checks.md) |
 | First 72 hours monitoring | [`first-72-hours-monitoring.md`](./first-72-hours-monitoring.md) |
 | Production verification log | [`../production-verification-log.md`](../production-verification-log.md) |
+| Production verification — SQL | [`../production-verification-sql.md`](../production-verification-sql.md) |
+| Production verification — Stripe | [`../production-verification-stripe.md`](../production-verification-stripe.md) |
+| Production verification — Mobile / PWA | [`../production-verification-mobile.md`](../production-verification-mobile.md) |
+| Production verification — Email tests | [`../production-verification-email-tests.md`](../production-verification-email-tests.md) |
 | Post-launch issue tracker | [`../post-launch-issue-tracker.md`](../post-launch-issue-tracker.md) |
 
 For the production launch dashboard, see
