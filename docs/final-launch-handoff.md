@@ -41,6 +41,8 @@ bun run go:no-go:report   # writes JSON to docs/go-no-go-report.generated.json
 | Daily admin checks | [`docs/admin/post-launch-daily-checks.md`](./admin/post-launch-daily-checks.md) |
 | App store readiness | [`docs/app-store-readiness.md`](./app-store-readiness.md) |
 | Mobile QA checklist | [`docs/mobile-qa-checklist.md`](./mobile-qa-checklist.md) |
+| Release archive index | [`docs/release-archive-index.md`](./release-archive-index.md) |
+| Release artifact process | [`docs/release-artifact-process.md`](./release-artifact-process.md) |
 
 ## 3. Admin operational playbooks
 

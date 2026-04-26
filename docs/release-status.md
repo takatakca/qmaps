@@ -35,6 +35,8 @@ For the launch owner handoff pack and final sign-off form, see:
 
 - [`docs/final-launch-handoff.md`](./final-launch-handoff.md)
 - [`docs/final-owner-signoff.md`](./final-owner-signoff.md)
+- [`docs/release-archive-index.md`](./release-archive-index.md)
+- [`docs/release-artifact-process.md`](./release-artifact-process.md)
 
 ## 3. Manual launch blockers
 

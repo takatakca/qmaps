@@ -29,3 +29,5 @@ For the production launch dashboard, see
 | Release status (stakeholder) | [`../release-status.md`](../release-status.md) |
 | Final launch handoff | [`../final-launch-handoff.md`](../final-launch-handoff.md) |
 | Final owner sign-off | [`../final-owner-signoff.md`](../final-owner-signoff.md) |
+| Release archive index | [`../release-archive-index.md`](../release-archive-index.md) |
+| Release artifact process | [`../release-artifact-process.md`](../release-artifact-process.md) |
