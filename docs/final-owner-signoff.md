@@ -16,6 +16,11 @@ section below must be checked and signed by the owner.
 - [ ] Reviewed [`docs/release-notes.md`](./release-notes.md)
 - [ ] Reviewed latest [`docs/go-no-go-report.generated.json`](./go-no-go-report.generated.json) (decision = `GO`)
 - [ ] Reviewed [`docs/release-status.generated.md`](./release-status.generated.md)
+- [ ] Reviewed [`docs/production-verification-log.md`](./production-verification-log.md) and the verification companions:
+  - [`docs/production-verification-sql.md`](./production-verification-sql.md)
+  - [`docs/production-verification-stripe.md`](./production-verification-stripe.md)
+  - [`docs/production-verification-mobile.md`](./production-verification-mobile.md)
+  - [`docs/production-verification-email-tests.md`](./production-verification-email-tests.md)
 
 ## 2. Manual production checks
 
