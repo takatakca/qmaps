@@ -17,7 +17,8 @@
     "release:status:file": "node scripts/release-status.mjs --out docs/release-status.generated.md",
     "go:no-go": "node scripts/go-no-go.mjs",
     "go:no-go:json": "node scripts/go-no-go.mjs --json",
-    "go:no-go:report": "node scripts/go-no-go.mjs --out docs/go-no-go-report.generated.json"
+    "go:no-go:report": "node scripts/go-no-go.mjs --out docs/go-no-go-report.generated.json",
+    "release:archive": "node scripts/build-release-archive.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
