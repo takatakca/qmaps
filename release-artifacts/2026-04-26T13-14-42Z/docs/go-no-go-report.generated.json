@@ -1,0 +1,33 @@
+{
+  "decision": "GO",
+  "passed": 4,
+  "failed": 0,
+  "total": 4,
+  "duration_ms": 22360,
+  "steps": [
+    {
+      "name": "Launch checks",
+      "ok": true,
+      "duration_ms": 145,
+      "command": "bun run launch:check"
+    },
+    {
+      "name": "Tests",
+      "ok": true,
+      "duration_ms": 7193,
+      "command": "bunx vitest run"
+    },
+    {
+      "name": "Build",
+      "ok": true,
+      "duration_ms": 14777,
+      "command": "bun run build"
+    },
+    {
+      "name": "Release status snapshot",
+      "ok": true,
+      "duration_ms": 245,
+      "command": "bun run release:status:file"
+    }
+  ]
+}

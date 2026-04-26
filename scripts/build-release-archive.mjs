@@ -20,6 +20,7 @@ import {
 } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -78,15 +79,43 @@ for (const rel of ALL_FILES) {
   copied.push({ path: rel, size_bytes: sizeBytes });
 }
 
-// Manifest
+// Manifest (zip path filled in below if applicable)
 const manifest = {
   generated_at: new Date().toISOString(),
   archive_folder: `release-artifacts/${ts}`,
+  archive_zip: null,
   files_copied: copied.length,
   files_missing: missing.length,
   files: copied,
   missing,
 };
+
+// Optional: build a zip archive next to the folder if --zip is passed
+// and a `zip` binary is available. Never fail the script if zip is
+// missing or fails — keep the folder archive as the source of truth.
+const wantZip = process.argv.includes("--zip");
+let zipPath = null;
+let zipSkipped = null;
+if (wantZip) {
+  const candidateZip = resolve(ROOT, "release-artifacts", `${ts}.zip`);
+  const probe = spawnSync("zip", ["-v"], { stdio: "ignore" });
+  if (probe.status !== 0 && probe.error) {
+    zipSkipped = `\`zip\` binary not available (${probe.error.code || probe.error.message}); kept folder archive only.`;
+  } else {
+    const result = spawnSync(
+      "zip",
+      ["-rq", candidateZip, ts],
+      { cwd: resolve(ROOT, "release-artifacts"), stdio: "inherit" },
+    );
+    if (result.status === 0) {
+      zipPath = `release-artifacts/${ts}.zip`;
+      manifest.archive_zip = zipPath;
+    } else {
+      zipSkipped = `\`zip\` exited with status ${result.status}; kept folder archive only.`;
+    }
+  }
+}
+
 writeFileSync(
   join(archiveDir, "manifest.json"),
   JSON.stringify(manifest, null, 2) + "\n",
@@ -150,4 +179,10 @@ if (missing.length) {
   for (const m of missing) console.log(`  - ${m}`);
 }
 console.log(`Manifest:      release-artifacts/${ts}/manifest.json`);
-console.log(`README:        release-artifacts/${ts}/README.md\n`);
+console.log(`README:        release-artifacts/${ts}/README.md`);
+if (zipPath) {
+  console.log(`Zip:           ${zipPath}`);
+} else if (wantZip && zipSkipped) {
+  console.log(`Zip:           skipped — ${zipSkipped}`);
+}
+console.log("");
