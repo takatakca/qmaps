@@ -1,0 +1,118 @@
+{
+  "generated_at": "2026-04-29T05:25:32.620Z",
+  "archive_folder": "release-artifacts/2026-04-29T05-25-32Z",
+  "archive_zip": "release-artifacts/2026-04-29T05-25-32Z.zip",
+  "files_copied": 27,
+  "files_missing": 0,
+  "files": [
+    {
+      "path": "docs/release-status.md",
+      "size_bytes": 4324
+    },
+    {
+      "path": "docs/release-status.generated.md",
+      "size_bytes": 1692
+    },
+    {
+      "path": "docs/release-notes.md",
+      "size_bytes": 2427
+    },
+    {
+      "path": "docs/final-launch-handoff.md",
+      "size_bytes": 4513
+    },
+    {
+      "path": "docs/final-owner-signoff.md",
+      "size_bytes": 3107
+    },
+    {
+      "path": "docs/launch-checklist.md",
+      "size_bytes": 2723
+    },
+    {
+      "path": "docs/release-candidate-checklist.md",
+      "size_bytes": 3318
+    },
+    {
+      "path": "docs/deployment-checklist.md",
+      "size_bytes": 4531
+    },
+    {
+      "path": "docs/app-store-readiness.md",
+      "size_bytes": 5002
+    },
+    {
+      "path": "docs/post-launch-checklist.md",
+      "size_bytes": 4266
+    },
+    {
+      "path": "docs/production-verification-log.md",
+      "size_bytes": 8748
+    },
+    {
+      "path": "docs/production-verification-sql.md",
+      "size_bytes": 4652
+    },
+    {
+      "path": "docs/production-verification-stripe.md",
+      "size_bytes": 3901
+    },
+    {
+      "path": "docs/production-verification-mobile.md",
+      "size_bytes": 3013
+    },
+    {
+      "path": "docs/production-verification-email-tests.md",
+      "size_bytes": 3140
+    },
+    {
+      "path": "docs/post-launch-issue-tracker.md",
+      "size_bytes": 2824
+    },
+    {
+      "path": "docs/go-no-go-report.generated.json",
+      "size_bytes": 612
+    },
+    {
+      "path": "docs/release-archive-index.md",
+      "size_bytes": 5783
+    },
+    {
+      "path": "docs/release-artifact-process.md",
+      "size_bytes": 4475
+    },
+    {
+      "path": "docs/admin/README.md",
+      "size_bytes": 2389
+    },
+    {
+      "path": "docs/admin/reviews-playbook.md",
+      "size_bytes": 1689
+    },
+    {
+      "path": "docs/admin/business-claims-playbook.md",
+      "size_bytes": 1924
+    },
+    {
+      "path": "docs/admin/sponsored-playbook.md",
+      "size_bytes": 2027
+    },
+    {
+      "path": "docs/admin/billing-playbook.md",
+      "size_bytes": 2511
+    },
+    {
+      "path": "docs/admin/incident-response-playbook.md",
+      "size_bytes": 5194
+    },
+    {
+      "path": "docs/admin/post-launch-daily-checks.md",
+      "size_bytes": 2374
+    },
+    {
+      "path": "docs/admin/first-72-hours-monitoring.md",
+      "size_bytes": 4007
+    }
+  ],
+  "missing": []
+}
