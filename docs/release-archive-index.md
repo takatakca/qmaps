@@ -82,6 +82,10 @@ The archive process itself is documented in
 | Document | Path |
 |----------|------|
 | Production verification log | [`production-verification-log.md`](./production-verification-log.md) |
+| Production verification SQL (read-only) | [`production-verification-sql.md`](./production-verification-sql.md) |
+| Production verification — Stripe | [`production-verification-stripe.md`](./production-verification-stripe.md) |
+| Production verification — Mobile/PWA | [`production-verification-mobile.md`](./production-verification-mobile.md) |
+| Production verification — Email mailboxes | [`production-verification-email-tests.md`](./production-verification-email-tests.md) |
 | Post-launch issue tracker | [`post-launch-issue-tracker.md`](./post-launch-issue-tracker.md) |
 | Phase 9 RLS regression notes | [`phase9-rls-regression.md`](./phase9-rls-regression.md) |
 | Sponsored RLS regression notes | [`sponsored-rls-regression.md`](./sponsored-rls-regression.md) |
