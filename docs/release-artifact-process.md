@@ -43,6 +43,10 @@ release-artifacts/
     ├── app-store-readiness.md
     ├── post-launch-checklist.md
     ├── production-verification-log.md
+    ├── production-verification-sql.md
+    ├── production-verification-stripe.md
+    ├── production-verification-mobile.md
+    ├── production-verification-email-tests.md
     ├── post-launch-issue-tracker.md
     ├── go-no-go-report.generated.json
     └── admin/
