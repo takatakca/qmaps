@@ -36,11 +36,30 @@ describe("release archive package", () => {
       "release-candidate-checklist.md",
       "post-launch-checklist.md",
       "production-verification-log.md",
+      "production-verification-sql.md",
+      "production-verification-stripe.md",
+      "production-verification-mobile.md",
+      "production-verification-email-tests.md",
       "post-launch-issue-tracker.md",
       "go-no-go-report.generated.json",
       "admin/incident-response-playbook.md",
     ]) {
       expect(md).toContain(required);
+    }
+  });
+
+  it("scripts/build-release-archive.mjs bundles Phase 14E verification companion docs", () => {
+    const src = readFileSync(
+      resolve(ROOT, "scripts/build-release-archive.mjs"),
+      "utf8",
+    );
+    for (const required of [
+      "docs/production-verification-sql.md",
+      "docs/production-verification-stripe.md",
+      "docs/production-verification-mobile.md",
+      "docs/production-verification-email-tests.md",
+    ]) {
+      expect(src).toContain(required);
     }
   });
 
