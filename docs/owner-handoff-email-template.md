@@ -34,6 +34,11 @@ bundle attached (`release-artifacts/[timestamp].zip`).
   `deployment-checklist.md`, `app-store-readiness.md`
 - `post-launch-checklist.md`, `production-verification-log.md`,
   `post-launch-issue-tracker.md`
+- Production verification companion docs:
+  `production-verification-sql.md` (read-only SQL),
+  `production-verification-stripe.md`,
+  `production-verification-mobile.md`,
+  `production-verification-email-tests.md`
 - Admin playbooks (incidents, reviews, billing, sponsored, claims)
 - `go-no-go-report.generated.json` (machine-readable gate report)
 
@@ -96,6 +101,11 @@ Vous trouverez le lot ci-joint (`release-artifacts/[timestamp].zip`).
   `deployment-checklist.md`, `app-store-readiness.md`
 - `post-launch-checklist.md`, `production-verification-log.md`,
   `post-launch-issue-tracker.md`
+- Documents compagnons de vérification production :
+  `production-verification-sql.md` (SQL en lecture seule),
+  `production-verification-stripe.md`,
+  `production-verification-mobile.md`,
+  `production-verification-email-tests.md`
 - Guides administratifs (incidents, avis, facturation, sponsorisé, réclamations)
 - `go-no-go-report.generated.json` (rapport machine du gate)
 
