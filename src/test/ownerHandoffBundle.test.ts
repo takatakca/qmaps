@@ -21,6 +21,21 @@ describe("phase 14D — owner handoff & zip support", () => {
     expect(md).toMatch(/##\s+Version française/);
   });
 
+  it("owner email template references production verification companion docs", () => {
+    const md = readFileSync(
+      resolve(ROOT, "docs/owner-handoff-email-template.md"),
+      "utf8",
+    );
+    for (const required of [
+      "production-verification-sql.md",
+      "production-verification-stripe.md",
+      "production-verification-mobile.md",
+      "production-verification-email-tests.md",
+    ]) {
+      expect(md).toContain(required);
+    }
+  });
+
   it("scripts/build-release-archive.mjs supports --zip with a non-fatal fallback", () => {
     const src = readFileSync(
       resolve(ROOT, "scripts/build-release-archive.mjs"),
