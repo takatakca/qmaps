@@ -101,6 +101,11 @@ Vous trouverez le lot ci-joint (`release-artifacts/[timestamp].zip`).
   `deployment-checklist.md`, `app-store-readiness.md`
 - `post-launch-checklist.md`, `production-verification-log.md`,
   `post-launch-issue-tracker.md`
+- Documents compagnons de vérification production :
+  `production-verification-sql.md` (SQL en lecture seule),
+  `production-verification-stripe.md`,
+  `production-verification-mobile.md`,
+  `production-verification-email-tests.md`
 - Guides administratifs (incidents, avis, facturation, sponsorisé, réclamations)
 - `go-no-go-report.generated.json` (rapport machine du gate)
 
