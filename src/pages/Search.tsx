@@ -12,6 +12,7 @@ import { formatDistance } from "@/lib/geo";
 import { mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
+import { sortBusinesses, SORT_OPTIONS, type SortOption } from "@/lib/searchFilters";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
