@@ -247,6 +247,11 @@ const BusinessDetail = () => {
       {/* Nearby */}
       <BusinessNearbySection currentBusinessId={business.id} city={business.city} isClaimed={business.is_claimed} />
 
+      {/* Report listing */}
+      <div className="px-4 mt-4 flex justify-center">
+        <ReportButton targetType="business" targetId={business.id} variant="ghost" />
+      </div>
+
       <BottomNav />
     </div>
   );
