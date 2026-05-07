@@ -12,6 +12,7 @@ import { formatDistance } from "@/lib/geo";
 import { mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
+import { sortBusinesses, SORT_OPTIONS, type SortOption } from "@/lib/searchFilters";
 import type { Tables } from "@/integrations/supabase/types";
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
@@ -33,6 +34,7 @@ const Search = () => {
   const [minRating, setMinRating] = useState<number | null>(null);
   const [openNow, setOpenNow] = useState(false);
   const [radiusKm, setRadiusKm] = useState(5);
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const { businesses: nearbyBusinesses } = useNearbyBusinesses(12);
 
   useEffect(() => {
@@ -224,14 +226,32 @@ const Search = () => {
 
         {/* Results */}
         <div className="mt-4">
-          {query && (
-            <p className="text-sm text-muted-foreground mb-3">
-              {loading ? "Recherche..." : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""} pour "${query}"`}
+          <div className="flex items-center justify-between mb-3 gap-2">
+            <p className="text-sm text-muted-foreground">
+              {loading
+                ? "Recherche..."
+                : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}`}
             </p>
-          )}
+            <select
+              aria-label="Trier les résultats"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="text-xs bg-card border border-border rounded-full px-3 py-1.5 text-foreground"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="space-y-4">
-            {businesses.map(b => (
+            {sortBusinesses(
+              businesses.map((b) => ({
+                ...b,
+                distance_meters: nearbyBusinesses.find((item) => item.id === b.id)?.distance_meters,
+              })) as (Tables<"businesses"> & { distance_meters?: number })[],
+              sortBy,
+            ).map(b => (
               <div
                 key={b.id}
                 onMouseDown={() => trackRecommendationEvent({
@@ -239,13 +259,13 @@ const Search = () => {
                   event_type: "search_click",
                   source: "search_results",
                   city: b.city ?? null,
-                  metadata: { query, category: selectedCategory || null },
+                  metadata: { query, category: selectedCategory || null, sort: sortBy },
                 })}
               >
                 <BusinessCard business={mapBusinessToCard({
                   ...b,
                   category_name: categories.find(cat => cat.slug === selectedCategory)?.name || "Local",
-                  distance_meters: nearbyBusinesses.find(item => item.id === b.id)?.distance_meters,
+                  distance_meters: (b as any).distance_meters,
                 })} />
               </div>
             ))}
