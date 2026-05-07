@@ -226,14 +226,32 @@ const Search = () => {
 
         {/* Results */}
         <div className="mt-4">
-          {query && (
-            <p className="text-sm text-muted-foreground mb-3">
-              {loading ? "Recherche..." : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""} pour "${query}"`}
+          <div className="flex items-center justify-between mb-3 gap-2">
+            <p className="text-sm text-muted-foreground">
+              {loading
+                ? "Recherche..."
+                : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}`}
             </p>
-          )}
+            <select
+              aria-label="Trier les résultats"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="text-xs bg-card border border-border rounded-full px-3 py-1.5 text-foreground"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="space-y-4">
-            {businesses.map(b => (
+            {sortBusinesses(
+              businesses.map((b) => ({
+                ...b,
+                distance_meters: nearbyBusinesses.find((item) => item.id === b.id)?.distance_meters,
+              })) as (Tables<"businesses"> & { distance_meters?: number })[],
+              sortBy,
+            ).map(b => (
               <div
                 key={b.id}
                 onMouseDown={() => trackRecommendationEvent({
@@ -241,13 +259,13 @@ const Search = () => {
                   event_type: "search_click",
                   source: "search_results",
                   city: b.city ?? null,
-                  metadata: { query, category: selectedCategory || null },
+                  metadata: { query, category: selectedCategory || null, sort: sortBy },
                 })}
               >
                 <BusinessCard business={mapBusinessToCard({
                   ...b,
                   category_name: categories.find(cat => cat.slug === selectedCategory)?.name || "Local",
-                  distance_meters: nearbyBusinesses.find(item => item.id === b.id)?.distance_meters,
+                  distance_meters: (b as any).distance_meters,
                 })} />
               </div>
             ))}
