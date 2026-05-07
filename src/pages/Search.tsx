@@ -34,6 +34,7 @@ const Search = () => {
   const [minRating, setMinRating] = useState<number | null>(null);
   const [openNow, setOpenNow] = useState(false);
   const [radiusKm, setRadiusKm] = useState(5);
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const { businesses: nearbyBusinesses } = useNearbyBusinesses(12);
 
   useEffect(() => {
