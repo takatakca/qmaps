@@ -12,6 +12,7 @@ import BusinessReviewsTab from "@/components/business/BusinessReviewsTab";
 import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
 import SimilarBusinessesSection from "@/components/recommendations/SimilarBusinessesSection";
+import ReportButton from "@/components/reports/ReportButton";
 import { trackBusinessEvent } from "@/lib/analytics";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
