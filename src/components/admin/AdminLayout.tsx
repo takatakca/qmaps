@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users, Briefcase, Sparkles, ArrowLeft, ShieldAlert, UserMinus, Rocket, ArrowRightLeft, ScrollText } from "lucide-react";
+import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users, Briefcase, Sparkles, ArrowLeft, ShieldAlert, UserMinus, Rocket, ArrowRightLeft, ScrollText, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
