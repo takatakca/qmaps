@@ -271,6 +271,59 @@ export type Database = {
           },
         ]
       }
+      business_menu_items: {
+        Row: {
+          business_id: string
+          category: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_available: boolean
+          name: string
+          photo_url: string | null
+          price_cents: number | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          category?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_available?: boolean
+          name: string
+          photo_url?: string | null
+          price_cents?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_available?: boolean
+          name?: string
+          photo_url?: string | null
+          price_cents?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_menu_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_photos: {
         Row: {
           business_id: string
@@ -381,6 +434,7 @@ export type Database = {
           region: string | null
           reviews_count: number
           search_document: unknown
+          special_hours: Json | null
           updated_at: string
           website: string | null
         }
@@ -414,6 +468,7 @@ export type Database = {
           region?: string | null
           reviews_count?: number
           search_document?: unknown
+          special_hours?: Json | null
           updated_at?: string
           website?: string | null
         }
@@ -447,6 +502,7 @@ export type Database = {
           region?: string | null
           reviews_count?: number
           search_document?: unknown
+          special_hours?: Json | null
           updated_at?: string
           website?: string | null
         }

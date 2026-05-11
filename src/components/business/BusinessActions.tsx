@@ -11,11 +11,12 @@ interface BusinessActionsProps {
   website: string | null;
   phone: string | null;
   onWriteReview: () => void;
+  onViewHours?: () => void;
 }
 
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
 
-const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, website, phone, onWriteReview }: BusinessActionsProps) => {
+const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, website, phone, onWriteReview, onViewHours }: BusinessActionsProps) => {
   const handleWebsite = () => {
     if (!website) return;
     if (businessId) trackBusinessEvent(businessId, "website_click", { source: "business_detail" });
@@ -41,7 +42,13 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
         {hours && (
           <>
             <span className="text-muted-foreground text-sm">•</span>
-            <button className="text-sm text-primary font-medium">Voir les horaires</button>
+            <button
+              type="button"
+              onClick={onViewHours}
+              className="text-sm text-primary font-medium"
+            >
+              Voir les horaires
+            </button>
           </>
         )}
       </div>

@@ -145,6 +145,77 @@ export const summarizeWeeklyHours = (week: WeeklyHours | null | undefined): stri
 };
 
 /* ──────────────────────────────────────────────────────────────────────── */
+/* Special hours — Phase 15D. Date-keyed overrides for holidays/events.     */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+/** Map of "YYYY-MM-DD" → DayHours (with optional note). */
+export type SpecialHours = Record<string, DayHours>;
+
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
+
+export const formatDateKey = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+export const parseSpecialHours = (raw: unknown): SpecialHours | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const obj = raw as Record<string, any>;
+  const out: SpecialHours = {};
+  for (const [key, v] of Object.entries(obj)) {
+    if (!DATE_KEY.test(key) || !v || typeof v !== "object") continue;
+    const closed = !!v.closed;
+    const blocks = Array.isArray(v.blocks)
+      ? v.blocks
+          .filter((b: any) => b && isValidBlock(b))
+          .map((b: any) => ({ open: b.open, close: b.close }))
+      : [];
+    out[key] = {
+      closed: closed || blocks.length === 0,
+      blocks: closed ? [] : blocks,
+      note: typeof v.note === "string" ? v.note : null,
+    };
+  }
+  return Object.keys(out).length === 0 ? null : out;
+};
+
+/** Returns the effective DayHours for the given date, preferring special_hours. */
+export const getHoursForDate = (
+  week: WeeklyHours | null,
+  special: SpecialHours | null,
+  date: Date,
+): { day: DayHours | null; isSpecial: boolean } => {
+  const key = formatDateKey(date);
+  if (special && special[key]) return { day: special[key], isSpecial: true };
+  if (week) return { day: week[dayKeyForDate(date)] ?? null, isSpecial: false };
+  return { day: null, isSpecial: false };
+};
+
+export const isOpenAtWithSpecialHours = (
+  week: WeeklyHours | null,
+  special: SpecialHours | null,
+  date: Date,
+): boolean => {
+  const { day } = getHoursForDate(week, special, date);
+  if (!day || day.closed || day.blocks.length === 0) return false;
+  const minutes = date.getHours() * 60 + date.getMinutes();
+  return day.blocks.some((b) => {
+    const o = timeToMinutes(b.open);
+    const c = timeToMinutes(b.close);
+    return Number.isFinite(o) && Number.isFinite(c) && minutes >= o && minutes < c;
+  });
+};
+
+export const formatSpecialHoursForDate = (special: SpecialHours | null, date: Date): string => {
+  if (!special) return "";
+  const day = special[formatDateKey(date)];
+  if (!day) return "";
+  return formatDayHours(day);
+};
+
+/* ──────────────────────────────────────────────────────────────────────── */
 /* Review rating distribution — used by Business Detail page.              */
 /* ──────────────────────────────────────────────────────────────────────── */
 

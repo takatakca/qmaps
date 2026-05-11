@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, X, Clock, MapPin, Tag, Sparkles, BookOpen, Building, List, Truck, CreditCard, Wifi, Dog, Baby, Utensils, Phone as PhoneIcon, Globe, PenLine } from "lucide-react";
+import { ArrowLeft, ChevronRight, Clock, MapPin, Tag, Sparkles, BookOpen, List, CreditCard, PenLine, Camera, Utensils, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +15,7 @@ import EditHistoryModal from "@/components/merchant/info/EditHistoryModal";
 import EditAmenitiesModal from "@/components/merchant/info/EditAmenitiesModal";
 import EditBasicInfoModal from "@/components/merchant/info/EditBasicInfoModal";
 import EditAttributesModal from "@/components/merchant/info/EditAttributesModal";
+import EditSpecialHoursModal from "@/components/merchant/info/EditSpecialHoursModal";
 
 const MerchantBusinessInfo = () => {
   const navigate = useNavigate();
@@ -37,6 +33,7 @@ const MerchantBusinessInfo = () => {
   const [showAmenities, setShowAmenities] = useState(false);
   const [showBasicInfo, setShowBasicInfo] = useState(false);
   const [showAttributes, setShowAttributes] = useState(false);
+  const [showSpecialHours, setShowSpecialHours] = useState(false);
 
   const fetchBusiness = async () => {
     if (!user) return;
@@ -55,12 +52,15 @@ const MerchantBusinessInfo = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Chargement...</p></div>;
   if (!business) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Aucune entreprise trouvée.</p></div>;
 
+  const specialCount = Object.keys(((business as any).special_hours as Record<string, unknown>) ?? {}).length;
   const sections = [
     { label: "Informations de base", icon: PenLine, value: `${business.name} · ${business.phone || ""}`, onClick: () => setShowBasicInfo(true) },
     { label: "Catégories", icon: Tag, value: "Restaurants", onClick: () => setShowCategory(true) },
     { label: "Heures d'ouverture", icon: Clock, value: business.hours || "Non définies", onClick: () => setShowHours(true) },
-    { label: "Heures spéciales", icon: Clock, value: "Gérer les jours fériés", onClick: () => setShowHours(true) },
+    { label: "Heures spéciales", icon: CalendarDays, value: specialCount > 0 ? `${specialCount} date(s) configurée(s)` : "Gérer les jours fériés", onClick: () => setShowSpecialHours(true) },
     { label: "Adresse", icon: MapPin, value: `${business.address}, ${business.city}`, onClick: () => setShowAddress(true) },
+    { label: "Photos", icon: Camera, value: `${(business.photos || []).length} photo(s)`, onClick: () => navigate("/merchant/photos") },
+    { label: "Menu", icon: Utensils, value: "Gérer les articles du menu", onClick: () => navigate("/merchant/menu") },
     { label: "Spécialités", icon: Sparkles, value: business.description?.substring(0, 40) || "Ajouter", onClick: () => setShowSpecialties(true) },
     { label: "Historique", icon: BookOpen, value: "Modifier l'historique", onClick: () => setShowHistory(true) },
     { label: "Commodités et plus", icon: List, value: `${business.amenities?.length || 0} options`, onClick: () => setShowAmenities(true) },
@@ -105,6 +105,7 @@ const MerchantBusinessInfo = () => {
       <EditAmenitiesModal open={showAmenities} onClose={() => setShowAmenities(false)} business={business} onSaved={fetchBusiness} />
       <EditBasicInfoModal open={showBasicInfo} onClose={() => setShowBasicInfo(false)} business={business} onSaved={fetchBusiness} />
       <EditAttributesModal open={showAttributes} onClose={() => setShowAttributes(false)} business={business} onSaved={fetchBusiness} />
+      <EditSpecialHoursModal open={showSpecialHours} onClose={() => setShowSpecialHours(false)} business={business} onSaved={fetchBusiness} />
     </div>
   );
 };
