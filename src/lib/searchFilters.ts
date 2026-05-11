@@ -1,9 +1,11 @@
 /**
- * Phase 15B — pure helpers for QMAPS search/discovery.
+ * Phase 15B/15C — pure helpers for QMAPS search/discovery.
  *
  * No React, no fetch, no Supabase. Safe to unit-test and reuse from
  * the consumer search page, category pages, and admin tooling.
  */
+
+import { isOpenAt, parseWeeklyHours } from "@/lib/businessHours";
 
 export type SortOption =
   | "recommended"
@@ -28,6 +30,7 @@ export interface SearchableBusiness {
   price_level?: number | null;
   is_open?: boolean | null;
   hours?: string | null;
+  hours_json?: unknown;
   amenities?: string[] | null;
   city?: string | null;
   created_at?: string | null;
@@ -82,17 +85,16 @@ export const matchesAmenityFilter = (
 };
 
 /**
- * Returns true if the business is currently open. Falls back to the
- * `is_open` flag when no structured hours are available.
- *
- * `hours` is a free-text field today — we only treat the obvious
- * "fermé" / "closed" markers as definitive; everything else falls
- * back to the boolean.
+ * Returns true if the business is currently open. Prefers structured
+ * `hours_json`, falls back to obvious "fermé"/"closed" markers in the
+ * legacy text field, then to the boolean `is_open` flag.
  */
 export const isBusinessOpenNow = (
   business: SearchableBusiness,
-  _now: Date = new Date(),
+  now: Date = new Date(),
 ): boolean => {
+  const week = parseWeeklyHours(business.hours_json);
+  if (week) return isOpenAt(week, now);
   const hours = (business.hours ?? "").toLowerCase();
   if (hours.includes("fermé") || hours.includes("closed")) return false;
   if (typeof business.is_open === "boolean") return business.is_open;

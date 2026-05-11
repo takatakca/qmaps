@@ -19,6 +19,7 @@ import EditSpecialtiesModal from "@/components/merchant/info/EditSpecialtiesModa
 import EditHistoryModal from "@/components/merchant/info/EditHistoryModal";
 import EditAmenitiesModal from "@/components/merchant/info/EditAmenitiesModal";
 import EditBasicInfoModal from "@/components/merchant/info/EditBasicInfoModal";
+import EditAttributesModal from "@/components/merchant/info/EditAttributesModal";
 
 const MerchantBusinessInfo = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const MerchantBusinessInfo = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [showAmenities, setShowAmenities] = useState(false);
   const [showBasicInfo, setShowBasicInfo] = useState(false);
+  const [showAttributes, setShowAttributes] = useState(false);
 
   const fetchBusiness = async () => {
     if (!user) return;
@@ -62,6 +64,7 @@ const MerchantBusinessInfo = () => {
     { label: "Spécialités", icon: Sparkles, value: business.description?.substring(0, 40) || "Ajouter", onClick: () => setShowSpecialties(true) },
     { label: "Historique", icon: BookOpen, value: "Modifier l'historique", onClick: () => setShowHistory(true) },
     { label: "Commodités et plus", icon: List, value: `${business.amenities?.length || 0} options`, onClick: () => setShowAmenities(true) },
+    { label: "Paiements, langues, accessibilité", icon: CreditCard, value: `${((business as any).payment_methods?.length || 0) + ((business as any).languages?.length || 0) + ((business as any).accessibility?.length || 0)} options`, onClick: () => setShowAttributes(true) },
   ];
 
   return (
@@ -101,6 +104,7 @@ const MerchantBusinessInfo = () => {
       <EditHistoryModal open={showHistory} onClose={() => setShowHistory(false)} business={business} onSaved={fetchBusiness} />
       <EditAmenitiesModal open={showAmenities} onClose={() => setShowAmenities(false)} business={business} onSaved={fetchBusiness} />
       <EditBasicInfoModal open={showBasicInfo} onClose={() => setShowBasicInfo(false)} business={business} onSaved={fetchBusiness} />
+      <EditAttributesModal open={showAttributes} onClose={() => setShowAttributes(false)} business={business} onSaved={fetchBusiness} />
     </div>
   );
 };

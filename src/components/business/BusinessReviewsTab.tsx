@@ -28,12 +28,11 @@ interface BusinessReviewsTabProps {
   onNavigateAuth: () => void;
 }
 
+import { getReviewRatingDistribution } from "@/lib/businessHours";
+
 const RatingDistribution = ({ reviews, avgRating, reviewsCount }: { reviews: any[]; avgRating: number; reviewsCount: number }) => {
-  const counts = [0, 0, 0, 0, 0];
-  reviews.forEach((r) => {
-    if (r.rating >= 1 && r.rating <= 5) counts[r.rating - 1]++;
-  });
-  const max = Math.max(...counts, 1);
+  const dist = getReviewRatingDistribution(reviews);
+  const max = Math.max(dist.counts[1], dist.counts[2], dist.counts[3], dist.counts[4], dist.counts[5], 1);
   const barColors = ["bg-muted", "bg-[hsl(30,90%,55%)]", "bg-primary", "bg-primary", "bg-primary"];
 
   return (
@@ -44,15 +43,16 @@ const RatingDistribution = ({ reviews, avgRating, reviewsCount }: { reviews: any
         <p className="text-xs text-muted-foreground mt-0.5">{reviewsCount} avis</p>
       </div>
       <div className="flex-1 space-y-1.5">
-        {[5, 4, 3, 2, 1].map((star) => (
+        {([5, 4, 3, 2, 1] as const).map((star) => (
           <div key={star} className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground w-3 text-right">{star}</span>
             <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${barColors[star - 1]}`}
-                style={{ width: `${(counts[star - 1] / max) * 100}%` }}
+                style={{ width: `${(dist.counts[star] / max) * 100}%` }}
               />
             </div>
+            <span className="text-[11px] text-muted-foreground w-10 text-right">{dist.percentages[star]}%</span>
           </div>
         ))}
       </div>
