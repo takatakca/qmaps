@@ -352,6 +352,7 @@ export type Database = {
       }
       businesses: {
         Row: {
+          accessibility: string[]
           address: string
           amenities: string[] | null
           avg_rating: number
@@ -360,16 +361,19 @@ export type Database = {
           created_at: string
           description: string | null
           hours: string | null
+          hours_json: Json | null
           id: string
           image_url: string | null
           is_active: boolean
           is_claimed: boolean
           is_open: boolean
+          languages: string[]
           latitude: number
           location: unknown
           longitude: number
           name: string
           owner_user_id: string | null
+          payment_methods: string[]
           phone: string | null
           photos: string[] | null
           postal_code: string | null
@@ -381,6 +385,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          accessibility?: string[]
           address: string
           amenities?: string[] | null
           avg_rating?: number
@@ -389,16 +394,19 @@ export type Database = {
           created_at?: string
           description?: string | null
           hours?: string | null
+          hours_json?: Json | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           is_claimed?: boolean
           is_open?: boolean
+          languages?: string[]
           latitude?: number
           location?: unknown
           longitude?: number
           name: string
           owner_user_id?: string | null
+          payment_methods?: string[]
           phone?: string | null
           photos?: string[] | null
           postal_code?: string | null
@@ -410,6 +418,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          accessibility?: string[]
           address?: string
           amenities?: string[] | null
           avg_rating?: number
@@ -418,16 +427,19 @@ export type Database = {
           created_at?: string
           description?: string | null
           hours?: string | null
+          hours_json?: Json | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           is_claimed?: boolean
           is_open?: boolean
+          languages?: string[]
           latitude?: number
           location?: unknown
           longitude?: number
           name?: string
           owner_user_id?: string | null
+          payment_methods?: string[]
           phone?: string | null
           photos?: string[] | null
           postal_code?: string | null
