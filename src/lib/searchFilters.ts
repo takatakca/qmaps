@@ -5,7 +5,7 @@
  * the consumer search page, category pages, and admin tooling.
  */
 
-import { isOpenAt, parseWeeklyHours } from "@/lib/businessHours";
+import { isOpenAtWithSpecialHours, parseSpecialHours, parseWeeklyHours } from "@/lib/businessHours";
 
 export type SortOption =
   | "recommended"
@@ -31,6 +31,7 @@ export interface SearchableBusiness {
   is_open?: boolean | null;
   hours?: string | null;
   hours_json?: unknown;
+  special_hours?: unknown;
   amenities?: string[] | null;
   city?: string | null;
   created_at?: string | null;
@@ -94,7 +95,8 @@ export const isBusinessOpenNow = (
   now: Date = new Date(),
 ): boolean => {
   const week = parseWeeklyHours(business.hours_json);
-  if (week) return isOpenAt(week, now);
+  const special = parseSpecialHours(business.special_hours);
+  if (week || special) return isOpenAtWithSpecialHours(week, special, now);
   const hours = (business.hours ?? "").toLowerCase();
   if (hours.includes("fermé") || hours.includes("closed")) return false;
   if (typeof business.is_open === "boolean") return business.is_open;
