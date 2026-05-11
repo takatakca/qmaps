@@ -7,6 +7,8 @@ export type BusinessEventType =
   | "directions_click"
   | "message_click"
   | "save_click"
+  | "search_click"
+  | "menu_view"
   | "photo_view"
   | "project_start"
   | "quote_sent";

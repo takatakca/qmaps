@@ -215,7 +215,12 @@ const BusinessDetail = () => {
           {tabs.map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                if (tab === "Menu" && business?.id) {
+                  trackBusinessEvent(business.id, "menu_view", { source: "business_detail" });
+                }
+              }}
               className={`flex-1 py-3 text-sm font-semibold text-center transition-colors relative ${
                 activeTab === tab ? "text-primary" : "text-muted-foreground"
               }`}

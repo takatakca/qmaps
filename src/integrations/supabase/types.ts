@@ -162,6 +162,65 @@ export type Database = {
           },
         ]
       }
+      business_claim_requests: {
+        Row: {
+          admin_note: string | null
+          business_email: string
+          business_id: string
+          business_phone: string | null
+          contact_name: string
+          created_at: string
+          evidence_url: string | null
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          business_email: string
+          business_id: string
+          business_phone?: string | null
+          contact_name: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          business_email?: string
+          business_id?: string
+          business_phone?: string | null
+          contact_name?: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_claim_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_claims: {
         Row: {
           business_id: string
