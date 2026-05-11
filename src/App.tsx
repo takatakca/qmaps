@@ -31,6 +31,7 @@ const AdminLaunchStatus = lazy(() => import("./pages/admin/AdminLaunchStatus"));
 const AdminClaims = lazy(() => import("./pages/admin/AdminClaims"));
 const AdminOwnerTransfers = lazy(() => import("./pages/admin/AdminOwnerTransfers"));
 const AdminAuditLogs = lazy(() => import("./pages/admin/AdminAuditLogs"));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 
 // Lazy: merchant
 const MerchantSponsored = lazy(() => import("./pages/MerchantSponsored"));
