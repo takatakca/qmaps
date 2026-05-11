@@ -38,6 +38,7 @@ const BusinessDetail = () => {
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("Menu");
   const [userName, setUserName] = useState<string | null>(null);
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
