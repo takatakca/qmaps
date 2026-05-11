@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     openReports: 0,
     pendingClaims: 0,
+    pendingClaimRequests: 0,
     recentReviews: 0,
     recentBusinesses: 0,
     recentProjects: 0,
@@ -18,9 +19,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     const load = async () => {
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const [reports, claims, reviews, businesses, projects] = await Promise.all([
+      const [reports, claims, claimRequests, reviews, businesses, projects] = await Promise.all([
         supabase.from("reports" as any).select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("business_claims").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        (supabase as any).from("business_claim_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("reviews").select("id", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("businesses").select("id", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("project_requests").select("id", { count: "exact", head: true }).gte("created_at", since),
@@ -28,6 +30,7 @@ const AdminDashboard = () => {
       setStats({
         openReports: reports.count || 0,
         pendingClaims: claims.count || 0,
+        pendingClaimRequests: claimRequests.count || 0,
         recentReviews: reviews.count || 0,
         recentBusinesses: businesses.count || 0,
         recentProjects: projects.count || 0,
