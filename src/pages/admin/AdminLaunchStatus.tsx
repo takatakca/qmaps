@@ -113,6 +113,12 @@ const AdminLaunchStatus = () => {
     { label: "Deployment checklist", path: "docs/deployment-checklist.md" },
     { label: "Environment setup", path: "docs/environment-setup.md" },
     { label: "App store readiness", path: "docs/app-store-readiness.md" },
+    { label: "Phase 16 — Launch deployment report", path: "docs/launch-deployment-report.md" },
+    { label: "Phase 16 — Deploy checklist", path: "docs/deploy-checklist.md" },
+    { label: "Phase 16 — Post-deploy smoke test", path: "docs/post-deploy-smoke-test.md" },
+    { label: "Phase 16 — First 72 hours monitoring", path: "docs/first-72-hours-monitoring.md" },
+    { label: "Phase 16 — Launch issue template", path: "docs/launch-issue-template.md" },
+    { label: "Phase 16 — Post-launch backlog", path: "docs/post-launch-backlog.md" },
   ];
 
   return (
@@ -151,18 +157,22 @@ const AdminLaunchStatus = () => {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Documentation</CardTitle>
+            <CardTitle className="text-base">Documentation (statique)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {docs.map((d) => (
-              <div key={d.path} className="flex items-center gap-2 text-sm">
-                <FileText size={16} className="text-muted-foreground" />
-                <span className="font-mono text-xs">{d.path}</span>
-                <ExternalLink size={12} className="text-muted-foreground" />
+              <div key={d.path} className="flex items-start gap-2 text-sm">
+                <FileText size={16} className="text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div>{d.label}</div>
+                  <div className="font-mono text-xs text-muted-foreground break-all">{d.path}</div>
+                </div>
+                <ExternalLink size={12} className="text-muted-foreground mt-1 shrink-0" />
               </div>
             ))}
             <p className="text-xs text-muted-foreground pt-2">
-              Ces fichiers vivent dans le dépôt et doivent être consultés via votre éditeur ou GitHub.
+              Statuts manuels — ces fichiers vivent dans le dépôt et doivent être consultés via votre éditeur ou GitHub.
+              Ce panneau ne reflète pas un monitoring temps réel.
             </p>
           </CardContent>
         </Card>
