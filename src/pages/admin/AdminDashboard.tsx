@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Flag, Building2, MessageSquare, Briefcase, ShieldAlert, ArrowRightLeft, ScrollText, ListChecks } from "lucide-react";
+import { Flag, Building2, MessageSquare, Briefcase, ShieldAlert, ArrowRightLeft, ScrollText, ListChecks, Tag } from "lucide-react";
 import { ADMIN_AUDIT_ACTION_LABELS } from "@/lib/adminAudit";
 
 const AdminDashboard = () => {
