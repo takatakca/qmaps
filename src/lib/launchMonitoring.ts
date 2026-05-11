@@ -67,7 +67,7 @@ const BLOCKING_AREAS: LaunchIssueArea[] = [
  * severity. Pure — used to drive UI badges and blocking decisions.
  */
 export const classifyLaunchIssue = (
-  issue: Pick<LaunchIssue, "area" | "severity" | "ok">,
+  issue: { area: LaunchIssueArea; severity?: LaunchSeverity; ok?: boolean },
 ): LaunchSeverity => {
   if (issue.ok === true) return "info";
   if (issue.severity) return issue.severity;
