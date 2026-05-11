@@ -46,6 +46,7 @@ const MerchantCTA = lazy(() => import("./pages/MerchantCTA"));
 const MerchantBusinessInfo = lazy(() => import("./pages/MerchantBusinessInfo"));
 const MerchantGuestManager = lazy(() => import("./pages/MerchantGuestManager"));
 const MerchantPhotos = lazy(() => import("./pages/MerchantPhotos"));
+const MerchantMenu = lazy(() => import("./pages/MerchantMenu"));
 const MerchantInbox = lazy(() => import("./pages/MerchantInbox"));
 const MerchantBilling = lazy(() => import("./pages/MerchantBilling"));
 const MerchantBillingPlans = lazy(() => import("./pages/MerchantBillingPlans"));
@@ -192,6 +193,7 @@ const App = () => (
               <Route path="/merchant/business-info" element={<ProtectedMerchantRoute><MerchantBusinessInfo /></ProtectedMerchantRoute>} />
               <Route path="/merchant/guest-manager" element={<ProtectedMerchantRoute><MerchantGuestManager /></ProtectedMerchantRoute>} />
               <Route path="/merchant/photos" element={<ProtectedMerchantRoute><MerchantPhotos /></ProtectedMerchantRoute>} />
+              <Route path="/merchant/menu" element={<ProtectedMerchantRoute><MerchantMenu /></ProtectedMerchantRoute>} />
               <Route path="/merchant/inbox" element={<ProtectedMerchantRoute><MerchantInbox /></ProtectedMerchantRoute>} />
               <Route path="/merchant/billing" element={<ProtectedMerchantRoute><MerchantBilling /></ProtectedMerchantRoute>} />
               <Route path="/merchant/billing/plans" element={<ProtectedMerchantRoute><MerchantBillingPlans /></ProtectedMerchantRoute>} />
