@@ -305,6 +305,13 @@ const BusinessDetail = () => {
       </div>
 
       <BottomNav />
+
+      <ClaimBusinessModal
+        businessId={business.id}
+        businessName={business.name}
+        open={claimOpen}
+        onOpenChange={setClaimOpen}
+      />
     </div>
   );
 };
