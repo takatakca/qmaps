@@ -14,6 +14,7 @@ import InsightsSection from "@/components/merchant/home/InsightsSection";
 import CompetitorSection from "@/components/merchant/home/CompetitorSection";
 import EnhanceSection from "@/components/merchant/home/EnhanceSection";
 import CompletenessCard from "@/components/merchant/CompletenessCard";
+import AnalyticsCards from "@/components/merchant/AnalyticsCards";
 import type { MenuItem } from "@/lib/menuItems";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ const MerchantHome = () => {
 
       <div className="p-4 space-y-4">
         <CompletenessCard business={business as any} menuItems={menuItems} />
+        <AnalyticsCards businessId={business.id} />
         <RemindersSection />
         <AdPreviewSection business={business} />
         <PerformanceSection reviewsCount={business.reviews_count} />

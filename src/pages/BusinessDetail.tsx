@@ -11,8 +11,12 @@ import BusinessInfoTab from "@/components/business/BusinessInfoTab";
 import BusinessReviewsTab from "@/components/business/BusinessReviewsTab";
 import BusinessVibeSection from "@/components/business/BusinessVibeSection";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
+import BusinessTrustBadges from "@/components/business/BusinessTrustBadges";
+import ClaimBusinessModal from "@/components/business/ClaimBusinessModal";
 import SimilarBusinessesSection from "@/components/recommendations/SimilarBusinessesSection";
 import ReportButton from "@/components/reports/ReportButton";
+import { Button } from "@/components/ui/button";
+import { ShieldCheck } from "lucide-react";
 import { trackBusinessEvent } from "@/lib/analytics";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
@@ -34,6 +38,7 @@ const BusinessDetail = () => {
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("Menu");
   const [userName, setUserName] = useState<string | null>(null);
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
@@ -190,6 +195,20 @@ const BusinessDetail = () => {
         }}
       />
 
+      <BusinessTrustBadges business={business as any} />
+
+      {!business.is_claimed && (!user || business.owner_user_id !== user.id) && (
+        <div className="mx-4 mt-3 p-3 rounded-xl border border-border bg-secondary/40 flex items-center justify-between gap-2">
+          <div className="text-xs">
+            <p className="font-semibold text-foreground">Vous êtes le propriétaire?</p>
+            <p className="text-muted-foreground">Revendiquez ce commerce pour le gérer.</p>
+          </div>
+          <Button size="sm" variant="outline" className="gap-1 shrink-0" onClick={() => setClaimOpen(true)}>
+            <ShieldCheck size={14} /> Revendiquer
+          </Button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="sticky top-0 z-30 bg-background border-b border-border mt-2">
         <div className="flex">
@@ -286,6 +305,13 @@ const BusinessDetail = () => {
       </div>
 
       <BottomNav />
+
+      <ClaimBusinessModal
+        businessId={business.id}
+        businessName={business.name}
+        open={claimOpen}
+        onOpenChange={setClaimOpen}
+      />
     </div>
   );
 };

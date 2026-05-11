@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Pencil, Trash2, Loader2, EyeOff, Eye } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Loader2, EyeOff, Eye, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +46,26 @@ const MerchantMenu = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const menuFileRef = useRef<HTMLInputElement>(null);
+
+  const handleMenuImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length || !business || !editing) return;
+    const file = e.target.files[0];
+    e.target.value = "";
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `businesses/${business.id}/menu/${Date.now()}.${ext}`;
+    setUploadingImage(true);
+    const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
+    if (uploadErr) {
+      setUploadingImage(false);
+      toast({ title: "Erreur d'envoi", description: uploadErr.message, variant: "destructive" });
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
+    setEditing({ ...editing, photo_url: urlData.publicUrl });
+    setUploadingImage(false);
+  };
 
   const fetchAll = async () => {
     if (!user) return;
@@ -268,11 +288,37 @@ const MerchantMenu = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">URL de la photo (facultatif)</label>
+                <label className="text-xs text-muted-foreground">Photo de l'article</label>
+                {editing.photo_url && (
+                  <div className="relative w-24 h-24 mb-2">
+                    <img src={editing.photo_url} alt="" className="w-full h-full object-cover rounded-lg" onError={(e) => ((e.target as HTMLImageElement).src = "/placeholder.svg")} />
+                    <button
+                      type="button"
+                      onClick={() => setEditing({ ...editing, photo_url: "" })}
+                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center"
+                      aria-label="Retirer la photo"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={menuFileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleMenuImageUpload}
+                />
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => menuFileRef.current?.click()} disabled={uploadingImage}>
+                    {uploadingImage ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />} Téléverser
+                  </Button>
+                </div>
                 <Input
                   value={editing.photo_url}
                   onChange={(e) => setEditing({ ...editing, photo_url: e.target.value })}
-                  placeholder="https://…"
+                  placeholder="ou collez une URL https://…"
+                  className="mt-2"
                 />
               </div>
               <div className="flex items-center justify-between">

@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, X, Check, Camera, ChevronLeft, ChevronRight, Lightbulb, Star, ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Star, Link as LinkIcon, ChevronUp, ChevronDown, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import StarRating from "@/components/StarRating";
+import {
+  addPhotoUrl,
+  dedupePhotoUrls,
+  isValidPhotoUrl,
+  movePhotoToFront,
+  removePhotoUrl,
+  reorderPhotos,
+} from "@/lib/businessPhotos";
 import type { Tables } from "@/integrations/supabase/types";
-
-type PreviewMode = "page" | "search";
 
 const MerchantPhotos = () => {
   const navigate = useNavigate();
@@ -18,10 +24,9 @@ const MerchantPhotos = () => {
 
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("page");
-  const [previewIndex, setPreviewIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [urlDraft, setUrlDraft] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -33,15 +38,29 @@ const MerchantPhotos = () => {
       .maybeSingle()
       .then(({ data }) => {
         setBusiness(data);
-        setPhotos(data?.photos || []);
+        setPhotos(dedupePhotoUrls(data?.photos || []));
         setLoading(false);
       });
   }, [user]);
 
+  const persist = async (next: string[]) => {
+    if (!business) return false;
+    setSaving(true);
+    const { error } = await supabase.from("businesses").update({ photos: next }).eq("id", business.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return false;
+    }
+    setPhotos(next);
+    return true;
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length || !business) return;
     const file = e.target.files[0];
-    const ext = file.name.split(".").pop();
+    e.target.value = "";
+    const ext = file.name.split(".").pop() || "jpg";
     const path = `business-photos/${business.id}/${Date.now()}.${ext}`;
 
     const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
@@ -49,47 +68,50 @@ const MerchantPhotos = () => {
       toast({ title: "Erreur d'envoi", description: uploadErr.message, variant: "destructive" });
       return;
     }
-
     const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
-    const newPhotos = [...photos, urlData.publicUrl];
+    const result = addPhotoUrl(photos, urlData.publicUrl);
+    if (!result.ok) {
+      toast({ title: "Photo déjà ajoutée", variant: "destructive" });
+      return;
+    }
+    if (await persist(result.urls)) toast({ title: "Photo ajoutée!" });
+  };
 
-    const { error } = await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else {
-      setPhotos(newPhotos);
+  const handleAddByUrl = async () => {
+    const result = addPhotoUrl(photos, urlDraft);
+    if (result.ok === false) {
+      toast({
+        title: result.reason === "duplicate" ? "Photo déjà ajoutée" : "URL invalide",
+        description: result.reason === "invalid" ? "L'URL doit commencer par http(s)://" : undefined,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (await persist(result.urls)) {
+      setUrlDraft("");
       toast({ title: "Photo ajoutée!" });
     }
   };
 
-  const handleDelete = async () => {
-    if (!business || selected.size === 0) return;
-    const newPhotos = photos.filter((_, i) => !selected.has(i));
-    const { error } = await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else {
-      setPhotos(newPhotos);
-      setSelected(new Set());
-      toast({ title: "Photos supprimées" });
-    }
+  const handleDelete = async (url: string) => {
+    if (!confirm("Supprimer cette photo?")) return;
+    if (await persist(removePhotoUrl(photos, url))) toast({ title: "Photo supprimée" });
   };
 
-  const toggleSelect = (i: number) => {
-    const next = new Set(selected);
-    next.has(i) ? next.delete(i) : next.add(i);
-    setSelected(next);
+  const handleSetCover = async (url: string) => {
+    if (await persist(movePhotoToFront(photos, url))) toast({ title: "Photo de couverture mise à jour" });
   };
 
-  const prevPreview = () => setPreviewIndex(i => Math.max(0, i - 1));
-  const nextPreview = () => setPreviewIndex(i => Math.min(photos.length - 1, i + 1));
+  const handleMove = async (i: number, dir: -1 | 1) => {
+    await persist(reorderPhotos(photos, i, i + dir));
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background max-w-lg mx-auto">
         <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center gap-3 px-4 py-3">
-          <button onClick={() => navigate(-1)}><ArrowLeft size={22} className="text-foreground" /></button>
-          <h1 className="font-heading text-lg font-bold text-foreground">Photos & Vidéos</h1>
+          <button onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
+          <h1 className="font-heading text-lg font-bold">Photos & Vidéos</h1>
         </div>
         <div className="text-center py-16 text-muted-foreground">Chargement...</div>
       </div>
@@ -98,26 +120,33 @@ const MerchantPhotos = () => {
 
   return (
     <div className="min-h-screen bg-background pb-10 max-w-lg mx-auto">
-      {/* Header */}
       <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center gap-3 px-4 py-3">
-        <button onClick={() => navigate(-1)}><ArrowLeft size={22} className="text-foreground" /></button>
-        <h1 className="font-heading text-lg font-bold text-foreground flex-1">Photos & Vidéos</h1>
-        {selected.size > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
-            Supprimer ({selected.size})
-          </Button>
-        )}
+        <button onClick={() => navigate(-1)} aria-label="Retour"><ArrowLeft size={22} /></button>
+        <h1 className="font-heading text-lg font-bold flex-1">Photos & Vidéos</h1>
       </div>
 
-      {/* Upload button */}
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-4 space-y-3">
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-        <Button variant="outline" className="w-full gap-2 rounded-xl" onClick={() => fileRef.current?.click()}>
-          <Plus size={16} /> Ajouter des photos
+        <Button variant="default" className="w-full gap-2 rounded-xl" onClick={() => fileRef.current?.click()} disabled={saving}>
+          <Plus size={16} /> Téléverser une photo
         </Button>
+
+        <div className="flex gap-2">
+          <Input
+            value={urlDraft}
+            onChange={(e) => setUrlDraft(e.target.value)}
+            placeholder="https://… (ajouter par URL)"
+            className="flex-1"
+          />
+          <Button variant="outline" onClick={handleAddByUrl} disabled={saving || !isValidPhotoUrl(urlDraft)} className="gap-1">
+            <LinkIcon size={14} /> Ajouter
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          La première photo sert de couverture. Réorganisez avec les flèches ou marquez une photo comme couverture.
+        </p>
       </div>
 
-      {/* Photo grid */}
       <div className="px-4 pt-4">
         {photos.length === 0 ? (
           <div className="text-center py-12">
@@ -126,130 +155,41 @@ const MerchantPhotos = () => {
             <p className="text-sm text-muted-foreground mt-1">Ajoutez des photos pour attirer plus de clients.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <ul className="space-y-2">
             {photos.map((url, i) => (
-              <button
-                key={i}
-                onClick={() => toggleSelect(i)}
-                className="relative aspect-square rounded-xl overflow-hidden group"
-              >
-                <img src={url} alt="" className="w-full h-full object-cover" />
-                <div className={`absolute inset-0 transition-colors ${selected.has(i) ? "bg-primary/30" : "group-hover:bg-black/10"}`} />
-                <div className={`absolute top-2 left-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  selected.has(i) ? "bg-primary border-primary" : "border-white/80 bg-black/20"
-                }`}>
-                  {selected.has(i) && <Check size={14} className="text-primary-foreground" />}
+              <li key={url} className="flex items-center gap-3 p-2 bg-card rounded-xl border border-border">
+                <div className="relative">
+                  <img src={url} alt="" className="w-20 h-20 rounded-lg object-cover" onError={(e) => ((e.target as HTMLImageElement).src = "/placeholder.svg")} />
+                  {i === 0 && (
+                    <span className="absolute -top-1 -left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5">
+                      <Star size={8} className="fill-current" /> Couv.
+                    </span>
+                  )}
                 </div>
-              </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground truncate">{url}</p>
+                  <div className="flex items-center gap-1 mt-2 flex-wrap">
+                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => handleMove(i, -1)} disabled={i === 0 || saving} aria-label="Monter">
+                      <ChevronUp size={14} />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => handleMove(i, 1)} disabled={i === photos.length - 1 || saving} aria-label="Descendre">
+                      <ChevronDown size={14} />
+                    </Button>
+                    {i !== 0 && (
+                      <Button size="sm" variant="outline" className="h-7 px-2 gap-1" onClick={() => handleSetCover(url)} disabled={saving}>
+                        <Star size={12} /> Couverture
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-destructive" onClick={() => handleDelete(url)} disabled={saving} aria-label="Supprimer">
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
-
-      {/* Separator */}
-      {photos.length > 0 && (
-        <>
-          <div className="border-t border-border mx-4 mt-6 mb-4" />
-
-          {/* Preview section */}
-          <div className="px-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-heading text-lg font-bold text-foreground">Aperçu</h2>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setPreviewMode("page")}
-                  className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                    previewMode === "page" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  Sur votre page
-                </button>
-                <button
-                  onClick={() => setPreviewMode("search")}
-                  className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                    previewMode === "search" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  En recherche
-                </button>
-              </div>
-            </div>
-
-            {previewMode === "page" ? (
-              /* Page preview - shows business card style */
-              <div className="bg-muted rounded-2xl p-4 relative">
-                <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
-                  {/* Photo carousel */}
-                  <div className="relative aspect-[4/3]">
-                    <img
-                      src={photos[previewIndex] || "/placeholder.svg"}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <p className="text-white font-bold text-lg">{business?.name}</p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <StarRating rating={Number(business?.avg_rating || 0)} size={14} />
-                        <span className="text-white/80 text-xs ml-1">Voir tous</span>
-                      </div>
-                    </div>
-                    {photos.length > 1 && (
-                      <>
-                        <button onClick={prevPreview} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
-                          <ChevronLeft size={16} />
-                        </button>
-                        <button onClick={nextPreview} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
-                          <ChevronRight size={16} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="text-sm text-muted-foreground">
-                      {"$".repeat(business?.price_level || 2)} · {business?.description || "Restaurant"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mini photos row */}
-                <div className="mt-3">
-                  <p className="text-sm font-bold text-foreground mb-2">Photos & Vidéos</p>
-                  <div className="flex gap-2 overflow-x-auto">
-                    {photos.slice(0, 4).map((url, i) => (
-                      <img key={i} src={url} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Search preview */
-              <div className="bg-muted rounded-2xl p-6">
-                <div className="bg-card rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                  <img
-                    src={photos[0] || "/placeholder.svg"}
-                    alt=""
-                    className="w-20 h-20 rounded-lg object-cover shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <p className="font-bold text-foreground text-sm">{business?.name}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-1">
-                      {business?.description || "Restaurant"}, {business?.address}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Info banner */}
-          <div className="mx-4 mt-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4 flex gap-3">
-            <Lightbulb size={24} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-foreground">
-              QMAPS organisera automatiquement vos photos pour que les plus attrayantes apparaissent en premier.
-            </p>
-          </div>
-        </>
-      )}
     </div>
   );
 };
