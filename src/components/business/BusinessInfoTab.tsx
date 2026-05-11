@@ -1,8 +1,16 @@
-import { Clock, Globe, Phone, MapPin, ArrowRight, Pencil, Check, X } from "lucide-react";
+import { Clock, Globe, Phone, MapPin, ArrowRight, Pencil, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DAYS,
+  DAY_LABELS_FR,
+  dayKeyForDate,
+  formatDayHours,
+  parseWeeklyHours,
+} from "@/lib/businessHours";
 
 interface BusinessInfoTabProps {
   hours: string | null;
+  hoursJson?: unknown;
   isOpen: boolean;
   website: string | null;
   phone: string | null;
@@ -11,46 +19,86 @@ interface BusinessInfoTabProps {
   region: string | null;
   postalCode: string | null;
   amenities: string[] | null;
+  paymentMethods?: string[] | null;
+  languages?: string[] | null;
+  accessibility?: string[] | null;
   latitude: number;
   longitude: number;
 }
 
-const paymentMethods = [
-  { name: "Carte de débit", supported: true },
-  { name: "Apple Pay", supported: false },
-  { name: "Carte de crédit", supported: true },
-];
+const Section = ({ title, items }: { title: string; items: string[] }) =>
+  items.length === 0 ? null : (
+    <div className="mt-5 border-t border-border pt-5">
+      <h4 className="font-heading font-semibold text-foreground mb-3">{title}</h4>
+      <div className="flex flex-wrap gap-2">
+        {items.map((it) => (
+          <span key={it} className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground">
+            <Check size={12} /> {it}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 
-const features = [
-  { name: "Décontracté", supported: true },
-  { name: "Calme", supported: true },
-  { name: "Bon pour les enfants", supported: true },
-];
-
-const ecoFeatures = [
-  { name: "Stationnement vélo", supported: false },
-];
-
-const BusinessInfoTab = ({ hours, isOpen, website, phone, address, city, region, postalCode, amenities, latitude, longitude }: BusinessInfoTabProps) => {
+const BusinessInfoTab = ({
+  hours,
+  hoursJson,
+  isOpen,
+  website,
+  phone,
+  address,
+  city,
+  region,
+  postalCode,
+  amenities,
+  paymentMethods,
+  languages,
+  accessibility,
+  latitude,
+  longitude,
+}: BusinessInfoTabProps) => {
   const fullAddress = `${address}\n${city}${region ? `, ${region}` : ""}${postalCode ? ` ${postalCode}` : ""}`;
   const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+  const week = parseWeeklyHours(hoursJson);
+  const today = week ? dayKeyForDate(new Date()) : null;
 
   return (
     <div className="space-y-0">
       <h3 className="font-heading text-lg font-bold text-foreground mb-4">Info</h3>
 
-      {/* Hours */}
-      <div className="flex items-center justify-between py-4 border-b border-border">
+      {/* Weekly hours (structured) or fallback */}
+      <div className="py-4 border-b border-border">
         <div className="flex items-start gap-3">
           <Clock size={18} className="text-muted-foreground mt-0.5 shrink-0" />
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">Horaires</p>
             <p className={`text-sm font-medium ${isOpen ? "text-success" : "text-destructive"}`}>
-              {isOpen ? "Ouvert" : "Fermé"}
+              {isOpen ? "Ouvert maintenant" : "Fermé maintenant"}
             </p>
+            {week ? (
+              <ul className="mt-2 space-y-1">
+                {DAYS.map((d) => {
+                  const isToday = d === today;
+                  return (
+                    <li
+                      key={d}
+                      className={`flex items-center justify-between text-sm ${
+                        isToday ? "font-semibold text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      <span>{DAY_LABELS_FR[d]}{isToday ? " (aujourd'hui)" : ""}</span>
+                      <span>{formatDayHours(week[d])}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : hours ? (
+              <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">{hours}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1">Heures non précisées</p>
+            )}
           </div>
         </div>
-        <ArrowRight size={18} className="text-muted-foreground" />
       </div>
 
       {/* Website */}
@@ -96,12 +144,7 @@ const BusinessInfoTab = ({ hours, isOpen, website, phone, address, city, region,
 
       {/* Address */}
       <div className="py-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-foreground whitespace-pre-line">{fullAddress}</p>
-          </div>
-          <span className="text-xs text-muted-foreground shrink-0 ml-3">2.2 km</span>
-        </div>
+        <p className="text-sm text-foreground whitespace-pre-line">{fullAddress}</p>
       </div>
 
       {/* Get directions */}
@@ -121,60 +164,10 @@ const BusinessInfoTab = ({ hours, isOpen, website, phone, address, city, region,
         <Pencil size={14} /> Suggérer une modification
       </Button>
 
-      {/* Payments */}
-      <div className="mt-6">
-        <h4 className="font-heading font-semibold text-foreground mb-3">Paiements</h4>
-        <div className="space-y-2">
-          {paymentMethods.map((p) => (
-            <div key={p.name} className="flex items-center gap-2">
-              {p.supported ? <Check size={16} className="text-foreground" /> : <X size={16} className="text-muted-foreground" />}
-              <span className={`text-sm ${p.supported ? "text-foreground" : "text-muted-foreground"}`}>{p.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Features */}
-      <div className="mt-5 border-t border-border pt-5">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="font-heading font-semibold text-foreground">Caractéristiques</h4>
-          <ArrowRight size={18} className="text-muted-foreground" />
-        </div>
-        <div className="space-y-2">
-          {features.map((f) => (
-            <div key={f.name} className="flex items-center gap-2">
-              <Check size={16} className="text-foreground" />
-              <span className="text-sm text-foreground">{f.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Eco */}
-      <div className="mt-5 border-t border-border pt-5">
-        <h4 className="font-heading font-semibold text-foreground mb-3">Éco-responsable</h4>
-        <div className="space-y-2">
-          {ecoFeatures.map((f) => (
-            <div key={f.name} className="flex items-center gap-2">
-              {f.supported ? <Check size={16} className="text-foreground" /> : <X size={16} className="text-muted-foreground" />}
-              <span className={`text-sm ${f.supported ? "text-foreground" : "text-muted-foreground"}`}>{f.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Community update */}
-      <div className="mt-6 p-4 bg-secondary rounded-xl">
-        <h4 className="font-heading font-semibold text-foreground mb-1">Mise à jour communauté</h4>
-        <p className="text-sm font-medium text-foreground mb-3">Ont-ils le Wi-Fi?</p>
-        <div className="flex flex-wrap gap-2">
-          {["Gratuit", "Payant", "Aucun", "Pas sûr"].map((opt) => (
-            <button key={opt} className="px-4 py-1.5 border border-border bg-card rounded-full text-sm font-medium text-foreground hover:bg-accent transition-colors">
-              {opt}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Section title="Commodités" items={amenities ?? []} />
+      <Section title="Paiements" items={paymentMethods ?? []} />
+      <Section title="Langues" items={languages ?? []} />
+      <Section title="Accessibilité" items={accessibility ?? []} />
     </div>
   );
 };
