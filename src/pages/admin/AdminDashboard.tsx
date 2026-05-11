@@ -55,6 +55,7 @@ const AdminDashboard = () => {
     { label: "Avis (7j)", value: stats.recentReviews, icon: MessageSquare, to: "/admin/reviews", tone: "text-foreground" },
     { label: "Entreprises (7j)", value: stats.recentBusinesses, icon: Building2, to: "/admin/businesses", tone: "text-foreground" },
     { label: "Projets (7j)", value: stats.recentProjects, icon: Briefcase, to: "/admin/projects", tone: "text-foreground" },
+    { label: "Catégories", value: 0, icon: Tag, to: "/admin/categories", tone: "text-foreground" },
   ];
 
   const quickLinks = [
