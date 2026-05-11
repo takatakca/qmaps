@@ -242,8 +242,29 @@ const BusinessDetail = () => {
         )}
       </div>
 
-      {/* Vibe section */}
-      <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
+      {/* Vibe section or photo empty-state */}
+      {(business.photos || []).length > 0 ? (
+        <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
+      ) : (
+        <div className="px-4 py-6 border-t border-border bg-secondary/30 text-center">
+          <p className="text-sm font-medium text-foreground">Aucune photo pour le moment</p>
+          {user && business.owner_user_id === user.id ? (
+            <>
+              <p className="text-xs text-muted-foreground mt-1">Mettez en valeur votre commerce avec quelques photos.</p>
+              <button
+                onClick={() => navigate("/merchant/business-info")}
+                className="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
+              >
+                Ajouter des photos
+              </button>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">
+              Vous êtes le propriétaire? Ajoutez des photos depuis votre portail marchand.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Similar businesses (Phase 9F) */}
       <SimilarBusinessesSection businessId={business.id} />
