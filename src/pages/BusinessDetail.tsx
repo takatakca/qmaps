@@ -212,6 +212,7 @@ const BusinessDetail = () => {
         {activeTab === "Info" && (
           <BusinessInfoTab
             hours={business.hours}
+            hoursJson={(business as any).hours_json}
             isOpen={business.is_open}
             website={business.website}
             phone={business.phone}
@@ -220,6 +221,9 @@ const BusinessDetail = () => {
             region={business.region}
             postalCode={business.postal_code}
             amenities={business.amenities}
+            paymentMethods={(business as any).payment_methods}
+            languages={(business as any).languages}
+            accessibility={(business as any).accessibility}
             latitude={business.latitude}
             longitude={business.longitude}
           />
