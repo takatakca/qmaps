@@ -12,6 +12,7 @@ const NAV = [
   { to: "/admin/reviews", label: "Avis", icon: MessageSquare },
   { to: "/admin/review-moderation", label: "Sécurité avis", icon: ShieldAlert },
   { to: "/admin/photos", label: "Photos", icon: ImageIcon },
+  { to: "/admin/categories", label: "Catégories", icon: Tag },
   { to: "/admin/projects", label: "Projets", icon: Briefcase },
   { to: "/admin/sponsored", label: "Sponsorisé", icon: Sparkles },
   { to: "/admin/users", label: "Utilisateurs", icon: Users },
