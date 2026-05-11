@@ -17,6 +17,7 @@ import { trackBusinessEvent } from "@/lib/analytics";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
 import { slugify } from "@/lib/seo";
+import { isBusinessOpenNow } from "@/lib/searchFilters";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
@@ -176,11 +177,17 @@ const BusinessDetail = () => {
         businessId={business.id}
         priceLevel={business.price_level}
         categoryName=""
-        isOpen={business.is_open}
+        isOpen={isBusinessOpenNow(business as any)}
         hours={business.hours}
         website={business.website}
         phone={business.phone}
         onWriteReview={() => { if (!user) navigate("/auth"); else setActiveTab("Avis"); }}
+        onViewHours={() => {
+          setActiveTab("Info");
+          setTimeout(() => {
+            document.getElementById("business-hours")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 50);
+        }}
       />
 
       {/* Tabs */}
@@ -205,7 +212,7 @@ const BusinessDetail = () => {
 
       {/* Tab content */}
       <div className="px-4 pt-4">
-        {activeTab === "Menu" && <BusinessMenuTab />}
+        {activeTab === "Menu" && <BusinessMenuTab businessId={business.id} />}
         {activeTab === "Demander" && (
           <BusinessAskTab businessName={business.name} isClaimed={business.is_claimed} />
         )}
@@ -213,7 +220,8 @@ const BusinessDetail = () => {
           <BusinessInfoTab
             hours={business.hours}
             hoursJson={(business as any).hours_json}
-            isOpen={business.is_open}
+            specialHours={(business as any).special_hours}
+            isOpen={isBusinessOpenNow(business as any)}
             website={business.website}
             phone={business.phone}
             address={business.address}
