@@ -100,6 +100,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           business_id: string
@@ -382,6 +412,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_owner_transfer_requests: {
+        Row: {
+          admin_note: string | null
+          business_id: string
+          claim_request_id: string | null
+          created_at: string
+          current_owner_user_id: string | null
+          id: string
+          reason: string | null
+          requested_owner_user_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          business_id: string
+          claim_request_id?: string | null
+          created_at?: string
+          current_owner_user_id?: string | null
+          id?: string
+          reason?: string | null
+          requested_owner_user_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          business_id?: string
+          claim_request_id?: string | null
+          created_at?: string
+          current_owner_user_id?: string | null
+          id?: string
+          reason?: string | null
+          requested_owner_user_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       business_photos: {
         Row: {
