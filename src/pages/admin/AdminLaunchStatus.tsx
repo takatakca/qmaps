@@ -113,6 +113,12 @@ const AdminLaunchStatus = () => {
     { label: "Deployment checklist", path: "docs/deployment-checklist.md" },
     { label: "Environment setup", path: "docs/environment-setup.md" },
     { label: "App store readiness", path: "docs/app-store-readiness.md" },
+    { label: "Phase 16 — Launch deployment report", path: "docs/launch-deployment-report.md" },
+    { label: "Phase 16 — Deploy checklist", path: "docs/deploy-checklist.md" },
+    { label: "Phase 16 — Post-deploy smoke test", path: "docs/post-deploy-smoke-test.md" },
+    { label: "Phase 16 — First 72 hours monitoring", path: "docs/first-72-hours-monitoring.md" },
+    { label: "Phase 16 — Launch issue template", path: "docs/launch-issue-template.md" },
+    { label: "Phase 16 — Post-launch backlog", path: "docs/post-launch-backlog.md" },
   ];
 
   return (
