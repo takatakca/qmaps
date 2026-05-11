@@ -9,6 +9,13 @@ export const ADMIN_AUDIT_ACTIONS = [
   "business_verified",
   "business_unverified",
   "business_updated_by_admin",
+  "category_created",
+  "category_updated",
+  "category_deactivated",
+  "category_reactivated",
+  "review_hidden",
+  "review_restored",
+  "review_reviewed",
 ] as const;
 
 export type AdminAuditAction = (typeof ADMIN_AUDIT_ACTIONS)[number];
@@ -24,6 +31,13 @@ export const ADMIN_AUDIT_ACTION_LABELS: Record<AdminAuditAction, string> = {
   business_verified: "Commerce vérifié",
   business_unverified: "Commerce dévérifié",
   business_updated_by_admin: "Commerce modifié",
+  category_created: "Catégorie créée",
+  category_updated: "Catégorie modifiée",
+  category_deactivated: "Catégorie désactivée",
+  category_reactivated: "Catégorie réactivée",
+  review_hidden: "Avis masqué",
+  review_restored: "Avis restauré",
+  review_reviewed: "Avis vérifié",
 };
 
 export function isAdminAuditAction(action: unknown): action is AdminAuditAction {

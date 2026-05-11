@@ -648,26 +648,46 @@ export type Database = {
           created_at: string
           icon: string | null
           id: string
+          is_active: boolean
           name: string
+          parent_id: string | null
           slug: string
+          sort_order: number
+          updated_at: string
         }
         Insert: {
           category_type?: string
           created_at?: string
           icon?: string | null
           id?: string
+          is_active?: boolean
           name: string
+          parent_id?: string | null
           slug: string
+          sort_order?: number
+          updated_at?: string
         }
         Update: {
           category_type?: string
           created_at?: string
           icon?: string | null
           id?: string
+          is_active?: boolean
           name?: string
+          parent_id?: string | null
           slug?: string
+          sort_order?: number
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       collection_items: {
         Row: {

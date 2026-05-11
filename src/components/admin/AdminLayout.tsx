@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users, Briefcase, Sparkles, ArrowLeft, ShieldAlert, UserMinus, Rocket, ArrowRightLeft, ScrollText } from "lucide-react";
+import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users, Briefcase, Sparkles, ArrowLeft, ShieldAlert, UserMinus, Rocket, ArrowRightLeft, ScrollText, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/admin/reviews", label: "Avis", icon: MessageSquare },
   { to: "/admin/review-moderation", label: "Sécurité avis", icon: ShieldAlert },
   { to: "/admin/photos", label: "Photos", icon: ImageIcon },
+  { to: "/admin/categories", label: "Catégories", icon: Tag },
   { to: "/admin/projects", label: "Projets", icon: Briefcase },
   { to: "/admin/sponsored", label: "Sponsorisé", icon: Sparkles },
   { to: "/admin/users", label: "Utilisateurs", icon: Users },

@@ -31,6 +31,7 @@ const AdminLaunchStatus = lazy(() => import("./pages/admin/AdminLaunchStatus"));
 const AdminClaims = lazy(() => import("./pages/admin/AdminClaims"));
 const AdminOwnerTransfers = lazy(() => import("./pages/admin/AdminOwnerTransfers"));
 const AdminAuditLogs = lazy(() => import("./pages/admin/AdminAuditLogs"));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 
 // Lazy: merchant
 const MerchantSponsored = lazy(() => import("./pages/MerchantSponsored"));
@@ -220,8 +221,7 @@ const App = () => (
               <Route path="/admin/claims" element={<ProtectedAdminRoute><AdminClaims /></ProtectedAdminRoute>} />
               <Route path="/admin/owner-transfers" element={<ProtectedAdminRoute><AdminOwnerTransfers /></ProtectedAdminRoute>} />
               <Route path="/admin/audit-logs" element={<ProtectedAdminRoute><AdminAuditLogs /></ProtectedAdminRoute>} />
-              <Route path="/admin/owner-transfers" element={<ProtectedAdminRoute><AdminOwnerTransfers /></ProtectedAdminRoute>} />
-              <Route path="/admin/audit-logs" element={<ProtectedAdminRoute><AdminAuditLogs /></ProtectedAdminRoute>} />
+              <Route path="/admin/categories" element={<ProtectedAdminRoute><AdminCategories /></ProtectedAdminRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
