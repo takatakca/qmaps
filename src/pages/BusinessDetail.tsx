@@ -195,6 +195,20 @@ const BusinessDetail = () => {
         }}
       />
 
+      <BusinessTrustBadges business={business as any} />
+
+      {!business.is_claimed && (!user || business.owner_user_id !== user.id) && (
+        <div className="mx-4 mt-3 p-3 rounded-xl border border-border bg-secondary/40 flex items-center justify-between gap-2">
+          <div className="text-xs">
+            <p className="font-semibold text-foreground">Vous êtes le propriétaire?</p>
+            <p className="text-muted-foreground">Revendiquez ce commerce pour le gérer.</p>
+          </div>
+          <Button size="sm" variant="outline" className="gap-1 shrink-0" onClick={() => setClaimOpen(true)}>
+            <ShieldCheck size={14} /> Revendiquer
+          </Button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="sticky top-0 z-30 bg-background border-b border-border mt-2">
         <div className="flex">
