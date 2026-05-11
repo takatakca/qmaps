@@ -61,6 +61,8 @@ const AdminDashboard = () => {
     { label: "Revendications", to: "/admin/claims" },
     { label: "Transferts propriétaire", to: "/admin/owner-transfers" },
     { label: "Signalements", to: "/admin/reports" },
+    { label: "Catégories", to: "/admin/categories" },
+    { label: "Avis", to: "/admin/reviews" },
     { label: "Journal d'audit", to: "/admin/audit-logs" },
     { label: "Commerces", to: "/admin/businesses" },
     { label: "Statut de lancement", to: "/admin/launch-status" },
