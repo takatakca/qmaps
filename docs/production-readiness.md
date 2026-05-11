@@ -69,3 +69,55 @@ See `docs/security-hardening-notes.md` for full context:
 - `spatial_ref_sys` RLS-disabled (PostGIS-managed)
 - Public EXECUTE on SECURITY DEFINER helpers used by RLS
 - Postgres minor version upgrade available
+
+## Final launch section (Phase 15J)
+
+### Required checks before deploy
+1. `bunx vitest run` — all tests green (≥263 expected after 15J).
+2. `bun run launch:check` — 16/16.
+3. `bun run go:no-go:json` — decision = `GO`.
+4. `bun run build` — succeeds with no error output.
+5. Manual mobile pass — `docs/mobile-screenshot-checklist.md`.
+6. Final regression review — `docs/final-regression-report.md`.
+
+### Deploy command
+Frontend is deployed via the Lovable **Publish** dialog. Edge functions
+deploy automatically when pushed.
+
+### Post-deploy smoke tests
+- Load `/`, `/search`, a known `/business/:id`, `/release-notes`.
+- Sign in as a test user, view `/profile`, sign out.
+- Sign in as admin, open `/admin`, `/admin/audit-logs`.
+- Verify `robots.txt`, `sitemap.xml`, `manifest.webmanifest` resolve.
+
+### Rollback steps
+1. In the Lovable publish dialog, select a previous published version
+   and republish.
+2. If a migration is suspected, do **not** roll back the database
+   automatically — open an incident per
+   `docs/admin/incident-response-playbook.md`.
+
+### Launch approver
+- Product owner (sign-off via `docs/final-owner-signoff.md`).
+- Backup approver: technical lead.
+
+### Known deferred warnings
+See `docs/security-hardening-notes.md`:
+- PostGIS / pg_trgm in `public` schema
+- `spatial_ref_sys` RLS-disabled (PostGIS-managed)
+- Public EXECUTE on SECURITY DEFINER helpers used by RLS
+- Postgres minor version upgrade available
+
+### Monitoring plan
+- First 72h: follow `docs/admin/first-72-hours-monitoring.md`.
+- Daily: follow `docs/admin/post-launch-daily-checks.md`.
+- Use `src/lib/launchMonitoring.ts` helpers for any future status UI.
+
+### Emergency contacts
+Stored privately by the owner. Do **not** commit personal contact info
+to the repo. Placeholders:
+
+- On-call engineer: _to fill in privately_
+- Product owner: _to fill in privately_
+- Stripe support: dashboard → Help
+- Lovable / hosting support: in-app
