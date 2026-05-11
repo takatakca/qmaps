@@ -85,17 +85,16 @@ export const matchesAmenityFilter = (
 };
 
 /**
- * Returns true if the business is currently open. Falls back to the
- * `is_open` flag when no structured hours are available.
- *
- * `hours` is a free-text field today — we only treat the obvious
- * "fermé" / "closed" markers as definitive; everything else falls
- * back to the boolean.
+ * Returns true if the business is currently open. Prefers structured
+ * `hours_json`, falls back to obvious "fermé"/"closed" markers in the
+ * legacy text field, then to the boolean `is_open` flag.
  */
 export const isBusinessOpenNow = (
   business: SearchableBusiness,
-  _now: Date = new Date(),
+  now: Date = new Date(),
 ): boolean => {
+  const week = parseWeeklyHours(business.hours_json);
+  if (week) return isOpenAt(week, now);
   const hours = (business.hours ?? "").toLowerCase();
   if (hours.includes("fermé") || hours.includes("closed")) return false;
   if (typeof business.is_open === "boolean") return business.is_open;
