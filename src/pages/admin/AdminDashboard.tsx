@@ -43,6 +43,7 @@ const AdminDashboard = () => {
   const cards = [
     { label: "Signalements ouverts", value: stats.openReports, icon: Flag, to: "/admin/reports", tone: "text-destructive" },
     { label: "Réclamations en attente", value: stats.pendingClaims, icon: ShieldAlert, to: "/admin/businesses", tone: "text-amber-600" },
+    { label: "Demandes structurées", value: stats.pendingClaimRequests, icon: ShieldAlert, to: "/admin/claims", tone: "text-amber-600" },
     { label: "Avis (7j)", value: stats.recentReviews, icon: MessageSquare, to: "/admin/reviews", tone: "text-foreground" },
     { label: "Entreprises (7j)", value: stats.recentBusinesses, icon: Building2, to: "/admin/businesses", tone: "text-foreground" },
     { label: "Projets (7j)", value: stats.recentProjects, icon: Briefcase, to: "/admin/projects", tone: "text-foreground" },
