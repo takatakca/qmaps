@@ -1,8 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /merchant
+Disallow: /merchant/
+Disallow: /auth/callback
+Disallow: /reset-password
+Disallow: /settings
+Disallow: /notifications
+
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /merchant
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /merchant
 
 User-agent: Twitterbot
 Allow: /
@@ -10,7 +25,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
-
-Sitemap: /sitemap.xml
+Sitemap: https://qmaps.lovable.app/sitemap.xml
