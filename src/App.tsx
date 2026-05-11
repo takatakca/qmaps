@@ -126,6 +126,7 @@ const App = () => (
         <OfflineBanner />
         <BrowserRouter>
           <Suspense fallback={<RouteFallback />}>
+            <ErrorBoundary>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
