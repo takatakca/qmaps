@@ -7,7 +7,7 @@ import {
 } from "@/lib/businessCompleteness";
 import type { MenuItem } from "@/lib/menuItems";
 
-const ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+const ICONS: Record<string, any> = {
   name: Tag,
   address: MapPin,
   contact: Phone,
