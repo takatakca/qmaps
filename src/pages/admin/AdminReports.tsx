@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { buildAdminAuditLogPayload } from "@/lib/adminAudit";
 
 const STATUS_COLORS: Record<ReportStatus, string> = {
   open: "bg-destructive/10 text-destructive",
@@ -36,10 +39,23 @@ const AdminReports = () => {
   const [openId, setOpenId] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleAction = async (id: string, status: ReportStatus, internalNote?: string) => {
     try {
       await updateStatus(id, status, internalNote);
+      if (user && (status === "resolved" || status === "reviewing" || status === "dismissed")) {
+        const action = status === "dismissed" ? "report_dismissed" : "report_reviewed";
+        const payload = buildAdminAuditLogPayload({
+          adminUserId: user.id,
+          action,
+          targetType: "report",
+          targetId: id,
+          metadata: { new_status: status, internal_note: internalNote ?? null },
+        });
+        const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(payload);
+        if (auditErr) toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
+      }
       toast({ title: "Signalement mis à jour" });
       setOpenId(null);
       setNote("");
