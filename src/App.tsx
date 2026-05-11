@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedMerchantRoute from "@/components/ProtectedMerchantRoute";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 import OfflineBanner from "@/components/OfflineBanner";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Eager: critical public pages
 import Index from "./pages/Index";
