@@ -80,9 +80,10 @@ const MerchantPhotos = () => {
   const handleAddByUrl = async () => {
     const result = addPhotoUrl(photos, urlDraft);
     if (!result.ok) {
+      const reason = result.reason;
       toast({
-        title: result.reason === "duplicate" ? "Photo déjà ajoutée" : "URL invalide",
-        description: result.reason === "invalid" ? "L'URL doit commencer par http(s)://" : undefined,
+        title: reason === "duplicate" ? "Photo déjà ajoutée" : "URL invalide",
+        description: reason === "invalid" ? "L'URL doit commencer par http(s)://" : undefined,
         variant: "destructive",
       });
       return;
