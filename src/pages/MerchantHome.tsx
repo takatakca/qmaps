@@ -13,6 +13,8 @@ import QuickQuestionSection from "@/components/merchant/home/QuickQuestionSectio
 import InsightsSection from "@/components/merchant/home/InsightsSection";
 import CompetitorSection from "@/components/merchant/home/CompetitorSection";
 import EnhanceSection from "@/components/merchant/home/EnhanceSection";
+import CompletenessCard from "@/components/merchant/CompletenessCard";
+import type { MenuItem } from "@/lib/menuItems";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
@@ -22,6 +24,7 @@ const MerchantHome = () => {
   const navigate = useNavigate();
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
   const [displayName, setDisplayName] = useState("Professionnel");
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +36,13 @@ const MerchantHome = () => {
       ]);
       setBusiness(biz);
       setDisplayName(profile?.display_name || user.email?.split("@")[0] || "Professionnel");
+      if (biz) {
+        const { data: menu } = await (supabase as any)
+          .from("business_menu_items")
+          .select("*")
+          .eq("business_id", biz.id);
+        setMenuItems((menu as MenuItem[]) ?? []);
+      }
       setLoading(false);
     };
     fetchData();
@@ -63,6 +73,7 @@ const MerchantHome = () => {
       <HomeHeader business={business} displayName={displayName} />
 
       <div className="p-4 space-y-4">
+        <CompletenessCard business={business as any} menuItems={menuItems} />
         <RemindersSection />
         <AdPreviewSection business={business} />
         <PerformanceSection reviewsCount={business.reviews_count} />
