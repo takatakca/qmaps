@@ -1,16 +1,19 @@
-import { Clock, Globe, Phone, MapPin, ArrowRight, Pencil, Check } from "lucide-react";
+import { Clock, Globe, Phone, MapPin, Pencil, Check, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DAYS,
   DAY_LABELS_FR,
   dayKeyForDate,
   formatDayHours,
+  formatSpecialHoursForDate,
+  parseSpecialHours,
   parseWeeklyHours,
 } from "@/lib/businessHours";
 
 interface BusinessInfoTabProps {
   hours: string | null;
   hoursJson?: unknown;
+  specialHours?: unknown;
   isOpen: boolean;
   website: string | null;
   phone: string | null;
@@ -43,6 +46,7 @@ const Section = ({ title, items }: { title: string; items: string[] }) =>
 const BusinessInfoTab = ({
   hours,
   hoursJson,
+  specialHours,
   isOpen,
   website,
   phone,
@@ -60,14 +64,28 @@ const BusinessInfoTab = ({
   const fullAddress = `${address}\n${city}${region ? `, ${region}` : ""}${postalCode ? ` ${postalCode}` : ""}`;
   const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
   const week = parseWeeklyHours(hoursJson);
-  const today = week ? dayKeyForDate(new Date()) : null;
+  const special = parseSpecialHours(specialHours);
+  const now = new Date();
+  const today = week ? dayKeyForDate(now) : null;
+  const todaySpecial = formatSpecialHoursForDate(special, now);
+  const todaySpecialNote =
+    special && special[`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`]?.note;
 
   return (
     <div className="space-y-0">
       <h3 className="font-heading text-lg font-bold text-foreground mb-4">Info</h3>
 
       {/* Weekly hours (structured) or fallback */}
-      <div className="py-4 border-b border-border">
+      <div id="business-hours" className="py-4 border-b border-border scroll-mt-16">
+        {todaySpecial && (
+          <div className="mb-3 flex items-start gap-2 rounded-lg bg-primary/10 text-primary p-2 text-xs">
+            <CalendarDays size={14} className="mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold">Horaire spécial aujourd'hui</p>
+              <p>{todaySpecial}{todaySpecialNote ? ` · ${todaySpecialNote}` : ""}</p>
+            </div>
+          </div>
+        )}
         <div className="flex items-start gap-3">
           <Clock size={18} className="text-muted-foreground mt-0.5 shrink-0" />
           <div className="flex-1">
