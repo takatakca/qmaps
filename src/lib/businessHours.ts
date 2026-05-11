@@ -170,7 +170,7 @@ export const getReviewRatingDistribution = (
   }
   const percentages: RatingDistribution["percentages"] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   if (total > 0) {
-    (Object.keys(counts) as Array<keyof typeof counts>).forEach((k) => {
+    ([1, 2, 3, 4, 5] as const).forEach((k) => {
       percentages[k] = Math.round((counts[k] / total) * 1000) / 10;
     });
   }
