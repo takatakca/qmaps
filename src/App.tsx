@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedMerchantRoute from "@/components/ProtectedMerchantRoute";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 import OfflineBanner from "@/components/OfflineBanner";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Eager: critical public pages
 import Index from "./pages/Index";
@@ -125,6 +126,7 @@ const App = () => (
         <OfflineBanner />
         <BrowserRouter>
           <Suspense fallback={<RouteFallback />}>
+            <ErrorBoundary>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
@@ -225,6 +227,7 @@ const App = () => (
 
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </ErrorBoundary>
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
