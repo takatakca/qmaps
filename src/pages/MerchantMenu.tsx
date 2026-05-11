@@ -46,6 +46,26 @@ const MerchantMenu = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const menuFileRef = useRef<HTMLInputElement>(null);
+
+  const handleMenuImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length || !business || !editing) return;
+    const file = e.target.files[0];
+    e.target.value = "";
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `businesses/${business.id}/menu/${Date.now()}.${ext}`;
+    setUploadingImage(true);
+    const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
+    if (uploadErr) {
+      setUploadingImage(false);
+      toast({ title: "Erreur d'envoi", description: uploadErr.message, variant: "destructive" });
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
+    setEditing({ ...editing, photo_url: urlData.publicUrl });
+    setUploadingImage(false);
+  };
 
   const fetchAll = async () => {
     if (!user) return;
