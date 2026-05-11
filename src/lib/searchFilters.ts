@@ -1,9 +1,11 @@
 /**
- * Phase 15B — pure helpers for QMAPS search/discovery.
+ * Phase 15B/15C — pure helpers for QMAPS search/discovery.
  *
  * No React, no fetch, no Supabase. Safe to unit-test and reuse from
  * the consumer search page, category pages, and admin tooling.
  */
+
+import { isOpenAt, parseWeeklyHours } from "@/lib/businessHours";
 
 export type SortOption =
   | "recommended"
@@ -28,6 +30,7 @@ export interface SearchableBusiness {
   price_level?: number | null;
   is_open?: boolean | null;
   hours?: string | null;
+  hours_json?: unknown;
   amenities?: string[] | null;
   city?: string | null;
   created_at?: string | null;
