@@ -66,7 +66,7 @@ export interface AuditLogLike {
 export function summarizeAuditLogs(logs: AuditLogLike[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const l of logs ?? []) {
-    if (!l || typeof l.action !== "string") continue;
+    if (!l || typeof l.action !== "string" || l.action.length === 0) continue;
     counts[l.action] = (counts[l.action] ?? 0) + 1;
   }
   return counts;
