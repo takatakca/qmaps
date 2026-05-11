@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Check, X, Loader2, ExternalLink } from "lucide-react";
+import { buildAdminAuditLogPayload } from "@/lib/adminAudit";
+import { buildOwnerTransferRequest } from "@/lib/ownerTransfers";
 
 interface ClaimRequestRow {
   id: string;
@@ -77,20 +79,87 @@ const AdminClaims = () => {
       return;
     }
 
-    if (decision === "approved" && row.business && !row.business.is_claimed) {
-      // Mark business as claimed; do NOT auto-transfer ownership when one already exists.
-      const update: Record<string, unknown> = { is_claimed: true };
-      if (!row.business.owner_user_id) update.owner_user_id = row.user_id;
-      const { error: bizErr } = await supabase.from("businesses").update(update).eq("id", row.business_id);
-      if (bizErr) {
-        setWorking(null);
-        toast({ title: "Erreur (commerce)", description: bizErr.message, variant: "destructive" });
-        return;
+    let transferred = false;
+    let transferRequested = false;
+
+    if (decision === "approved" && row.business) {
+      const existingOwner = row.business.owner_user_id;
+      if (!existingOwner || existingOwner === row.user_id) {
+        const update: Record<string, unknown> = { is_claimed: true };
+        if (!existingOwner) update.owner_user_id = row.user_id;
+        const { error: bizErr } = await supabase.from("businesses").update(update).eq("id", row.business_id);
+        if (bizErr) {
+          setWorking(null);
+          toast({ title: "Erreur (commerce)", description: bizErr.message, variant: "destructive" });
+          return;
+        }
+        transferred = !existingOwner;
+      } else {
+        // Different existing owner — create a transfer request for review
+        try {
+          const payload = buildOwnerTransferRequest({
+            businessId: row.business_id,
+            requestedOwnerUserId: row.user_id,
+            currentOwnerUserId: existingOwner,
+            claimRequestId: row.id,
+            reason: adminNote ?? undefined,
+          });
+          const { error: trErr } = await (supabase as any)
+            .from("business_owner_transfer_requests")
+            .insert(payload);
+          if (trErr) {
+            toast({ title: "Avertissement transfert", description: trErr.message, variant: "destructive" });
+          } else {
+            transferRequested = true;
+            const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(
+              buildAdminAuditLogPayload({
+                adminUserId: user.id,
+                action: "owner_transfer_requested",
+                targetType: "business_owner_transfer_request",
+                targetId: row.business_id,
+                metadata: {
+                  business_id: row.business_id,
+                  claim_request_id: row.id,
+                  current_owner_user_id: existingOwner,
+                  requested_owner_user_id: row.user_id,
+                },
+              })
+            );
+            if (auditErr) toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
+          }
+        } catch (e: any) {
+          toast({ title: "Avertissement transfert", description: e.message, variant: "destructive" });
+        }
       }
     }
 
+    // Audit log for the claim decision
+    const auditPayload = buildAdminAuditLogPayload({
+      adminUserId: user.id,
+      action: decision === "approved" ? "claim_approved" : "claim_rejected",
+      targetType: "business_claim_request",
+      targetId: row.id,
+      metadata: {
+        business_id: row.business_id,
+        claimant_user_id: row.user_id,
+        ownership_transferred: transferred,
+        transfer_request_created: transferRequested,
+        admin_note: adminNote,
+      },
+    });
+    const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(auditPayload);
+    if (auditErr) {
+      toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
+    }
+
     setWorking(null);
-    toast({ title: decision === "approved" ? "Revendication approuvée" : "Revendication rejetée" });
+    toast({
+      title: decision === "approved"
+        ? transferRequested
+          ? "Demande approuvée, transfert propriétaire créé pour révision."
+          : "Revendication approuvée"
+        : "Revendication rejetée",
+    });
     await load();
   };
 
