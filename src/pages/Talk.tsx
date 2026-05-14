@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Plus, MoreVertical, MessageSquare } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import Seo from "@/components/Seo";
 
 type Tab = "all" | "my";
 
@@ -19,6 +20,11 @@ const Talk = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="Discussions QMAPS — la communauté locale de Montréal"
+        description="Échangez avec la communauté QMAPS sur la vie à Montréal : conduite, restaurants, shopping, questions locales et conseils entre voisins."
+        canonicalPath="/talk"
+      />
       <div className="sticky top-0 z-20 bg-card border-b border-border">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">

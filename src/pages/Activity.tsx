@@ -8,6 +8,7 @@ import SuggestedUsersList from "@/components/social/SuggestedUsersList";
 import { formatRelativeTime } from "@/lib/social";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
+import Seo from "@/components/Seo";
 
 type Tab = "all" | "friends" | "nearby";
 
@@ -27,6 +28,12 @@ const Activity = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="Activité — vos amis et commerces locaux à Montréal | QMAPS"
+        description="Suivez l'activité de vos amis QMAPS, les nouveaux avis, photos et commerces tendance près de chez vous à Montréal."
+        canonicalPath="/activity"
+        noindex
+      />
       <div className="sticky top-0 z-20 bg-card">
         <h1 className="font-heading text-xl font-bold text-foreground px-4 pt-4 pb-2">Activité</h1>
         <div className="flex border-b border-border">

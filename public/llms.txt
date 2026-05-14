@@ -1,0 +1,24 @@
+# QMAPS
+
+> QMAPS aide les Montréalais à découvrir des commerces locaux, lire des avis, partager des photos et trouver des pros près de chez eux.
+
+QMAPS est une plateforme communautaire dédiée aux commerces et services de Montréal. Les utilisateurs peuvent rechercher par catégorie ou quartier, consulter des avis vérifiés, sauvegarder leurs adresses préférées dans des collections et contacter directement des professionnels locaux.
+
+## Pages
+
+- [Accueil](/): Découvrir les commerces recommandés et tendance à Montréal.
+- [Recherche](/search): Rechercher des commerces par nom, catégorie ou quartier.
+- [Montréal](/city/montreal): Explorer les commerces classés par quartier de Montréal.
+- [Projets](/projects): Trouver des pros locaux pour vos projets et obtenir des devis.
+- [Événements](/events): Voir les événements communautaires et activités locales.
+- [Discussions](/talk): Échanger avec la communauté QMAPS sur la vie locale.
+- [Collections](/collections): Parcourir les listes thématiques de commerces.
+- [Notes de version](/release-notes): Lire l'historique des nouveautés QMAPS.
+
+## Optional
+
+- [Confidentialité](/privacy): Politique de confidentialité.
+- [Conditions](/terms): Conditions d'utilisation.
+- [Cookies](/cookies): Politique de cookies.
+- [Support](/support-policy): Politique de support utilisateur.
+- [Suppression de compte](/account-deletion-policy): Procédure de suppression de compte.

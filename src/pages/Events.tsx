@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell, Share2, CalendarDays, Star, MapPin } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import Seo from "@/components/Seo";
 
 const mockEvents = {
   official: [
@@ -16,6 +17,11 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="Événements à Montréal — pop-ups, marchés et activités locales | QMAPS"
+        description="Découvrez les événements officiels QMAPS et les activités populaires à Montréal : pop-ups, marchés gourmands, sorties et rendez-vous communautaires."
+        canonicalPath="/events"
+      />
       <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)}><ArrowLeft size={22} className="text-foreground" /></button>

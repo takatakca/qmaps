@@ -4,6 +4,7 @@ import { ArrowLeft, Search, HelpCircle, Store, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BottomNav from "@/components/BottomNav";
+import Seo from "@/components/Seo";
 
 const faqs = [
   "Comment fonctionne la facturation?",
@@ -20,6 +21,11 @@ const Support = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="Centre d'aide QMAPS — support, FAQ et contact"
+        description="Trouvez des réponses sur la facturation, la gestion de votre commerce, la connexion à votre compte et le support QMAPS pour Montréal."
+        canonicalPath="/support"
+      />
       <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center gap-3 px-4 py-3">
         <button onClick={() => navigate(-1)}><ArrowLeft size={22} className="text-foreground" /></button>
         <h1 className="font-heading text-lg font-bold text-foreground">Centre d'aide</h1>

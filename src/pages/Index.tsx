@@ -41,7 +41,7 @@ const Index = () => {
         canonicalPath="/"
       />
       {/* Header */}
-      <div className="px-4 pt-4 pb-2">
+      <header className="px-4 pt-4 pb-2">
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-heading text-2xl font-bold text-foreground tracking-tight">
             Q<span className="text-primary">Maps</span>
@@ -54,9 +54,10 @@ const Index = () => {
           </a>
         </div>
         <SearchBar />
-      </div>
+      </header>
 
       {/* Categories */}
+      <main>
       <div className="px-4 mt-3">
         <CategoryRow />
       </div>
@@ -99,6 +100,7 @@ const Index = () => {
           ))
         )}
       </div>
+      </main>
 
       <BottomNav />
     </div>
