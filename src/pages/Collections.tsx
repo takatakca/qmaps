@@ -12,6 +12,7 @@ import restaurantImg from "@/assets/restaurant-1.jpg";
 import { useCollections } from "@/hooks/useCollections";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
+import Seo from "@/components/Seo";
 
 const featuredCollections = [
   { id: "f1", title: "Sélection hebdo Montréal", desc: "Les 10 meilleurs restaurants de Montréal cette semaine", image: foodImg, count: 10 },
@@ -45,6 +46,11 @@ const Collections = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+      <Seo
+        title="Collections de commerces — listes thématiques de Montréal | QMAPS"
+        description="Parcourez les collections QMAPS : sélections hebdomadaires, incontournables locaux, cafés cozy et listes personnalisées de commerces à Montréal."
+        canonicalPath="/collections"
+      />
       <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center justify-between px-4 py-3">
         <h1 className="font-heading text-xl font-bold text-foreground">Collections</h1>
         {user && <button onClick={() => void handleCreate()} disabled={creating || !draftName.trim()} className="text-sm font-semibold text-primary disabled:text-muted-foreground">CRÉER</button>}
