@@ -254,8 +254,8 @@ const MerchantHighlights = () => {
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">
             Économisez avec le Package
           </Button>
-          <Button onClick={() => setStep("checkout")} className="flex-1 rounded-full text-sm" disabled={selected.length === 0}>
-            Acheter · CA$2/jour
+          <Button onClick={() => navigate("/merchant/billing/plans")} className="flex-1 rounded-full text-sm">
+            Bientôt disponible
           </Button>
         </div>
       </div>
