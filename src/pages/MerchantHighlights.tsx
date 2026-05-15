@@ -153,8 +153,8 @@ const MerchantHighlights = () => {
               En procédant, j'accepte les <button className="text-primary underline">Conditions publicitaires</button> de QMAPS.
             </p>
 
-            <Button onClick={() => navigate("/merchant")} className="w-full rounded-full font-bold">
-              Confirmer l'achat
+            <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">
+              Voir les plans d'abonnement
             </Button>
           </div>
         </div>
@@ -177,8 +177,8 @@ const MerchantHighlights = () => {
         </p>
 
         {/* CTA buttons */}
-        <Button onClick={() => setStep("checkout")} className="w-full rounded-full mb-2" disabled={selected.length === 0}>
-          Acheter · CA$2/jour
+        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
+          Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-6">
           Économisez avec le Package
@@ -254,8 +254,8 @@ const MerchantHighlights = () => {
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">
             Économisez avec le Package
           </Button>
-          <Button onClick={() => setStep("checkout")} className="flex-1 rounded-full text-sm" disabled={selected.length === 0}>
-            Acheter · CA$2/jour
+          <Button onClick={() => navigate("/merchant/billing/plans")} className="flex-1 rounded-full text-sm">
+            Bientôt disponible
           </Button>
         </div>
       </div>

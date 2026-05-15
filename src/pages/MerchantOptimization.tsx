@@ -100,12 +100,12 @@ const MerchantOptimization = () => {
   const monthlyCap = useMemo(() => dailyBudget * 30, [dailyBudget]);
   const selectedPackageData = useMemo(() => packages.find((pkg) => pkg.id === selectedPackage) ?? packages[0], [selectedPackage]);
 
-  const publishCampaign = () => {
-    setCampaignPublished(true);
+  const goToBilling = () => {
     toast({
-      title: "Campagne prête",
-      description: `${campaignName} est prête avec un budget de CA$${dailyBudget}/jour.`,
+      title: "Bientôt disponible",
+      description: "Les campagnes publicitaires QMAPS arrivent. En attendant, gérez votre abonnement.",
     });
+    navigate("/merchant/billing/plans");
   };
 
   useEffect(() => {
@@ -231,7 +231,7 @@ const MerchantOptimization = () => {
                   variant="outline"
                   size="sm"
                   className="mt-3 w-full rounded-full"
-                  onClick={() => navigate("/merchant/ads")}
+                  onClick={goToBilling}
                 >
                   {booster.cta}
                 </Button>
@@ -332,12 +332,12 @@ const MerchantOptimization = () => {
                   </div>
                 </div>
                 <Button
-                  onClick={() => setSelectedPackage(pkg.id)}
+                  onClick={goToBilling}
                   size="sm"
                   className="w-full rounded-full mt-3 gap-1"
-                  variant={selectedPackage === pkg.id || pkg.popular ? "default" : "outline"}
+                  variant={pkg.popular ? "default" : "outline"}
                 >
-                  {selectedPackage === pkg.id ? <>Sélectionné <Check size={14} /></> : <>Activer <ChevronRight size={14} /></>}
+                  Bientôt disponible <ChevronRight size={14} />
                 </Button>
               </div>
             ))}
@@ -348,8 +348,8 @@ const MerchantOptimization = () => {
         <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4 text-center">
           <h3 className="font-heading font-bold text-foreground mb-1">Publicité personnalisée</h3>
           <p className="text-xs text-muted-foreground mb-3">Créez une campagne sur mesure avec votre texte, photo et budget.</p>
-          <Button onClick={() => navigate("/merchant/ads")} className="rounded-full gap-1">
-            <Megaphone size={14} /> Créer une publicité
+          <Button onClick={goToBilling} className="rounded-full gap-1">
+            <Megaphone size={14} /> Bientôt disponible
           </Button>
         </div>
 
@@ -379,10 +379,10 @@ const MerchantOptimization = () => {
             <label className="text-xs font-medium text-muted-foreground">Nom de campagne</label>
             <Input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} className="rounded-lg" />
           </div>
-          <Button onClick={() => navigate("/merchant/ads")} className="mt-4 w-full rounded-full gap-1">
+          <Button onClick={goToBilling} className="mt-4 w-full rounded-full gap-1">
             Configurer une campagne <ChevronRight size={14} />
           </Button>
-          <Button variant="outline" onClick={publishCampaign} className="mt-2 w-full rounded-full gap-1">
+          <Button variant="outline" onClick={goToBilling} className="mt-2 w-full rounded-full gap-1">
             Publier la campagne <Megaphone size={14} />
           </Button>
         </div>

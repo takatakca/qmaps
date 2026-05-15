@@ -194,8 +194,8 @@ const MerchantAds = () => {
             <Button onClick={goNext} className="flex-1 rounded-full gap-2">Suivant <ChevronRight size={16} /></Button>
           </div>
         ) : step === 6 ? (
-          <Button onClick={() => { goNext(); navigate("/merchant"); }} className="w-full rounded-full bg-primary text-primary-foreground font-bold">
-            Confirmer l'achat
+          <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full bg-primary text-primary-foreground font-bold">
+            Bientôt disponible · Voir les plans
           </Button>
         ) : (
           <Button onClick={goNext} className="w-full rounded-full gap-2">Suivant <ChevronRight size={16} /></Button>
