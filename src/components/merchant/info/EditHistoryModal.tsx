@@ -1,9 +1,6 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Info } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface Props {
@@ -13,50 +10,35 @@ interface Props {
   onSaved: () => void;
 }
 
-const EditHistoryModal = ({ open, onClose, business, onSaved }: Props) => {
-  const [year, setYear] = useState("2023");
-  const [history, setHistory] = useState("");
-  const maxLen = 1000;
-
-  const handleSave = () => {
-    // Would persist to a dedicated field/table in production
-    onSaved();
-    onClose();
-  };
-
+/**
+ * Phase 3 note: the underlying `businesses` table has no `history` /
+ * `founded_year` columns yet. Persisting these fields requires the schema
+ * work scheduled for Phase 4/5. To avoid silently dropping merchant input
+ * (the previous version of this modal kept inputs but never wrote them),
+ * we now show an explicit "coming soon" state instead of a fake form.
+ */
+const EditHistoryModal = ({ open, onClose }: Props) => {
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl font-bold">Historique</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground mb-4">
-          Ajoutez une brève description de l'origine et du parcours de votre entreprise.
-        </p>
 
-        <div className="bg-muted/50 rounded-xl p-4 mb-4 space-y-4">
-          <div>
-            <Label className="font-medium">En quelle année votre entreprise a-t-elle été fondée?</Label>
-            <Input value={year} onChange={e => setYear(e.target.value)} className="rounded-lg mt-1" />
-          </div>
-          <div>
-            <Label className="font-medium">Quelle est l'histoire de votre entreprise?</Label>
-            <Textarea
-              value={history}
-              onChange={e => setHistory(e.target.value.slice(0, maxLen))}
-              rows={4}
-              className="rounded-lg mt-1"
-            />
-            <p className="text-xs text-muted-foreground text-right mt-1">{maxLen - history.length}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Consultez nos <button className="text-primary underline">directives</button>
+        <div className="bg-muted/50 rounded-xl p-4 mb-4 flex gap-3">
+          <Info size={18} className="text-primary shrink-0 mt-0.5" />
+          <div className="text-sm text-foreground">
+            <p className="font-medium mb-1">Bientôt disponible</p>
+            <p className="text-muted-foreground">
+              L'historique de votre entreprise (année de fondation, parcours)
+              sera disponible dans une prochaine mise à jour. En attendant,
+              ajoutez ces informations dans la section <strong>Spécialités</strong>.
             </p>
           </div>
         </div>
 
-        <div className="flex gap-3 justify-end">
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSave}>Sauvegarder</Button>
+        <div className="flex justify-end">
+          <Button onClick={onClose}>Fermer</Button>
         </div>
       </DialogContent>
     </Dialog>
