@@ -167,8 +167,8 @@ const MerchantUpgrade = () => {
         {/* Sticky CTA */}
         <div className="bg-card border-t border-border p-4 rounded-xl mb-4">
           <p className="text-center text-sm font-bold text-foreground mb-1">Package Upgrade · Essai gratuit</p>
-          <Button onClick={() => setStep("checkout")} className="w-full rounded-full font-bold">
-            Essayer gratuitement pendant 14 jours
+          <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">
+            Bientôt disponible · Voir les plans
           </Button>
           <button onClick={() => navigate(-1)} className="w-full text-center text-sm text-muted-foreground py-2">Annuler</button>
         </div>
