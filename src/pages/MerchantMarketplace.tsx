@@ -134,20 +134,7 @@ const MerchantMarketplace = () => {
     );
   }
 
-  const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const dayNamesFr = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-
-  const parseHours = () => {
-    if (!business.hours) return null;
-    return dayNamesFr.map((d, i) => {
-      const match = business.hours?.includes(d);
-      const segment = business.hours?.split(",").find(s => s.trim().startsWith(d));
-      const time = segment ? segment.split(":").slice(1).join(":").trim() : "Fermé";
-      return { day: d, time: time || "9:00 - 17:00" };
-    });
-  };
-
-  const hoursData = parseHours();
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
