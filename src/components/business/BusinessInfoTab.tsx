@@ -206,7 +206,7 @@ const BusinessInfoTab = ({
         <Pencil size={14} /> Suggérer une modification
       </Button>
 
-      <Section title="Commodités" items={amenities ?? []} />
+      <Section title="Commodités" items={amenityItems} />
       <Section title="Paiements" items={paymentMethods ?? []} />
       <Section title="Langues" items={languages ?? []} />
       <Section title="Accessibilité" items={accessibility ?? []} />
