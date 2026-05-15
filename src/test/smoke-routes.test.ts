@@ -57,9 +57,14 @@ const SMOKE_ROUTES = [
 
   // Merchant auth + dashboards
   "/merchant/login",
+  "/merchant/register",
   "/merchant/onboarding",
   "/merchant",
   "/merchant/home",
+  "/merchant/optimization",
+  "/merchant/marketplace",
+  "/merchant/messages",
+  "/merchant/menu",
   "/merchant/business-info",
   "/merchant/services",
   "/merchant/leads",
