@@ -114,7 +114,7 @@ const MerchantUpgrade = () => {
             <p className="text-[10px] text-muted-foreground">
               En procédant, j'accepte les <button className="text-primary underline">Conditions de service</button> de QMAPS.
             </p>
-            <Button className="w-full rounded-full font-bold">Essayer gratuitement pendant 14 jours</Button>
+            <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">Voir les plans d'abonnement</Button>
             <button onClick={() => setStep("info")} className="w-full text-center text-sm text-muted-foreground py-2">Annuler</button>
           </div>
         </div>
