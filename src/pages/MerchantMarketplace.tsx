@@ -360,19 +360,9 @@ const MerchantMarketplace = () => {
             <button onClick={() => setEditHours(true)} className="text-xs text-primary font-medium">Modifier</button>
           </div>
           {business.hours ? (
-            <div className="space-y-2">
-              {dayNamesFr.map((day, i) => {
-                const isOpen = i < 5;
-                return (
-                  <div key={day} className="flex justify-between text-sm">
-                    <span className="text-foreground font-medium">{day}</span>
-                    <span className="text-muted-foreground">{isOpen ? "Ouvert 24 heures" : "9:00 - 17:00"}</span>
-                  </div>
-                );
-              })}
-            </div>
+            <p className="text-sm text-foreground whitespace-pre-line">{business.hours}</p>
           ) : (
-            <p className="text-sm text-muted-foreground">Heures non configurées.</p>
+            <p className="text-sm text-muted-foreground">Heures non configurées. <button onClick={() => setEditHours(true)} className="text-primary font-medium">Ajouter →</button></p>
           )}
           <Button variant="outline" size="sm" className="rounded-full mt-3 w-full" onClick={() => setEditHours(true)}>
             <Plus size={14} className="mr-1" /> Ajouter des heures spéciales
