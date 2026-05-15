@@ -27,7 +27,7 @@ interface PendingRequest {
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isMerchant } = useAuth();
   const [pending, setPending] = useState<PendingRequest | null>(null);
 
   useEffect(() => {
