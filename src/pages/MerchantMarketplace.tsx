@@ -86,13 +86,18 @@ const MerchantMarketplace = () => {
     const ext = file.name.split(".").pop();
     const path = `business-photos/${business.id}/${Date.now()}.${ext}`;
     const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
-    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploading(false); return; }
+    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploading(false); e.target.value = ""; return; }
     const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
     const newPhotos = [...(business.photos || []), urlData.publicUrl];
-    await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
-    setBusiness({ ...business, photos: newPhotos });
-    toast({ title: "Photo ajoutée!" });
+    const { error: updateErr } = await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
+    if (updateErr) {
+      toast({ title: "Erreur", description: updateErr.message, variant: "destructive" });
+    } else {
+      setBusiness({ ...business, photos: newPhotos });
+      toast({ title: "Photo ajoutée!" });
+    }
     setUploading(false);
+    e.target.value = "";
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,12 +107,17 @@ const MerchantMarketplace = () => {
     const ext = file.name.split(".").pop();
     const path = `business-covers/${business.id}/${Date.now()}.${ext}`;
     const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
-    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploadingCover(false); return; }
+    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploadingCover(false); e.target.value = ""; return; }
     const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
-    await supabase.from("businesses").update({ image_url: urlData.publicUrl }).eq("id", business.id);
-    setBusiness({ ...business, image_url: urlData.publicUrl });
-    toast({ title: "Photo de couverture mise à jour!" });
+    const { error: updateErr } = await supabase.from("businesses").update({ image_url: urlData.publicUrl }).eq("id", business.id);
+    if (updateErr) {
+      toast({ title: "Erreur", description: updateErr.message, variant: "destructive" });
+    } else {
+      setBusiness({ ...business, image_url: urlData.publicUrl });
+      toast({ title: "Photo de couverture mise à jour!" });
+    }
     setUploadingCover(false);
+    e.target.value = "";
   };
 
   if (authLoading || loading) {
@@ -124,20 +134,7 @@ const MerchantMarketplace = () => {
     );
   }
 
-  const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const dayNamesFr = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-
-  const parseHours = () => {
-    if (!business.hours) return null;
-    return dayNamesFr.map((d, i) => {
-      const match = business.hours?.includes(d);
-      const segment = business.hours?.split(",").find(s => s.trim().startsWith(d));
-      const time = segment ? segment.split(":").slice(1).join(":").trim() : "Fermé";
-      return { day: d, time: time || "9:00 - 17:00" };
-    });
-  };
-
-  const hoursData = parseHours();
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -360,19 +357,9 @@ const MerchantMarketplace = () => {
             <button onClick={() => setEditHours(true)} className="text-xs text-primary font-medium">Modifier</button>
           </div>
           {business.hours ? (
-            <div className="space-y-2">
-              {dayNamesFr.map((day, i) => {
-                const isOpen = i < 5;
-                return (
-                  <div key={day} className="flex justify-between text-sm">
-                    <span className="text-foreground font-medium">{day}</span>
-                    <span className="text-muted-foreground">{isOpen ? "Ouvert 24 heures" : "9:00 - 17:00"}</span>
-                  </div>
-                );
-              })}
-            </div>
+            <p className="text-sm text-foreground whitespace-pre-line">{business.hours}</p>
           ) : (
-            <p className="text-sm text-muted-foreground">Heures non configurées.</p>
+            <p className="text-sm text-muted-foreground">Heures non configurées. <button onClick={() => setEditHours(true)} className="text-primary font-medium">Ajouter →</button></p>
           )}
           <Button variant="outline" size="sm" className="rounded-full mt-3 w-full" onClick={() => setEditHours(true)}>
             <Plus size={14} className="mr-1" /> Ajouter des heures spéciales

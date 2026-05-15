@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,17 +17,33 @@ interface Props {
 
 const EditBasicInfoModal = ({ open, onClose, business, onSaved }: Props) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [name, setName] = useState(business.name);
   const [phone, setPhone] = useState(business.phone || "");
   const [website, setWebsite] = useState(business.website || "");
-  const [menuLink, setMenuLink] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // Re-sync local state if a different business is loaded while modal is mounted.
+  useEffect(() => {
+    if (open) {
+      setName(business.name);
+      setPhone(business.phone || "");
+      setWebsite(business.website || "");
+    }
+  }, [open, business.id, business.name, business.phone, business.website]);
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      toast({ title: "Nom requis", description: "Le nom de l'entreprise ne peut pas être vide.", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
     const { error } = await supabase.from("businesses").update({
-      name,
-      phone,
-      website,
+      name: name.trim(),
+      phone: phone.trim() || null,
+      website: website.trim() || null,
     }).eq("id", business.id);
+    setSaving(false);
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -64,14 +81,25 @@ const EditBasicInfoModal = ({ open, onClose, business, onSaved }: Props) => {
             <p className="text-xs text-muted-foreground mt-1">N'utilisez pas de sites tiers.</p>
           </div>
           <div>
-            <Label className="font-medium">Lien du menu <span className="text-muted-foreground font-normal">(Optionnel)</span></Label>
-            <Input value={menuLink} onChange={e => setMenuLink(e.target.value)} placeholder="https://" className="rounded-lg mt-1" />
+            <Label className="font-medium">Menu</Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Le menu se gère depuis l'éditeur dédié.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-lg mt-2"
+              onClick={() => { onClose(); navigate("/merchant/menu"); }}
+            >
+              Ouvrir l'éditeur de menu
+            </Button>
           </div>
         </div>
 
         <div className="flex gap-3 justify-end mt-4">
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSave}>Sauvegarder</Button>
+          <Button variant="outline" onClick={onClose} disabled={saving}>Annuler</Button>
+          <Button onClick={handleSave} disabled={saving}>{saving ? "Sauvegarde..." : "Sauvegarder"}</Button>
         </div>
       </DialogContent>
     </Dialog>
