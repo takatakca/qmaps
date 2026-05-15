@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { readBusinessStatus, STATUS_LABELS } from "@/lib/businessStatus";
 import type { Tables } from "@/integrations/supabase/types";
 
 const MerchantMarketplace = () => {
@@ -450,24 +451,31 @@ const MerchantMarketplace = () => {
         </div>
 
         {/* ===== BUSINESS STATUS ===== */}
-        <button onClick={() => setEditStatus(true)} className="w-full bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 transition-colors">
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full shrink-0 ${business.is_open && business.is_active ? "bg-green-500" : !business.is_active ? "bg-muted-foreground" : "bg-amber-500"}`} />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">
-                {business.is_open && business.is_active
-                  ? "L'entreprise est ouverte"
-                  : !business.is_active
-                    ? "L'entreprise est masquée"
-                    : "L'entreprise est temporairement fermée"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {business.is_claimed ? "Entreprise vérifiée par le propriétaire" : "Marquer comme vérifiée"}
-              </p>
-            </div>
-            <Pencil size={14} className="text-primary shrink-0" />
-          </div>
-        </button>
+        {(() => {
+          const currentStatus = readBusinessStatus(business as any);
+          const meta = STATUS_LABELS[currentStatus];
+          const dot = {
+            success: "bg-green-500",
+            warning: "bg-amber-500",
+            destructive: "bg-destructive",
+            info: "bg-blue-500",
+            muted: "bg-muted-foreground",
+          }[meta.tone];
+          return (
+            <button onClick={() => setEditStatus(true)} className="w-full bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full shrink-0 ${dot}`} />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">{meta.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {business.is_claimed ? "Entreprise vérifiée par le propriétaire" : "Marquer comme vérifiée"}
+                  </p>
+                </div>
+                <Pencil size={14} className="text-primary shrink-0" />
+              </div>
+            </button>
+          );
+        })()}
       </div>
 
       <MerchantBottomNav />
