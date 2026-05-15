@@ -86,13 +86,18 @@ const MerchantMarketplace = () => {
     const ext = file.name.split(".").pop();
     const path = `business-photos/${business.id}/${Date.now()}.${ext}`;
     const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
-    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploading(false); return; }
+    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploading(false); e.target.value = ""; return; }
     const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
     const newPhotos = [...(business.photos || []), urlData.publicUrl];
-    await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
-    setBusiness({ ...business, photos: newPhotos });
-    toast({ title: "Photo ajoutée!" });
+    const { error: updateErr } = await supabase.from("businesses").update({ photos: newPhotos }).eq("id", business.id);
+    if (updateErr) {
+      toast({ title: "Erreur", description: updateErr.message, variant: "destructive" });
+    } else {
+      setBusiness({ ...business, photos: newPhotos });
+      toast({ title: "Photo ajoutée!" });
+    }
     setUploading(false);
+    e.target.value = "";
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,12 +107,17 @@ const MerchantMarketplace = () => {
     const ext = file.name.split(".").pop();
     const path = `business-covers/${business.id}/${Date.now()}.${ext}`;
     const { error: uploadErr } = await supabase.storage.from("photos").upload(path, file);
-    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploadingCover(false); return; }
+    if (uploadErr) { toast({ title: "Erreur", description: uploadErr.message, variant: "destructive" }); setUploadingCover(false); e.target.value = ""; return; }
     const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
-    await supabase.from("businesses").update({ image_url: urlData.publicUrl }).eq("id", business.id);
-    setBusiness({ ...business, image_url: urlData.publicUrl });
-    toast({ title: "Photo de couverture mise à jour!" });
+    const { error: updateErr } = await supabase.from("businesses").update({ image_url: urlData.publicUrl }).eq("id", business.id);
+    if (updateErr) {
+      toast({ title: "Erreur", description: updateErr.message, variant: "destructive" });
+    } else {
+      setBusiness({ ...business, image_url: urlData.publicUrl });
+      toast({ title: "Photo de couverture mise à jour!" });
+    }
     setUploadingCover(false);
+    e.target.value = "";
   };
 
   if (authLoading || loading) {
