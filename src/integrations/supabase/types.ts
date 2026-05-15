@@ -542,6 +542,7 @@ export type Database = {
           accessibility: string[]
           address: string
           amenities: string[] | null
+          attributes: Json
           avg_rating: number
           city: string
           country: string
@@ -577,6 +578,7 @@ export type Database = {
           accessibility?: string[]
           address: string
           amenities?: string[] | null
+          attributes?: Json
           avg_rating?: number
           city?: string
           country?: string
@@ -612,6 +614,7 @@ export type Database = {
           accessibility?: string[]
           address?: string
           amenities?: string[] | null
+          attributes?: Json
           avg_rating?: number
           city?: string
           country?: string
