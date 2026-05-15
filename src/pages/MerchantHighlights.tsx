@@ -177,8 +177,8 @@ const MerchantHighlights = () => {
         </p>
 
         {/* CTA buttons */}
-        <Button onClick={() => setStep("checkout")} className="w-full rounded-full mb-2" disabled={selected.length === 0}>
-          Acheter · CA$2/jour
+        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
+          Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-6">
           Économisez avec le Package
