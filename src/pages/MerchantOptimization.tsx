@@ -379,10 +379,10 @@ const MerchantOptimization = () => {
             <label className="text-xs font-medium text-muted-foreground">Nom de campagne</label>
             <Input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} className="rounded-lg" />
           </div>
-          <Button onClick={() => navigate("/merchant/ads")} className="mt-4 w-full rounded-full gap-1">
+          <Button onClick={goToBilling} className="mt-4 w-full rounded-full gap-1">
             Configurer une campagne <ChevronRight size={14} />
           </Button>
-          <Button variant="outline" onClick={publishCampaign} className="mt-2 w-full rounded-full gap-1">
+          <Button variant="outline" onClick={goToBilling} className="mt-2 w-full rounded-full gap-1">
             Publier la campagne <Megaphone size={14} />
           </Button>
         </div>
