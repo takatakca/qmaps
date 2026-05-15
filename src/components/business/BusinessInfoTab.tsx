@@ -10,8 +10,10 @@ import {
   parseWeeklyHours,
 } from "@/lib/businessHours";
 import { STATUS_LABELS, type BusinessStatus } from "@/lib/businessStatus";
+import { attributesToDisplayLabels } from "@/lib/businessAttributes";
 
 interface BusinessInfoTabProps {
+  attributes?: unknown;
   hours: string | null;
   hoursJson?: unknown;
   specialHours?: unknown;
