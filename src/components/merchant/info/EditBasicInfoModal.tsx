@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,17 +17,33 @@ interface Props {
 
 const EditBasicInfoModal = ({ open, onClose, business, onSaved }: Props) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [name, setName] = useState(business.name);
   const [phone, setPhone] = useState(business.phone || "");
   const [website, setWebsite] = useState(business.website || "");
-  const [menuLink, setMenuLink] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // Re-sync local state if a different business is loaded while modal is mounted.
+  useEffect(() => {
+    if (open) {
+      setName(business.name);
+      setPhone(business.phone || "");
+      setWebsite(business.website || "");
+    }
+  }, [open, business.id, business.name, business.phone, business.website]);
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      toast({ title: "Nom requis", description: "Le nom de l'entreprise ne peut pas être vide.", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
     const { error } = await supabase.from("businesses").update({
-      name,
-      phone,
-      website,
+      name: name.trim(),
+      phone: phone.trim() || null,
+      website: website.trim() || null,
     }).eq("id", business.id);
+    setSaving(false);
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
