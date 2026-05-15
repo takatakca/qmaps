@@ -1,4 +1,4 @@
-import { Clock, Globe, Phone, MapPin, Pencil, Check, CalendarDays } from "lucide-react";
+import { Clock, Globe, Phone, MapPin, Pencil, Check, CalendarDays, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DAYS,
@@ -9,12 +9,14 @@ import {
   parseSpecialHours,
   parseWeeklyHours,
 } from "@/lib/businessHours";
+import { STATUS_LABELS, type BusinessStatus } from "@/lib/businessStatus";
 
 interface BusinessInfoTabProps {
   hours: string | null;
   hoursJson?: unknown;
   specialHours?: unknown;
   isOpen: boolean;
+  status?: BusinessStatus;
   website: string | null;
   phone: string | null;
   address: string;
@@ -43,11 +45,18 @@ const Section = ({ title, items }: { title: string; items: string[] }) =>
     </div>
   );
 
+const STATUS_BANNER_TONE: Record<string, string> = {
+  warning: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30",
+  destructive: "bg-destructive/10 text-destructive border-destructive/30",
+  info: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30",
+};
+
 const BusinessInfoTab = ({
   hours,
   hoursJson,
   specialHours,
   isOpen,
+  status,
   website,
   phone,
   address,
@@ -71,9 +80,19 @@ const BusinessInfoTab = ({
   const todaySpecialNote =
     special && special[`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`]?.note;
 
+  const statusMeta = status && status !== "open" && status !== "hidden" ? STATUS_LABELS[status] : null;
+  const statusBannerClass = statusMeta ? STATUS_BANNER_TONE[statusMeta.tone] ?? "bg-muted text-foreground border-border" : "";
+
   return (
     <div className="space-y-0">
       <h3 className="font-heading text-lg font-bold text-foreground mb-4">Info</h3>
+
+      {statusMeta && (
+        <div className={`mb-4 flex items-start gap-2 rounded-lg border p-3 text-sm ${statusBannerClass}`} role="status">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <p className="font-medium">{statusMeta.label}</p>
+        </div>
+      )}
 
       {/* Weekly hours (structured) or fallback */}
       <div id="business-hours" className="py-4 border-b border-border scroll-mt-16">

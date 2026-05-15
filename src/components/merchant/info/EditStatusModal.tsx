@@ -5,14 +5,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  BUSINESS_STATUS_VALUES,
+  STATUS_LABELS,
+  flagsForStatus,
+  readBusinessStatus,
+  type BusinessStatus,
+} from "@/lib/businessStatus";
 
-const STATUS_OPTIONS = [
-  { value: "open", label: "Ouvert / En opération", color: "bg-green-500" },
-  { value: "temporarily_closed", label: "Temporairement fermé", color: "bg-amber-500" },
-  { value: "permanently_closed", label: "Définitivement fermé", color: "bg-destructive" },
-  { value: "seasonal", label: "Saisonnier / En pause", color: "bg-blue-500" },
-  { value: "hidden", label: "Masqué de la liste publique", color: "bg-muted-foreground" },
-];
+const TONE_DOT: Record<string, string> = {
+  success: "bg-green-500",
+  warning: "bg-amber-500",
+  destructive: "bg-destructive",
+  info: "bg-blue-500",
+  muted: "bg-muted-foreground",
+};
 
 interface Props {
   open: boolean;
@@ -24,45 +31,16 @@ interface Props {
 const EditStatusModal = ({ open, onClose, business, onSaved }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-
-  // Derive initial status from is_open + is_active
-  const deriveStatus = () => {
-    if (!business.is_active) return "hidden";
-    if (business.is_open) return "open";
-    return "temporarily_closed";
-  };
-  const [status, setStatus] = useState(deriveStatus);
+  const [status, setStatus] = useState<BusinessStatus>(() =>
+    readBusinessStatus(business as { status?: string | null; is_open?: boolean | null; is_active?: boolean | null }),
+  );
 
   const handleSave = async () => {
     setSaving(true);
-    const updates: Record<string, unknown> = {};
-
-    switch (status) {
-      case "open":
-        updates.is_open = true;
-        updates.is_active = true;
-        break;
-      case "temporarily_closed":
-        updates.is_open = false;
-        updates.is_active = true;
-        break;
-      case "permanently_closed":
-        updates.is_open = false;
-        updates.is_active = false;
-        break;
-      case "seasonal":
-        updates.is_open = false;
-        updates.is_active = true;
-        break;
-      case "hidden":
-        updates.is_active = false;
-        updates.is_open = false;
-        break;
-    }
-
+    const updates = flagsForStatus(status);
     const { error } = await supabase
       .from("businesses")
-      .update(updates)
+      .update(updates as never)
       .eq("id", business.id);
 
     setSaving(false);
@@ -76,7 +54,7 @@ const EditStatusModal = ({ open, onClose, business, onSaved }: Props) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+    <Dialog open={open} onOpenChange={v => !v && !saving && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl font-bold">Statut de l'entreprise</DialogTitle>
@@ -86,23 +64,34 @@ const EditStatusModal = ({ open, onClose, business, onSaved }: Props) => {
         </p>
 
         <div className="space-y-2">
-          {STATUS_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setStatus(opt.value)}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left ${
-                status === opt.value
-                  ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                  : "border-border hover:border-primary/30"
-              }`}
-            >
-              <div className={`w-3 h-3 rounded-full shrink-0 ${opt.color}`} />
-              <span className={`text-sm font-medium ${status === opt.value ? "text-primary" : "text-foreground"}`}>
-                {opt.label}
-              </span>
-            </button>
-          ))}
+          {BUSINESS_STATUS_VALUES.map(value => {
+            const meta = STATUS_LABELS[value];
+            const selected = status === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setStatus(value)}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left ${
+                  selected
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                    : "border-border hover:border-primary/30"
+                }`}
+              >
+                <div className={`w-3 h-3 rounded-full shrink-0 ${TONE_DOT[meta.tone] ?? "bg-muted-foreground"}`} />
+                <span className={`text-sm font-medium ${selected ? "text-primary" : "text-foreground"}`}>
+                  {meta.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        <p className="text-xs text-muted-foreground mt-3">
+          Les entreprises masquées ou définitivement fermées ne sont pas visibles
+          dans la recherche publique. Les entreprises temporairement fermées et
+          saisonnières restent visibles avec un libellé approprié.
+        </p>
 
         <div className="flex gap-3 justify-end mt-4">
           <Button variant="outline" onClick={onClose} disabled={saving}>Annuler</Button>

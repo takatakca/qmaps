@@ -569,6 +569,7 @@ export type Database = {
           reviews_count: number
           search_document: unknown
           special_hours: Json | null
+          status: string
           updated_at: string
           website: string | null
         }
@@ -603,6 +604,7 @@ export type Database = {
           reviews_count?: number
           search_document?: unknown
           special_hours?: Json | null
+          status?: string
           updated_at?: string
           website?: string | null
         }
@@ -637,6 +639,7 @@ export type Database = {
           reviews_count?: number
           search_document?: unknown
           special_hours?: Json | null
+          status?: string
           updated_at?: string
           website?: string | null
         }
