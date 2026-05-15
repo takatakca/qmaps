@@ -8,7 +8,7 @@ import {
   Settings, Star, Camera, ChevronRight, ChevronDown, Lock,
   Sparkles, Link2, PhoneCall, Award, Image, Play, ShieldOff,
   Package, Users, MapPin, CreditCard, Bell, ShieldCheck, User,
-  CalendarClock, Scale, FileText, HelpCircle, LogOut, Briefcase, Inbox, BarChart3
+  CalendarClock, Scale, FileText, HelpCircle, LogOut, Briefcase, Inbox, BarChart3, Search
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
