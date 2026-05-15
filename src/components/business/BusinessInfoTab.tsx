@@ -10,8 +10,10 @@ import {
   parseWeeklyHours,
 } from "@/lib/businessHours";
 import { STATUS_LABELS, type BusinessStatus } from "@/lib/businessStatus";
+import { attributesToDisplayLabels } from "@/lib/businessAttributes";
 
 interface BusinessInfoTabProps {
+  attributes?: unknown;
   hours: string | null;
   hoursJson?: unknown;
   specialHours?: unknown;
@@ -64,12 +66,15 @@ const BusinessInfoTab = ({
   region,
   postalCode,
   amenities,
+  attributes,
   paymentMethods,
   languages,
   accessibility,
   latitude,
   longitude,
 }: BusinessInfoTabProps) => {
+  const structuredAmenities = attributesToDisplayLabels({ attributes, amenities });
+  const amenityItems = structuredAmenities.length > 0 ? structuredAmenities : amenities ?? [];
   const fullAddress = `${address}\n${city}${region ? `, ${region}` : ""}${postalCode ? ` ${postalCode}` : ""}`;
   const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
   const week = parseWeeklyHours(hoursJson);
@@ -201,7 +206,7 @@ const BusinessInfoTab = ({
         <Pencil size={14} /> Suggérer une modification
       </Button>
 
-      <Section title="Commodités" items={amenities ?? []} />
+      <Section title="Commodités" items={amenityItems} />
       <Section title="Paiements" items={paymentMethods ?? []} />
       <Section title="Langues" items={languages ?? []} />
       <Section title="Accessibilité" items={accessibility ?? []} />
