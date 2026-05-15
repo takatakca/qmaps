@@ -129,8 +129,8 @@ const MerchantCTA = () => {
             <p className="text-[10px] text-muted-foreground">
               En procédant, j'accepte les <button className="text-primary underline">Conditions publicitaires</button> de QMAPS.
             </p>
-            <Button onClick={() => navigate("/merchant")} className="w-full rounded-full font-bold">
-              Confirmer l'achat
+            <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">
+              Voir les plans d'abonnement
             </Button>
           </div>
         </div>
