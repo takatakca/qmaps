@@ -100,12 +100,12 @@ const MerchantOptimization = () => {
   const monthlyCap = useMemo(() => dailyBudget * 30, [dailyBudget]);
   const selectedPackageData = useMemo(() => packages.find((pkg) => pkg.id === selectedPackage) ?? packages[0], [selectedPackage]);
 
-  const publishCampaign = () => {
-    setCampaignPublished(true);
+  const goToBilling = () => {
     toast({
-      title: "Campagne prête",
-      description: `${campaignName} est prête avec un budget de CA$${dailyBudget}/jour.`,
+      title: "Bientôt disponible",
+      description: "Les campagnes publicitaires QMAPS arrivent. En attendant, gérez votre abonnement.",
     });
+    navigate("/merchant/billing/plans");
   };
 
   useEffect(() => {
