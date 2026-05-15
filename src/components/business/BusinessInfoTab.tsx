@@ -66,12 +66,15 @@ const BusinessInfoTab = ({
   region,
   postalCode,
   amenities,
+  attributes,
   paymentMethods,
   languages,
   accessibility,
   latitude,
   longitude,
 }: BusinessInfoTabProps) => {
+  const structuredAmenities = attributesToDisplayLabels({ attributes, amenities });
+  const amenityItems = structuredAmenities.length > 0 ? structuredAmenities : amenities ?? [];
   const fullAddress = `${address}\n${city}${region ? `, ${region}` : ""}${postalCode ? ` ${postalCode}` : ""}`;
   const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
   const week = parseWeeklyHours(hoursJson);
