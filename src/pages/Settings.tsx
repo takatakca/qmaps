@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, LogOut, AlertCircle } from "lucide-react";
+import { ArrowLeft, ChevronRight, LogOut, AlertCircle, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
