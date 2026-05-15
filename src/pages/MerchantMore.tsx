@@ -170,6 +170,15 @@ const MerchantMore = () => {
 
         <Separator />
 
+        {/* Phase 6: Switch back to client view (same account, role preserved) */}
+        <button
+          onClick={() => navigate("/")}
+          className="w-full flex items-center gap-3 py-3 text-foreground hover:bg-muted/30 rounded-lg transition-colors"
+        >
+          <Search size={18} className="text-muted-foreground" />
+          <span className="text-sm font-medium">Passer en vue client</span>
+        </button>
+
         {/* LOGOUT */}
         <button
           onClick={handleLogout}
