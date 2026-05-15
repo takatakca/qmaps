@@ -22,6 +22,7 @@ import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
 import { slugify } from "@/lib/seo";
 import { isBusinessOpenNow } from "@/lib/searchFilters";
+import { readBusinessStatus } from "@/lib/businessStatus";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
@@ -246,6 +247,7 @@ const BusinessDetail = () => {
             hoursJson={(business as any).hours_json}
             specialHours={(business as any).special_hours}
             isOpen={isBusinessOpenNow(business as any)}
+            status={readBusinessStatus(business as any)}
             website={business.website}
             phone={business.phone}
             address={business.address}
