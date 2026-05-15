@@ -332,12 +332,12 @@ const MerchantOptimization = () => {
                   </div>
                 </div>
                 <Button
-                  onClick={() => setSelectedPackage(pkg.id)}
+                  onClick={goToBilling}
                   size="sm"
                   className="w-full rounded-full mt-3 gap-1"
-                  variant={selectedPackage === pkg.id || pkg.popular ? "default" : "outline"}
+                  variant={pkg.popular ? "default" : "outline"}
                 >
-                  {selectedPackage === pkg.id ? <>Sélectionné <Check size={14} /></> : <>Activer <ChevronRight size={14} /></>}
+                  Bientôt disponible <ChevronRight size={14} />
                 </Button>
               </div>
             ))}
