@@ -255,6 +255,7 @@ const BusinessDetail = () => {
             region={business.region}
             postalCode={business.postal_code}
             amenities={business.amenities}
+            attributes={(business as any).attributes}
             paymentMethods={(business as any).payment_methods}
             languages={(business as any).languages}
             accessibility={(business as any).accessibility}
