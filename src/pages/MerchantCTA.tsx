@@ -161,8 +161,8 @@ const MerchantCTA = () => {
           Facilitez la tâche aux clients pour en savoir plus sur vos spéciaux hebdomadaires, vos offres Happy Hour ou obtenir un rabais avec un Call to Action entièrement personnalisable.
         </p>
 
-        <Button onClick={() => setStep("checkout")} className="w-full rounded-full mb-2">
-          Acheter · CA$2/jour
+        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
+          Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-8">
           Économisez avec le Package
