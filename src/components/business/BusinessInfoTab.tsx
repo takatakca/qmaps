@@ -1,4 +1,4 @@
-import { Clock, Globe, Phone, MapPin, Pencil, Check, CalendarDays } from "lucide-react";
+import { Clock, Globe, Phone, MapPin, Pencil, Check, CalendarDays, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DAYS,
@@ -9,12 +9,14 @@ import {
   parseSpecialHours,
   parseWeeklyHours,
 } from "@/lib/businessHours";
+import { STATUS_LABELS, type BusinessStatus } from "@/lib/businessStatus";
 
 interface BusinessInfoTabProps {
   hours: string | null;
   hoursJson?: unknown;
   specialHours?: unknown;
   isOpen: boolean;
+  status?: BusinessStatus;
   website: string | null;
   phone: string | null;
   address: string;
