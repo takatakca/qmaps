@@ -231,7 +231,7 @@ const MerchantOptimization = () => {
                   variant="outline"
                   size="sm"
                   className="mt-3 w-full rounded-full"
-                  onClick={() => navigate("/merchant/ads")}
+                  onClick={goToBilling}
                 >
                   {booster.cta}
                 </Button>
