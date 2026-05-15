@@ -348,8 +348,8 @@ const MerchantOptimization = () => {
         <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4 text-center">
           <h3 className="font-heading font-bold text-foreground mb-1">Publicité personnalisée</h3>
           <p className="text-xs text-muted-foreground mb-3">Créez une campagne sur mesure avec votre texte, photo et budget.</p>
-          <Button onClick={() => navigate("/merchant/ads")} className="rounded-full gap-1">
-            <Megaphone size={14} /> Créer une publicité
+          <Button onClick={goToBilling} className="rounded-full gap-1">
+            <Megaphone size={14} /> Bientôt disponible
           </Button>
         </div>
 
