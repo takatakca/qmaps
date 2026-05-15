@@ -70,6 +70,20 @@ const Settings = () => {
         </button>
       )}
 
+      {/* Phase 6: Switch to merchant view (only when user holds merchant role) */}
+      {isMerchant && (
+        <button
+          onClick={() => navigate("/merchant")}
+          className="w-full flex items-center justify-between px-4 py-4 hover:bg-accent/30 transition-colors border-b border-border"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium text-foreground">
+            <Building2 size={18} className="text-primary" />
+            Passer en espace professionnel
+          </span>
+          <ChevronRight size={16} className="text-muted-foreground" />
+        </button>
+      )}
+
       <div className="divide-y divide-border">
         {settingsItems.map((item, i) => (
           <button
