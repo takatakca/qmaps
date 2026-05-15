@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, LogOut, AlertCircle } from "lucide-react";
+import { ArrowLeft, ChevronRight, LogOut, AlertCircle, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -27,7 +27,7 @@ interface PendingRequest {
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isMerchant } = useAuth();
   const [pending, setPending] = useState<PendingRequest | null>(null);
 
   useEffect(() => {
@@ -67,6 +67,20 @@ const Settings = () => {
             </p>
           </div>
           <ChevronRight size={16} className="text-muted-foreground shrink-0 mt-0.5" />
+        </button>
+      )}
+
+      {/* Phase 6: Switch to merchant view (only when user holds merchant role) */}
+      {isMerchant && (
+        <button
+          onClick={() => navigate("/merchant")}
+          className="w-full flex items-center justify-between px-4 py-4 hover:bg-accent/30 transition-colors border-b border-border"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium text-foreground">
+            <Building2 size={18} className="text-primary" />
+            Passer en espace professionnel
+          </span>
+          <ChevronRight size={16} className="text-muted-foreground" />
         </button>
       )}
 

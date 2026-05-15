@@ -15,11 +15,12 @@ const steps = [
 ];
 
 const MerchantOnboarding = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [checkingExisting, setCheckingExisting] = useState(true);
 
   const [businessName, setBusinessName] = useState("");
   const [ownerName, setOwnerName] = useState("");
@@ -31,9 +32,36 @@ const MerchantOnboarding = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
 
+  // Phase 6: Detect already-onboarded merchants and skip the form to prevent
+  // duplicate `businesses` rows for the same owner.
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth?role=merchant");
+    if (authLoading) return;
+    if (!user) {
+      navigate("/auth?role=merchant");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data: biz } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_user_id", user.id)
+        .limit(1);
+      if (cancelled) return;
+      if (biz && biz.length > 0) {
+        // Ensure role is set then bounce to dashboard.
+        await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+        await refreshRoles();
+        navigate("/merchant", { replace: true });
+        return;
+      }
+      setCheckingExisting(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [user, authLoading]);
+
 
   const canNext = () => {
     if (step === 0) return businessName.trim().length > 0;
@@ -44,6 +72,22 @@ const MerchantOnboarding = () => {
   const handleFinish = async () => {
     if (!user) return;
     setLoading(true);
+
+    // Phase 6: Re-check at submit time to defeat the race where the user
+    // double-clicks the button, opens the page in two tabs, or returns to
+    // /merchant/onboarding after an earlier successful create.
+    const { data: existing } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("owner_user_id", user.id)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+      toast({ title: "Profil déjà créé", description: "Redirection vers votre tableau de bord." });
+      navigate("/merchant", { replace: true });
+      setLoading(false);
+      return;
+    }
 
     // Update profile with owner name
     if (ownerName) {
@@ -76,13 +120,14 @@ const MerchantOnboarding = () => {
 
     // Ensure merchant role
     await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+    await refreshRoles();
 
     toast({ title: "Profil créé!", description: "Bienvenue sur QMAPS Professional." });
-    navigate("/merchant");
+    navigate("/merchant", { replace: true });
     setLoading(false);
   };
 
-  if (authLoading) {
+  if (authLoading || checkingExisting) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Chargement...</p></div>;
   }
 
