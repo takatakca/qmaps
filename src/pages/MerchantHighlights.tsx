@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Shield, Check, ShoppingBag, Award, Heart, Building, Clock, Users, Briefcase, Sparkles, Star, Globe, Truck, Leaf, Zap, Coffee, Wrench, Camera, Music, BookOpen, Gift, Palette, Umbrella, Flame, Gem, Crown, ThumbsUp, HandHeart, Baby, Dog } from "lucide-react";
+import { ArrowLeft, Check, ShoppingBag, Award, Heart, Building, Clock, Users, Briefcase, Sparkles, Star, Globe, Truck, Leaf, Zap, Coffee, Wrench, Camera, Music, BookOpen, Gift, Palette, Umbrella, Flame, Gem, Crown, ThumbsUp, HandHeart, Baby, Dog } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const HIGHLIGHTS = [
   { id: "shopping", label: "Shopping", icon: ShoppingBag },
@@ -38,16 +36,7 @@ const HIGHLIGHTS = [
 
 const MerchantHighlights = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<"select" | "checkout">("select");
   const [selected, setSelected] = useState<string[]>([]);
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expMonth, setExpMonth] = useState("");
-  const [expYear, setExpYear] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [promoCode, setPromoCode] = useState("");
-  const [hasPromo, setHasPromo] = useState(false);
 
   const toggleHighlight = (id: string) => {
     setSelected(prev =>
