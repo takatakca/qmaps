@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Shield, MousePointerClick, ExternalLink, Phone as PhoneIcon, UtensilsCrossed, PenLine, Calendar as CalendarIcon, Check } from "lucide-react";
+import { ArrowLeft, MousePointerClick, ExternalLink, Phone as PhoneIcon, UtensilsCrossed, PenLine, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
@@ -27,116 +26,17 @@ const CTA_TYPES = [
   "En savoir plus",
 ];
 
-type Step = "info" | "checkout";
-
 const MerchantCTA = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("info");
 
   // Form state
   const [messageType, setMessageType] = useState<"popular" | "custom">("custom");
   const [selectedPopular, setSelectedPopular] = useState("");
   const [customDesc, setCustomDesc] = useState("");
-  const [customMessage, setCustomMessage] = useState("");
   const [ctaLabel, setCtaLabel] = useState("Obtenir l'offre");
   const [destination, setDestination] = useState("website");
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState<Date | undefined>();
-
-  // Payment state
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expMonth, setExpMonth] = useState("");
-  const [expYear, setExpYear] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [hasPromo, setHasPromo] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
-
-  if (step === "checkout") {
-    return (
-      <div className="min-h-screen bg-background max-w-lg mx-auto pb-12">
-        <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-          <button onClick={() => setStep("info")}><ArrowLeft size={22} className="text-foreground" /></button>
-          <h1 className="font-heading text-base font-bold text-foreground">Achat Call to Action</h1>
-        </div>
-
-        <div className="px-4 pt-6">
-          <h2 className="font-heading text-xl font-bold text-foreground mb-1">Achat Call to Action</h2>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
-            <Shield size={14} /> Paiement sécurisé
-          </div>
-
-          {/* Order summary */}
-          <h3 className="font-heading font-bold text-foreground mb-3">Résumé de la commande</h3>
-          <div className="bg-card rounded-xl border border-border p-4 mb-6">
-            <div className="flex items-start gap-3 mb-4">
-              <MousePointerClick size={20} className="text-primary mt-0.5" />
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Call to Action</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Convertissez les visites en clients potentiels.</p>
-                  </div>
-                  <p className="text-sm font-medium text-foreground">CA$2/jour moy</p>
-                </div>
-              </div>
-            </div>
-            <div className="border-t border-border pt-3">
-              <div className="flex justify-between">
-                <p className="font-bold text-foreground">Total</p>
-                <p className="font-bold text-foreground">CA$2/jour moy</p>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Facturation mensuelle. Annulez à tout moment.</p>
-            </div>
-          </div>
-
-          {/* Payment form */}
-          <h3 className="font-heading font-bold text-foreground mb-4">Informations de paiement</h3>
-          <div className="space-y-3 mb-6">
-            <div>
-              <Label className="text-xs">Nom sur la carte</Label>
-              <Input value={cardName} onChange={e => setCardName(e.target.value)} className="rounded-lg" />
-            </div>
-            <div>
-              <Label className="text-xs">Numéro de carte</Label>
-              <Input value={cardNumber} onChange={e => setCardNumber(e.target.value)} placeholder="•••• •••• •••• ••••" className="rounded-lg" />
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <Label className="text-xs">Date d'expiration</Label>
-                <div className="flex gap-2">
-                  <Input value={expMonth} onChange={e => setExpMonth(e.target.value)} placeholder="MM" className="rounded-lg" />
-                  <Input value={expYear} onChange={e => setExpYear(e.target.value)} placeholder="AA" className="rounded-lg" />
-                </div>
-              </div>
-              <div className="w-24">
-                <Label className="text-xs">CVV</Label>
-                <Input value={cvv} onChange={e => setCvv(e.target.value)} className="rounded-lg" />
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs">Code postal</Label>
-              <Input value={postalCode} onChange={e => setPostalCode(e.target.value)} className="rounded-lg" />
-            </div>
-            <div className="flex items-center gap-2">
-              <input type="checkbox" checked={hasPromo} onChange={e => setHasPromo(e.target.checked)} className="rounded" />
-              <span className="text-sm text-foreground">Avez-vous un code promo QMAPS?</span>
-            </div>
-            {hasPromo && (
-              <Input value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="Code promo" className="rounded-lg" />
-            )}
-            <p className="text-[10px] text-muted-foreground">
-              En procédant, j'accepte les <button className="text-primary underline">Conditions publicitaires</button> de QMAPS.
-            </p>
-            <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">
-              Voir les plans d'abonnement
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-32">
@@ -146,7 +46,6 @@ const MerchantCTA = () => {
       </div>
 
       <div className="px-4 pt-6">
-        {/* Hero */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
             <MousePointerClick size={24} className="text-primary" />
@@ -168,7 +67,10 @@ const MerchantCTA = () => {
           Économisez avec le Package
         </Button>
 
-        {/* Get more customers */}
+        <p className="text-xs text-muted-foreground mb-8">
+          Les paiements sont gérés en toute sécurité via notre fournisseur (Stripe). QMAPS ne collecte jamais directement votre numéro de carte.
+        </p>
+
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xl">👋</span>
@@ -178,7 +80,6 @@ const MerchantCTA = () => {
             Encouragez plus de trafic en promouvant des offres spéciales pendant les heures creuses ou des articles de menu saisonniers.
           </p>
 
-          {/* Preview card */}
           <div className="bg-card rounded-xl border border-border p-4 mb-2">
             <div className="bg-muted rounded-lg h-24 mb-3 flex items-center justify-center">
               <span className="text-muted-foreground text-xs">Nom de l'entreprise</span>
@@ -195,7 +96,6 @@ const MerchantCTA = () => {
           </div>
         </div>
 
-        {/* Customize your message */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
             <PenLine size={20} className="text-primary" />
@@ -254,16 +154,11 @@ const MerchantCTA = () => {
           </RadioGroup>
         </div>
 
-        {/* Choose destination */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
             <ExternalLink size={20} className="text-primary" />
             <h3 className="font-heading text-lg font-bold text-foreground">Choisissez où envoyer les clients</h3>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Envoyez les clients vers votre site web, votre menu ou faites-les vous appeler directement.
-          </p>
-
           <div className="bg-card rounded-xl border border-border p-3">
             <p className="text-xs text-muted-foreground mb-2">Choisissez la destination</p>
             <div className="grid grid-cols-3 gap-2">
@@ -285,29 +180,15 @@ const MerchantCTA = () => {
           </div>
         </div>
 
-        {/* Update anytime */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
             <CalendarIcon size={20} className="text-primary" />
-            <h3 className="font-heading text-lg font-bold text-foreground">Mettez à jour votre Call to Action à tout moment</h3>
+            <h3 className="font-heading text-lg font-bold text-foreground">Planifiez une date de fin (optionnel)</h3>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Changez votre message aussi souvent que vous le souhaitez pour répondre à de nouveaux objectifs ou promouvoir des offres saisonnières.
-          </p>
-
-          <div className="bg-card rounded-xl border border-border p-4 mb-3">
-            <div className="flex items-center gap-2 mb-2">
-              <CalendarIcon size={14} className="text-muted-foreground" />
-              <p className="text-sm font-medium text-foreground">Spécial du Nouvel An!</p>
-            </div>
-            <button className="text-xs text-primary font-medium">Obtenir l'offre</button>
-          </div>
-
           <div className="flex items-center gap-2 mb-3">
             <input type="checkbox" checked={hasEndDate} onChange={e => setHasEndDate(e.target.checked)} className="rounded" />
             <span className="text-sm text-foreground">Planifier une date de fin</span>
           </div>
-
           {hasEndDate && (
             <div className="flex justify-center">
               <Calendar
@@ -321,7 +202,6 @@ const MerchantCTA = () => {
         </div>
       </div>
 
-      {/* Sticky footer */}
       <div className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-card border-t border-border p-4 z-30">
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">

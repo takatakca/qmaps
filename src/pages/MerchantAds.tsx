@@ -29,13 +29,6 @@ export interface AdFormData {
   budgetPreset: number;
   customBudget: number | null;
   upgradePackage: boolean;
-  cardName: string;
-  cardNumber: string;
-  expMonth: string;
-  expYear: string;
-  cvv: string;
-  postalCode: string;
-  promoCode: string;
 }
 
 const defaultFormData: AdFormData = {
@@ -52,13 +45,6 @@ const defaultFormData: AdFormData = {
   budgetPreset: 24,
   customBudget: null,
   upgradePackage: true,
-  cardName: "",
-  cardNumber: "",
-  expMonth: "",
-  expYear: "",
-  cvv: "",
-  postalCode: "",
-  promoCode: "",
 };
 
 const STEP_LABELS = ["Objectif", "Photo", "Texte", "Mots-clés", "Zone", "Budget", "Paiement"];

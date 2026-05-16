@@ -1,7 +1,4 @@
 import { Shield, Megaphone } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { AdFormData } from "@/pages/MerchantAds";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -11,7 +8,7 @@ interface Props {
   business: Tables<"businesses">;
 }
 
-const AdStepPayment = ({ formData, update, business }: Props) => {
+const AdStepPayment = ({ formData }: Props) => {
   const daily = formData.customBudget || formData.budgetPreset;
   const upgradeCost = formData.upgradePackage ? 4 : 0;
   const total = daily + upgradeCost;
@@ -19,14 +16,13 @@ const AdStepPayment = ({ formData, update, business }: Props) => {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Shield size={14} /> Paiement sécurisé
+        <Shield size={14} /> Paiement sécurisé via Stripe
       </div>
 
       {/* Order summary */}
       <div className="bg-card rounded-xl border border-border p-4">
         <div className="flex justify-between mb-4">
           <h3 className="font-heading font-bold text-foreground">Résumé de la commande</h3>
-          <button className="text-sm text-primary font-medium">Modifier</button>
         </div>
         <div className="space-y-3 border-b border-border pb-3 mb-3">
           <div className="flex items-start gap-3">
@@ -57,49 +53,14 @@ const AdStepPayment = ({ formData, update, business }: Props) => {
         </p>
       </div>
 
-      <div className="bg-muted/50 rounded-xl p-3">
+      <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+        <p className="text-sm font-semibold text-foreground">Paiement sécurisé hébergé</p>
         <p className="text-xs text-muted-foreground">
-          Toutes les moyennes quotidiennes sont basées sur un mois de 30 jours. Vous serez facturé mensuellement ou lorsque vous atteindrez votre seuil de facturation. Annulable en tout temps.
+          QMAPS ne collecte jamais directement votre numéro de carte. Tous les paiements sont traités via Stripe, dans une page de paiement hébergée et conforme PCI.
         </p>
-      </div>
-
-      {/* Payment form */}
-      <div>
-        <h3 className="font-heading font-bold text-foreground mb-4">Informations de paiement</h3>
-        <div className="space-y-3">
-          <div>
-            <Label className="text-xs">Nom sur la carte</Label>
-            <Input value={formData.cardName} onChange={e => update({ cardName: e.target.value })} className="rounded-lg" />
-          </div>
-          <div>
-            <Label className="text-xs">Numéro de carte</Label>
-            <Input value={formData.cardNumber} onChange={e => update({ cardNumber: e.target.value })} placeholder="•••• •••• •••• ••••" className="rounded-lg" />
-          </div>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <Label className="text-xs">Date d'expiration</Label>
-              <div className="flex gap-2">
-                <Input value={formData.expMonth} onChange={e => update({ expMonth: e.target.value })} placeholder="MM" className="rounded-lg" />
-                <Input value={formData.expYear} onChange={e => update({ expYear: e.target.value })} placeholder="AA" className="rounded-lg" />
-              </div>
-            </div>
-            <div className="w-24">
-              <Label className="text-xs">CVV</Label>
-              <Input value={formData.cvv} onChange={e => update({ cvv: e.target.value })} className="rounded-lg" />
-            </div>
-          </div>
-          <div>
-            <Label className="text-xs">Code postal</Label>
-            <Input value={formData.postalCode} onChange={e => update({ postalCode: e.target.value })} className="rounded-lg" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Checkbox />
-            <span className="text-xs text-muted-foreground">J'ai un code promo QMAPS</span>
-          </div>
-          <p className="text-[10px] text-muted-foreground">
-            En procédant, j'accepte les <button className="text-primary underline">Conditions de publicité</button> de QMAPS.
-          </p>
-        </div>
+        <p className="text-xs text-muted-foreground">
+          Vous serez redirigé vers votre page de facturation pour choisir un plan et entrer vos informations de paiement en toute sécurité.
+        </p>
       </div>
     </div>
   );

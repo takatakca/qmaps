@@ -17,9 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,11 +28,6 @@ const MerchantBilling = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [showAddCard, setShowAddCard] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
-  const [cardName, setCardName] = useState("");
   const [portalLoading, setPortalLoading] = useState(false);
 
   const [businessId, setBusinessId] = useState<string | null>(null);
@@ -68,15 +60,7 @@ const MerchantBilling = () => {
     })();
   }, [businessId]);
 
-  const handleAddCard = () => {
-    if (!cardNumber || !expiry || !cvc || !cardName) {
-      toast({ title: "Erreur", description: "Veuillez remplir tous les champs.", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Carte ajoutée", description: "Votre méthode de paiement a été enregistrée." });
-    setShowAddCard(false);
-    setCardNumber(""); setExpiry(""); setCvc(""); setCardName("");
-  };
+
 
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("fr-CA")
@@ -261,12 +245,14 @@ const MerchantBilling = () => {
             <Button
               variant="outline"
               className="w-full justify-center gap-2"
-              onClick={() => setShowAddCard(true)}
+              onClick={() => navigate("/merchant/billing/plans")}
             >
               <CreditCard size={16} />
-              Ajouter une nouvelle carte
+              Gérer les méthodes de paiement
             </Button>
-            <p className="text-xs text-muted-foreground">Aucune carte enregistrée</p>
+            <p className="text-xs text-muted-foreground">
+              Les paiements sont gérés de façon sécurisée via notre fournisseur (Stripe). QMAPS ne collecte jamais directement votre numéro de carte.
+            </p>
           </CardContent>
         </Card>
 
@@ -321,35 +307,6 @@ const MerchantBilling = () => {
         </div>
       </div>
 
-      {/* Add Card Dialog */}
-      <Dialog open={showAddCard} onOpenChange={setShowAddCard}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-heading">Ajouter une carte</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <div>
-              <Label>Nom sur la carte</Label>
-              <Input value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="Jean Dupont" />
-            </div>
-            <div>
-              <Label>Numéro de carte</Label>
-              <Input value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} placeholder="4242 4242 4242 4242" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Expiration</Label>
-                <Input value={expiry} onChange={(e) => setExpiry(e.target.value)} placeholder="MM/AA" />
-              </div>
-              <div>
-                <Label>CVC</Label>
-                <Input value={cvc} onChange={(e) => setCvc(e.target.value)} placeholder="123" />
-              </div>
-            </div>
-          </div>
-          <Button onClick={handleAddCard} className="w-full">Ajouter</Button>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
