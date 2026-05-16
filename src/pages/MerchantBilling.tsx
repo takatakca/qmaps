@@ -60,15 +60,7 @@ const MerchantBilling = () => {
     })();
   }, [businessId]);
 
-  const handleAddCard = () => {
-    if (!cardNumber || !expiry || !cvc || !cardName) {
-      toast({ title: "Erreur", description: "Veuillez remplir tous les champs.", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Carte ajoutée", description: "Votre méthode de paiement a été enregistrée." });
-    setShowAddCard(false);
-    setCardNumber(""); setExpiry(""); setCvc(""); setCardName("");
-  };
+
 
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("fr-CA")
