@@ -695,6 +695,60 @@ export type Database = {
           },
         ]
       }
+      cities: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          latitude: number | null
+          longitude: number | null
+          mrc: string | null
+          name: string
+          parent_city_slug: string | null
+          population: number
+          region: string | null
+          region_slug: string | null
+          slug: string
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          mrc?: string | null
+          name: string
+          parent_city_slug?: string | null
+          population?: number
+          region?: string | null
+          region_slug?: string | null
+          slug: string
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          mrc?: string | null
+          name?: string
+          parent_city_slug?: string | null
+          population?: number
+          region?: string | null
+          region_slug?: string | null
+          slug?: string
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collection_items: {
         Row: {
           business_id: string
