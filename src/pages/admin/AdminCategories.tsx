@@ -49,11 +49,24 @@ const AdminCategories = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await (supabase as any)
-      .from("categories")
-      .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
-      .limit(500);
-    setRows((data as Row[]) ?? []);
+    // Paginated fetch — DB holds 1100+ categories; Supabase caps each query at 1000 rows.
+    const pageSize = 1000;
+    const all: Row[] = [];
+    let from = 0;
+    // Safety cap: 20 pages = 20k rows
+    for (let i = 0; i < 20; i++) {
+      const { data, error } = await (supabase as any)
+        .from("categories")
+        .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
+        .order("sort_order", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) break;
+      const batch = (data as Row[]) ?? [];
+      all.push(...batch);
+      if (batch.length < pageSize) break;
+      from += pageSize;
+    }
+    setRows(all);
     setLoading(false);
   }, []);
 
