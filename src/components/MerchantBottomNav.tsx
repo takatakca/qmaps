@@ -20,9 +20,10 @@ const MerchantBottomNav = () => {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
 
-  // For now, badge counts are placeholder — will be dynamic once messaging/notification tables exist
+  // MVP LIMITATION — badges are not yet wired to live unread counts.
+  // Notification + message producers are not active in this release. Keeping
+  // counts at 0 (rather than fake numbers) until `useUnreadCounts()` is wired in.
   useEffect(() => {
-    // Placeholder badge logic
     setUnreadMessages(0);
     setUnreadNotifs(0);
   }, [user]);
