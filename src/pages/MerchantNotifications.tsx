@@ -7,6 +7,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// MVP STAGED DATA — NOT WIRED TO BACKEND
+// The `notifications` table exists but is not yet populated by server events.
+// These items are sample placeholders so merchants can preview the UX shape.
+// Replace with `useNotifications()` once notification producers are live.
 const mockNotifications = [
   { id: "1", icon: Star, title: "Nouvel avis reçu", desc: "Un client a laissé un avis 5 étoiles sur votre entreprise.", time: "Il y a 2h", read: false, route: "/merchant" },
   { id: "2", icon: MessageSquare, title: "Nouveau message", desc: "Vous avez reçu une demande d'un client potentiel.", time: "Il y a 5h", read: false, route: "/merchant/messages" },
@@ -45,6 +49,11 @@ const MerchantNotifications = () => {
             <CheckCheck size={14} /> Tout lire
           </button>
         )}
+      </div>
+
+      {/* MVP staging notice */}
+      <div className="bg-muted/60 border-b border-border px-4 py-2 text-[11px] text-muted-foreground">
+        Aperçu MVP — les notifications temps réel arriveront dans une mise à jour à venir.
       </div>
 
       {/* Notifications list */}
