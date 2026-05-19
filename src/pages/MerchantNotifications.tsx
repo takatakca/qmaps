@@ -51,6 +51,11 @@ const MerchantNotifications = () => {
         )}
       </div>
 
+      {/* MVP staging notice */}
+      <div className="bg-muted/60 border-b border-border px-4 py-2 text-[11px] text-muted-foreground">
+        Aperçu MVP — les notifications temps réel arriveront dans une mise à jour à venir.
+      </div>
+
       {/* Notifications list */}
       <div className="divide-y divide-border">
         {notifications.length === 0 && (
