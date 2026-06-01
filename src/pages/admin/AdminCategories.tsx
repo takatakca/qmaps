@@ -64,20 +64,25 @@ const AdminCategories = () => {
     const all: Row[] = [];
     let from = 0;
     // Safety cap: 20 pages = 20k rows
-    for (let i = 0; i < 20; i++) {
-      const { data, error } = await (supabase as any)
-        .from("categories")
-        .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
-        .order("sort_order", { ascending: true })
-        .range(from, from + pageSize - 1);
-      if (error) break;
-      const batch = (data as Row[]) ?? [];
-      all.push(...batch);
-      if (batch.length < pageSize) break;
-      from += pageSize;
+    try {
+      for (let i = 0; i < 20; i++) {
+        const { data, error } = await (supabase as any)
+          .from("categories")
+          .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
+          .order("sort_order", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        const batch = (data as Row[]) ?? [];
+        all.push(...batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+      }
+      setRows(all);
+    } catch (e: any) {
+      setLoadError(e?.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
     }
-    setRows(all);
-    setLoading(false);
   }, []);
 
   useEffect(() => { void load(); }, [load]);
