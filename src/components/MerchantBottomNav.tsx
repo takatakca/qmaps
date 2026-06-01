@@ -1,8 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Megaphone, Store, MessageSquare, Bell, Menu } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useUnreadCounts } from "@/hooks/useUnreadCounts";
 
 const tabs = [
   { path: "/merchant/home", icon: Home, label: "Accueil" },
@@ -16,17 +14,11 @@ const tabs = [
 const MerchantBottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [unreadMessages, setUnreadMessages] = useState(0);
-  const [unreadNotifs, setUnreadNotifs] = useState(0);
-
-  // MVP LIMITATION — badges are not yet wired to live unread counts.
-  // Notification + message producers are not active in this release. Keeping
-  // counts at 0 (rather than fake numbers) until `useUnreadCounts()` is wired in.
-  useEffect(() => {
-    setUnreadMessages(0);
-    setUnreadNotifs(0);
-  }, [user]);
+  // Live unread counts. Messages = real unread from conversation_participants/messages.
+  // Notifications = real unread row count from `notifications` table. The table exists
+  // and is RLS-protected; until server-side producers are wired in, the count will be
+  // 0 for most merchants — we never fake counts.
+  const { unreadMessages, unreadNotifications } = useUnreadCounts();
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
@@ -35,7 +27,12 @@ const MerchantBottomNav = () => {
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
-          const badge = tab.path === "/merchant/messages" ? unreadMessages : tab.path === "/merchant/notifications" ? unreadNotifs : 0;
+          const badge =
+            tab.path === "/merchant/messages"
+              ? unreadMessages
+              : tab.path === "/merchant/notifications"
+                ? unreadNotifications
+                : 0;
           return (
             <button
               key={tab.path}
