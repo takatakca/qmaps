@@ -37,10 +37,19 @@ interface Row {
 
 const empty: CategoryInput = { name: "", slug: "", icon: "", parent_id: null, is_active: true, sort_order: 0 };
 
+type LevelFilter = "all" | "root" | "child";
+type TypeFilter = "all" | string;
+const PAGE_SIZE_UI = 50;
+
 const AdminCategories = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [parentFilter, setParentFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
   const [form, setForm] = useState<CategoryInput>(empty);
@@ -49,6 +58,7 @@ const AdminCategories = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     // Paginated fetch — DB holds 1100+ categories; Supabase caps each query at 1000 rows.
     const pageSize = 1000;
     const all: Row[] = [];
