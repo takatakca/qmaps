@@ -17,14 +17,17 @@ _Last verified: 2026-05-19_
 ## Categories (1,132 rows: 35 roots + 1,097 children)
 
 - **Table**: `public.categories`
-- **Source of truth (frontend)**: `src/data/quebecCategories.ts` (21 root sectors, ~1,118 entries with parent/child links and stable slugs)
-- **Seed strategy**: applied via service-role SQL in batches `/tmp/cb_01.sql … /tmp/cb_10.sql`,
-  using `ON CONFLICT (slug) DO NOTHING` to preserve existing IDs.
-- **Re-seed procedure** (fresh environment):
-  1. Ensure `categories` table exists (created in earlier migration).
-  2. Run `bun scripts/seed-categories.mjs` to regenerate batches from `quebecCategories.ts`.
-  3. Execute the generated SQL in Lovable Cloud → SQL editor (service-role).
-  4. Verify: `SELECT count(*) FROM categories;` should return ≥ 1,132.
+- **Source of truth (frontend)**: `src/data/quebecCategories.ts` (21 root sectors, 1,118 entries with parent/child links and stable slugs)
+- **Reseed (automated)**:
+  1. `node scripts/seed-categories.mjs` — writes `/tmp/qmaps-categories-seed.sql`.
+     The SQL upserts by stable `slug` (`ON CONFLICT (slug) DO UPDATE`),
+     resolves `parent_id` from the parent's slug so existing UUIDs are preserved,
+     and runs total/duplicate/orphan integrity checks at the end.
+  2. Paste the file into Lovable Cloud → SQL editor (service-role),
+     or run `psql "$DATABASE_URL" -f /tmp/qmaps-categories-seed.sql`.
+  3. Verify the four `SELECT` checks emitted at the bottom of the file:
+     `total` ≥ 1,118, `roots` ≥ 21, `dup_slugs` = 0, `orphans` = 0.
+- Re-running is safe and idempotent — no duplicates, no UUID churn.
 
 ## Integrity checks (run after any reseed)
 

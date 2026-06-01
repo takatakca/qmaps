@@ -37,10 +37,19 @@ interface Row {
 
 const empty: CategoryInput = { name: "", slug: "", icon: "", parent_id: null, is_active: true, sort_order: 0 };
 
+type LevelFilter = "all" | "root" | "child";
+type TypeFilter = "all" | string;
+const PAGE_SIZE_UI = 50;
+
 const AdminCategories = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [parentFilter, setParentFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
   const [form, setForm] = useState<CategoryInput>(empty);
@@ -49,25 +58,31 @@ const AdminCategories = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     // Paginated fetch — DB holds 1100+ categories; Supabase caps each query at 1000 rows.
     const pageSize = 1000;
     const all: Row[] = [];
     let from = 0;
     // Safety cap: 20 pages = 20k rows
-    for (let i = 0; i < 20; i++) {
-      const { data, error } = await (supabase as any)
-        .from("categories")
-        .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
-        .order("sort_order", { ascending: true })
-        .range(from, from + pageSize - 1);
-      if (error) break;
-      const batch = (data as Row[]) ?? [];
-      all.push(...batch);
-      if (batch.length < pageSize) break;
-      from += pageSize;
+    try {
+      for (let i = 0; i < 20; i++) {
+        const { data, error } = await (supabase as any)
+          .from("categories")
+          .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
+          .order("sort_order", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        const batch = (data as Row[]) ?? [];
+        all.push(...batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+      }
+      setRows(all);
+    } catch (e: any) {
+      setLoadError(e?.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
     }
-    setRows(all);
-    setLoading(false);
   }, []);
 
   useEffect(() => { void load(); }, [load]);
@@ -114,28 +129,92 @@ const AdminCategories = () => {
     void load();
   };
 
-  const filtered = sortCategories(
+  const typeOptions = Array.from(new Set(rows.map((r) => r.category_type).filter(Boolean))).sort();
+  const rootOptions = sortCategories(rows.filter((r) => !r.parent_id));
+
+  const filteredAll = sortCategories(
     rows.filter((r) => {
       const q = search.trim().toLowerCase();
-      if (!q) return true;
-      return r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q);
+      if (q) {
+        const parent = r.parent_id ? rows.find((p) => p.id === r.parent_id) : null;
+        const hay = [r.name, r.slug, r.category_type, parent?.name, parent?.slug]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (levelFilter === "root" && r.parent_id) return false;
+      if (levelFilter === "child" && !r.parent_id) return false;
+      if (typeFilter !== "all" && r.category_type !== typeFilter) return false;
+      if (parentFilter !== "all") {
+        if (parentFilter === "__none__") {
+          if (r.parent_id) return false;
+        } else if (r.parent_id !== parentFilter) {
+          return false;
+        }
+      }
+      return true;
     }),
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredAll.length / PAGE_SIZE_UI));
+  const safePage = Math.min(page, totalPages);
+  const filtered = filteredAll.slice((safePage - 1) * PAGE_SIZE_UI, safePage * PAGE_SIZE_UI);
 
   const parentOptions = rows.filter((r) => r.id !== editing?.id);
 
   return (
     <AdminLayout title="Catégories">
-      <div className="flex flex-wrap gap-2 mb-4">
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher…" className="flex-1 min-w-[200px]" />
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Input
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Rechercher (nom, slug, parent, type)…"
+          className="flex-1 min-w-[200px]"
+        />
         <Button onClick={openCreate}>Nouvelle catégorie</Button>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-4 text-sm">
+        <select
+          className="border border-border rounded-md px-2 py-1 bg-background"
+          value={levelFilter}
+          onChange={(e) => { setLevelFilter(e.target.value as LevelFilter); setPage(1); }}
+        >
+          <option value="all">Tous niveaux</option>
+          <option value="root">Racines uniquement</option>
+          <option value="child">Sous-catégories</option>
+        </select>
+        <select
+          className="border border-border rounded-md px-2 py-1 bg-background"
+          value={typeFilter}
+          onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+        >
+          <option value="all">Tous types</option>
+          {typeOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <select
+          className="border border-border rounded-md px-2 py-1 bg-background min-w-[180px]"
+          value={parentFilter}
+          onChange={(e) => { setParentFilter(e.target.value); setPage(1); }}
+        >
+          <option value="all">Tout parent</option>
+          <option value="__none__">— Sans parent —</option>
+          {rootOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+        <span className="text-xs text-muted-foreground self-center ml-auto">
+          {filteredAll.length} / {rows.length} catégories
+        </span>
       </div>
 
       {loading ? (
         <p className="text-muted-foreground">Chargement...</p>
-      ) : filtered.length === 0 ? (
-        <Card className="p-8 text-center"><p className="text-muted-foreground">Aucune catégorie.</p></Card>
+      ) : loadError ? (
+        <Card className="p-6 text-center space-y-3">
+          <p className="text-destructive text-sm">Erreur : {loadError}</p>
+          <Button size="sm" variant="outline" onClick={() => void load()}>Réessayer</Button>
+        </Card>
+      ) : filteredAll.length === 0 ? (
+        <Card className="p-8 text-center"><p className="text-muted-foreground">Aucune catégorie ne correspond à ces filtres.</p></Card>
       ) : (
+        <>
         <div className="space-y-2">
           {filtered.map((r) => {
             const parent = rows.find((p) => p.id === r.parent_id);
@@ -160,6 +239,14 @@ const AdminCategories = () => {
             );
           })}
         </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between gap-2 mt-4">
+            <Button size="sm" variant="outline" disabled={safePage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Précédent</Button>
+            <span className="text-xs text-muted-foreground">Page {safePage} / {totalPages}</span>
+            <Button size="sm" variant="outline" disabled={safePage >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Suivant</Button>
+          </div>
+        )}
+        </>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
