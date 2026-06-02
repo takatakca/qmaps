@@ -6,6 +6,7 @@ import {
   ShieldCheck, Sparkles, CheckCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MvpPreviewBadge from "@/components/common/MvpPreviewBadge";
 
 // MVP STAGED DATA — NOT WIRED TO BACKEND
 // The `notifications` table exists but is not yet populated by server events.
