@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell, Share2, CalendarDays, Star, MapPin } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import Seo from "@/components/Seo";
+import MvpPreviewBadge from "@/components/common/MvpPreviewBadge";
 
 const mockEvents = {
   official: [

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Share2, ScanLine, User } from "lucide-react";
+import MvpPreviewBadge from "@/components/common/MvpPreviewBadge";
 import { useAuth } from "@/hooks/useAuth";
 
 const QRCode = () => {
@@ -38,6 +39,13 @@ const QRCode = () => {
               <User size={24} className="text-muted-foreground" />
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 w-full max-w-xs">
+          <MvpPreviewBadge
+            label="Aperçu MVP — QR décoratif"
+            description="Le QR code scannable arrive bientôt. En attendant, utilisez Partager pour envoyer votre profil."
+          />
         </div>
 
         <div className="flex gap-8 mt-10">
