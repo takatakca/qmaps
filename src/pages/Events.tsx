@@ -34,7 +34,12 @@ const Events = () => {
         </div>
       </div>
 
-      <div className="bg-muted px-4 py-3">
+      <div className="px-4 pt-3">
+        <MvpPreviewBadge
+          description="Bientôt : événements locaux soumis par les commerçants et la communauté du Québec."
+        />
+      </div>
+      <div className="bg-muted px-4 py-3 mt-3">
         <h2 className="text-sm font-bold text-foreground">Événements officiels QMAPS</h2>
       </div>
       {mockEvents.official.map(e => (
