@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Plus, MoreVertical, MessageSquare } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import Seo from "@/components/Seo";
+import MvpPreviewBadge from "@/components/common/MvpPreviewBadge";
 
 type Tab = "all" | "my";
 
@@ -54,7 +55,12 @@ const Talk = () => {
 
       {tab === "all" ? (
         <div>
-          <div className="px-4 py-2 bg-muted text-xs text-muted-foreground">Montréal, QC</div>
+          <div className="px-4 pt-3">
+            <MvpPreviewBadge
+              description="Aperçu des discussions locales. La communauté QMAPS Québec ouvrira bientôt."
+            />
+          </div>
+          <div className="px-4 py-2 bg-muted text-xs text-muted-foreground mt-3">Montréal, QC</div>
           <div className="divide-y divide-border">
             {mockTopics.map(t => (
               <button key={t.id} className="w-full text-left px-4 py-3 hover:bg-accent/30 transition-colors">

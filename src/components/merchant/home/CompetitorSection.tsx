@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import StarRating from "@/components/StarRating";
 import { ChevronRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MvpPreviewBadge from "@/components/common/MvpPreviewBadge";
 
 const mockCompetitors = [
   { name: "Café Lumière", rating: 4.3, reviews: 61 },
@@ -17,10 +18,13 @@ const CompetitorSection = () => {
       {/* Competitors list */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="font-heading font-bold text-foreground">Comparez vos visites</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-heading font-bold text-foreground">Comparez vos visites</h2>
+            <MvpPreviewBadge variant="inline" />
+          </div>
           <button className="text-xs text-primary font-semibold">Modifier →</button>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">Derniers 30 jours</p>
+        <p className="text-xs text-muted-foreground mb-3">Données d'exemple — branchement en cours</p>
 
         <p className="text-sm font-semibold text-foreground mb-2">Concurrents les plus consultés</p>
         <div className="space-y-2">
@@ -43,7 +47,10 @@ const CompetitorSection = () => {
 
       {/* Potential customers map placeholder */}
       <div className="bg-card border border-border rounded-xl p-4">
-        <p className="text-xs text-muted-foreground mb-2">Derniers 14 jours</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground">Carte des recherches locales</p>
+          <MvpPreviewBadge variant="inline" />
+        </div>
         <h2 className="font-heading font-bold text-foreground mb-3">Clients potentiels</h2>
         <div className="h-40 bg-muted/30 rounded-lg flex items-center justify-center mb-3">
           <MapPin size={32} className="text-muted-foreground/30" />
