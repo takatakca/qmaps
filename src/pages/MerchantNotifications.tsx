@@ -52,8 +52,10 @@ const MerchantNotifications = () => {
       </div>
 
       {/* MVP staging notice */}
-      <div className="bg-muted/60 border-b border-border px-4 py-2 text-[11px] text-muted-foreground">
-        Aperçu MVP — les notifications temps réel arriveront dans une mise à jour à venir.
+      <div className="px-4 pt-3">
+        <MvpPreviewBadge
+          description="Les notifications temps réel (nouveaux avis, messages, paiements) seront branchées dans une prochaine mise à jour. Les compteurs de badges, eux, sont déjà en direct."
+        />
       </div>
 
       {/* Notifications list */}
