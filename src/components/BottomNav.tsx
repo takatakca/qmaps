@@ -16,7 +16,7 @@ const BottomNav = () => {
   const { unreadNotifications, unreadMessages } = useUnreadCounts();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border shadow-elevated pb-safe">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
@@ -27,13 +27,22 @@ const BottomNav = () => {
               onClick={() => navigate(tab.path)}
               aria-label={tab.label}
               aria-current={isActive ? "page" : undefined}
-              className={`flex flex-col items-center gap-0.5 py-2 px-3 min-w-[60px] min-h-[44px] transition-colors ${
-                isActive ? "text-primary" : "text-muted-foreground"
+              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 min-w-[60px] min-h-[44px] transition-all ${
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <tab.icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
-              {badge > 0 && <span className="absolute mt-[-6px] ml-5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">{badge > 9 ? "9+" : badge}</span>}
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              {isActive && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-brand-gradient" />
+              )}
+              <div className={`relative flex items-center justify-center rounded-xl transition-all ${isActive ? "bg-secondary px-2.5 py-1" : "px-1 py-1"}`}>
+                <tab.icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+                {badge > 0 && (
+                  <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center shadow-soft">
+                    {badge > 9 ? "9+" : badge}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[10px] ${isActive ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
             </button>
           );
         })}

@@ -14,17 +14,17 @@ const CategoryRow = () => {
   }, []);
 
   return (
-    <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-1">
+    <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2 px-1">
       {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => navigate(`/search?category=${cat.slug}`)}
-          className="flex flex-col items-center gap-1.5 min-w-[64px] group"
+          className="flex flex-col items-center gap-1.5 min-w-[68px] group"
         >
-          <div className="w-14 h-14 rounded-full bg-card border border-border flex items-center justify-center text-2xl shadow-sm group-hover:border-primary/30 transition-colors">
+          <div className="w-14 h-14 rounded-2xl bg-secondary border border-border flex items-center justify-center text-2xl shadow-soft group-hover:shadow-glow group-hover:border-primary/40 group-hover:-translate-y-0.5 transition-all duration-200">
             {cat.icon}
           </div>
-          <span className="text-xs text-foreground font-medium whitespace-nowrap">
+          <span className="text-xs text-foreground font-medium whitespace-nowrap group-hover:text-primary transition-colors">
             {cat.name}
           </span>
         </button>
