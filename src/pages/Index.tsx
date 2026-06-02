@@ -41,17 +41,26 @@ const Index = () => {
         canonicalPath="/"
       />
       {/* Header */}
-      <header className="px-4 pt-4 pb-2">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="font-heading text-2xl font-bold text-foreground tracking-tight">
-            Q<span className="text-primary">Maps</span>
+      <header className="relative px-4 pt-5 pb-5 bg-brand-gradient-soft border-b border-border">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="font-heading text-2xl font-bold tracking-tight">
+            <span className="text-foreground">Q</span>
+            <span className="text-brand-gradient">Maps</span>
           </h1>
           <a
             href="/city/montreal"
-            className="text-xs text-muted-foreground font-medium bg-secondary px-2 py-1 rounded-full hover:bg-accent transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-primary font-semibold bg-card border border-border px-2.5 py-1 rounded-full shadow-soft hover:shadow-glow transition-shadow"
           >
             📍 Montréal
           </a>
+        </div>
+        <div className="mb-4">
+          <h2 className="font-heading text-[22px] leading-tight font-bold text-foreground">
+            Découvrez le meilleur du <span className="text-brand-gradient">Québec</span>.
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Commerces locaux, avis honnêtes et pros de confiance — près de chez vous.
+          </p>
         </div>
         <SearchBar />
       </header>

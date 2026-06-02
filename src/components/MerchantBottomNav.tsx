@@ -23,7 +23,7 @@ const MerchantBottomNav = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border shadow-elevated pb-safe">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
@@ -39,19 +39,22 @@ const MerchantBottomNav = () => {
               onClick={() => navigate(tab.path)}
               aria-label={tab.label}
               aria-current={active ? "page" : undefined}
-              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 min-w-[56px] min-h-[44px] transition-colors ${
-                active ? "text-primary" : "text-muted-foreground"
+              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 min-w-[56px] min-h-[44px] transition-all ${
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <div className="relative">
-                <tab.icon size={22} strokeWidth={active ? 2.5 : 1.5} />
+              {active && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-brand-gradient" />
+              )}
+              <div className={`relative flex items-center justify-center rounded-xl transition-all ${active ? "bg-secondary px-2.5 py-1" : "px-1 py-1"}`}>
+                <tab.icon size={20} strokeWidth={active ? 2.5 : 1.75} />
                 {badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center px-1">
+                  <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center px-1 shadow-soft">
                     {badge > 99 ? "99+" : badge}
                   </span>
                 )}
               </div>
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              <span className={`text-[10px] ${active ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
             </button>
           );
         })}
