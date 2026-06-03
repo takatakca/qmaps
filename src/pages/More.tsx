@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import {
   Star, Camera, MapPin, MessageCircle, Bell, Activity,
-  Eye, ChevronRight, Settings, HelpCircle, Store
+  Eye, ChevronRight, Settings, HelpCircle, Store, Briefcase
 } from "lucide-react";
 import foodImg from "@/assets/food-1.jpg";
 
