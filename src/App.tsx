@@ -98,6 +98,7 @@ const AppPreferences = lazy(() => import("./pages/settings/AppPreferences"));
 const DeleteAccount = lazy(() => import("./pages/settings/DeleteAccount"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const Services = lazy(() => import("./pages/Services"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
 const Privacy = lazy(() => import("./pages/legal/Privacy"));
 const Terms = lazy(() => import("./pages/legal/Terms"));
