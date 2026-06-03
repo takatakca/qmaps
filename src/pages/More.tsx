@@ -21,13 +21,15 @@ const More = () => {
 
   const sections = [
     {
+      title: "Découvrir",
       items: [
+        { icon: Briefcase, label: "Services professionnels", action: () => navigate("/services") },
         { icon: Star, label: "Ajouter un avis", action: () => navigate("/") },
         { icon: Camera, label: "Ajouter une photo ou vidéo" },
         { icon: MapPin, label: "Check-in" },
-        { icon: MessageCircle, label: "Messages" },
-        { icon: Bell, label: "Notifications", badge: 3 },
-        { icon: Activity, label: "Fil d'activité" },
+        { icon: MessageCircle, label: "Messages", action: () => navigate("/messages") },
+        { icon: Bell, label: "Notifications", action: () => navigate("/notifications") },
+        { icon: Activity, label: "Fil d'activité", action: () => navigate("/activity") },
         { icon: Eye, label: "Récemment consultés" },
       ],
     },
