@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Building2, Search, Info } from "lucide-react";
+import { lovable } from "@/integrations/lovable";
 
 type AuthMode = "login" | "signup" | "forgot";
 type AuthRole = "client" | "merchant";
