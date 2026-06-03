@@ -98,6 +98,7 @@ const AppPreferences = lazy(() => import("./pages/settings/AppPreferences"));
 const DeleteAccount = lazy(() => import("./pages/settings/DeleteAccount"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const Services = lazy(() => import("./pages/Services"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
 const Privacy = lazy(() => import("./pages/legal/Privacy"));
 const Terms = lazy(() => import("./pages/legal/Terms"));
@@ -146,6 +147,7 @@ const App = () => (
               <Route path="/release-notes" element={<ReleaseNotes />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/collections" element={<Collections />} />
+              <Route path="/services" element={<Services />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/projects/:id" element={<ProjectDetail />} />
               <Route path="/more" element={<More />} />

@@ -7,7 +7,7 @@ import ShareSheet from "@/components/ShareSheet";
 import {
   User, Star, MapPin, Settings, LogOut, LogIn, Store, Camera, Award, Bell,
   Share2, QrCode, ChevronRight, MessageCircle, Heart, Activity, Eye,
-  HelpCircle, Shield, ImageIcon
+  HelpCircle, Shield, ImageIcon, Briefcase, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -81,10 +81,12 @@ const Profile = () => {
   ];
 
   const communityItems = [
+    { icon: Briefcase, label: "Mes projets", path: "/projects" },
+    { icon: Sparkles, label: "Services au Québec", path: "/services" },
     { icon: MessageCircle, label: "Messages", path: "/messages" },
     { icon: Heart, label: "Compliments", path: "/compliments" },
     { icon: MapPin, label: "Événements", path: "/events" },
-    { icon: Activity, label: "Fil d'activité", badge: 2, path: "/activity" },
+    { icon: Activity, label: "Fil d'activité", path: "/activity" },
     { icon: MessageCircle, label: "Discussions", path: "/talk" },
   ];
 
@@ -132,6 +134,20 @@ const Profile = () => {
             <span className="text-[10px] text-foreground font-medium text-center whitespace-pre-line leading-tight">{btn.label}</span>
           </button>
         ))}
+      </div>
+
+      {/* Pro CTA — visible to every signed-in client; the merchant page handles already-pro users */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={() => navigate("/auth?role=merchant")}
+          className="w-full rounded-2xl bg-brand-gradient text-primary-foreground p-4 shadow-elevated flex items-center justify-between gap-3 text-left"
+        >
+          <div>
+            <p className="font-heading text-sm font-bold">Devenir professionnel</p>
+            <p className="text-xs opacity-90 mt-0.5">Recevez des demandes de clients du Québec</p>
+          </div>
+          <ChevronRight size={20} className="shrink-0" />
+        </button>
       </div>
 
       <div className="h-2 bg-muted" />
@@ -226,8 +242,8 @@ const Profile = () => {
               <span className="text-sm text-foreground">{item.label}</span>
             </div>
             <div className="flex items-center gap-2">
-              {"badge" in item && item.badge && (
-                <span className="bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">{item.badge}</span>
+              {"badge" in (item as any) && typeof (item as any).badge === "number" && (item as any).badge > 0 && (
+                <span className="bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">{(item as any).badge}</span>
               )}
               <ChevronRight size={16} className="text-muted-foreground" />
             </div>
