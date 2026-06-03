@@ -147,6 +147,7 @@ const App = () => (
               <Route path="/release-notes" element={<ReleaseNotes />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/collections" element={<Collections />} />
+              <Route path="/services" element={<Services />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/projects/:id" element={<ProjectDetail />} />
               <Route path="/more" element={<More />} />
