@@ -7,7 +7,7 @@ import ShareSheet from "@/components/ShareSheet";
 import {
   User, Star, MapPin, Settings, LogOut, LogIn, Store, Camera, Award, Bell,
   Share2, QrCode, ChevronRight, MessageCircle, Heart, Activity, Eye,
-  HelpCircle, Shield, ImageIcon
+  HelpCircle, Shield, ImageIcon, Briefcase, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
