@@ -136,6 +136,20 @@ const Profile = () => {
         ))}
       </div>
 
+      {/* Pro CTA — visible to every signed-in client; the merchant page handles already-pro users */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={() => navigate("/auth?role=merchant")}
+          className="w-full rounded-2xl bg-brand-gradient text-primary-foreground p-4 shadow-elevated flex items-center justify-between gap-3 text-left"
+        >
+          <div>
+            <p className="font-heading text-sm font-bold">Devenir professionnel</p>
+            <p className="text-xs opacity-90 mt-0.5">Recevez des demandes de clients du Québec</p>
+          </div>
+          <ChevronRight size={20} className="shrink-0" />
+        </button>
+      </div>
+
       <div className="h-2 bg-muted" />
 
       {/* My Impact */}
