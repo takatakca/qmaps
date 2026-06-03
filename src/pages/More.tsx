@@ -80,9 +80,9 @@ const More = () => {
                     <span className="text-sm text-foreground">{item.label}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {"badge" in item && item.badge && (
+                    {"badge" in item && typeof (item as any).badge === "number" && (item as any).badge > 0 && (
                       <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                        {item.badge}
+                        {(item as any).badge}
                       </span>
                     )}
                     <ChevronRight size={16} className="text-muted-foreground" />
