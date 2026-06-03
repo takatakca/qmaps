@@ -228,8 +228,8 @@ const Profile = () => {
               <span className="text-sm text-foreground">{item.label}</span>
             </div>
             <div className="flex items-center gap-2">
-              {"badge" in item && item.badge && (
-                <span className="bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">{item.badge}</span>
+              {"badge" in (item as any) && typeof (item as any).badge === "number" && (item as any).badge > 0 && (
+                <span className="bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">{(item as any).badge}</span>
               )}
               <ChevronRight size={16} className="text-muted-foreground" />
             </div>
