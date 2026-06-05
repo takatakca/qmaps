@@ -34,7 +34,7 @@ const SectionHeader = ({
   step, title, subtitle, icon: Icon,
 }: {
   step: number; title: string; subtitle?: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: LucideIcon;
 }) => (
   <div className="flex items-start gap-3 pt-2">
     <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary shrink-0">
