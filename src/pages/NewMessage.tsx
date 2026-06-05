@@ -64,7 +64,7 @@ const NewMessage = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || "Utilisateur"}</p>
-              <p className="text-xs text-muted-foreground truncate">{profile.email || "Disponible sur QMaps"}</p>
+              <p className="text-xs text-muted-foreground truncate">Disponible sur QMaps</p>
             </div>
           </button>
         ))}
