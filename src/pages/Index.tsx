@@ -7,6 +7,8 @@ import BottomNav from "@/components/BottomNav";
 import NearbySection from "@/components/home/NearbySection";
 import FeaturedBusinesses from "@/components/home/FeaturedBusinesses";
 import TrendingCollections from "@/components/home/TrendingCollections";
+import HorizontalShortcutRow from "@/components/home/HorizontalShortcutRow";
+import StartProjectCTA from "@/components/home/StartProjectCTA";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
@@ -14,6 +16,61 @@ import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { mapBusinessToCard } from "@/lib/business";
 import Seo from "@/components/Seo";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  UtensilsCrossed, Coffee, ShoppingBasket, Pill, Bike, Store,
+  Sparkles as SparkIcon, Zap, Wrench, HardHat, Calculator, Scale,
+  Camera, Megaphone, Dumbbell, FileText, MapPin, Building2,
+} from "lucide-react";
+
+const RESTAURANT_SHORTCUTS = [
+  { label: "Restaurants québécois", q: "restaurants québécois", icon: UtensilsCrossed, tint: "bg-orange-500/10" },
+  { label: "Cafés", q: "cafés", icon: Coffee, tint: "bg-amber-500/10" },
+  { label: "Bistros", q: "bistros", icon: UtensilsCrossed, tint: "bg-red-500/10" },
+  { label: "Poutineries", q: "poutineries", icon: UtensilsCrossed, tint: "bg-yellow-500/10" },
+  { label: "Brasseries", q: "brasseries", icon: UtensilsCrossed, tint: "bg-amber-600/10" },
+  { label: "Pâtisseries", q: "pâtisseries", icon: Coffee, tint: "bg-pink-500/10" },
+];
+
+const POPULAR_SERVICES = [
+  { label: "Nettoyage", q: "nettoyage", icon: SparkIcon, tint: "bg-cyan-500/10" },
+  { label: "Électriciens", q: "électriciens", icon: Zap, tint: "bg-yellow-500/10" },
+  { label: "Plomberie", q: "plomberie", icon: Wrench, tint: "bg-blue-500/10" },
+  { label: "Comptables", q: "comptables", icon: Calculator, tint: "bg-emerald-500/10" },
+  { label: "Avocats", q: "avocats", icon: Scale, tint: "bg-indigo-500/10" },
+  { label: "Construction", q: "construction", icon: HardHat, tint: "bg-orange-500/10" },
+  { label: "Marketing", q: "marketing", icon: Megaphone, tint: "bg-fuchsia-500/10" },
+  { label: "Photographes", q: "photographes", icon: Camera, tint: "bg-violet-500/10" },
+  { label: "Entraîneurs privés", q: "entraîneur privé", icon: Dumbbell, tint: "bg-rose-500/10" },
+  { label: "Impôts", q: "impôts", icon: FileText, tint: "bg-teal-500/10" },
+];
+
+const ESSENTIALS = [
+  { label: "Épicerie", q: "épicerie", icon: ShoppingBasket, tint: "bg-green-500/10" },
+  { label: "Dépanneurs", q: "dépanneur", icon: Store, tint: "bg-orange-500/10" },
+  { label: "Restaurants", q: "restaurants", icon: UtensilsCrossed, tint: "bg-red-500/10" },
+  { label: "Cafés", q: "cafés", icon: Coffee, tint: "bg-amber-500/10" },
+  { label: "Pharmacies", q: "pharmacie", icon: Pill, tint: "bg-emerald-500/10" },
+  { label: "Livraison", q: "livraison", icon: Bike, tint: "bg-blue-500/10" },
+  { label: "Plats à emporter", q: "à emporter", icon: UtensilsCrossed, tint: "bg-yellow-500/10" },
+];
+
+const NEARBY_HINTS = [
+  { label: "Montréal", to: "/city/montreal", icon: MapPin, tint: "bg-primary/10" },
+  { label: "Québec", to: "/city/quebec", icon: MapPin, tint: "bg-primary/10" },
+  { label: "Laval", to: "/city/laval", icon: MapPin, tint: "bg-primary/10" },
+  { label: "Gatineau", to: "/city/gatineau", icon: MapPin, tint: "bg-primary/10" },
+  { label: "Sherbrooke", to: "/city/sherbrooke", icon: MapPin, tint: "bg-primary/10" },
+  { label: "Trois-Rivières", to: "/city/trois-rivieres", icon: MapPin, tint: "bg-primary/10" },
+];
+
+const PROS_RECOMMENDED = [
+  { label: "Rénovation cuisine", q: "rénovation cuisine", icon: HardHat, tint: "bg-orange-500/10" },
+  { label: "Design web", q: "design web", icon: Megaphone, tint: "bg-violet-500/10" },
+  { label: "Architectes", q: "architectes", icon: Building2, tint: "bg-blue-500/10" },
+  { label: "Coachs d'affaires", q: "coach affaires", icon: Dumbbell, tint: "bg-rose-500/10" },
+  { label: "Notaires", q: "notaires", icon: Scale, tint: "bg-indigo-500/10" },
+  { label: "Traduction", q: "traduction", icon: FileText, tint: "bg-teal-500/10" },
+];
 
 const Index = () => {
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
@@ -36,8 +93,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       <Seo
-        title="QMaps Montréal — Commerces, avis et pros locaux"
-        description="Découvrez des commerces, lisez des avis et trouvez des pros locaux à Montréal avec QMaps."
+        title="QMaps Québec — Commerces, services et pros locaux"
+        description="Découvrez les meilleurs commerces, restaurants et professionnels du Québec avec QMaps."
         canonicalPath="/"
       />
       {/* Header */}
@@ -51,7 +108,7 @@ const Index = () => {
             href="/city/montreal"
             className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-card border border-border px-3 py-1.5 rounded-full shadow-soft hover:shadow-glow transition-shadow"
           >
-            <span aria-hidden>📍</span> Montréal
+            <MapPin size={12} /> Montréal
           </a>
         </div>
         <div className="mb-5">
@@ -62,7 +119,7 @@ const Index = () => {
             Commerces locaux, avis honnêtes et pros de confiance — près de chez vous.
           </p>
         </div>
-        <SearchBar />
+        <SearchBar smart />
         <p className="text-xs text-muted-foreground mt-3 text-center leading-snug">
           Trouvez les meilleurs commerces, services et professionnels du Québec.
         </p>
@@ -91,31 +148,87 @@ const Index = () => {
       </header>
 
       {/* Categories */}
-      <main className="space-y-5">
+      <main className="space-y-6">
         <div className="px-4 mt-5">
-          <div className="mb-3">
-            <h2 className="font-heading text-base font-bold text-foreground">
-              Explorer par service
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Les catégories les plus recherchées au Québec.
-            </p>
+          <div className="mb-3 flex items-end justify-between">
+            <div>
+              <h2 className="font-heading text-base font-bold text-foreground">
+                Explorer par service
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Les catégories les plus recherchées au Québec.
+              </p>
+            </div>
+            <a href="/services" className="text-xs font-semibold text-primary hover:underline whitespace-nowrap">
+              Voir tous les services
+            </a>
           </div>
           <CategoryRow />
         </div>
 
+        <div className="px-4">
+          <HorizontalShortcutRow
+            title="Meilleurs restaurants près de vous"
+            subtitle="Restaurants, cafés et bistros à découvrir au Québec."
+            items={RESTAURANT_SHORTCUTS}
+            seeAllHref="/search?q=restaurants"
+          />
+        </div>
+
+        <div className="px-4">
+          <HorizontalShortcutRow
+            title="Services populaires au Québec"
+            subtitle="Les pros les plus demandés cette semaine."
+            items={POPULAR_SERVICES}
+            seeAllHref="/services"
+          />
+        </div>
+
+        <div className="px-4">
+          <HorizontalShortcutRow
+            title="À proximité"
+            subtitle={
+              nearbyBusinesses.length
+                ? "Repérés autour de vous"
+                : "Explorez les villes du Québec"
+            }
+            items={NEARBY_HINTS}
+          />
+        </div>
+
+        <div className="px-4">
+          <HorizontalShortcutRow
+            title="Épicerie, restaurants et essentiels"
+            subtitle="Tout ce qu'il vous faut au quotidien."
+            items={ESSENTIALS}
+          />
+        </div>
+
+        <div className="px-4">
+          <StartProjectCTA />
+        </div>
+
+        <div className="px-4">
+          <HorizontalShortcutRow
+            title="Professionnels recommandés"
+            subtitle="Des pros de confiance pour vos projets."
+            items={PROS_RECOMMENDED}
+            seeAllHref="/services"
+          />
+        </div>
+
         {/* Professional CTA */}
         <div className="px-4">
-          <div className="rounded-2xl bg-brand-gradient p-5 text-primary-foreground shadow-elevated">
-            <h3 className="font-heading text-base font-bold">
+          <div className="rounded-2xl bg-card border border-border p-5 shadow-soft">
+            <h3 className="font-heading text-base font-bold text-foreground">
               Vous êtes un professionnel ?
             </h3>
-            <p className="text-sm mt-1 opacity-90 leading-relaxed">
+            <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
               Rejoignez les milliers d'entreprises québécoises visibles sur QMAPS.
             </p>
             <a
               href="/merchant/onboarding"
-              className="inline-flex items-center mt-4 px-5 py-2.5 rounded-full bg-primary-foreground text-primary text-sm font-semibold shadow-soft hover:shadow-glow transition-shadow"
+              className="inline-flex items-center mt-4 px-5 py-2.5 rounded-full bg-brand-gradient text-primary-foreground text-sm font-semibold shadow-soft hover:shadow-glow transition-shadow"
             >
               Enregistrer mon entreprise
             </a>
