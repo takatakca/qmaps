@@ -13,14 +13,14 @@ const NewMessage = () => {
   const { user } = useAuth();
   const { createConversation } = useConversations();
   const [query, setQuery] = useState("");
-  const [profiles, setProfiles] = useState<{ id: string; display_name: string | null; email: string | null }[]>([]);
+  const [profiles, setProfiles] = useState<{ id: string; display_name: string | null }[]>([]);
   const [startingId, setStartingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("id, display_name, email")
+      .select("id, display_name")
       .neq("id", user.id)
       .order("display_name", { ascending: true })
       .limit(25)
@@ -28,7 +28,7 @@ const NewMessage = () => {
   }, [user]);
 
   const filtered = profiles.filter((profile) => {
-    const haystack = `${profile.display_name || ""} ${profile.email || ""}`.toLowerCase();
+    const haystack = `${profile.display_name || ""}`.toLowerCase();
     return haystack.includes(query.toLowerCase());
   });
 
@@ -64,7 +64,7 @@ const NewMessage = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || "Utilisateur"}</p>
-              <p className="text-xs text-muted-foreground truncate">{profile.email || "Disponible sur QMaps"}</p>
+              <p className="text-xs text-muted-foreground truncate">Disponible sur QMaps</p>
             </div>
           </button>
         ))}
