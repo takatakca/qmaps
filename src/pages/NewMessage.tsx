@@ -13,14 +13,14 @@ const NewMessage = () => {
   const { user } = useAuth();
   const { createConversation } = useConversations();
   const [query, setQuery] = useState("");
-  const [profiles, setProfiles] = useState<{ id: string; display_name: string | null; email: string | null }[]>([]);
+  const [profiles, setProfiles] = useState<{ id: string; display_name: string | null }[]>([]);
   const [startingId, setStartingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("id, display_name, email")
+      .select("id, display_name")
       .neq("id", user.id)
       .order("display_name", { ascending: true })
       .limit(25)
@@ -28,7 +28,7 @@ const NewMessage = () => {
   }, [user]);
 
   const filtered = profiles.filter((profile) => {
-    const haystack = `${profile.display_name || ""} ${profile.email || ""}`.toLowerCase();
+    const haystack = `${profile.display_name || ""}`.toLowerCase();
     return haystack.includes(query.toLowerCase());
   });
 
