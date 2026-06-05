@@ -23,7 +23,10 @@ const Profile = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("display_name, email").eq("id", user.id).maybeSingle().then(({ data }) => setProfile(data));
+    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle().then(({ data }) => {
+      // Email comes from the authenticated session, not from the publicly-readable profile row.
+      setProfile({ display_name: data?.display_name ?? null, email: user.email ?? null });
+    });
     supabase.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setStats(s => ({ ...s, reviews: count || 0 })));
     supabase.from("bookmarks").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setStats(s => ({ ...s, bookmarks: count || 0 })));
     // Load recently viewed (using bookmarks as proxy)
