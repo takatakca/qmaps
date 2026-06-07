@@ -60,31 +60,75 @@ const Search = () => {
       setLoading(true);
       let q = supabase.from("businesses").select("*");
 
-      if (query) q = q.ilike("name", `%${query}%`);
+      // Broader text matching across name, city and description
+      if (query) {
+        const safe = query.replace(/[,()]/g, " ").trim();
+        const pattern = `%${safe}%`;
+        q = q.or(
+          `name.ilike.${pattern},city.ilike.${pattern},description.ilike.${pattern}`,
+        );
+      }
       if (minRating) q = q.gte("avg_rating", minRating);
       if (selectedPrice.length > 0) q = q.in("price_level", selectedPrice);
 
-      if (selectedCategory) {
-        const cat = (categories.length ? categories : []).find((c) => c.slug === selectedCategory)
-          ?? allCategories.find((c) => c.slug === selectedCategory);
-        if (cat) {
-          const { data: bcData } = await supabase
-            .from("business_categories")
-            .select("business_id")
-            .eq("category_id", cat.id);
-          if (bcData && bcData.length > 0) {
-            q = q.in("id", bcData.map((bc) => bc.business_id));
-          } else {
+      // Resolve category set: selected + its children, OR categories matching the free-text query
+      const resolveCategoryIds = (): string[] => {
+        const pool = categories.length ? categories : allCategories;
+        if (!pool.length) return [];
+        if (selectedCategory) {
+          const cat = pool.find((c) => c.slug === selectedCategory);
+          if (!cat) return [];
+          const children = pool.filter((c: any) => c.parent_id === cat.id).map((c) => c.id);
+          return [cat.id, ...children];
+        }
+        if (query && allCategories.length) {
+          const matches = searchCategories(allCategories, query, 4);
+          if (!matches.length) return [];
+          const ids = new Set<string>();
+          for (const m of matches) {
+            ids.add(m.id);
+            for (const c of allCategories) if (c.parent_id === m.id) ids.add(c.id);
+          }
+          return Array.from(ids);
+        }
+        return [];
+      };
+
+      const catIds = resolveCategoryIds();
+      let businessIdsFromCategory: string[] | null = null;
+      if (catIds.length > 0) {
+        const { data: bcData } = await supabase
+          .from("business_categories")
+          .select("business_id")
+          .in("category_id", catIds);
+        businessIdsFromCategory = Array.from(new Set((bcData || []).map((bc) => bc.business_id)));
+        if (selectedCategory) {
+          // Strict filter when user explicitly picked a category
+          if (businessIdsFromCategory.length === 0) {
             setBusinesses([]);
             setLoading(false);
             return;
           }
+          q = q.in("id", businessIdsFromCategory);
         }
       }
 
       q = q.order("avg_rating", { ascending: false });
       const { data } = await q;
       let results = data || [];
+
+      // If query had no name/city/description hits but matched categories, union those businesses
+      if (query && !selectedCategory && businessIdsFromCategory && businessIdsFromCategory.length) {
+        const have = new Set(results.map((b) => b.id));
+        const missing = businessIdsFromCategory.filter((id) => !have.has(id));
+        if (missing.length > 0) {
+          const { data: extra } = await supabase
+            .from("businesses")
+            .select("*")
+            .in("id", missing);
+          if (extra) results = [...results, ...extra];
+        }
+      }
 
       // Client-side openNow using real hours when available
       if (openNow) {
