@@ -20,9 +20,7 @@ const AdminUsers = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("profiles")
-      .select("id,display_name,avatar_url,email,created_at")
-      .order("created_at", { ascending: false }).limit(100);
+    const { data } = await supabase.rpc("admin_list_profiles", { _limit: 100 });
     setUsers((data as Profile[]) || []);
     setLoading(false);
   }, []);

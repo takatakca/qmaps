@@ -2122,6 +2122,16 @@ export type Database = {
             }
             Returns: string
           }
+      admin_list_profiles: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+        }[]
+      }
       can_access_quote: {
         Args: { _quote_id: string; _user_id: string }
         Returns: boolean

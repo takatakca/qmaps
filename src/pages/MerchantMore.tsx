@@ -18,7 +18,7 @@ const MerchantMore = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const [profile, setProfile] = useState<Pick<Tables<"profiles">, "id" | "display_name" | "avatar_url" | "created_at" | "updated_at"> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const MerchantMore = () => {
     const fetch = async () => {
       const [{ data: biz }, { data: prof }] = await Promise.all([
         supabase.from("businesses").select("*").eq("owner_user_id", user.id).limit(1).maybeSingle(),
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("id, display_name, avatar_url, created_at, updated_at").eq("id", user.id).maybeSingle(),
       ]);
       setBusiness(biz);
       setProfile(prof);
