@@ -18,7 +18,7 @@ const MerchantMore = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const [profile, setProfile] = useState<Pick<Tables<"profiles">, "id" | "display_name" | "avatar_url" | "created_at" | "updated_at"> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
