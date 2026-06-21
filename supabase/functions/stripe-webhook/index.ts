@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("stripe-webhook handler error", err);
-    return new Response(JSON.stringify({ error: "handler_error", message: String(err) }), {
+    return new Response(JSON.stringify({ error: "handler_error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
