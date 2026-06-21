@@ -30,8 +30,8 @@ try {
     record("robots.txt exists", true);
     record(
       "robots.txt references sitemap",
-      /Sitemap:\s*\/sitemap\.xml/i.test(robots),
-      "expected `Sitemap: /sitemap.xml`",
+      /Sitemap:\s*\S*\/sitemap\.xml/i.test(robots),
+      "expected a `Sitemap:` line ending in /sitemap.xml",
     );
   }
 } catch (e) {

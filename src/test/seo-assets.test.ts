@@ -17,7 +17,7 @@ describe("seo: robots.txt", () => {
   const robots = readPublic("robots.txt");
 
   it("references the sitemap", () => {
-    expect(robots).toMatch(/Sitemap:\s*\/sitemap\.xml/i);
+    expect(robots).toMatch(/Sitemap:\s*\S*\/sitemap\.xml/i);
   });
 
   it("allows public crawling", () => {
