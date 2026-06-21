@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import CheckoutGuidanceDialog from "@/components/merchant/CheckoutGuidanceDialog";
 
 const POPULAR_MESSAGES = [
   { id: "free_app", label: "Achetez 2 entrées, obtenez l'app GRATUITE", desc: "Offre spéciale" },
@@ -37,6 +38,7 @@ const MerchantCTA = () => {
   const [destination, setDestination] = useState("website");
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-32">
@@ -60,7 +62,7 @@ const MerchantCTA = () => {
           Facilitez la tâche aux clients pour en savoir plus sur vos spéciaux hebdomadaires, vos offres Happy Hour ou obtenir un rabais avec un Call to Action entièrement personnalisable.
         </p>
 
-        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
+        <Button onClick={() => setCheckoutOpen(true)} className="w-full rounded-full mb-2">
           Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-8">
@@ -207,11 +209,12 @@ const MerchantCTA = () => {
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">
             Économisez avec le Package
           </Button>
-          <Button onClick={() => navigate("/merchant/billing/plans")} className="flex-1 rounded-full text-sm">
+          <Button onClick={() => setCheckoutOpen(true)} className="flex-1 rounded-full text-sm">
             Bientôt disponible
           </Button>
         </div>
       </div>
+      <CheckoutGuidanceDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 };

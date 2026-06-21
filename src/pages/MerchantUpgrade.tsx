@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, TrendingUp, Eye, Target, Award, Image, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
+import CheckoutGuidanceDialog from "@/components/merchant/CheckoutGuidanceDialog";
 
 const FEATURES = [
   { icon: MessageSquare, title: "Rejoignez vos clients d'une nouvelle façon", desc: "Créez des publications importantes, des mises à jour ou des nouvelles sur votre entreprise pour les clients nouveaux et existants." },
@@ -14,6 +16,8 @@ const FEATURES = [
 
 const MerchantUpgrade = () => {
   const navigate = useNavigate();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -61,12 +65,13 @@ const MerchantUpgrade = () => {
           <p className="text-center text-xs text-muted-foreground mb-3">
             Les paiements sont traités en toute sécurité via notre fournisseur (Stripe). QMAPS ne collecte jamais directement vos informations de carte.
           </p>
-          <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">
-            Bientôt disponible · Voir les plans
+          <Button onClick={() => setCheckoutOpen(true)} className="w-full rounded-full font-bold">
+            Voir les plans QMAPS
           </Button>
           <button onClick={() => navigate(-1)} className="w-full text-center text-sm text-muted-foreground py-2">Annuler</button>
         </div>
       </div>
+      <CheckoutGuidanceDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
       <BottomNav />
     </div>
   );
