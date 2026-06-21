@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, TrendingUp, Eye, Target, Award, Image, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
+import CheckoutGuidanceDialog from "@/components/merchant/CheckoutGuidanceDialog";
 
 const FEATURES = [
   { icon: MessageSquare, title: "Rejoignez vos clients d'une nouvelle façon", desc: "Créez des publications importantes, des mises à jour ou des nouvelles sur votre entreprise pour les clients nouveaux et existants." },
