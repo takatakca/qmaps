@@ -397,7 +397,12 @@ Deno.serve(async (req) => {
         : "visible";
 
     // Replace prior signals (best-effort)
-    await admin.from("review_moderation_signals").delete().eq("review_id", reviewId);
+    // Preserve admin-set signals; only auto-generated signals are replaced.
+    await admin
+      .from("review_moderation_signals")
+      .delete()
+      .eq("review_id", reviewId)
+      .not("signal_type", "in", "(admin_flagged,user_reported)");
     if (signals.length > 0) {
       const toInsert = signals.map((s) => ({
         review_id: reviewId,
