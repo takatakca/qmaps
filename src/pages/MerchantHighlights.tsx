@@ -38,6 +38,7 @@ const HIGHLIGHTS = [
 const MerchantHighlights = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const toggleHighlight = (id: string) => {
     setSelected(prev =>
