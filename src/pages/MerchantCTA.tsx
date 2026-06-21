@@ -38,6 +38,7 @@ const MerchantCTA = () => {
   const [destination, setDestination] = useState("website");
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-32">
