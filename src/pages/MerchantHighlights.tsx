@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, ShoppingBag, Award, Heart, Building, Clock, Users, Briefcase, Sparkles, Star, Globe, Truck, Leaf, Zap, Coffee, Wrench, Camera, Music, BookOpen, Gift, Palette, Umbrella, Flame, Gem, Crown, ThumbsUp, HandHeart, Baby, Dog } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CheckoutGuidanceDialog from "@/components/merchant/CheckoutGuidanceDialog";
 
 const HIGHLIGHTS = [
   { id: "shopping", label: "Shopping", icon: ShoppingBag },
@@ -38,7 +37,6 @@ const HIGHLIGHTS = [
 const MerchantHighlights = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const toggleHighlight = (id: string) => {
     setSelected(prev =>
@@ -67,7 +65,7 @@ const MerchantHighlights = () => {
         </p>
 
         {/* CTA buttons */}
-        <Button onClick={() => setCheckoutOpen(true)} className="w-full rounded-full mb-2">
+        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
           Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-6">
@@ -144,12 +142,11 @@ const MerchantHighlights = () => {
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">
             Économisez avec le Package
           </Button>
-          <Button onClick={() => setCheckoutOpen(true)} className="flex-1 rounded-full text-sm">
+          <Button onClick={() => navigate("/merchant/billing/plans")} className="flex-1 rounded-full text-sm">
             Bientôt disponible
           </Button>
         </div>
       </div>
-      <CheckoutGuidanceDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 };
