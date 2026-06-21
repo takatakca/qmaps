@@ -16,6 +16,8 @@ const FEATURES = [
 
 const MerchantUpgrade = () => {
   const navigate = useNavigate();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
