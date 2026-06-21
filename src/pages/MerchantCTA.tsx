@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import CheckoutGuidanceDialog from "@/components/merchant/CheckoutGuidanceDialog";
 
 const POPULAR_MESSAGES = [
   { id: "free_app", label: "Achetez 2 entrées, obtenez l'app GRATUITE", desc: "Offre spéciale" },
