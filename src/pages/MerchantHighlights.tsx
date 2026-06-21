@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, ShoppingBag, Award, Heart, Building, Clock, Users, Briefcase, Sparkles, Star, Globe, Truck, Leaf, Zap, Coffee, Wrench, Camera, Music, BookOpen, Gift, Palette, Umbrella, Flame, Gem, Crown, ThumbsUp, HandHeart, Baby, Dog } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CheckoutGuidanceDialog from "@/components/merchant/CheckoutGuidanceDialog";
 
 const HIGHLIGHTS = [
   { id: "shopping", label: "Shopping", icon: ShoppingBag },
