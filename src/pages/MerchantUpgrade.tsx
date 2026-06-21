@@ -65,12 +65,13 @@ const MerchantUpgrade = () => {
           <p className="text-center text-xs text-muted-foreground mb-3">
             Les paiements sont traités en toute sécurité via notre fournisseur (Stripe). QMAPS ne collecte jamais directement vos informations de carte.
           </p>
-          <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full font-bold">
-            Bientôt disponible · Voir les plans
+          <Button onClick={() => setCheckoutOpen(true)} className="w-full rounded-full font-bold">
+            Voir les plans QMAPS
           </Button>
           <button onClick={() => navigate(-1)} className="w-full text-center text-sm text-muted-foreground py-2">Annuler</button>
         </div>
       </div>
+      <CheckoutGuidanceDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
       <BottomNav />
     </div>
   );
