@@ -214,6 +214,7 @@ const MerchantCTA = () => {
           </Button>
         </div>
       </div>
+      <CheckoutGuidanceDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 };
