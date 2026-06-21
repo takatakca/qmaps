@@ -143,7 +143,17 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const reviewId = String(body?.review_id ?? "");
-    const force = Boolean(body?.force);
+    let force = Boolean(body?.force);
+
+    // Only admins may use force=true (which bypasses idempotency and would
+    // otherwise let any signed-in user wipe admin-set moderation signals).
+    if (force) {
+      const { data: isAdmin } = await userClient.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      if (!isAdmin) force = false;
+    }
     if (!reviewId) {
       return new Response(JSON.stringify({ error: "missing_review_id" }), {
         status: 400,
