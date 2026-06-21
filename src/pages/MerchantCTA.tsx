@@ -60,7 +60,7 @@ const MerchantCTA = () => {
           Facilitez la tâche aux clients pour en savoir plus sur vos spéciaux hebdomadaires, vos offres Happy Hour ou obtenir un rabais avec un Call to Action entièrement personnalisable.
         </p>
 
-        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
+        <Button onClick={() => setCheckoutOpen(true)} className="w-full rounded-full mb-2">
           Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-8">
@@ -207,7 +207,7 @@ const MerchantCTA = () => {
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">
             Économisez avec le Package
           </Button>
-          <Button onClick={() => navigate("/merchant/billing/plans")} className="flex-1 rounded-full text-sm">
+          <Button onClick={() => setCheckoutOpen(true)} className="flex-1 rounded-full text-sm">
             Bientôt disponible
           </Button>
         </div>

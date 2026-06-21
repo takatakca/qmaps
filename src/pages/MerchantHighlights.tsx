@@ -67,7 +67,7 @@ const MerchantHighlights = () => {
         </p>
 
         {/* CTA buttons */}
-        <Button onClick={() => navigate("/merchant/billing/plans")} className="w-full rounded-full mb-2">
+        <Button onClick={() => setCheckoutOpen(true)} className="w-full rounded-full mb-2">
           Bientôt disponible · Voir les plans
         </Button>
         <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="w-full rounded-full mb-6">
@@ -144,7 +144,7 @@ const MerchantHighlights = () => {
           <Button variant="outline" onClick={() => navigate("/merchant/upgrade")} className="flex-1 rounded-full text-sm">
             Économisez avec le Package
           </Button>
-          <Button onClick={() => navigate("/merchant/billing/plans")} className="flex-1 rounded-full text-sm">
+          <Button onClick={() => setCheckoutOpen(true)} className="flex-1 rounded-full text-sm">
             Bientôt disponible
           </Button>
         </div>
