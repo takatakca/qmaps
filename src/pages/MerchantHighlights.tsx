@@ -149,6 +149,7 @@ const MerchantHighlights = () => {
           </Button>
         </div>
       </div>
+      <CheckoutGuidanceDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 };
