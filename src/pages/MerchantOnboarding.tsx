@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, MapPin, Phone, Globe, ChevronRight, Check } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Phone, Globe, ChevronRight, Check, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+
 
 const steps = [
   { title: "Informations de base", icon: Building2 },
