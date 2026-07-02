@@ -154,6 +154,26 @@ const MerchantOnboarding = () => {
 
         {step === 0 && (
           <div className="space-y-4">
+            {/* QR handoff — continue signup on mobile */}
+            <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 flex items-center gap-4">
+              <div className="bg-white p-2 rounded-lg border border-border shrink-0">
+                <QRCodeSVG
+                  value={`${window.location.origin}/merchant/onboarding?source=qr`}
+                  size={72}
+                  level="M"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <QrCode size={14} className="text-primary" />
+                  <p className="text-xs font-semibold text-foreground">Continuer sur mobile</p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  Scannez pour reprendre l'inscription de votre entreprise depuis votre téléphone.
+                </p>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label>Nom de l'entreprise *</Label>
               <Input placeholder="Ex: Café Montréal" value={businessName} onChange={(e) => setBusinessName(e.target.value)} required />
