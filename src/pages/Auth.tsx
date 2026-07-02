@@ -208,6 +208,23 @@ const Auth = () => {
           {mode === "signup" && role === "merchant" && "Inscrivez votre entreprise sur QMAPS"}
         </p>
 
+        {/* Merchant role explanation */}
+        {role === "merchant" && !upgradeHint && (
+          <div className="mt-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Building2 size={18} className="text-primary" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">Espace professionnel QMAPS</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Créez votre profil, ajoutez votre entreprise et commencez à recevoir des clients partout au Québec.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Upgrade hint banner */}
         {upgradeHint && mode === "login" && (
           <div className="mt-3 flex items-start gap-2 bg-primary/10 border border-primary/20 rounded-xl p-3">
@@ -217,6 +234,7 @@ const Auth = () => {
             </p>
           </div>
         )}
+
 
         {/* Social login — Google (managed by Lovable Cloud) */}
         {mode !== "forgot" && (
