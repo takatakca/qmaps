@@ -1,4 +1,4 @@
-let loadPromise: Promise<typeof google> | null = null;
+let loadPromise: Promise<any> | null = null;
 
 declare global {
   interface Window {
@@ -16,7 +16,7 @@ export const isMapsConfigured = () => !!mapsBrowserKey;
  * Loads the Google Maps JS API once (async + callback pattern).
  * Resolves with the global `google` namespace, or rejects if not configured.
  */
-export function loadGoogleMaps(): Promise<typeof google> {
+export function loadGoogleMaps(): Promise<any> {
   if (loadPromise) return loadPromise;
 
   loadPromise = new Promise((resolve, reject) => {
