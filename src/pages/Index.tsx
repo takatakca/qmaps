@@ -71,22 +71,11 @@ const PROS_RECOMMENDED = [
 ];
 
 const Index = () => {
-  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { businesses: nearbyBusinesses } = useNearbyBusinesses(4);
+  const { t } = useLang();
+  const listings = useHomeListings(10);
+  const { businesses: nearbyBusinesses } = useNearbyBusinesses(6);
   const { recommended, trending, loading: recLoading } = useRecommendedBusinesses({ limit: 5 });
 
-  useEffect(() => {
-    const fetchBusinesses = async () => {
-      const { data } = await supabase
-        .from("businesses")
-        .select("*")
-        .order("avg_rating", { ascending: false });
-      setBusinesses(data || []);
-      setLoading(false);
-    };
-    fetchBusinesses();
-  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
