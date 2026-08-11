@@ -140,16 +140,13 @@ const Index = () => {
         <div className="px-4 mt-5">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <h2 className="font-heading text-base font-bold text-foreground">
-                Explorer par service
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Les catégories les plus recherchées au Québec.
-              </p>
+              <h2 className="font-heading text-base font-bold text-foreground">{t("exploreServices")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("exploreServicesSub")}</p>
             </div>
             <a href="/services" className="text-xs font-semibold text-primary hover:underline whitespace-nowrap">
-              Voir tous les services
+              {t("seeAllServices")}
             </a>
+
           </div>
           <CategoryRow />
         </div>
