@@ -13,6 +13,9 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { useAllCategories } from "@/hooks/useAllCategories";
 import BusinessMediaUploader from "@/components/media/BusinessMediaUploader";
+import PhoneOtpVerification from "@/components/auth/PhoneOtpVerification";
+import AddressAutocomplete, { type ResolvedAddress } from "@/components/business/AddressAutocomplete";
+
 
 /**
  * Phase 18 — Guided 7-step merchant onboarding.
@@ -52,6 +55,14 @@ const MerchantOnboarding = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [hoursText, setHoursText] = useState("");
+  const [country, setCountry] = useState("CA");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  // Phone verification (Twilio Verify)
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState("");
+
 
   // Categories
   const [selectedCatIds, setSelectedCatIds] = useState<Set<string>>(new Set());
@@ -82,7 +93,22 @@ const MerchantOnboarding = () => {
         navigate("/merchant", { replace: true });
         return;
       }
+
+      // Existing phone verification status (server-controlled column).
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("phone, phone_verified_at")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (prof?.phone) {
+        setVerifiedPhone(prof.phone);
+        if (!phone) setPhone(prof.phone);
+      }
+      if (prof?.phone_verified_at) setPhoneVerified(true);
+
       setCheckingExisting(false);
+
     })();
     return () => { cancelled = true; };
   }, [user, authLoading]);
@@ -166,8 +192,12 @@ const MerchantOnboarding = () => {
         phone: phone || null,
         website: website || null,
         hours: hoursText || null,
+        country: country || "CA",
+        latitude,
+        longitude,
         owner_user_id: user.id,
         is_claimed: true,
+
       })
       .select()
       .single();
@@ -270,9 +300,20 @@ const MerchantOnboarding = () => {
               </div>
               <div className="text-xs text-muted-foreground flex items-start gap-2 pt-2 border-t border-border">
                 <Mail size={13} className="mt-0.5 shrink-0" />
-                <span>Votre courriel est vérifié via le lien de confirmation Supabase. La vérification par SMS/appel sera disponible dès que Twilio Verify sera connecté.</span>
+                <span>Votre courriel est vérifié via le lien de confirmation envoyé à votre adresse.</span>
               </div>
             </div>
+
+            <PhoneOtpVerification
+              initialPhone={verifiedPhone || phone}
+              verified={phoneVerified}
+              onVerified={(p) => {
+                setPhoneVerified(true);
+                setVerifiedPhone(p);
+                setPhone(p);
+              }}
+            />
+
 
             {/* QR handoff */}
             <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 flex items-center gap-4">
@@ -320,13 +361,21 @@ const MerchantOnboarding = () => {
         {/* Step 3 — Address */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Adresse *</Label>
-              <div className="relative">
-                <MapPin size={16} className="absolute left-3 top-3 text-muted-foreground" />
-                <Input placeholder="123 Rue Principale" value={address} onChange={e => setAddress(e.target.value)} className="pl-10" required />
-              </div>
-            </div>
+            <AddressAutocomplete
+              value={address}
+              onChange={(v) => { setAddress(v); setLatitude(null); setLongitude(null); }}
+              latitude={latitude}
+              longitude={longitude}
+              onResolved={(a: ResolvedAddress) => {
+                setAddress(a.address || address);
+                if (a.city) setCity(a.city);
+                if (a.region) setRegion(a.region);
+                if (a.postalCode) setPostalCode(a.postalCode);
+                if (a.country) setCountry(a.country);
+                setLatitude(a.latitude);
+                setLongitude(a.longitude);
+              }}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Ville *</Label>
@@ -342,16 +391,6 @@ const MerchantOnboarding = () => {
               <Input placeholder="H2X 1Y4" value={postalCode} onChange={e => setPostalCode(e.target.value)} />
             </div>
 
-            {/* Map placeholder — Google Maps/Places pending connector */}
-            <div className="rounded-2xl border border-dashed border-border bg-gradient-to-br from-muted/40 to-transparent p-6 text-center space-y-2">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                <MapPin size={20} className="text-primary" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Carte interactive bientôt disponible</p>
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
-                Autocomplétion d'adresse et aperçu carte s'activent dès que Google Maps sera connecté.
-              </p>
-            </div>
           </div>
         )}
 
