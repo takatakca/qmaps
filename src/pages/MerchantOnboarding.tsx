@@ -300,9 +300,20 @@ const MerchantOnboarding = () => {
               </div>
               <div className="text-xs text-muted-foreground flex items-start gap-2 pt-2 border-t border-border">
                 <Mail size={13} className="mt-0.5 shrink-0" />
-                <span>Votre courriel est vérifié via le lien de confirmation Supabase. La vérification par SMS/appel sera disponible dès que Twilio Verify sera connecté.</span>
+                <span>Votre courriel est vérifié via le lien de confirmation envoyé à votre adresse.</span>
               </div>
             </div>
+
+            <PhoneOtpVerification
+              initialPhone={verifiedPhone || phone}
+              verified={phoneVerified}
+              onVerified={(p) => {
+                setPhoneVerified(true);
+                setVerifiedPhone(p);
+                setPhone(p);
+              }}
+            />
+
 
             {/* QR handoff */}
             <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 flex items-center gap-4">
