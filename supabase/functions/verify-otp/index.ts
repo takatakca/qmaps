@@ -49,9 +49,8 @@ Deno.serve(async (req) => {
       return json({ error: "Numéro et code requis." }, 400);
     }
     const phone = toE164(body.phone);
-    if (!phone) return json({ error: "Numéro de téléphone invalide." }, 400);
-
     const code = body.code.replace(/\D/g, "");
+    if (!phone) return json({ error: "Numéro de téléphone invalide." }, 400);
     if (code.length < 4 || code.length > 10) return json({ error: "Code invalide." }, 400);
 
     const admin = createClient(
@@ -60,18 +59,18 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    // Brute-force guard: max 6 failed checks per 15 min per user+phone.
+    // Brute-force guard: max 6 failed checks per 15 minutes.
     const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
     const { count: failedCount } = await admin
       .from("phone_verification_attempts")
       .select("id", { count: "exact", head: true })
-      .eq("action", "check")
+      .eq("action", "verify")
       .eq("success", false)
-      .eq("user_id", userId)
+      .or(`user_id.eq.${userId},phone.eq.${phone}`)
       .gte("created_at", since);
 
     if ((failedCount ?? 0) >= 6) {
-      return json({ error: "Trop de tentatives. Demandez un nouveau code dans 15 minutes." }, 429);
+      return json({ error: "Trop de tentatives. Réessayez dans 15 minutes." }, 429);
     }
 
     const twilioRes = await fetch(
@@ -85,24 +84,21 @@ Deno.serve(async (req) => {
         body: new URLSearchParams({ To: phone, Code: code }),
       },
     );
-    const twilioData = await twilioRes.json().catch(() => ({}));
-    const approved = twilioRes.ok && twilioData?.status === "approved";
+
+    const payload = await twilioRes.json().catch(() => ({}));
+    const approved = twilioRes.ok && payload?.status === "approved";
 
     await admin.from("phone_verification_attempts").insert({
       user_id: userId,
       phone,
-      action: "check",
+      action: "verify",
+      channel: "sms",
       success: approved,
     });
 
     if (!approved) {
-      if (twilioData?.code === 20404) {
-        return json({ error: "Code expiré. Demandez un nouveau code." }, 400);
-      }
-      if (twilioRes.status === 429 || twilioData?.code === 60202) {
-        return json({ error: "Trop de tentatives. Demandez un nouveau code." }, 429);
-      }
-      return json({ error: "Code invalide." }, 400);
+      if (!twilioRes.ok) console.error("Twilio VerificationCheck failed", twilioRes.status, payload);
+      return json({ error: "Code invalide ou expiré." }, 400);
     }
 
     const { error: updateError } = await admin
@@ -111,13 +107,13 @@ Deno.serve(async (req) => {
       .eq("id", userId);
 
     if (updateError) {
-      console.error("profile update failed", updateError.message);
-      return json({ error: "Vérification réussie mais l'enregistrement a échoué." }, 500);
+      console.error("profile phone update failed", updateError);
+      return json({ error: "Impossible d'enregistrer le numéro." }, 500);
     }
 
     return json({ ok: true, verified: true, phone });
-  } catch (e) {
-    console.error("verify-otp error", e instanceof Error ? e.message : e);
-    return json({ error: "Une erreur est survenue." }, 500);
+  } catch (err) {
+    console.error("verify-otp error", err);
+    return json({ error: "Erreur inattendue." }, 500);
   }
 });
