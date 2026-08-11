@@ -361,13 +361,21 @@ const MerchantOnboarding = () => {
         {/* Step 3 — Address */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Adresse *</Label>
-              <div className="relative">
-                <MapPin size={16} className="absolute left-3 top-3 text-muted-foreground" />
-                <Input placeholder="123 Rue Principale" value={address} onChange={e => setAddress(e.target.value)} className="pl-10" required />
-              </div>
-            </div>
+            <AddressAutocomplete
+              value={address}
+              onChange={(v) => { setAddress(v); setLatitude(null); setLongitude(null); }}
+              latitude={latitude}
+              longitude={longitude}
+              onResolved={(a: ResolvedAddress) => {
+                setAddress(a.address || address);
+                if (a.city) setCity(a.city);
+                if (a.region) setRegion(a.region);
+                if (a.postalCode) setPostalCode(a.postalCode);
+                if (a.country) setCountry(a.country);
+                setLatitude(a.latitude);
+                setLongitude(a.longitude);
+              }}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Ville *</Label>
@@ -383,16 +391,6 @@ const MerchantOnboarding = () => {
               <Input placeholder="H2X 1Y4" value={postalCode} onChange={e => setPostalCode(e.target.value)} />
             </div>
 
-            {/* Map placeholder — Google Maps/Places pending connector */}
-            <div className="rounded-2xl border border-dashed border-border bg-gradient-to-br from-muted/40 to-transparent p-6 text-center space-y-2">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                <MapPin size={20} className="text-primary" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Carte interactive bientôt disponible</p>
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
-                Autocomplétion d'adresse et aperçu carte s'activent dès que Google Maps sera connecté.
-              </p>
-            </div>
           </div>
         )}
 
