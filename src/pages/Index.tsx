@@ -166,14 +166,6 @@ const Index = () => {
           <CategoryRow />
         </div>
 
-        <div className="px-4">
-          <HorizontalShortcutRow
-            title="Meilleurs restaurants près de vous"
-            subtitle="Restaurants, cafés et bistros à découvrir au Québec."
-            items={RESTAURANT_SHORTCUTS}
-            seeAllHref="/search?q=restaurants"
-          />
-        </div>
 
         {/* Real listings — every card below is backed by public.businesses */}
         <div className="px-4">
