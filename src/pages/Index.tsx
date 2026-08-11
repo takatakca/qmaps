@@ -86,30 +86,31 @@ const Index = () => {
       />
       {/* Header */}
       <header className="relative px-4 pt-6 pb-6 bg-brand-gradient-soft border-b border-border">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5 gap-2">
           <h1 className="font-heading text-[26px] font-bold tracking-tight">
             <span className="text-foreground">Q</span>
             <span className="text-brand-gradient">Maps</span>
           </h1>
-          <a
-            href="/city/montreal"
-            className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-card border border-border px-3 py-1.5 rounded-full shadow-soft hover:shadow-glow transition-shadow"
-          >
-            <MapPin size={12} /> Montréal
-          </a>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <QuickAuthMenu />
+          </div>
         </div>
-        <div className="mb-5">
+        <a
+          href="/city/montreal"
+          className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-card border border-border px-3 py-1.5 rounded-full shadow-soft hover:shadow-glow transition-shadow"
+        >
+          <MapPin size={12} /> Montréal
+        </a>
+        <div className="mt-4 mb-5">
           <h2 className="font-heading text-[24px] leading-[1.15] font-bold text-foreground">
-            Découvrez le meilleur du <span className="text-brand-gradient">Québec</span>.
+            {t("heroTitle")} <span className="text-brand-gradient">Québec</span>.
           </h2>
-          <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">
-            Commerces locaux, avis honnêtes et pros de confiance — près de chez vous.
-          </p>
+          <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">{t("heroSub")}</p>
         </div>
         <SearchBar smart />
-        <p className="text-xs text-muted-foreground mt-3 text-center leading-snug">
-          Trouvez les meilleurs commerces, services et professionnels du Québec.
-        </p>
+        <p className="text-xs text-muted-foreground mt-3 text-center leading-snug">{t("searchNote")}</p>
+
 
         {/* Quick search chips */}
         <div className="mt-4 flex flex-wrap gap-2">
