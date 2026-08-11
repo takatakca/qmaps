@@ -93,7 +93,22 @@ const MerchantOnboarding = () => {
         navigate("/merchant", { replace: true });
         return;
       }
+
+      // Existing phone verification status (server-controlled column).
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("phone, phone_verified_at")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (prof?.phone) {
+        setVerifiedPhone(prof.phone);
+        if (!phone) setPhone(prof.phone);
+      }
+      if (prof?.phone_verified_at) setPhoneVerified(true);
+
       setCheckingExisting(false);
+
     })();
     return () => { cancelled = true; };
   }, [user, authLoading]);
