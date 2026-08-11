@@ -13,6 +13,9 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { useAllCategories } from "@/hooks/useAllCategories";
 import BusinessMediaUploader from "@/components/media/BusinessMediaUploader";
+import PhoneOtpVerification from "@/components/auth/PhoneOtpVerification";
+import AddressAutocomplete, { type ResolvedAddress } from "@/components/business/AddressAutocomplete";
+
 
 /**
  * Phase 18 — Guided 7-step merchant onboarding.
