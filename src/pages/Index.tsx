@@ -175,46 +175,78 @@ const Index = () => {
           />
         </div>
 
+        {/* Real listings — every card below is backed by public.businesses */}
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="Services populaires au Québec"
-            subtitle="Les pros les plus demandés cette semaine."
-            items={POPULAR_SERVICES}
+          <BusinessListingRow
+            title={t("restaurants")}
+            subtitle={t("restaurantsSub")}
+            businesses={listings.restaurants}
+            loading={listings.loading}
+            seeAllHref="/search?q=restaurants"
+            fallbackShortcuts={RESTAURANT_SHORTCUTS}
+            emptyMessage="Aucun restaurant actif pour l'instant — explorez ces catégories."
+          />
+        </div>
+
+        <div className="px-4">
+          <BusinessListingRow
+            title={t("popular")}
+            subtitle={t("popularSub")}
+            businesses={listings.popular}
+            loading={listings.loading}
+            seeAllHref="/search"
+            fallbackShortcuts={POPULAR_SERVICES}
+            emptyMessage="Aucune entreprise active pour l'instant."
+          />
+        </div>
+
+        <div className="px-4">
+          <BusinessListingRow
+            title={t("services")}
+            subtitle={t("servicesSub")}
+            businesses={listings.services}
+            loading={listings.loading}
             seeAllHref="/services"
+            fallbackShortcuts={POPULAR_SERVICES}
+            emptyMessage="Aucun pro inscrit dans ces services pour l'instant."
           />
         </div>
 
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="À proximité"
-            subtitle={
-              nearbyBusinesses.length
-                ? "Repérés autour de vous"
-                : "Explorez les villes du Québec"
-            }
-            items={NEARBY_HINTS}
+          <BusinessListingRow
+            title={t("recent")}
+            subtitle={t("recentSub")}
+            businesses={listings.recent}
+            loading={listings.loading}
+            fallbackShortcuts={PROS_RECOMMENDED}
+            emptyMessage="Aucune nouvelle entreprise inscrite pour l'instant."
           />
         </div>
 
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="Épicerie, restaurants et essentiels"
-            subtitle="Tout ce qu'il vous faut au quotidien."
-            items={ESSENTIALS}
+          <BusinessListingRow
+            title={t("nearby")}
+            subtitle={nearbyBusinesses.length ? t("nearbySubGeo") : t("nearbySubNoGeo")}
+            businesses={nearbyBusinesses as unknown as HomeListing[]}
+            fallbackShortcuts={NEARBY_HINTS}
+            fallbackTitle="Explorer par ville"
+            emptyMessage="Position non partagée ou aucune entreprise à proximité — explorez par ville."
+          />
+        </div>
+
+        <div className="px-4">
+          <BusinessListingRow
+            title={t("essentials")}
+            subtitle={t("essentialsSub")}
+            businesses={listings.essentials}
+            loading={listings.loading}
+            fallbackShortcuts={ESSENTIALS}
+            emptyMessage="Aucun commerce essentiel inscrit pour l'instant — explorez ces catégories."
           />
         </div>
 
         <div className="px-4">
           <StartProjectCTA />
-        </div>
-
-        <div className="px-4">
-          <HorizontalShortcutRow
-            title="Professionnels recommandés"
-            subtitle="Des pros de confiance pour vos projets."
-            items={PROS_RECOMMENDED}
-            seeAllHref="/services"
-          />
         </div>
 
         {/* Professional CTA */}
@@ -224,7 +256,7 @@ const Index = () => {
               Vous êtes un professionnel ?
             </h3>
             <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-              Rejoignez les milliers d'entreprises québécoises visibles sur QMAPS.
+              Créez votre fiche QMAPS, recevez des demandes de projets et gérez vos avis — gratuitement.
             </p>
             <a
               href="/merchant/onboarding"
@@ -237,9 +269,8 @@ const Index = () => {
 
         <SponsoredListings placement="home" />
 
-        {/* Feed */}
+        {/* Personalized real-data feed */}
         <div className="px-4 space-y-5">
-          <NearbySection title="À proximité" businesses={nearbyBusinesses} />
           <RecommendedSection
             title="Recommandé pour vous"
             subtitle="Basé sur ce que vous consultez et enregistrez"
@@ -255,22 +286,8 @@ const Index = () => {
             showReasonChips={false}
             items={trending.slice(0, 4).map((b) => ({ business: b }))}
           />
-          <FeaturedBusinesses businesses={businesses.slice(0, 3)} />
-          <TrendingCollections />
-
-          <div className="pt-1">
-            <h2 className="font-heading text-lg font-bold text-foreground">Mieux notés</h2>
-            <p className="text-xs text-muted-foreground">Les commerces qui performent le mieux actuellement</p>
-          </div>
-          {loading ? (
-            <p className="text-center text-muted-foreground py-8">Chargement...</p>
-          ) : (
-            businesses.map((b) => (
-              <BusinessCard
-                key={b.id}
-                business={mapBusinessToCard({ ...b, category_name: "Local" })}
-              />
-            ))
+          {listings.error && (
+            <p className="text-center text-xs text-destructive">{listings.error}</p>
           )}
         </div>
       </main>
@@ -281,3 +298,4 @@ const Index = () => {
 };
 
 export default Index;
+
