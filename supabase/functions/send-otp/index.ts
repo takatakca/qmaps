@@ -29,10 +29,18 @@ function toE164(raw: string): string | null {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  const smsConfigured = !!(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_VERIFY_SERVICE_SID);
+
+  // Capability probe for the UI — no secrets, no side effects.
+  if (req.method === "GET") {
+    return json({ smsEnabled: smsConfigured, voiceEnabled: smsConfigured && VOICE_ENABLED });
+  }
+
   try {
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_VERIFY_SERVICE_SID) {
+    if (!smsConfigured) {
       return json({ error: "La vérification par téléphone n'est pas configurée." }, 503);
     }
+
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
