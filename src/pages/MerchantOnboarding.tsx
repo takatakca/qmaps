@@ -192,8 +192,12 @@ const MerchantOnboarding = () => {
         phone: phone || null,
         website: website || null,
         hours: hoursText || null,
+        country: country || "CA",
+        latitude,
+        longitude,
         owner_user_id: user.id,
         is_claimed: true,
+
       })
       .select()
       .single();
