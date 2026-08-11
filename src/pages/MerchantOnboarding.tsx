@@ -55,6 +55,14 @@ const MerchantOnboarding = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [hoursText, setHoursText] = useState("");
+  const [country, setCountry] = useState("CA");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  // Phone verification (Twilio Verify)
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState("");
+
 
   // Categories
   const [selectedCatIds, setSelectedCatIds] = useState<Set<string>>(new Set());
