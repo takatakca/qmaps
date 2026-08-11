@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import SearchBar from "@/components/SearchBar";
 import CategoryRow from "@/components/CategoryRow";
-import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
-import NearbySection from "@/components/home/NearbySection";
-import FeaturedBusinesses from "@/components/home/FeaturedBusinesses";
-import TrendingCollections from "@/components/home/TrendingCollections";
 import HorizontalShortcutRow from "@/components/home/HorizontalShortcutRow";
+import BusinessListingRow from "@/components/home/BusinessListingRow";
+import LanguageSwitcher from "@/components/home/LanguageSwitcher";
+import QuickAuthMenu from "@/components/home/QuickAuthMenu";
 import StartProjectCTA from "@/components/home/StartProjectCTA";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
-import { mapBusinessToCard } from "@/lib/business";
+import { useHomeListings, type HomeListing } from "@/hooks/useHomeListings";
+import { useLang } from "@/i18n/language";
 import Seo from "@/components/Seo";
-import type { Tables } from "@/integrations/supabase/types";
+
 import {
   UtensilsCrossed, Coffee, ShoppingBasket, Pill, Bike, Store,
   Sparkles as SparkIcon, Zap, Wrench, HardHat, Calculator, Scale,
