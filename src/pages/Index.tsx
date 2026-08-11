@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import SearchBar from "@/components/SearchBar";
 import CategoryRow from "@/components/CategoryRow";
-import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
-import NearbySection from "@/components/home/NearbySection";
-import FeaturedBusinesses from "@/components/home/FeaturedBusinesses";
-import TrendingCollections from "@/components/home/TrendingCollections";
 import HorizontalShortcutRow from "@/components/home/HorizontalShortcutRow";
+import BusinessListingRow from "@/components/home/BusinessListingRow";
+import LanguageSwitcher from "@/components/home/LanguageSwitcher";
+import QuickAuthMenu from "@/components/home/QuickAuthMenu";
 import StartProjectCTA from "@/components/home/StartProjectCTA";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
-import { mapBusinessToCard } from "@/lib/business";
+import { useHomeListings, type HomeListing } from "@/hooks/useHomeListings";
+import { useLang } from "@/i18n/language";
 import Seo from "@/components/Seo";
-import type { Tables } from "@/integrations/supabase/types";
+
 import {
   UtensilsCrossed, Coffee, ShoppingBasket, Pill, Bike, Store,
   Sparkles as SparkIcon, Zap, Wrench, HardHat, Calculator, Scale,
@@ -73,22 +71,11 @@ const PROS_RECOMMENDED = [
 ];
 
 const Index = () => {
-  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { businesses: nearbyBusinesses } = useNearbyBusinesses(4);
+  const { t } = useLang();
+  const listings = useHomeListings(10);
+  const { businesses: nearbyBusinesses } = useNearbyBusinesses(6);
   const { recommended, trending, loading: recLoading } = useRecommendedBusinesses({ limit: 5 });
 
-  useEffect(() => {
-    const fetchBusinesses = async () => {
-      const { data } = await supabase
-        .from("businesses")
-        .select("*")
-        .order("avg_rating", { ascending: false });
-      setBusinesses(data || []);
-      setLoading(false);
-    };
-    fetchBusinesses();
-  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
@@ -99,30 +86,31 @@ const Index = () => {
       />
       {/* Header */}
       <header className="relative px-4 pt-6 pb-6 bg-brand-gradient-soft border-b border-border">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5 gap-2">
           <h1 className="font-heading text-[26px] font-bold tracking-tight">
             <span className="text-foreground">Q</span>
             <span className="text-brand-gradient">Maps</span>
           </h1>
-          <a
-            href="/city/montreal"
-            className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-card border border-border px-3 py-1.5 rounded-full shadow-soft hover:shadow-glow transition-shadow"
-          >
-            <MapPin size={12} /> Montréal
-          </a>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <QuickAuthMenu />
+          </div>
         </div>
-        <div className="mb-5">
+        <a
+          href="/city/montreal"
+          className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-card border border-border px-3 py-1.5 rounded-full shadow-soft hover:shadow-glow transition-shadow"
+        >
+          <MapPin size={12} /> Montréal
+        </a>
+        <div className="mt-4 mb-5">
           <h2 className="font-heading text-[24px] leading-[1.15] font-bold text-foreground">
-            Découvrez le meilleur du <span className="text-brand-gradient">Québec</span>.
+            {t("heroTitle")} <span className="text-brand-gradient">Québec</span>.
           </h2>
-          <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">
-            Commerces locaux, avis honnêtes et pros de confiance — près de chez vous.
-          </p>
+          <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">{t("heroSub")}</p>
         </div>
         <SearchBar smart />
-        <p className="text-xs text-muted-foreground mt-3 text-center leading-snug">
-          Trouvez les meilleurs commerces, services et professionnels du Québec.
-        </p>
+        <p className="text-xs text-muted-foreground mt-3 text-center leading-snug">{t("searchNote")}</p>
+
 
         {/* Quick search chips */}
         <div className="mt-4 flex flex-wrap gap-2">
@@ -152,69 +140,90 @@ const Index = () => {
         <div className="px-4 mt-5">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <h2 className="font-heading text-base font-bold text-foreground">
-                Explorer par service
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Les catégories les plus recherchées au Québec.
-              </p>
+              <h2 className="font-heading text-base font-bold text-foreground">{t("exploreServices")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("exploreServicesSub")}</p>
             </div>
             <a href="/services" className="text-xs font-semibold text-primary hover:underline whitespace-nowrap">
-              Voir tous les services
+              {t("seeAllServices")}
             </a>
+
           </div>
           <CategoryRow />
         </div>
 
+
+        {/* Real listings — every card below is backed by public.businesses */}
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="Meilleurs restaurants près de vous"
-            subtitle="Restaurants, cafés et bistros à découvrir au Québec."
-            items={RESTAURANT_SHORTCUTS}
+          <BusinessListingRow
+            title={t("restaurants")}
+            subtitle={t("restaurantsSub")}
+            businesses={listings.restaurants}
+            loading={listings.loading}
             seeAllHref="/search?q=restaurants"
+            fallbackShortcuts={RESTAURANT_SHORTCUTS}
+            emptyMessage="Aucun restaurant actif pour l'instant — explorez ces catégories."
           />
         </div>
 
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="Services populaires au Québec"
-            subtitle="Les pros les plus demandés cette semaine."
-            items={POPULAR_SERVICES}
+          <BusinessListingRow
+            title={t("popular")}
+            subtitle={t("popularSub")}
+            businesses={listings.popular}
+            loading={listings.loading}
+            seeAllHref="/search"
+            fallbackShortcuts={POPULAR_SERVICES}
+            emptyMessage="Aucune entreprise active pour l'instant."
+          />
+        </div>
+
+        <div className="px-4">
+          <BusinessListingRow
+            title={t("services")}
+            subtitle={t("servicesSub")}
+            businesses={listings.services}
+            loading={listings.loading}
             seeAllHref="/services"
+            fallbackShortcuts={POPULAR_SERVICES}
+            emptyMessage="Aucun pro inscrit dans ces services pour l'instant."
           />
         </div>
 
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="À proximité"
-            subtitle={
-              nearbyBusinesses.length
-                ? "Repérés autour de vous"
-                : "Explorez les villes du Québec"
-            }
-            items={NEARBY_HINTS}
+          <BusinessListingRow
+            title={t("recent")}
+            subtitle={t("recentSub")}
+            businesses={listings.recent}
+            loading={listings.loading}
+            fallbackShortcuts={PROS_RECOMMENDED}
+            emptyMessage="Aucune nouvelle entreprise inscrite pour l'instant."
           />
         </div>
 
         <div className="px-4">
-          <HorizontalShortcutRow
-            title="Épicerie, restaurants et essentiels"
-            subtitle="Tout ce qu'il vous faut au quotidien."
-            items={ESSENTIALS}
+          <BusinessListingRow
+            title={t("nearby")}
+            subtitle={nearbyBusinesses.length ? t("nearbySubGeo") : t("nearbySubNoGeo")}
+            businesses={nearbyBusinesses as unknown as HomeListing[]}
+            fallbackShortcuts={NEARBY_HINTS}
+            fallbackTitle="Explorer par ville"
+            emptyMessage="Position non partagée ou aucune entreprise à proximité — explorez par ville."
+          />
+        </div>
+
+        <div className="px-4">
+          <BusinessListingRow
+            title={t("essentials")}
+            subtitle={t("essentialsSub")}
+            businesses={listings.essentials}
+            loading={listings.loading}
+            fallbackShortcuts={ESSENTIALS}
+            emptyMessage="Aucun commerce essentiel inscrit pour l'instant — explorez ces catégories."
           />
         </div>
 
         <div className="px-4">
           <StartProjectCTA />
-        </div>
-
-        <div className="px-4">
-          <HorizontalShortcutRow
-            title="Professionnels recommandés"
-            subtitle="Des pros de confiance pour vos projets."
-            items={PROS_RECOMMENDED}
-            seeAllHref="/services"
-          />
         </div>
 
         {/* Professional CTA */}
@@ -224,7 +233,7 @@ const Index = () => {
               Vous êtes un professionnel ?
             </h3>
             <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-              Rejoignez les milliers d'entreprises québécoises visibles sur QMAPS.
+              Créez votre fiche QMAPS, recevez des demandes de projets et gérez vos avis — gratuitement.
             </p>
             <a
               href="/merchant/onboarding"
@@ -237,9 +246,8 @@ const Index = () => {
 
         <SponsoredListings placement="home" />
 
-        {/* Feed */}
+        {/* Personalized real-data feed */}
         <div className="px-4 space-y-5">
-          <NearbySection title="À proximité" businesses={nearbyBusinesses} />
           <RecommendedSection
             title="Recommandé pour vous"
             subtitle="Basé sur ce que vous consultez et enregistrez"
@@ -255,22 +263,8 @@ const Index = () => {
             showReasonChips={false}
             items={trending.slice(0, 4).map((b) => ({ business: b }))}
           />
-          <FeaturedBusinesses businesses={businesses.slice(0, 3)} />
-          <TrendingCollections />
-
-          <div className="pt-1">
-            <h2 className="font-heading text-lg font-bold text-foreground">Mieux notés</h2>
-            <p className="text-xs text-muted-foreground">Les commerces qui performent le mieux actuellement</p>
-          </div>
-          {loading ? (
-            <p className="text-center text-muted-foreground py-8">Chargement...</p>
-          ) : (
-            businesses.map((b) => (
-              <BusinessCard
-                key={b.id}
-                business={mapBusinessToCard({ ...b, category_name: "Local" })}
-              />
-            ))
+          {listings.error && (
+            <p className="text-center text-xs text-destructive">{listings.error}</p>
           )}
         </div>
       </main>
@@ -281,3 +275,4 @@ const Index = () => {
 };
 
 export default Index;
+
