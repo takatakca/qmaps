@@ -1,17 +1,16 @@
-import SearchBar from "@/components/SearchBar";
-import CategoryRow from "@/components/CategoryRow";
 import BottomNav from "@/components/BottomNav";
-import HorizontalShortcutRow from "@/components/home/HorizontalShortcutRow";
+import HeroSection from "@/components/home/HeroSection";
+import CategoryShowcase from "@/components/home/CategoryShowcase";
 import BusinessListingRow from "@/components/home/BusinessListingRow";
-import LanguageSwitcher from "@/components/home/LanguageSwitcher";
-import QuickAuthMenu from "@/components/home/QuickAuthMenu";
 import StartProjectCTA from "@/components/home/StartProjectCTA";
+import MerchantBanner from "@/components/home/MerchantBanner";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { useHomeListings, type HomeListing } from "@/hooks/useHomeListings";
 import { useLang } from "@/i18n/language";
+import { categoryImages } from "@/lib/categoryImages";
 import Seo from "@/components/Seo";
 
 import {
@@ -76,178 +75,97 @@ const Index = () => {
   const { businesses: nearbyBusinesses } = useNearbyBusinesses(6);
   const { recommended, trending, loading: recLoading } = useRecommendedBusinesses({ limit: 5 });
 
-
   return (
-    <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+    <div className="min-h-screen bg-background pb-24">
       <Seo
         title="QMaps Québec — Commerces, services et pros locaux"
         description="Découvrez les meilleurs commerces, restaurants et professionnels du Québec avec QMaps."
         canonicalPath="/"
       />
-      {/* Header */}
-      <header className="relative px-4 pt-6 pb-6 bg-brand-gradient-soft border-b border-border">
-        <div className="flex items-center justify-between mb-5 gap-2">
-          <h1 className="font-heading text-[26px] font-bold tracking-tight">
-            <span className="text-foreground">Q</span>
-            <span className="text-brand-gradient">Maps</span>
-          </h1>
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-            <QuickAuthMenu />
-          </div>
-        </div>
-        <a
-          href="/city/montreal"
-          className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-card border border-border px-3 py-1.5 rounded-full shadow-soft hover:shadow-glow transition-shadow"
-        >
-          <MapPin size={12} /> Montréal
-        </a>
-        <div className="mt-4 mb-5">
-          <h2 className="font-heading text-[24px] leading-[1.15] font-bold text-foreground">
-            {t("heroTitle")} <span className="text-brand-gradient">Québec</span>.
-          </h2>
-          <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">{t("heroSub")}</p>
-        </div>
-        <SearchBar smart />
-        <p className="text-xs text-muted-foreground mt-3 text-center leading-snug">{t("searchNote")}</p>
 
+      <HeroSection />
 
-        {/* Quick search chips */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {[
-            { label: "Restaurants", q: "restaurants" },
-            { label: "Nettoyage", q: "nettoyage" },
-            { label: "Électriciens", q: "électriciens" },
-            { label: "Comptables", q: "comptables" },
-            { label: "Avocats", q: "avocats" },
-            { label: "Construction", q: "construction" },
-            { label: "Beauté", q: "beauté" },
-            { label: "Santé", q: "santé" },
-          ].map((chip) => (
-            <a
-              key={chip.q}
-              href={`/search?q=${encodeURIComponent(chip.q)}`}
-              className="inline-flex items-center px-3 py-1.5 rounded-full bg-card border border-border text-xs font-medium text-foreground shadow-soft hover:shadow-glow hover:border-primary/30 hover:text-primary transition-all"
-            >
-              {chip.label}
-            </a>
-          ))}
-        </div>
-      </header>
-
-      {/* Categories */}
-      <main className="space-y-6">
-        <div className="px-4 mt-5">
-          <div className="mb-3 flex items-end justify-between">
-            <div>
-              <h2 className="font-heading text-base font-bold text-foreground">{t("exploreServices")}</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("exploreServicesSub")}</p>
-            </div>
-            <a href="/services" className="text-xs font-semibold text-primary hover:underline whitespace-nowrap">
-              {t("seeAllServices")}
-            </a>
-
-          </div>
-          <CategoryRow />
-        </div>
-
+      <main className="mx-auto w-full max-w-6xl space-y-12 px-5 pt-10 sm:px-8 md:space-y-16 md:pt-14">
+        <CategoryShowcase />
 
         {/* Real listings — every card below is backed by public.businesses */}
-        <div className="px-4">
-          <BusinessListingRow
-            title={t("restaurants")}
-            subtitle={t("restaurantsSub")}
-            businesses={listings.restaurants}
-            loading={listings.loading}
-            seeAllHref="/search?q=restaurants"
-            fallbackShortcuts={RESTAURANT_SHORTCUTS}
-            emptyMessage="Aucun restaurant actif pour l'instant — explorez ces catégories."
-          />
-        </div>
+        <BusinessListingRow
+          eyebrow="Autour de vous"
+          title={t("nearby")}
+          subtitle={nearbyBusinesses.length ? t("nearbySubGeo") : t("nearbySubNoGeo")}
+          businesses={nearbyBusinesses as unknown as HomeListing[]}
+          fallbackShortcuts={NEARBY_HINTS}
+          fallbackTitle="Explorer par ville"
+          fallbackImage={categoryImages.pro}
+          emptyMessage="Partagez votre position ou explorez par ville pour découvrir les entreprises près de chez vous."
+        />
 
-        <div className="px-4">
-          <BusinessListingRow
-            title={t("popular")}
-            subtitle={t("popularSub")}
-            businesses={listings.popular}
-            loading={listings.loading}
-            seeAllHref="/search"
-            fallbackShortcuts={POPULAR_SERVICES}
-            emptyMessage="Aucune entreprise active pour l'instant."
-          />
-        </div>
+        <BusinessListingRow
+          eyebrow="Gastronomie"
+          title={t("restaurants")}
+          subtitle={t("restaurantsSub")}
+          businesses={listings.restaurants}
+          loading={listings.loading}
+          seeAllHref="/search?q=restaurants"
+          fallbackShortcuts={RESTAURANT_SHORTCUTS}
+          fallbackImage={categoryImages.restaurant}
+          emptyMessage="Les premiers restaurants du Québec arrivent bientôt sur QMaps — explorez les catégories en attendant."
+        />
 
-        <div className="px-4">
-          <BusinessListingRow
-            title={t("services")}
-            subtitle={t("servicesSub")}
-            businesses={listings.services}
-            loading={listings.loading}
-            seeAllHref="/services"
-            fallbackShortcuts={POPULAR_SERVICES}
-            emptyMessage="Aucun pro inscrit dans ces services pour l'instant."
-          />
-        </div>
+        <BusinessListingRow
+          eyebrow="Tendance"
+          title={t("popular")}
+          subtitle={t("popularSub")}
+          businesses={listings.popular}
+          loading={listings.loading}
+          seeAllHref="/search"
+          fallbackShortcuts={POPULAR_SERVICES}
+          fallbackImage={categoryImages.marketing}
+          emptyMessage="Aucune entreprise populaire à afficher pour l'instant."
+        />
 
-        <div className="px-4">
-          <BusinessListingRow
-            title={t("recent")}
-            subtitle={t("recentSub")}
-            businesses={listings.recent}
-            loading={listings.loading}
-            fallbackShortcuts={PROS_RECOMMENDED}
-            emptyMessage="Aucune nouvelle entreprise inscrite pour l'instant."
-          />
-        </div>
+        <BusinessListingRow
+          eyebrow="Experts locaux"
+          title={t("services")}
+          subtitle={t("servicesSub")}
+          businesses={listings.services}
+          loading={listings.loading}
+          seeAllHref="/services"
+          fallbackShortcuts={POPULAR_SERVICES}
+          fallbackImage={categoryImages.electricien}
+          emptyMessage="Aucun pro inscrit dans ces services pour l'instant — soyez le premier."
+        />
 
-        <div className="px-4">
-          <BusinessListingRow
-            title={t("nearby")}
-            subtitle={nearbyBusinesses.length ? t("nearbySubGeo") : t("nearbySubNoGeo")}
-            businesses={nearbyBusinesses as unknown as HomeListing[]}
-            fallbackShortcuts={NEARBY_HINTS}
-            fallbackTitle="Explorer par ville"
-            emptyMessage="Position non partagée ou aucune entreprise à proximité — explorez par ville."
-          />
-        </div>
+        <StartProjectCTA />
 
-        <div className="px-4">
-          <BusinessListingRow
-            title={t("essentials")}
-            subtitle={t("essentialsSub")}
-            businesses={listings.essentials}
-            loading={listings.loading}
-            fallbackShortcuts={ESSENTIALS}
-            emptyMessage="Aucun commerce essentiel inscrit pour l'instant — explorez ces catégories."
-          />
-        </div>
+        <BusinessListingRow
+          eyebrow="Nouveau sur QMaps"
+          title={t("recent")}
+          subtitle={t("recentSub")}
+          businesses={listings.recent}
+          loading={listings.loading}
+          fallbackShortcuts={PROS_RECOMMENDED}
+          fallbackImage={categoryImages.construction}
+          emptyMessage="Aucune nouvelle entreprise inscrite cette semaine."
+        />
 
-        <div className="px-4">
-          <StartProjectCTA />
-        </div>
+        <BusinessListingRow
+          eyebrow="Essentiels"
+          title={t("essentials")}
+          subtitle={t("essentialsSub")}
+          businesses={listings.essentials}
+          loading={listings.loading}
+          fallbackShortcuts={ESSENTIALS}
+          fallbackImage={categoryImages.epicerie}
+          emptyMessage="Épiceries, pharmacies et dépanneurs seront listés ici dès leur inscription."
+        />
 
-        {/* Professional CTA */}
-        <div className="px-4">
-          <div className="rounded-2xl bg-card border border-border p-5 shadow-soft">
-            <h3 className="font-heading text-base font-bold text-foreground">
-              Vous êtes un professionnel ?
-            </h3>
-            <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-              Créez votre fiche QMAPS, recevez des demandes de projets et gérez vos avis — gratuitement.
-            </p>
-            <a
-              href="/merchant/onboarding"
-              className="inline-flex items-center mt-4 px-5 py-2.5 rounded-full bg-brand-gradient text-primary-foreground text-sm font-semibold shadow-soft hover:shadow-glow transition-shadow"
-            >
-              Enregistrer mon entreprise
-            </a>
-          </div>
-        </div>
+        <MerchantBanner />
 
         <SponsoredListings placement="home" />
 
         {/* Personalized real-data feed */}
-        <div className="px-4 space-y-5">
+        <div className="space-y-8">
           <RecommendedSection
             title="Recommandé pour vous"
             subtitle="Basé sur ce que vous consultez et enregistrez"
@@ -275,4 +193,3 @@ const Index = () => {
 };
 
 export default Index;
-
