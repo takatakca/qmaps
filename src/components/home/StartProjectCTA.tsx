@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight, PenLine, ShieldCheck, Clock } from "lucide-react";
 import StartProjectSheet from "@/components/projects/StartProjectSheet";
+import constructionImg from "@/assets/cat-construction.jpg";
 
 const StartProjectCTA = () => {
   const [open, setOpen] = useState(false);
@@ -8,22 +9,37 @@ const StartProjectCTA = () => {
     <section>
       <button
         onClick={() => setOpen(true)}
-        className="w-full text-left rounded-2xl p-5 bg-brand-gradient text-primary-foreground shadow-elevated relative overflow-hidden group"
+        className="group relative isolate w-full overflow-hidden rounded-3xl border border-border/60 text-left shadow-premium transition-all duration-300 hover:-translate-y-1 hover:shadow-premium-hover"
       >
-        <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-primary-foreground/10 blur-2xl" />
-        <div className="flex items-start gap-3 relative">
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary-foreground/15 backdrop-blur">
-            <Sparkles size={20} />
-          </span>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-heading text-base font-bold">Commencer un projet</h3>
-            <p className="text-[13px] mt-1 opacity-90 leading-relaxed">
-              Décrivez ce dont vous avez besoin — les bons pros du Québec viendront à vous avec leurs devis.
-            </p>
-            <span className="inline-flex items-center gap-1 mt-3 text-sm font-semibold">
-              Publier mon projet <ArrowRight size={14} />
+        <img
+          src={constructionImg}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          width={768}
+          height={512}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(216_100%_20%)]/95 via-[hsl(211_100%_35%)]/85 to-[hsl(222_60%_5%)]/95" />
+        <div className="relative flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between md:p-9">
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
+              <PenLine size={12} /> Demande de projet
             </span>
+            <h2 className="mt-3 font-heading text-[22px] font-bold leading-tight text-white md:text-[30px]">
+              Décrivez votre projet, les bons pros viennent à vous
+            </h2>
+            <p className="mt-2 text-[14px] leading-relaxed text-white/75">
+              Rénovation, nettoyage, comptabilité, web — recevez des devis d'entreprises du Québec en quelques heures.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] text-white/60">
+              <span className="inline-flex items-center gap-1.5"><Clock size={12} /> 5 étapes, 2 minutes</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck size={12} /> Sans engagement</span>
+            </div>
           </div>
+          <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-bold text-[hsl(216_100%_25%)] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] transition-transform group-hover:translate-x-0.5">
+            Publier mon projet <ArrowRight size={15} />
+          </span>
         </div>
       </button>
       <StartProjectSheet open={open} onOpenChange={setOpen} />
