@@ -1,6 +1,7 @@
 import { Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StarRating from "./StarRating";
+import { getCategoryImage } from "@/lib/categoryImages";
 import type { Business } from "@/types";
 
 interface BusinessCardProps {
@@ -9,18 +10,22 @@ interface BusinessCardProps {
 
 const BusinessCard = ({ business }: BusinessCardProps) => {
   const navigate = useNavigate();
+  const hasPhoto = Boolean(business.image) && business.image !== "/placeholder.svg";
+  const image = hasPhoto ? business.image : getCategoryImage(business.category, business.name);
 
   return (
     <div
       onClick={() => navigate(`/business/${business.id}`)}
-      className="group bg-card rounded-2xl overflow-hidden shadow-soft border border-border cursor-pointer hover:shadow-elevated hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200"
+      className="group bg-card rounded-2xl overflow-hidden shadow-premium border border-border/70 cursor-pointer hover:shadow-premium-hover hover:border-primary/30 hover:-translate-y-1 transition-all duration-300"
     >
       <div className="relative overflow-hidden">
         <img
-          src={business.image}
+          src={image}
           alt={business.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
         />
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <button
           onClick={(e) => {
