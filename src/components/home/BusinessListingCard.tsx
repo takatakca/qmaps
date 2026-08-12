@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Star, MapPin, BadgeCheck } from "lucide-react";
-import { getListingImage, getListingVisual } from "@/lib/listingVisuals";
+import { Star, MapPin, BadgeCheck, ArrowUpRight } from "lucide-react";
+import { getListingImage } from "@/lib/listingVisuals";
+import { getCategoryImage } from "@/lib/categoryImages";
 import type { HomeListing } from "@/hooks/useHomeListings";
 
 interface Props {
@@ -11,9 +12,8 @@ interface Props {
 const priceLabels = ["$", "$$", "$$$", "$$$$"];
 
 const BusinessListingCard = ({ business, variant = "row" }: Props) => {
-  const image = getListingImage(business);
-  const visual = getListingVisual(business.category_name, business.category_slug, business.name);
-  const Icon = visual.icon;
+  const uploaded = getListingImage(business);
+  const image = uploaded ?? getCategoryImage(business.category_name, business.category_slug, business.name);
   const rating = Number(business.avg_rating || 0);
   const isOpen = business.status === "open" && business.is_open;
   const price = business.price_level ? priceLabels[business.price_level - 1] : null;
@@ -21,59 +21,64 @@ const BusinessListingCard = ({ business, variant = "row" }: Props) => {
   return (
     <Link
       to={`/business/${business.id}`}
-      className={`group block shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-        variant === "row" ? "w-[212px]" : "w-full"
+      className={`group relative block shrink-0 overflow-hidden rounded-3xl border border-border/70 bg-card shadow-premium transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-premium-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
+        variant === "row" ? "w-[268px] sm:w-[292px]" : "w-full"
       }`}
     >
-      <div className="relative h-28 overflow-hidden">
-        {image ? (
-          <img
-            src={image}
-            alt={business.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${visual.gradient}`}>
-            <Icon size={30} className={visual.iconClass} strokeWidth={1.75} />
-          </div>
+      <div className="relative h-40 overflow-hidden sm:h-44">
+        <img
+          src={image}
+          alt={business.name}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.12]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(222_60%_5%)]/85 via-[hsl(222_60%_5%)]/10 to-transparent" />
+        {!uploaded && (
+          <span className="absolute left-3 top-3 rounded-full bg-black/35 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/80 backdrop-blur-md">
+            Visuel de catégorie
+          </span>
         )}
-        <span
-          className={`absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-soft ${
-            isOpen ? "bg-success text-success-foreground" : "bg-card text-muted-foreground"
-          }`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-success-foreground/90" : "bg-muted-foreground/60"}`} />
-          {isOpen ? "Ouvert" : "Fermé"}
-        </span>
         {business.is_claimed && (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-card/95 px-2 py-0.5 text-[10px] font-semibold text-primary shadow-soft backdrop-blur">
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white shadow-soft backdrop-blur-md">
             <BadgeCheck size={11} /> Vérifié
           </span>
         )}
+        <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
+          <h3 className="line-clamp-2 font-heading text-[16px] font-bold leading-tight text-white drop-shadow">
+            {business.name}
+          </h3>
+          <span
+            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
+              isOpen ? "bg-success/90 text-success-foreground" : "bg-white/15 text-white/80"
+            }`}
+          >
+            {isOpen ? "Ouvert" : "Fermé"}
+          </span>
+        </div>
       </div>
-      <div className="space-y-1 p-3">
-        <h3 className="line-clamp-1 font-heading text-[14px] font-bold text-foreground">{business.name}</h3>
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+
+      <div className="space-y-1.5 p-4">
+        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
           {rating > 0 ? (
             <>
-              <Star size={11} className="fill-primary text-primary" />
-              <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
+              <Star size={12} className="fill-primary text-primary" />
+              <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
               <span>({business.reviews_count})</span>
             </>
           ) : (
-            <span>Nouveau · aucun avis</span>
+            <span className="font-medium text-primary">Nouveau sur QMaps</span>
           )}
           {price && <span>· {price}</span>}
         </div>
-        <p className="line-clamp-1 text-[11px] text-muted-foreground">
+        <p className="line-clamp-1 text-[12px] font-medium text-foreground/80">
           {business.category_name ?? "Entreprise locale"}
         </p>
-        <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-          <MapPin size={10} /> <span className="line-clamp-1">{business.city}</span>
+        <p className="flex items-center gap-1 text-[12px] text-muted-foreground">
+          <MapPin size={11} /> <span className="line-clamp-1">{business.city}</span>
         </p>
-        <span className="mt-1 inline-block text-[11px] font-semibold text-primary group-hover:underline">
+        <span className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-semibold text-primary">
           Voir la fiche
+          <ArrowUpRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
       </div>
     </Link>
