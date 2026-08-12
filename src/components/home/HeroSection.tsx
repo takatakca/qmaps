@@ -19,7 +19,7 @@ const HeroSection = () => (
       height={1024}
       className="absolute inset-0 h-full w-full object-cover opacity-70"
     />
-    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222_60%_5%)]/70 via-[hsl(216_100%_18%)]/70 to-[hsl(222_60%_5%)]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,10,20,0.72)] via-[rgba(4,28,70,0.72)] to-[rgba(5,10,20,0.97)]" />
     <div
       aria-hidden
       className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[hsl(211_100%_50%)]/40 blur-[90px] animate-pulse-glow"

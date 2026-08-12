@@ -20,7 +20,7 @@ const StartProjectCTA = () => {
           height={512}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(216_100%_20%)]/95 via-[hsl(211_100%_35%)]/85 to-[hsl(222_60%_5%)]/95" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[rgba(4,20,52,0.94)] via-[rgba(6,40,95,0.86)] to-[rgba(5,10,20,0.75)]" />
         <div className="relative flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between md:p-9">
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">

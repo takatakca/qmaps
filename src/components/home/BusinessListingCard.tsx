@@ -32,7 +32,7 @@ const BusinessListingCard = ({ business, variant = "row" }: Props) => {
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.12]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(222_60%_5%)]/85 via-[hsl(222_60%_5%)]/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,20,0.92)] via-[rgba(5,10,20,0.25)] to-transparent" />
         {!uploaded && (
           <span className="absolute left-3 top-3 rounded-full bg-black/35 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/80 backdrop-blur-md">
             Visuel de catégorie

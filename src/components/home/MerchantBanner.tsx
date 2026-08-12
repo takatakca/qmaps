@@ -13,7 +13,7 @@ const MerchantBanner = () => (
       height={512}
       className="absolute inset-0 h-full w-full object-cover"
     />
-    <div className="absolute inset-0 bg-gradient-to-r from-[hsl(222_60%_5%)] via-[hsl(216_100%_18%)]/90 to-[hsl(211_100%_35%)]/60" />
+    <div className="absolute inset-0 bg-gradient-to-r from-[rgba(5,10,20,0.95)] via-[rgba(4,32,78,0.88)] to-[rgba(0,80,180,0.55)]" />
     <div className="relative flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between md:p-9">
       <div className="max-w-xl">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">

@@ -63,7 +63,7 @@ const CategoryShowcase = () => (
             height={512}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[hsl(222_60%_5%)] via-[hsl(222_60%_5%)]/45 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,20,0.95)] via-[rgba(5,10,20,0.45)] to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-3.5">
             <h3 className="font-heading text-[15px] font-bold leading-tight text-white">{tile.label}</h3>
             <p className="mt-0.5 line-clamp-1 text-[11px] text-white/70">{tile.sub}</p>
