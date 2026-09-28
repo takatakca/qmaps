@@ -41,7 +41,7 @@ const CityPage = () => {
       setLoading(true);
       const { data: biz } = await supabase
         .from("businesses")
-        .select("*")
+        .select("*, business_categories(categories(name))")
         .ilike("city", cityLabel)
         .eq("is_active", true)
         .order("avg_rating", { ascending: false })
@@ -145,7 +145,7 @@ const CityPage = () => {
           businesses.map((b) => (
             <BusinessCard
               key={b.id}
-              business={mapBusinessToCard({ ...b, category_name: "Local" })}
+              business={mapBusinessToCard({ ...b, category_name: (b as any).business_categories?.[0]?.categories?.name || "Local" })}
             />
           ))
         )}

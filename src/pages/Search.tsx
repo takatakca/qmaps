@@ -58,7 +58,7 @@ const Search = () => {
   useEffect(() => {
     const fetchBusinesses = async () => {
       setLoading(true);
-      let q = supabase.from("businesses").select("*");
+      let q = supabase.from("businesses").select("*, business_categories(categories(name))");
 
       // Broader text matching across name, city and description
       if (query) {
@@ -124,7 +124,7 @@ const Search = () => {
         if (missing.length > 0) {
           const { data: extra } = await supabase
             .from("businesses")
-            .select("*")
+            .select("*, business_categories(categories(name))")
             .in("id", missing);
           if (extra) results = [...results, ...extra];
         }
@@ -306,7 +306,7 @@ const Search = () => {
               >
                 <BusinessCard business={mapBusinessToCard({
                   ...b,
-                  category_name: categories.find((cat) => cat.slug === selectedCategory)?.name || "Local",
+                  category_name: categories.find((cat) => cat.slug === selectedCategory)?.name || (b as any).business_categories?.[0]?.categories?.name || "Local",
                   distance_meters: (b as any).distance_meters,
                 })} />
               </div>

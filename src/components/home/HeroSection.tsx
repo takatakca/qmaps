@@ -34,7 +34,7 @@ const HeroSection = () => (
         <span className="font-heading text-[26px] font-bold tracking-tight text-white md:text-[30px]">
           Q<span className="bg-gradient-to-r from-[#7CC0FF] to-white bg-clip-text text-transparent">Maps</span>
         </span>
-        <div className="flex items-center gap-2 [&_button]:text-white">
+        <div className="flex items-center gap-2 [&>button]:border-white/25 [&>button]:bg-white/10 [&>button]:text-white [&>button]:backdrop-blur-md">
           <LanguageSwitcher />
           <QuickAuthMenu />
         </div>
