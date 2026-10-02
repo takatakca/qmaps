@@ -1,32 +1,42 @@
 import { Globe, Check } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LANGUAGES, useLang } from "@/i18n/language";
+import { cn } from "@/lib/utils";
 
-const LanguageSwitcher = () => {
+export const headerTriggerClass = (tone: "light" | "dark") =>
+  cn(
+    "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    tone === "dark"
+      ? "border-white/25 bg-white/10 text-white backdrop-blur-md hover:bg-white/20"
+      : "border-border bg-card text-foreground shadow-soft hover:shadow-glow",
+  );
+
+const LanguageSwitcher = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
   const { lang, setLang, t } = useLang();
   const active = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];
 
   return (
     <Popover>
-      <PopoverTrigger
-        aria-label={t("language")}
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-soft transition-shadow hover:shadow-glow"
-      >
-        <Globe size={13} className="text-primary" />
+      <PopoverTrigger aria-label={t("language")} className={headerTriggerClass(tone)}>
+        <Globe size={13} />
         {active.code.toUpperCase()}
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-48 p-1">
-        <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+      <PopoverContent align="end" className="w-44 p-1">
+        <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {t("language")}
         </p>
         {LANGUAGES.map((l) => (
           <button
             key={l.code}
             onClick={() => setLang(l.code)}
-            className="flex w-full items-center justify-between rounded-md px-2 py-2 text-sm text-foreground hover:bg-accent"
+            className={cn(
+              "flex w-full items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-accent",
+              l.code === lang ? "font-semibold text-foreground" : "text-foreground/80",
+            )}
           >
             <span className="flex items-center gap-2">
-              <span aria-hidden>{l.flag}</span> {l.label}
+              <span className="w-6 text-[11px] font-bold text-muted-foreground">{l.code.toUpperCase()}</span>
+              {l.label}
             </span>
             {l.code === lang && <Check size={14} className="text-primary" />}
           </button>

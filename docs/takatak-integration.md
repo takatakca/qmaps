@@ -26,3 +26,10 @@ used by the homepage header switcher. Default: `fr` (Québec French).
 ## Header auth menu
 `QuickAuthMenu` exposes Google OAuth (Lovable managed), email sign-in and the
 SMS verification entry point (Twilio Verify, available after sign-in). No mock states.
+
+## GROUPE TAKATAK ecosystem boundary (developer note)
+- QMAPS is a child application of the GROUPE TAKATAK ecosystem (public marketplace + merchant discovery).
+- QMAPS currently runs on its own auth, onboarding and listing system. No TAKATAK production sync exists.
+- Future integration with TAKATAK Auth / TAKATAK Dashboard must go through a dedicated adapter/API/event boundary.
+- QMAPS must not duplicate TAKATAK master identity, nor depend directly on another child application.
+- UI only uses honest status labels (`StatusPill`: Connecté, Actif, Non configuré, Bientôt, À configurer). Never show a fake "connected" state.

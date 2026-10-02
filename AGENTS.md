@@ -1,0 +1,1 @@
+- QMAPS is a GROUPE TAKATAK child app; any TAKATAK integration goes through a dedicated adapter boundary — avoids coupling and fake sync.
