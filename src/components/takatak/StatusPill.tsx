@@ -1,13 +1,15 @@
 import { cn } from "@/lib/utils";
 
-export type IntegrationStatus = "connected" | "active" | "not_configured" | "coming_soon" | "needs_setup";
+export type IntegrationStatus = "connected" | "active" | "not_configured" | "coming_soon" | "needs_setup" | "to_verify" | "mvp";
 
 const LABELS: Record<IntegrationStatus, string> = {
   connected: "Connecté",
   active: "Actif",
   not_configured: "Non configuré",
-  coming_soon: "Bientôt",
-  needs_setup: "À configurer",
+  coming_soon: "Bientôt disponible",
+  needs_setup: "À compléter",
+  to_verify: "À vérifier",
+  mvp: "Aperçu MVP",
 };
 
 const STYLES: Record<IntegrationStatus, string> = {
@@ -16,6 +18,8 @@ const STYLES: Record<IntegrationStatus, string> = {
   not_configured: "bg-muted text-muted-foreground border-border",
   coming_soon: "bg-secondary text-secondary-foreground border-border",
   needs_setup: "bg-destructive/10 text-destructive border-destructive/20",
+  to_verify: "bg-accent text-accent-foreground border-border",
+  mvp: "bg-secondary text-secondary-foreground border-dashed border-border",
 };
 
 /** Honest integration / feature status pill (TAKATAK dashboard standard). */

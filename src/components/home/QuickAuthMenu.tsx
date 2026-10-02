@@ -94,7 +94,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
                 onClick={() => { setOpen(false); void signOut(); }}
                 className="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
               >
-                <LogOut size={14} /> Se déconnecter
+                <LogOut size={14} /> {t("signOut")}
               </button>
             </>
           ) : (
@@ -121,7 +121,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
                 onClick={() => go("/auth?mode=signup")}
                 className="mt-2 w-full rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
               >
-                Créer un compte
+                {t("createAccount")}
               </button>
             </>
           )}
