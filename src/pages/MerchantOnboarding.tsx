@@ -88,7 +88,7 @@ const MerchantOnboarding = () => {
         .limit(1);
       if (cancelled) return;
       if (biz && biz.length > 0) {
-        await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+        await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
         await refreshRoles();
         navigate("/merchant", { replace: true });
         return;
@@ -170,7 +170,7 @@ const MerchantOnboarding = () => {
       .eq("owner_user_id", user.id)
       .limit(1);
     if (existing && existing.length > 0) {
-      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
       toast({ title: "Profil déjà créé", description: "Redirection vers votre tableau de bord." });
       navigate("/merchant", { replace: true });
       return null;
@@ -213,7 +213,7 @@ const MerchantOnboarding = () => {
       await supabase.from("business_categories").insert(rows);
     }
 
-    await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+    await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
     await refreshRoles();
     return data.id;
   };
