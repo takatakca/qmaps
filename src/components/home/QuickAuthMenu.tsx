@@ -51,7 +51,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
     </button>
   );
 
-  const roleLabel = isAdmin ? "Administrateur" : isMerchant ? "Mode professionnel" : "Mode client";
+  const roleLabel = isAdmin ? t("roleAdmin") : isMerchant ? t("roleMerchant") : t("roleClient");
   const initial = (user?.email ?? "?")[0].toUpperCase();
 
   return (
@@ -62,34 +62,34 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
         ) : (
           <UserRound size={13} />
         )}
-        {user ? "Compte" : t("signIn")}
+        {user ? t("account") : t("signIn")}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72 overflow-hidden p-0">
         <div className="bg-gradient-to-br from-primary to-[hsl(222_60%_12%)] px-4 py-3 text-primary-foreground">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-75">Compte QMaps</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-75">{t("qmapsAccount")}</p>
           {user ? (
             <>
               <p className="mt-0.5 truncate text-sm font-semibold">{user.email}</p>
               <span className="mt-1.5 inline-flex rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-semibold">{roleLabel}</span>
             </>
           ) : (
-            <p className="mt-0.5 text-sm font-semibold">Un seul compte pour découvrir et faire affaire au Québec</p>
+            <p className="mt-0.5 text-sm font-semibold">{t("accountPitch")}</p>
           )}
         </div>
 
         <div className="p-2">
           {user ? (
             <>
-              <Item icon={UserRound} label="Profil public" onClick={() => go("/profile")} />
-              <Item icon={FolderKanban} label="Mes projets" onClick={() => go("/projects")} />
-              <Item icon={Bookmark} label="Collections" onClick={() => go("/collections")} />
+              <Item icon={UserRound} label={t("publicProfile")} onClick={() => go("/profile")} />
+              <Item icon={FolderKanban} label={t("myProjects")} onClick={() => go("/projects")} />
+              <Item icon={Bookmark} label={t("collections")} onClick={() => go("/collections")} />
               <div className="my-1.5 h-px bg-border" />
               {isMerchant ? (
-                <Item icon={Store} label="Portail marchand" sub="Tableau de bord marchand" onClick={() => go("/merchant/home")} />
+                <Item icon={Store} label={t("merchantPortal")} sub={t("merchantPortalSub")} onClick={() => go("/merchant/home")} />
               ) : (
-                <Item icon={Briefcase} label="Devenir professionnel" sub="Inscrire votre entreprise" onClick={() => go("/merchant/onboarding")} />
+                <Item icon={Briefcase} label={t("becomePro")} sub={t("becomeProSub")} onClick={() => go("/merchant/onboarding")} />
               )}
-              {isAdmin && <Item icon={ShieldCheck} label="Administration" onClick={() => go("/admin")} />}
+              {isAdmin && <Item icon={ShieldCheck} label={t("admin")} onClick={() => go("/admin")} />}
               <button
                 onClick={() => { setOpen(false); void signOut(); }}
                 className="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
@@ -110,12 +110,12 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
                   <path fill="#FBBC05" d="M5.84 14.11a6.6 6.6 0 0 1 0-4.22V7.05H2.18a11 11 0 0 0 0 9.9l3.66-2.84Z" />
                   <path fill="#EA4335" d="M12 4.75c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.46 14.97.5 12 .5A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.29 9.14 4.75 12 4.75Z" />
                 </svg>
-                {loading ? "Connexion…" : "Continuer avec Google"}
+                {loading ? t("connecting") : t("continueGoogle")}
               </button>
               <div className="mt-1.5">
-                <Item icon={Mail} label="Continuer par courriel" onClick={() => go("/auth")} />
-                <Item icon={Smartphone} label="Vérification par SMS" sub="Disponible après la connexion" onClick={() => go("/auth?verify=sms")} />
-                <Item icon={Briefcase} label="Espace professionnel" sub="Pour les entreprises et les pros" onClick={() => go("/auth?role=merchant")} />
+                <Item icon={Mail} label={t("continueEmail")} onClick={() => go("/auth")} />
+                <Item icon={Smartphone} label={t("smsVerify")} sub={t("smsVerifySub")} onClick={() => go("/auth?verify=sms")} />
+                <Item icon={Briefcase} label={t("proSpace")} sub={t("proSpaceSub")} onClick={() => go("/auth?role=merchant")} />
               </div>
               <button
                 onClick={() => go("/auth?mode=signup")}
@@ -127,7 +127,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
           )}
         </div>
         <p className="border-t border-border bg-muted/40 px-4 py-2 text-center text-[10px] text-muted-foreground">
-          Un service de l'écosystème GROUPE TAKATAK
+          {t("ecosystem")}
         </p>
       </PopoverContent>
     </Popover>
