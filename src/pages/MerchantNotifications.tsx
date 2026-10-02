@@ -44,7 +44,7 @@ const MerchantNotifications = () => {
             <CheckCheck size={14} /> Tout lire
           </button>
         )}
-      </div>
+      </>} />
 
       {/* MVP staging notice */}
       <div className="px-4 pt-3">
