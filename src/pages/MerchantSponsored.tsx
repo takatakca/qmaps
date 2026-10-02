@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Sparkles, Pause, Send, Info, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -156,15 +157,7 @@ const MerchantSponsored = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
-      <header className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/merchant/more")}>
-          <ArrowLeft size={20} className="text-muted-foreground" />
-        </button>
-        <Sparkles size={18} className="text-primary" />
-        <h1 className="font-heading text-lg font-bold text-foreground">
-          Visibilité sponsorisée
-        </h1>
-      </header>
+      <MerchantPageHeader title="Visibilité sponsorisée" back="/merchant/more" icon={<Sparkles size={16} className="text-primary" />} />
 
       <div className="px-4 py-4 space-y-4">
         {loadingBiz ? (

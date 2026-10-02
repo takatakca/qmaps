@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import {
@@ -37,14 +38,7 @@ const MerchantNotifications = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/merchant/home")}><ArrowLeft size={22} className="text-foreground" /></button>
-          <h1 className="font-heading text-lg font-bold text-foreground">Notifications</h1>
-          {unreadCount > 0 && (
-            <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unreadCount}</span>
-          )}
-        </div>
+      <MerchantPageHeader title="Notifications" subtitle={unreadCount > 0 ? `${unreadCount} non lue(s)` : "Tout est à jour"} right={<>
         {unreadCount > 0 && (
           <button onClick={markAllRead} className="flex items-center gap-1 text-xs text-primary font-medium">
             <CheckCheck size={14} /> Tout lire

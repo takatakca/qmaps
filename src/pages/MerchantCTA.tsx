@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MousePointerClick, ExternalLink, Phone as PhoneIcon, UtensilsCrossed, PenLine, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,10 +41,7 @@ const MerchantCTA = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-32">
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/merchant")}><ArrowLeft size={22} className="text-foreground" /></button>
-        <h1 className="font-heading text-base font-bold text-foreground">Call to Action</h1>
-      </div>
+      <MerchantPageHeader title="Bouton d'action" back="/merchant" />
 
       <div className="px-4 pt-6">
         <div className="flex items-center gap-3 mb-4">

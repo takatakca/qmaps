@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronRight, Clock, MapPin, Tag, Sparkles, BookOpen, List, CreditCard, PenLine, Camera, Utensils, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,10 +70,7 @@ const MerchantBusinessInfo = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-12">
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/merchant")}><ArrowLeft size={22} className="text-foreground" /></button>
-        <h1 className="font-heading text-base font-bold text-foreground">Informations de l'entreprise</h1>
-      </div>
+      <MerchantPageHeader title="Informations de l'entreprise" back="/merchant" />
 
       <div className="px-4 pt-6">
         <h2 className="font-heading text-xl font-bold text-foreground mb-1">{business.name}</h2>

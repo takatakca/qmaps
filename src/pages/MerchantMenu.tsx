@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Pencil, Trash2, Loader2, EyeOff, Eye, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -176,11 +177,7 @@ const MerchantMenu = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-12">
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/merchant")} aria-label="Retour"><ArrowLeft size={22} /></button>
-        <h1 className="font-heading text-base font-bold flex-1">Menu</h1>
-        <Button size="sm" onClick={startNew} className="gap-1"><Plus size={14} /> Ajouter</Button>
-      </div>
+      <MerchantPageHeader title="Menu" back="/merchant" right={<Button size="sm" onClick={startNew} className="gap-1"><Plus size={14} /> Ajouter</Button>} />
 
       <div className="px-4 pt-4 space-y-6">
         {grouped.length === 0 ? (

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -131,10 +132,7 @@ const MerchantOptimization = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/merchant/home")}><ArrowLeft size={22} className="text-foreground" /></button>
-        <h1 className="font-heading text-lg font-bold text-foreground flex-1">Optimisation & Publicité</h1>
-      </div>
+      <MerchantPageHeader title="Optimisation & Publicité" />
 
       <div className="p-4 space-y-4">
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">

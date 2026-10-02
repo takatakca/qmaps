@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, Phone, Globe, MapPin, MessageSquare, Bookmark, Image as ImageIcon, Briefcase, Send, CheckCircle2, Circle, ChevronRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,13 +163,7 @@ const MerchantAnalytics = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
-      <header className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
-        <div className="flex-1 min-w-0">
-          <h1 className="font-heading text-lg font-bold truncate">Statistiques</h1>
-          {businessName && <p className="text-xs text-muted-foreground truncate">{businessName}</p>}
-        </div>
-      </header>
+      <MerchantPageHeader title="Statistiques" subtitle={businessName || undefined} back={-1} />
 
       <div className="p-4 space-y-4">
         {/* Range toggle */}

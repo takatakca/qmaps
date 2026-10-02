@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, Star, Link as LinkIcon, ChevronUp, ChevronDown, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -109,10 +110,7 @@ const MerchantPhotos = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background max-w-lg mx-auto">
-        <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center gap-3 px-4 py-3">
-          <button onClick={() => navigate(-1)}><ArrowLeft size={22} /></button>
-          <h1 className="font-heading text-lg font-bold">Photos & Vidéos</h1>
-        </div>
+        <MerchantPageHeader title="Photos & Vidéos" back={-1} />
         <div className="text-center py-16 text-muted-foreground">Chargement...</div>
       </div>
     );
@@ -120,10 +118,7 @@ const MerchantPhotos = () => {
 
   return (
     <div className="min-h-screen bg-background pb-10 max-w-lg mx-auto">
-      <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center gap-3 px-4 py-3">
-        <button onClick={() => navigate(-1)} aria-label="Retour"><ArrowLeft size={22} /></button>
-        <h1 className="font-heading text-lg font-bold flex-1">Photos & Vidéos</h1>
-      </div>
+      <MerchantPageHeader title="Photos & Vidéos" back={-1} />
 
       <div className="px-4 pt-4 space-y-3">
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
