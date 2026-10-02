@@ -1,3 +1,4 @@
+import { getCategoryImage } from "@/lib/categoryImages";
 import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -45,7 +46,7 @@ const BusinessDetail = () => {
   const fetchData = async () => {
     if (!id) return;
     const [{ data: biz }, revs] = await Promise.all([
-      supabase.from("businesses").select("*").eq("id", id).maybeSingle(),
+      supabase.from("businesses").select("*, business_categories(categories(name))").eq("id", id).maybeSingle(),
       fetchReviewsWithAuthors(id),
     ]);
     setBusiness(biz);
@@ -166,7 +167,7 @@ const BusinessDetail = () => {
       {/* Hero */}
       <BusinessHero
         name={business.name}
-        imageUrl={business.image_url || "/placeholder.svg"}
+        imageUrl={business.image_url || getCategoryImage((business as any).business_categories?.[0]?.categories?.name, business.name)}
         avgRating={Number(business.avg_rating)}
         reviewsCount={business.reviews_count}
         isClaimed={business.is_claimed}

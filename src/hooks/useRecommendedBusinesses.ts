@@ -53,7 +53,7 @@ export const useRecommendedBusinesses = (
         // 1) Pull a wide candidate set
         const { data: bizData } = await supabase
           .from("businesses")
-          .select("*")
+          .select("*, business_categories(categories(name))")
           .eq("is_active", true)
           .order("avg_rating", { ascending: false })
           .limit(80);
