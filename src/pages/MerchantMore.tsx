@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,12 +55,7 @@ const MerchantMore = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <h1 className="font-heading text-lg font-bold text-foreground">Menu</h1>
-        <button onClick={() => navigate("/merchant/business-info")}>
-          <Settings size={20} className="text-muted-foreground" />
-        </button>
-      </div>
+      <MerchantPageHeader title="Menu" back={false} right={<button onClick={() => navigate("/merchant/business-info")} aria-label="Paramètres" className="p-2 rounded-full hover:bg-accent"><Settings size={20} className="text-muted-foreground" /></button>} />
 
       {/* Business card */}
       {business && (

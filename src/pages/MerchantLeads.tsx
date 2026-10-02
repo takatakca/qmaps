@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Inbox, MapPin, Clock, CheckCheck } from "lucide-react";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
@@ -22,12 +23,7 @@ const MerchantLeads = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       <div className="px-4 pt-4">
-        <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center">
-            <ArrowLeft size={18} />
-          </button>
-          <h1 className="font-heading text-xl font-bold text-foreground">Demandes de projet</h1>
-        </div>
+        <div className="-mx-4 -mt-4 mb-4"><MerchantPageHeader title="Demandes de projet" back={-1} /></div>
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Chargement...</p>

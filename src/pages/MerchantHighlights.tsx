@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, ShoppingBag, Award, Heart, Building, Clock, Users, Briefcase, Sparkles, Star, Globe, Truck, Leaf, Zap, Coffee, Wrench, Camera, Music, BookOpen, Gift, Palette, Umbrella, Flame, Gem, Crown, ThumbsUp, HandHeart, Baby, Dog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,10 +53,7 @@ const MerchantHighlights = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto pb-32">
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/merchant")}><ArrowLeft size={22} className="text-foreground" /></button>
-        <h1 className="font-heading text-base font-bold text-foreground">Business Highlights</h1>
-      </div>
+      <MerchantPageHeader title="Points forts" back="/merchant" />
 
       <div className="px-4 pt-6">
         {/* Hero */}

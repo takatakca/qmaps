@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,12 +39,13 @@ const MerchantMessages = () => {
     <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-card border-b border-border">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/merchant/home")}><ArrowLeft size={22} className="text-foreground" /></button>
-            <h1 className="font-heading text-lg font-bold text-foreground">Boîte de réception</h1>
+        <div className="flex items-center gap-3 px-4 py-3">
+          <button onClick={() => navigate("/merchant/home")} aria-label="Retour" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background hover:border-primary/40"><ArrowLeft size={18} className="text-foreground" /></button>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Portail marchand · QMaps</p>
+            <h1 className="truncate font-heading text-base font-bold text-foreground">Boîte de réception</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button onClick={() => setShowSearch(!showSearch)} className="p-2">
               <Search size={20} className="text-muted-foreground" />
             </button>

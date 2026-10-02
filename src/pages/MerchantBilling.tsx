@@ -11,6 +11,7 @@
 //   9. Open billing portal via "Gérer l'abonnement"
 //  10. Cancel subscription in Stripe portal — verify cancel_at_period_end + status
 import { useEffect, useState } from "react";
+import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,12 +70,7 @@ const MerchantBilling = () => {
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-card border-b border-border flex items-center gap-3 px-4 py-3">
-        <button onClick={() => navigate(-1)}>
-          <ArrowLeft size={22} className="text-foreground" />
-        </button>
-        <h1 className="font-heading text-lg font-bold text-foreground">Facturation</h1>
-      </div>
+      <MerchantPageHeader title="Facturation" subtitle="Paiements sécurisés par Stripe" back={-1} />
 
       <div className="p-4 space-y-4">
         {/* Current plan */}
