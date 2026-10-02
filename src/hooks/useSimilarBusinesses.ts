@@ -60,7 +60,7 @@ export const useSimilarBusinesses = (
         if (candidateIds.length > 0) {
           const { data } = await supabase
             .from("businesses")
-            .select("*")
+            .select("*, business_categories(categories(name))")
             .in("id", candidateIds.slice(0, 60))
             .eq("is_active", true)
             .order("avg_rating", { ascending: false })
@@ -72,7 +72,7 @@ export const useSimilarBusinesses = (
         if (candidates.length < limit && current?.city) {
           const { data: cityData } = await supabase
             .from("businesses")
-            .select("*")
+            .select("*, business_categories(categories(name))")
             .eq("city", current.city)
             .eq("is_active", true)
             .neq("id", businessId)

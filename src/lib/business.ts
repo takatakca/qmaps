@@ -11,7 +11,7 @@ export type BusinessWithDistance = Tables<"businesses"> & {
 export const mapBusinessToCard = (business: BusinessWithDistance): Business => ({
   id: business.id,
   name: business.name,
-  category: business.category_name || "Local",
+  category: business.category_name || (business as any).business_categories?.[0]?.categories?.name || "Local",
   rating: Number(business.avg_rating),
   reviewCount: business.reviews_count,
   priceLevel: priceLabels[(business.price_level || 1) - 1] || "$",

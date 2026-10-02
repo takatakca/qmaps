@@ -69,14 +69,14 @@ const Auth = () => {
         navigate("/merchant");
       } else if (hasMerchant || hasBusiness) {
         if (!hasMerchant) {
-          await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" as any });
+          await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
           await refreshRoles();
         }
         toast({ title: "Bienvenue!", description: "Connexion professionnelle réussie." });
         navigate("/merchant");
       } else {
         // User exists but has no merchant role — offer onboarding
-        await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" as any });
+        await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
         await refreshRoles();
         toast({ title: "Bienvenue!", description: "Complétez votre profil professionnel." });
         navigate("/merchant/onboarding");
@@ -134,7 +134,7 @@ const Auth = () => {
     // New account created — assign role and redirect
     const { data: { user: u } } = await supabase.auth.getUser();
     if (u && role === "merchant") {
-      await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" as any });
+      await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
       await refreshRoles();
       toast({ title: "Compte pro créé!", description: "Complétez votre profil professionnel." });
       navigate("/merchant/onboarding");

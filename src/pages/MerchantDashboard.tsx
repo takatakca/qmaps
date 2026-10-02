@@ -1,3 +1,4 @@
+import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,11 +51,7 @@ const MerchantDashboard = () => {
 
   const selectBiz = async (biz: Tables<"businesses">) => {
     setSelectedBiz(biz);
-    const { data: revData } = await supabase
-      .from("reviews")
-      .select("*, profiles:user_id(display_name)")
-      .eq("business_id", biz.id)
-      .order("created_at", { ascending: false });
+    const revData = await fetchReviewsWithAuthors(biz.id);
     setReviews((revData as any) || []);
   };
 
@@ -69,7 +66,7 @@ const MerchantDashboard = () => {
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else if (data) {
-      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
       fetchBusinesses();
       setTab("edit");
     }

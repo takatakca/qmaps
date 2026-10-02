@@ -36,7 +36,7 @@ const ProtectedMerchantRoute = ({ children }: Props) => {
         .limit(1);
 
       if (biz && biz.length > 0) {
-        await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any });
+        await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
         await refreshRoles();
         setAuthorized(true);
       } else {

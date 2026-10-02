@@ -62,7 +62,7 @@ const AdminBusinesses = () => {
       .update({ status: "approved" }).eq("id", claim.id);
     if (clErr) { toast({ title: "Erreur claim", description: clErr.message, variant: "destructive" }); return; }
 
-    await supabase.from("user_roles").insert({ user_id: claim.user_id, role: "merchant" as any });
+    await supabase.from("user_roles").upsert({ user_id: claim.user_id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
 
     toast({ title: "Réclamation approuvée" });
     void load();
