@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, ShieldCheck, Star } from "lucide-react";
+import { MapPin, Search, ShieldCheck, Star } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import LanguageSwitcher from "@/components/home/LanguageSwitcher";
 import QuickAuthMenu from "@/components/home/QuickAuthMenu";
@@ -31,12 +31,22 @@ const HeroSection = () => (
 
     <div className="relative mx-auto w-full max-w-6xl px-5 pb-12 pt-6 sm:px-8 md:pb-20 md:pt-8">
       <nav className="flex items-center justify-between gap-3">
-        <span className="font-heading text-[26px] font-bold tracking-tight text-white md:text-[30px]">
+        <Link to="/" className="font-heading text-[26px] font-bold tracking-tight text-white md:text-[30px]">
           Q<span className="bg-gradient-to-r from-[#7CC0FF] to-white bg-clip-text text-transparent">Maps</span>
-        </span>
-        <div className="flex items-center gap-2 [&>button]:border-white/25 [&>button]:bg-white/10 [&>button]:text-white [&>button]:backdrop-blur-md">
-          <LanguageSwitcher />
-          <QuickAuthMenu />
+        </Link>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="mr-2 hidden items-center gap-5 text-sm font-medium text-white/80 md:flex">
+            <Link to="/search" className="inline-flex items-center gap-1.5 hover:text-white"><Search size={14} /> Rechercher</Link>
+            <Link to="/services" className="hover:text-white">Services</Link>
+            <Link to="/merchant/onboarding" className="rounded-full border border-white/25 px-3 py-1.5 hover:bg-white/10 hover:text-white">
+              Enregistrer mon entreprise
+            </Link>
+          </div>
+          <Link to="/search" aria-label="Rechercher" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md md:hidden">
+            <Search size={14} />
+          </Link>
+          <LanguageSwitcher tone="dark" />
+          <QuickAuthMenu tone="dark" />
         </div>
       </nav>
 
@@ -90,6 +100,9 @@ const HeroSection = () => (
         </span>
         <span className="inline-flex items-center gap-1.5">
           <MapPin size={13} /> 100 % Québec
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-white/40">
+          <span className="h-px w-4 bg-white/30" /> Propulsé par GROUPE TAKATAK
         </span>
       </div>
     </div>

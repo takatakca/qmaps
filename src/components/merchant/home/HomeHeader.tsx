@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import StarRating from "@/components/StarRating";
 import { ChevronDown, Settings } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import StatusPill from "@/components/takatak/StatusPill";
 
 interface Props {
   business: Tables<"businesses">;
@@ -20,12 +21,18 @@ const HomeHeader = ({ business, displayName }: Props) => {
   return (
     <div className="bg-card border-b border-border px-4 pt-4 pb-3">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="font-heading text-lg font-bold text-foreground">
-          {greeting()}, {displayName}
-        </h1>
-        <button onClick={() => navigate("/merchant/more")} className="p-2 rounded-full hover:bg-accent">
-          <Settings size={20} className="text-muted-foreground" />
-        </button>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Portail marchand · QMaps</p>
+          <h1 className="font-heading text-lg font-bold text-foreground">
+            {greeting()}, {displayName}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusPill status={business.is_active ? "active" : "needs_setup"} label={business.is_active ? "Fiche active" : "À compléter"} />
+          <button onClick={() => navigate("/merchant/more")} aria-label="Paramètres" className="p-2 rounded-full hover:bg-accent">
+            <Settings size={20} className="text-muted-foreground" />
+          </button>
+        </div>
       </div>
 
       <button

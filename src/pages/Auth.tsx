@@ -176,6 +176,12 @@ const Auth = () => {
         <h1 className="font-heading text-3xl font-bold text-foreground">
           Q<span className="text-primary">Maps</span>
         </h1>
+        <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Compte QMaps · écosystème GROUPE TAKATAK
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Choisissez votre type de compte. À terme, ce même compte donnera accès aux autres applications de l'écosystème.
+        </p>
 
         {/* Role toggle */}
         <div className="mt-5 flex rounded-full bg-secondary p-1">
