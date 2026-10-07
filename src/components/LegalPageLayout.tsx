@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Seo from "@/components/Seo";
 import BottomNav from "@/components/BottomNav";
+import { ManageCookiesLink } from "@/consent/ManageCookiesLink";
 
 export type LegalLang = "en" | "fr";
 const STORAGE_KEY = "qmaps:legal-language";
 
 export const getStoredLegalLang = (): LegalLang => {
-  if (typeof window === "undefined") return "en";
+  // French first (Québec): English only when the visitor chose it.
+  if (typeof window === "undefined") return "fr";
   const v = window.localStorage.getItem(STORAGE_KEY);
-  return v === "fr" ? "fr" : "en";
+  return v === "en" ? "en" : "fr";
 };
 
 export interface ReviewHistoryEntry {
@@ -128,6 +130,7 @@ const LegalPageLayout = ({
             </a>
             .
           </p>
+          <ManageCookiesLink className="mt-2 text-primary underline" />
         </div>
       </article>
 

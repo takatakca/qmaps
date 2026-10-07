@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     const origin =
       req.headers.get("origin") ||
       req.headers.get("referer") ||
-      "https://qmaps.lovable.app";
+      "https://qmaps.ca";
 
     const portal = await stripe.billingPortal.sessions.create({
       customer: sub.provider_customer_id,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SITE } from "@/site.config";
 
 // TODO (production SEO): move to an edge-function-rendered sitemap that returns
 // Content-Type: application/xml. Crawlers may execute JS but a server-rendered
@@ -18,7 +19,7 @@ const Sitemap = () => {
 
   useEffect(() => {
     void (async () => {
-      const origin = window.location.origin;
+      const origin = SITE.url;
       const [{ data: biz }, { data: cats }, { data: cities }] = await Promise.all([
         supabase
           .from("businesses")

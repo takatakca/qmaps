@@ -29,9 +29,11 @@ const alsoNotify = [
 
 const EmailNotifications = () => {
   const navigate = useNavigate();
-  const [receiveEmails, setReceiveEmails] = useState(true);
+  // CASL: nothing is pre-ticked; the member opts in.
+  // TODO(owner): these choices are not saved yet (no table/column for email preferences).
+  const [receiveEmails, setReceiveEmails] = useState(false);
   const [updates, setUpdates] = useState<Record<string, boolean>>(
-    Object.fromEntries([...emailUpdates, ...alsoNotify].map(k => [k, true]))
+    Object.fromEntries([...emailUpdates, ...alsoNotify].map(k => [k, false]))
   );
 
   const toggle = (key: string) => setUpdates(prev => ({ ...prev, [key]: !prev[key] }));

@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronRight, LogOut, AlertCircle, Building2 } from "lucide-
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
+import { ManageCookiesLink } from "@/consent/ManageCookiesLink";
 import { STATUS_LABELS_FR, type AccountDeletionStatus } from "@/lib/accountDeletion";
 
 const settingsItems = [
@@ -115,6 +116,7 @@ const Settings = () => {
           <button onClick={() => navigate("/account-deletion-policy")} className="text-primary">Suppression de compte</button> et{" "}
           <button onClick={() => navigate("/support-policy")} className="text-primary">Support</button>
         </p>
+        <ManageCookiesLink className="text-xs text-primary" />
         <p className="text-xs text-muted-foreground">Copyright © 2024–2026 QMAPS Inc.</p>
         <p className="text-xs text-muted-foreground">QMAPS v1.0.0</p>
       </div>

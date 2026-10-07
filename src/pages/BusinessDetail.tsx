@@ -22,7 +22,7 @@ import { ShieldCheck } from "lucide-react";
 import { trackBusinessEvent } from "@/lib/analytics";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
-import { slugify } from "@/lib/seo";
+import { buildCanonicalUrl, slugify } from "@/lib/seo";
 import { isBusinessOpenNow } from "@/lib/searchFilters";
 import { readBusinessStatus } from "@/lib/businessStatus";
 import type { Tables } from "@/integrations/supabase/types";
@@ -132,7 +132,7 @@ const BusinessDetail = () => {
     name: business.name,
     image: business.image_url || undefined,
     telephone: business.phone || undefined,
-    url: business.website || `${typeof window !== "undefined" ? window.location.origin : ""}/business/${business.id}`,
+    url: business.website || buildCanonicalUrl(`/business/${business.id}`),
     address: {
       "@type": "PostalAddress",
       streetAddress: business.address,

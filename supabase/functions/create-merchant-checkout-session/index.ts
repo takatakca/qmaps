@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
     const origin =
       req.headers.get("origin") ||
       req.headers.get("referer") ||
-      "https://qmaps.lovable.app";
+      "https://qmaps.ca";
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
