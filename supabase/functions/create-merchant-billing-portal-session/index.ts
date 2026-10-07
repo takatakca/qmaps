@@ -1,6 +1,7 @@
 // Phase 7B — Create Stripe Customer Portal session for merchants.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { getTrustedReturnOrigin } from "../_shared/returnOrigin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -87,10 +88,11 @@ Deno.serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
-    const origin =
-      req.headers.get("origin") ||
-      req.headers.get("referer") ||
-      "https://qmaps.ca";
+    const allowedReturnOrigins = (Deno.env.get("QMAPS_ALLOWED_RETURN_ORIGINS") ?? "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const origin = getTrustedReturnOrigin(req, allowedReturnOrigins);
 
     const portal = await stripe.billingPortal.sessions.create({
       customer: sub.provider_customer_id,

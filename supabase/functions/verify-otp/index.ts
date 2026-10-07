@@ -97,7 +97,9 @@ Deno.serve(async (req) => {
     });
 
     if (!approved) {
-      if (!twilioRes.ok) console.error("Twilio VerificationCheck failed", twilioRes.status, payload);
+      if (!twilioRes.ok) {
+        console.error("Twilio VerificationCheck failed", twilioRes.status, payload?.code);
+      }
       return json({ error: "Code invalide ou expiré." }, 400);
     }
 
@@ -113,7 +115,7 @@ Deno.serve(async (req) => {
 
     return json({ ok: true, verified: true, phone });
   } catch (err) {
-    console.error("verify-otp error", err);
+    console.error("verify-otp error", err instanceof Error ? err.message : "Unknown error");
     return json({ error: "Erreur inattendue." }, 500);
   }
 });

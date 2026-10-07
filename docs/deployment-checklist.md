@@ -17,6 +17,7 @@ ownership so a single human can sign off in one pass.
   - `create-merchant-billing-portal-session`
   - `stripe-webhook`
 - [ ] Edge function secrets set: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LOVABLE_API_KEY`
+- [ ] Optional `QMAPS_ALLOWED_RETURN_ORIGINS` contains only trusted HTTPS app origins (comma-separated; defaults to `https://qmaps.ca`)
 
 ## 2. Stripe (test → live switch)
 
@@ -38,10 +39,10 @@ ownership so a single human can sign off in one pass.
 ## 4. Domain & SSL
 
 - [ ] Custom domain connected (Project Settings → Domains)
-- [ ] Both `qmaps.app` and `www.qmaps.app` added; one set as Primary
+- [ ] Both `qmaps.ca` and `www.qmaps.ca` added; one set as Primary
 - [ ] DNS A records → `185.158.133.1`
 - [ ] SSL status = **Active** in Lovable
-- [ ] Open `https://qmaps.app/sitemap.xml` and confirm legal routes are listed
+- [ ] Open `https://qmaps.ca/sitemap.xml` and confirm canonical public routes are listed
 
 ## 5. Public legal pages (live and linked)
 
@@ -77,7 +78,7 @@ ownership so a single human can sign off in one pass.
 
 - [ ] Each route has `<Seo>` with unique title (<60 chars) and description (<160 chars)
 - [ ] Canonical URLs use the live domain after publishing
-- [ ] `index.html` lang attribute matches default locale (`en`)
+- [ ] `index.html` lang attribute matches default locale (`fr-CA`)
 - [ ] `robots.txt` allows crawling of public routes
 - [ ] OG image is at least 1200×630 and resolves on the live domain
 

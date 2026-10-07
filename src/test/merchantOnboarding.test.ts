@@ -39,7 +39,7 @@ describe("Phase 6 — merchant onboarding duplicate guard", () => {
 
   it("handleFinish re-checks for an existing business before INSERT", () => {
     // The check must appear BEFORE the businesses insert in handleFinish.
-    const insertIdx = ONBOARDING.indexOf('.from("businesses")\n      .insert');
+    const insertIdx = ONBOARDING.search(/\.from\("businesses"\)\s*\.insert\s*\(/);
     const recheckIdx = ONBOARDING.indexOf("Re-check at submit time");
     expect(recheckIdx).toBeGreaterThan(-1);
     expect(insertIdx).toBeGreaterThan(recheckIdx);
