@@ -14,6 +14,8 @@ and `docs/launch-deployment-report.md` (which records the run).
 - [ ] `bun run launch:check` — 16/16 pass
 - [ ] `bun run go:no-go` — decision **GO**
 - [ ] `bun run build` — succeeds
+- [ ] Generated `dist/sitemap.xml` contains active business URLs and only cities
+      with at least three active listings
 - [ ] `docs/launch-deployment-report.md` updated with current results
 - [ ] `docs/final-owner-signoff.md` signed by owner
 - [ ] Manual gates in `docs/launch-deployment-report.md` §3 all signed

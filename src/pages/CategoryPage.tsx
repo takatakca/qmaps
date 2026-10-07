@@ -104,7 +104,7 @@ const CategoryPage = () => {
         description={category ? description : `Cette catégorie n'existe pas sur QMaps.`}
         canonicalPath={canonical}
         image={businesses[0]?.image_url || undefined}
-        noindex={!loading && !category}
+        noindex={!loading && (!category || businesses.length === 0)}
         jsonLdId="category"
         jsonLd={category ? {
           "@context": "https://schema.org",

@@ -98,6 +98,7 @@ const CityPage = () => {
           description,
           about: { "@type": "City", name: cityLabel },
         }}
+        noindex={!loading && businesses.length === 0}
       />
 
       <header className="px-4 pt-6 pb-4">
