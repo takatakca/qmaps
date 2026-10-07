@@ -1,9 +1,10 @@
 import { useEffect } from "react";
+import { buildCanonicalUrl, SITE_ORIGIN } from "@/lib/seo";
 
 const SITE_NAME = "QMaps";
-const DEFAULT_ORIGIN = "https://qmaps.lovable.app";
+const DEFAULT_ORIGIN = SITE_ORIGIN;
 export const DEFAULT_OG_IMAGE =
-  "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fd800b5d-13e2-435a-8a83-8ee02fae1858/id-preview-4a1ab253--899a1afd-3cc7-4929-9328-cc8fed5f8294.lovable.app-1772261493991.png";
+  `${SITE_ORIGIN}/icons/icon-512.svg`;
 
 const upsertMeta = (selector: string, attr: "name" | "property", key: string, content: string) => {
   let el = document.head.querySelector<HTMLMetaElement>(selector);
@@ -61,7 +62,6 @@ const Seo = ({
   noindex = false,
 }: SeoProps) => {
   useEffect(() => {
-    const origin = typeof window !== "undefined" ? window.location.origin : DEFAULT_ORIGIN;
     const fullTitle = title.length > 60 ? title.slice(0, 57) + "..." : title;
     document.title = fullTitle;
 
@@ -82,7 +82,7 @@ const Seo = ({
     upsertMeta("meta[name='twitter:image']", "name", "twitter:image", ogImage);
 
     if (canonicalPath) {
-      const url = canonicalPath.startsWith("http") ? canonicalPath : `${origin}${canonicalPath}`;
+      const url = buildCanonicalUrl(canonicalPath, DEFAULT_ORIGIN);
       upsertCanonical(url);
       upsertMeta("meta[property='og:url']", "property", "og:url", url);
     }

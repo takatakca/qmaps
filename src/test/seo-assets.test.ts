@@ -24,6 +24,19 @@ describe("seo: robots.txt", () => {
     expect(robots).toMatch(/User-agent:\s*\*/i);
     expect(robots).toMatch(/Allow:\s*\//i);
   });
+
+  it("points crawlers to the production sitemap", () => {
+    expect(robots).toContain("Sitemap: https://qmaps.ca/sitemap.xml");
+  });
+});
+
+describe("seo: sitemap.xml", () => {
+  const sitemap = readPublic("sitemap.xml");
+
+  it("uses only the canonical production domain", () => {
+    expect(sitemap).toContain("<loc>https://qmaps.ca/</loc>");
+    expect(sitemap).not.toContain("lovable.app");
+  });
 });
 
 describe("pwa: manifest.webmanifest", () => {

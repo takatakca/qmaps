@@ -26,7 +26,7 @@ and `docs/launch-deployment-report.md` (which records the run).
 2. Wait for the publish job to finish.
 3. Record the new published version ID in
    `docs/launch-deployment-report.md` §1.
-4. Capture the published URL (e.g. `https://qmaps.lovable.app` or
+4. Capture the published URL (e.g. `https://qmaps.ca` or the configured
    custom domain).
 5. Walk `docs/post-deploy-smoke-test.md` immediately.
 

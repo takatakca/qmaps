@@ -21,10 +21,10 @@ export const cityFromSlug = (slug: string): string => titleCase(slug.replace(/-/
 
 // ---- Phase 15I SEO helpers ---------------------------------------------------
 export const APP_NAME = "QMAPS";
-export const SITE_ORIGIN = "https://qmaps.lovable.app";
+export const SITE_ORIGIN = "https://qmaps.ca";
 export const DEFAULT_LOCALE = "fr_CA";
 export const DEFAULT_OG_FALLBACK =
-  "https://qmaps.lovable.app/icons/icon-512.svg";
+  `${SITE_ORIGIN}/icons/icon-512.svg`;
 
 export function buildPageTitle(title: string, appName: string = APP_NAME): string {
   const t = (title ?? "").trim();

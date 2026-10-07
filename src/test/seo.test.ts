@@ -7,9 +7,16 @@ import {
   getSeoImage,
   DEFAULT_OG_FALLBACK,
   APP_NAME,
+  SITE_ORIGIN,
 } from "@/lib/seo";
 
 describe("seo helpers", () => {
+  it("uses the production domain for canonical URLs and fallback images", () => {
+    expect(SITE_ORIGIN).toBe("https://qmaps.ca");
+    expect(buildCanonicalUrl("/search")).toBe("https://qmaps.ca/search");
+    expect(DEFAULT_OG_FALLBACK).toBe("https://qmaps.ca/icons/icon-512.svg");
+  });
+
   it("builds page title with app name", () => {
     expect(buildPageTitle("Pizza")).toBe(`Pizza | ${APP_NAME}`);
     expect(buildPageTitle(`Already ${APP_NAME}`)).toBe(`Already ${APP_NAME}`);
