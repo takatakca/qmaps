@@ -68,6 +68,11 @@
 
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'DM Sans', sans-serif;
+    --scene: 222 40% 7%;
+    --scene-foreground: 0 0% 100%;
+    --scene-accent: 208 100% 78%;
+    --scene-scrim: linear-gradient(180deg, hsl(222 40% 7% / .38), hsl(222 40% 7% / .12) 48%, hsl(222 40% 7% / .68));
+    --tile-scrim: linear-gradient(180deg, transparent 30%, hsl(222 40% 7% / .85));
   }
 
   .dark {
@@ -132,6 +137,30 @@
 }
 
 @layer utilities {
+  .qmaps-scene { background: hsl(var(--scene)); color: hsl(var(--scene-foreground)); }
+  .qmaps-scene-overlay { background: var(--scene-scrim); }
+  .qmaps-tile-overlay { background: var(--tile-scrim); }
+  .qmaps-scene-text { color: hsl(var(--scene-foreground)); }
+  .qmaps-scene-muted { color: hsl(var(--scene-foreground) / .78); }
+  .qmaps-scene-accent { color: hsl(var(--scene-accent)); }
+  .qmaps-scene-rule { border-color: hsl(var(--scene-foreground) / .25); }
+  .qmaps-scene-control {
+    color: hsl(var(--scene-foreground));
+    border: 1px solid hsl(var(--scene-foreground) / .25);
+    background: hsl(var(--scene) / .22);
+    backdrop-filter: blur(12px);
+  }
+  .qmaps-scene-control:hover { background: hsl(var(--scene-foreground) / .18); }
+  .qmaps-wordmark { font-size: 112px; line-height: .95; letter-spacing: 0; }
+  .qmaps-editorial-title { font-size: 42px; line-height: 1.15; letter-spacing: 0; }
+  .qmaps-category-feature { min-height: 340px; }
+  .qmaps-category-tile { min-height: 250px; }
+  @media (max-width: 767px) {
+    .qmaps-wordmark { font-size: 76px; }
+    .qmaps-editorial-title { font-size: 28px; }
+    .qmaps-category-feature { min-height: 260px; }
+    .qmaps-category-tile { min-height: 210px; }
+  }
   .text-star { color: hsl(var(--star)); }
   .bg-star { background-color: hsl(var(--star)); }
   .bg-brand-gradient { background: var(--brand-gradient); }
