@@ -26,12 +26,12 @@ const TILES: Tile[] = [
 ];
 
 const CategoryShowcase = () => (
-  <section className="space-y-4">
+  <section className="space-y-6">
     <div className="flex items-end justify-between gap-4">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Explorer</p>
-        <h2 className="mt-1 font-heading text-[20px] font-bold tracking-tight text-foreground md:text-[26px]">
-          Par service, partout au Québec
+        <p className="text-[11px] font-semibold uppercase tracking-normal text-primary">Explorer</p>
+        <h2 className="qmaps-editorial-title mt-2 max-w-xl font-heading font-bold text-foreground">
+          Le Québec, à découvrir.
         </h2>
         <p className="mt-1 text-[13px] text-muted-foreground">
           Les catégories les plus recherchées par les Québécois.
@@ -39,19 +39,19 @@ const CategoryShowcase = () => (
       </div>
       <Link
         to="/services"
-        className="hidden shrink-0 items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition-all hover:border-primary/40 hover:text-primary sm:inline-flex"
+        className="hidden shrink-0 items-center gap-1 rounded-md border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition-all hover:border-primary/40 hover:text-primary sm:inline-flex"
       >
         Voir tous les services <ArrowUpRight size={13} />
       </Link>
     </div>
 
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      {TILES.map((tile) => (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+      {TILES.map((tile, index) => (
         <Link
           key={tile.q}
           to={`/search?q=${encodeURIComponent(tile.q)}`}
-          className={`group relative isolate overflow-hidden rounded-2xl border border-border/70 shadow-premium transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-premium-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
-            tile.wide ? "col-span-2 h-40 md:h-48" : "h-40 md:h-48"
+          className={`group relative isolate overflow-hidden rounded-lg border border-border/70 transition-all duration-300 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
+            tile.wide ? "qmaps-category-feature col-span-2" : "qmaps-category-tile"
           }`}
         >
           <img
@@ -61,14 +61,15 @@ const CategoryShowcase = () => (
             loading="lazy"
             width={768}
             height={512}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,20,0.95)] via-[rgba(5,10,20,0.45)] to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-3.5">
-            <h3 className="font-heading text-[15px] font-bold leading-tight text-white">{tile.label}</h3>
-            <p className="mt-0.5 line-clamp-1 text-[11px] text-white/70">{tile.sub}</p>
+          <div className="absolute inset-0 qmaps-tile-overlay" />
+          <div className="absolute inset-x-0 bottom-0 p-4 md:p-6">
+            <h3 className="font-heading text-[20px] font-bold leading-tight qmaps-scene-text md:text-[26px]">{tile.label}</h3>
+            <p className="qmaps-scene-muted mt-1 text-[12px] leading-relaxed">{tile.sub}</p>
           </div>
-          <span className="absolute right-3 top-3 inline-flex h-7 w-7 translate-y-1 items-center justify-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <span className="qmaps-scene-muted absolute left-4 top-5 text-[11px] font-medium md:left-6">{String(index + 1).padStart(2, "0")}</span>
+          <span className="qmaps-scene-control absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-300 motion-safe:group-hover:rotate-45">
             <ArrowUpRight size={14} />
           </span>
         </Link>
@@ -77,7 +78,7 @@ const CategoryShowcase = () => (
 
     <Link
       to="/services"
-      className="inline-flex w-full items-center justify-center gap-1 rounded-full border border-border bg-card px-4 py-2.5 text-xs font-semibold text-foreground transition-all hover:border-primary/40 hover:text-primary sm:hidden"
+      className="inline-flex w-full items-center justify-center gap-1 rounded-md border border-border bg-card px-4 py-2.5 text-xs font-semibold text-foreground transition-all hover:border-primary/40 hover:text-primary sm:hidden"
     >
       Voir tous les services <ArrowUpRight size={13} />
     </Link>
