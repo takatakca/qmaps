@@ -36,7 +36,7 @@ const HeroSection = () => (
         </div>
       </nav>
 
-      <div className="mt-10 animate-fade-up md:mt-12">
+      <div className="mt-6 animate-fade-up md:mt-12">
         <Link to="/city/montreal" className="qmaps-scene-muted inline-flex items-center gap-2 text-xs font-medium">
           <MapPin size={14} /> Montréal · Québec · partout au Québec
         </Link>
@@ -49,25 +49,25 @@ const HeroSection = () => (
         </p>
       </div>
 
-      <div className="relative mt-8 max-w-2xl animate-fade-up [animation-delay:120ms]">
+      <div className="relative mt-5 max-w-2xl md:mt-8 animate-fade-up [animation-delay:120ms]">
         <div className="relative rounded-lg border border-border bg-card p-2 text-card-foreground shadow-elevated">
           <SearchBar smart />
         </div>
       </div>
 
-      <div className="mt-5 flex max-w-3xl flex-wrap gap-2 animate-fade-up [animation-delay:200ms]">
+      <div className="mt-4 flex max-w-3xl flex-wrap gap-1.5 md:gap-2 animate-fade-up [animation-delay:200ms]">
         {CHIPS.map((chip) => (
           <Link
             key={chip}
             to={`/search?q=${encodeURIComponent(chip.toLowerCase())}`}
-            className="qmaps-scene-control rounded-md px-3 py-2 text-xs font-medium transition-colors"
+            className="qmaps-scene-control rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
           >
             {chip}
           </Link>
         ))}
       </div>
 
-      <div className="qmaps-scene-muted qmaps-scene-rule mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t pt-4 text-[10px] font-medium uppercase tracking-normal">
+      <div className="qmaps-scene-muted qmaps-scene-rule mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 border-t pt-4 text-[10px] font-medium uppercase tracking-normal">
         <span className="inline-flex items-center gap-1.5">
           <ShieldCheck size={13} /> Entreprises vérifiées
         </span>
