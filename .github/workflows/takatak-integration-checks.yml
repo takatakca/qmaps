@@ -1,0 +1,48 @@
+name: TAKATAK integration checks
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/takatak-match-businesses/**"
+      - "supabase/functions/_shared/takatak-matching.ts"
+      - "src/test/takatakMatching.test.ts"
+      - "docs/takatak-integration.md"
+      - "supabase/config.toml"
+      - ".github/workflows/takatak-integration-checks.yml"
+  push:
+    branches:
+      - "feat/takatak-matching-adapter"
+    paths:
+      - "supabase/functions/takatak-match-businesses/**"
+      - "supabase/functions/_shared/takatak-matching.ts"
+      - "src/test/takatakMatching.test.ts"
+      - "docs/takatak-integration.md"
+      - "supabase/config.toml"
+      - ".github/workflows/takatak-integration-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Matching contract tests
+        run: bunx vitest run src/test/takatakMatching.test.ts
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.5.6
+
+      - name: Deno check matching function
+        run: deno check --node-modules-dir=none --no-lock supabase/functions/takatak-match-businesses/index.ts
