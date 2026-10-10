@@ -33,3 +33,93 @@ SMS verification entry point (Twilio Verify, available after sign-in). No mock s
 - Future integration with TAKATAK Auth / TAKATAK Dashboard must go through a dedicated adapter/API/event boundary.
 - QMAPS must not duplicate TAKATAK master identity, nor depend directly on another child application.
 - UI only uses honest status labels (`StatusPill`: Connecté, Actif, Non configuré, Bientôt, À configurer). Never show a fake "connected" state.
+
+
+## TAKATAK candidate matching adapter
+
+Status: **CODE COMPLETE on feature branch; not production configured or verified**.
+
+The first read-only server-to-server adapter is implemented as the Supabase Edge Function:
+
+`takatak-match-businesses`
+
+It exists to let TAKATAK ask QMAPS for candidate businesses for a service category and geographic need. R2F does **not** call this function directly.
+
+### Request boundary
+
+POST JSON, signed with product-specific HMAC credentials.
+
+Headers:
+
+```text
+X-Integration-Id: <TAKATAK_QMAPS_INTEGRATION_ID>
+X-Event-Id: <same value as body.requestId>
+X-Timestamp: <unix seconds>
+X-Signature: sha256=<HMAC hex>
+```
+
+Canonical signed value:
+
+```text
+<timestamp>.<eventId>.<rawBody>
+```
+
+The timestamp window is five minutes.
+
+Required Edge Function secrets:
+
+- `TAKATAK_QMAPS_INTEGRATION_ID`
+- `TAKATAK_QMAPS_MATCHING_SECRET`
+- standard Supabase `SUPABASE_URL`
+- standard server-only `SUPABASE_SERVICE_ROLE_KEY`
+
+Do not expose these to the browser.
+
+### Version 1 payload
+
+```json
+{
+  "version": 1,
+  "requestId": "stable-correlation-id",
+  "categorySlug": "plomberie",
+  "city": "Montréal",
+  "region": "QC",
+  "postalCode": "H1H 1H1",
+  "limit": 20
+}
+```
+
+At least one of city, region or postalCode is required.
+
+### Matching rules
+
+1. The category must be an active QMAPS category.
+2. Candidate businesses must explicitly offer the category through `merchant_service_categories`.
+3. Businesses must be active and currently `open` or `seasonal`.
+4. Existing QMAPS geographic semantics are preserved:
+   - no service-area row configured → do not geographically filter the business;
+   - otherwise every non-empty constraint on one service-area row must match;
+   - postal prefix is more specific than city, then region.
+5. Radius matching remains intentionally excluded until reliable coordinates exist for every request.
+
+### Data minimization
+
+The adapter returns only data TAKATAK needs for candidate selection:
+
+- QMAPS business ID
+- business name
+- city / region / postal code
+- claimed flag
+- public rating / review count
+- public status
+- match scope
+
+It does **not** return owner user IDs, phone numbers, email addresses, private messages, billing records or authentication data.
+
+TAKATAK remains responsible for the R2F lead/project and final routing decision. QMAPS remains the source of its business/category/service-area data.
+
+### Verification
+
+`npm test` includes `src/test/takatakMatching.test.ts`, which verifies service-area semantics, specificity scoring, HMAC configuration references, and the privacy-minimized query surface.
+
+Production status must remain **Not configured** until the Edge Function is deployed, secrets are installed through the approved secret manager, a real TAKATAK signed request succeeds in staging, and the result is verified.
