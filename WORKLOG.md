@@ -3,9 +3,9 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-2026-10-11 | cursor | cursor/qmaps-takatak-bridge → #4 | PR | Link a business to a TAKATAK workspace and accept an owner review reply | wait for CI; apply the migration only when the owner runs it on the QMAPS database
+2026-10-11 | cursor | cursor/qmaps-takatak-bridge → #4 | PR | Link a business to a TAKATAK workspace and accept an owner review reply | CI is green. Owner runs migration 20261011120000 on the QMAPS database
 
-2026-10-11 | cursor | cursor/qmaps-lint-explicit-any → #3 | PR | Replace explicit any with the generated Supabase row types so lint passes | CI lint and tests passed; the go/no-go step now runs bun run test | wait for CI
+2026-10-11 | cursor | cursor/qmaps-lint-explicit-any → #3 | PR | Replace explicit any with the generated Supabase row types so lint passes | CI green | owner can merge; the empty Supabase secret no longer fails the go/no-go tests
 
 2026-10-09 | Lovable | managed workspace → no PR | done | Added 6 more visual option boards (search+map, onboarding, city page, mobile screens, notifications, about page), boards 16-21 in Files; no code changes | Owner picks favorites; no publishing
 2026-10-09 | Lovable | managed workspace → no PR | done | Added 6 more visual option boards (dark mode, editorial categories, dark business page, profile, winter hero, light merchant portal), boards 10-15 in Files; no code changes | Owner picks favorites; no publishing
