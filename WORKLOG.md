@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-2026-10-11 | cursor | cursor/qmaps-takatak-bridge → PR | active | Link a business to a TAKATAK workspace and accept an owner review reply | open the PR; the columns apply when the QMAPS database migration is run
+2026-10-11 | cursor | cursor/qmaps-takatak-bridge → #4 | PR | Link a business to a TAKATAK workspace and accept an owner review reply | wait for CI; apply the migration only when the owner runs it on the QMAPS database
 
 2026-10-11 | cursor | cursor/qmaps-lint-explicit-any → #3 | PR | Replace explicit any with the generated Supabase row types so lint passes | CI lint and tests passed; the go/no-go step now runs bun run test | wait for CI
 
