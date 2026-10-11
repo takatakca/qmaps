@@ -571,6 +571,7 @@ export type Database = {
           search_document: unknown
           special_hours: Json | null
           status: string
+          takatak_client_id: string | null
           updated_at: string
           website: string | null
         }
@@ -607,6 +608,7 @@ export type Database = {
           search_document?: unknown
           special_hours?: Json | null
           status?: string
+          takatak_client_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -643,6 +645,7 @@ export type Database = {
           search_document?: unknown
           special_hours?: Json | null
           status?: string
+          takatak_client_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -1731,6 +1734,8 @@ export type Database = {
           hidden_reason: string | null
           id: string
           moderation_status: string
+          owner_reply: string | null
+          owner_replied_at: string | null
           rating: number
           updated_at: string
           useful: number
@@ -1747,6 +1752,8 @@ export type Database = {
           hidden_reason?: string | null
           id?: string
           moderation_status?: string
+          owner_reply?: string | null
+          owner_replied_at?: string | null
           rating: number
           updated_at?: string
           useful?: number
@@ -1763,6 +1770,8 @@ export type Database = {
           hidden_reason?: string | null
           id?: string
           moderation_status?: string
+          owner_reply?: string | null
+          owner_replied_at?: string | null
           rating?: number
           updated_at?: string
           useful?: number

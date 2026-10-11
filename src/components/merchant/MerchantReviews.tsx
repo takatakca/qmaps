@@ -112,6 +112,12 @@ const MerchantReviews = ({ reviews }: Props) => {
                 <StarRating rating={review.rating} size={12} />
               </div>
               <p className="text-sm text-foreground mt-2">{review.body}</p>
+              {review.owner_reply ? (
+                <p className="text-sm text-foreground mt-2">
+                  <span className="font-medium">Réponse de l'entreprise. </span>
+                  {review.owner_reply}
+                </p>
+              ) : null}
               <p className="text-xs text-muted-foreground mt-2">
                 {new Date(review.created_at).toLocaleDateString("fr-CA")}
               </p>

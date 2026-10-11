@@ -14,6 +14,7 @@ interface Business {
   is_active: boolean;
   is_claimed: boolean;
   owner_user_id: string | null;
+  takatak_client_id: string | null;
   created_at: string;
 }
 
@@ -26,16 +27,19 @@ interface Claim {
   created_at: string;
 }
 
+const CLIENT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const AdminBusinesses = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const [clientDrafts, setClientDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: biz }, { data: cl }] = await Promise.all([
-      supabase.from("businesses").select("id,name,city,is_active,is_claimed,owner_user_id,created_at")
+      supabase.from("businesses").select("id,name,city,is_active,is_claimed,owner_user_id,takatak_client_id,created_at")
         .order("created_at", { ascending: false }).limit(100),
       supabase.from("business_claims").select("*").eq("status", "pending").order("created_at", { ascending: false }),
     ]);
@@ -68,6 +72,20 @@ const AdminBusinesses = () => {
     void load();
   };
 
+  const saveClientLink = async (business: Business) => {
+    const clientId = (clientDrafts[business.id] ?? business.takatak_client_id ?? "").trim();
+    if (clientId && !CLIENT_ID.test(clientId)) {
+      toast({ title: "Identifiant invalide", description: "L'espace TAKATAK doit être un UUID, ou vide pour retirer le lien.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.from("businesses").update({ takatak_client_id: clientId || null }).eq("id", business.id);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: clientId ? "Espace TAKATAK enregistré" : "Lien TAKATAK retiré" });
+      void load();
+    }
+  };
+
   const rejectClaim = async (claim: Claim) => {
     const { error } = await supabase.from("business_claims").update({ status: "rejected" }).eq("id", claim.id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -94,10 +112,21 @@ const AdminBusinesses = () => {
                     {b.is_claimed && <Badge variant="outline">Revendiquée</Badge>}
                   </div>
                   <p className="text-sm text-muted-foreground">{b.city}</p>
+                  {b.takatak_client_id ? <Badge variant="outline">Espace TAKATAK enregistré</Badge> : null}
                 </div>
-                <Button size="sm" variant={b.is_active ? "outline" : "default"} onClick={() => toggleActive(b.id, b.is_active)}>
-                  {b.is_active ? "Désactiver" : "Réactiver"}
-                </Button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input
+                    aria-label={`Espace TAKATAK pour ${b.name}`}
+                    className="h-9 w-64 rounded-md border border-input bg-background px-2 text-xs"
+                    placeholder="UUID espace TAKATAK"
+                    value={clientDrafts[b.id] ?? b.takatak_client_id ?? ""}
+                    onChange={(event) => setClientDrafts((current) => ({ ...current, [b.id]: event.target.value }))}
+                  />
+                  <Button size="sm" variant="outline" onClick={() => void saveClientLink(b)}>Lier</Button>
+                  <Button size="sm" variant={b.is_active ? "outline" : "default"} onClick={() => toggleActive(b.id, b.is_active)}>
+                    {b.is_active ? "Désactiver" : "Réactiver"}
+                  </Button>
+                </div>
               </Card>
             ))
           }

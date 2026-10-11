@@ -214,6 +214,12 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                   )}
                 </p>
               )}
+              {review.owner_reply ? (
+                <p className="mt-2 text-sm text-foreground leading-relaxed">
+                  <span className="font-medium">Réponse de l'entreprise. </span>
+                  {review.owner_reply}
+                </p>
+              ) : null}
 
               {/* Reaction buttons */}
               <div className="mt-3 flex items-center justify-between gap-2">
