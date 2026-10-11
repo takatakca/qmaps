@@ -4,7 +4,7 @@
  *
  * Runs, in order:
  *   1. bun run launch:check
- *   2. bunx vitest run
+ *   2. bun run test
  *   3. bun run build
  *   4. bun run release:status:file
  *
@@ -31,7 +31,8 @@ const outPath = outIdx >= 0 ? argv[outIdx + 1] : null;
 
 const allSteps = [
   { name: "Launch checks", cmd: "bun", args: ["run", "launch:check"] },
-  { name: "Tests", cmd: "bunx", args: ["vitest", "run"] },
+  // Same vitest the CI "Test" step already runs. bunx can resolve a different package.
+  { name: "Tests", cmd: "bun", args: ["run", "test"] },
   { name: "Build", cmd: "bun", args: ["run", "build"] },
   { name: "Release status snapshot", cmd: "bun", args: ["run", "release:status:file"] },
 ];
@@ -60,7 +61,9 @@ for (const step of steps) {
     execSync(command, { cwd: ROOT, encoding: "utf8", stdio: "pipe" });
   } catch (e) {
     ok = false;
-    error = e.message || String(e);
+    const stderr = e && typeof e === "object" && "stderr" in e ? String(e.stderr ?? "") : "";
+    const stdout = e && typeof e === "object" && "stdout" in e ? String(e.stdout ?? "") : "";
+    error = (stderr || stdout || (e && e.message) || String(e)).slice(0, 400);
   }
   const duration_ms = Date.now() - start;
   results.push({ name: step.name, ok, duration_ms, command, ...(error ? { error } : {}) });
@@ -80,11 +83,12 @@ const report = {
   failed: failed.length,
   total,
   duration_ms: total_duration_ms,
-  steps: results.map(({ name, ok, duration_ms, command }) => ({
+  steps: results.map(({ name, ok, duration_ms, command, error }) => ({
     name,
     ok,
     duration_ms,
     command,
+    ...(error ? { error } : {}),
   })),
 };
 
