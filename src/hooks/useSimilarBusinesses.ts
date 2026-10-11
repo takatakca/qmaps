@@ -42,7 +42,7 @@ export const useSimilarBusinesses = (
           .from("business_categories")
           .select("category_id")
           .eq("business_id", businessId);
-        const categoryIds = (catRows ?? []).map((r: any) => r.category_id);
+        const categoryIds = (catRows ?? []).map((row) => row.category_id);
 
         let candidateIds: string[] = [];
         if (categoryIds.length > 0) {
@@ -51,7 +51,7 @@ export const useSimilarBusinesses = (
             .select("business_id, category_id")
             .in("category_id", categoryIds);
           candidateIds = Array.from(
-            new Set((bcs ?? []).map((r: any) => r.business_id).filter((id) => id !== businessId))
+            new Set((bcs ?? []).map((row) => row.business_id).filter((id) => id !== businessId))
           );
         }
 

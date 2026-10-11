@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Check, X, Loader2, ExternalLink } from "lucide-react";
 import { buildAdminAuditLogPayload } from "@/lib/adminAudit";
+import { errorMessage } from "@/lib/errors";
 import { buildOwnerTransferRequest } from "@/lib/ownerTransfers";
 
 interface ClaimRequestRow {
@@ -43,7 +44,7 @@ const AdminClaims = () => {
 
   const load = async () => {
     setLoading(true);
-    let q = (supabase as any)
+    let q = supabase
       .from("business_claim_requests")
       .select("*, business:business_id(name,city,is_claimed,owner_user_id)")
       .order("created_at", { ascending: false })
@@ -63,7 +64,7 @@ const AdminClaims = () => {
     setWorking(row.id);
     const adminNote = (notes[row.id] ?? row.admin_note ?? "").trim() || null;
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("business_claim_requests")
       .update({
         status: decision,
@@ -104,14 +105,14 @@ const AdminClaims = () => {
             claimRequestId: row.id,
             reason: adminNote ?? undefined,
           });
-          const { error: trErr } = await (supabase as any)
+          const { error: trErr } = await supabase
             .from("business_owner_transfer_requests")
             .insert(payload);
           if (trErr) {
             toast({ title: "Avertissement transfert", description: trErr.message, variant: "destructive" });
           } else {
             transferRequested = true;
-            const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(
+            const { error: auditErr } = await supabase.from("admin_audit_logs").insert(
               buildAdminAuditLogPayload({
                 adminUserId: user.id,
                 action: "owner_transfer_requested",
@@ -127,8 +128,8 @@ const AdminClaims = () => {
             );
             if (auditErr) toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
           }
-        } catch (e: any) {
-          toast({ title: "Avertissement transfert", description: e.message, variant: "destructive" });
+        } catch (error: unknown) {
+          toast({ title: "Avertissement transfert", description: errorMessage(error), variant: "destructive" });
         }
       }
     }
@@ -147,7 +148,7 @@ const AdminClaims = () => {
         admin_note: adminNote,
       },
     });
-    const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(auditPayload);
+    const { error: auditErr } = await supabase.from("admin_audit_logs").insert(auditPayload);
     if (auditErr) {
       toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
     }

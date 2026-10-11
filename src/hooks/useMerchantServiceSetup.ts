@@ -45,12 +45,12 @@ export const useMerchantServiceSetup = (businessId?: string) => {
     setLoading(true);
     const [areasRes, catsRes] = await Promise.all([
       supabase
-        .from("merchant_service_areas" as any)
+        .from("merchant_service_areas")
         .select("*")
         .eq("business_id", businessId)
         .order("created_at", { ascending: false }),
       supabase
-        .from("merchant_service_categories" as any)
+        .from("merchant_service_categories")
         .select("*")
         .eq("business_id", businessId),
     ]);
@@ -72,7 +72,7 @@ export const useMerchantServiceSetup = (businessId?: string) => {
     async (input: ServiceAreaInput) => {
       if (!businessId) return { error: "Missing business" as const };
       const { error } = await supabase
-        .from("merchant_service_areas" as any)
+        .from("merchant_service_areas")
         .insert({ ...input, business_id: businessId });
       if (!error) await fetchAll();
       return { error: error?.message ?? null };
@@ -83,7 +83,7 @@ export const useMerchantServiceSetup = (businessId?: string) => {
   const removeArea = useCallback(
     async (id: string) => {
       const { error } = await supabase
-        .from("merchant_service_areas" as any)
+        .from("merchant_service_areas")
         .delete()
         .eq("id", id);
       if (!error) await fetchAll();
@@ -96,7 +96,7 @@ export const useMerchantServiceSetup = (businessId?: string) => {
     async (categoryId: string) => {
       if (!businessId) return { error: "Missing business" as const };
       const { error } = await supabase
-        .from("merchant_service_categories" as any)
+        .from("merchant_service_categories")
         .insert({ business_id: businessId, category_id: categoryId });
       if (!error) await fetchAll();
       return { error: error?.message ?? null };
@@ -107,7 +107,7 @@ export const useMerchantServiceSetup = (businessId?: string) => {
   const removeCategory = useCallback(
     async (id: string) => {
       const { error } = await supabase
-        .from("merchant_service_categories" as any)
+        .from("merchant_service_categories")
         .delete()
         .eq("id", id);
       if (!error) await fetchAll();

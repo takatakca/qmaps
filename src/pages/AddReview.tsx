@@ -11,6 +11,7 @@ import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { useToast } from "@/hooks/use-toast";
 import { useReviewTrust } from "@/hooks/useReviewTrust";
 import BottomNav from "@/components/BottomNav";
+import type { BusinessSearchHit } from "@/lib/business";
 
 const AddReview = () => {
   const navigate = useNavigate();
@@ -18,9 +19,9 @@ const AddReview = () => {
   const { toast } = useToast();
   const { submitReviewForScoring } = useReviewTrust();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<BusinessSearchHit[]>([]);
   const { businesses: nearby, loading: nearbyLoading, error: nearbyError, refresh } = useNearbyBusinesses(8);
-  const [selectedBusiness, setSelectedBusiness] = useState<any | null>(null);
+  const [selectedBusiness, setSelectedBusiness] = useState<BusinessSearchHit | null>(null);
   const [rating, setRating] = useState(0);
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);

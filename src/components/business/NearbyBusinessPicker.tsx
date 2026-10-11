@@ -2,14 +2,19 @@ import { MapPin, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistance } from "@/lib/geo";
-import type { BusinessWithDistance } from "@/lib/business";
+import type { BusinessSearchHit } from "@/lib/business";
+
+export type NearbyPickerBusiness = BusinessSearchHit & {
+  city?: string | null;
+  distance_meters?: number | null;
+};
 
 interface NearbyBusinessPickerProps {
-  businesses: BusinessWithDistance[];
+  businesses: NearbyPickerBusiness[];
   loading: boolean;
   error?: string | null;
   emptyLabel: string;
-  onSelect: (business: BusinessWithDistance) => void;
+  onSelect: (business: NearbyPickerBusiness) => void;
   onRefresh?: () => void;
 }
 

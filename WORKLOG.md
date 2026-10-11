@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-11 | cursor | cursor/qmaps-lint-explicit-any → PR | active | Replace explicit any with the generated Supabase row types so lint passes | open the PR and wait for CI
+
 2026-10-09 | Lovable | managed workspace → no PR | done | Added 6 more visual option boards (search+map, onboarding, city page, mobile screens, notifications, about page), boards 16-21 in Files; no code changes | Owner picks favorites; no publishing
 2026-10-09 | Lovable | managed workspace → no PR | done | Added 6 more visual option boards (dark mode, editorial categories, dark business page, profile, winter hero, light merchant portal), boards 10-15 in Files; no code changes | Owner picks favorites; no publishing
 2026-10-09 | Lovable | managed workspace → no PR | done | Delivered 12 QMaps visual concepts across 3 image boards; no application code changes | Owner can select visual directions; no publishing

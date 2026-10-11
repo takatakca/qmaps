@@ -26,14 +26,14 @@ export const useReviewReactions = (reviewIds: string[]) => {
     }
 
     const { data } = await supabase
-      .from("review_reactions" as any)
+      .from("review_reactions")
       .select("review_id, user_id, reaction_type")
       .in("review_id", reviewIds);
 
     const next: Record<string, ReviewReactionState> = {};
     for (const id of reviewIds) next[id] = emptyState();
 
-    for (const row of (data || []) as any[]) {
+    for (const row of (data || [])) {
       const target = next[row.review_id] || emptyState();
       if (row.reaction_type in target.counts) {
         target.counts[row.reaction_type as ReactionType] += 1;
@@ -74,7 +74,7 @@ export const useReviewReactions = (reviewIds: string[]) => {
       };
     });
 
-    const query = supabase.from("review_reactions" as any);
+    const query = supabase.from("review_reactions");
     const { error } = hasReaction
       ? await query.delete().eq("review_id", reviewId).eq("user_id", user.id).eq("reaction_type", reactionType)
       : await query.insert({ review_id: reviewId, user_id: user.id, reaction_type: reactionType });

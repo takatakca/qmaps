@@ -28,6 +28,32 @@ export type ReviewSignalType =
 export type ReviewSeverity = "low" | "medium" | "high" | "critical";
 export type ReviewRiskLevel = ReviewSeverity;
 
+const REVIEW_SIGNAL_TYPES: readonly ReviewSignalType[] = [
+  "duplicate_text",
+  "repeated_phrase",
+  "extreme_rating",
+  "new_account",
+  "burst_activity",
+  "review_velocity",
+  "same_business_pattern",
+  "short_low_context",
+  "suspicious_language",
+  "merchant_conflict",
+  "user_reported",
+  "ai_flagged",
+  "admin_flagged",
+  "trusted_history",
+];
+
+export function asReviewSeverity(value: string | null | undefined): ReviewSeverity {
+  if (value === "low" || value === "medium" || value === "high" || value === "critical") return value;
+  return "low";
+}
+
+export function asReviewSignalType(value: string): ReviewSignalType | null {
+  return (REVIEW_SIGNAL_TYPES as readonly string[]).includes(value) ? (value as ReviewSignalType) : null;
+}
+
 export type ReviewModerationStatus =
   | "visible"
   | "needs_review"

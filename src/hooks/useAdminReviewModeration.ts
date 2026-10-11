@@ -5,15 +5,21 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import type { ReviewModerationStatus, ReviewRiskLevel, ReviewSignalType } from "@/lib/reviewTrust";
 
+type ModerationReview = Pick<
+  Tables<"reviews">,
+  "id" | "body" | "rating" | "user_id" | "business_id" | "moderation_status" | "created_at"
+>;
+
 export interface FlaggedReview {
-  trust: any;
-  review: any;
+  trust: Tables<"review_trust_scores"> | undefined;
+  review: ModerationReview;
   business: { id: string; name: string; city: string | null } | null;
   user: { id: string; display_name: string | null } | null;
-  signals: any[];
+  signals: Tables<"review_moderation_signals">[];
 }
 
 export interface ModerationFilters {
@@ -42,8 +48,8 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
     (async () => {
       setLoading(true);
       try {
-        let query: any = supabase
-          .from("review_trust_scores" as any)
+        let query = supabase
+          .from("review_trust_scores")
           .select("*")
           .order("updated_at", { ascending: false })
           .limit(100);
@@ -57,7 +63,7 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
         if (filters.toDate) query = query.lte("updated_at", filters.toDate);
 
         const { data: scores } = await query;
-        const trustList = (scores ?? []) as any[];
+        const trustList = (scores ?? []);
         if (trustList.length === 0) {
           if (!cancelled) setItems([]);
           return;
@@ -79,13 +85,13 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
 
         const { data: businesses } = businessIds.length
           ? await supabase.from("businesses").select("id, name, city").in("id", businessIds)
-          : { data: [] as any[] };
+          : { data: [] };
         const { data: profiles } = userIds.length
           ? await supabase.from("profiles").select("id, display_name").in("id", userIds)
-          : { data: [] as any[] };
+          : { data: [] };
 
-        let signalQuery: any = supabase
-          .from("review_moderation_signals" as any)
+        let signalQuery = supabase
+          .from("review_moderation_signals")
           .select("*")
           .in("review_id", reviewIds);
         if (filters.signalType && filters.signalType !== "all") {
@@ -95,9 +101,9 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
 
         const result: FlaggedReview[] = filteredReviews.map((r) => {
           const trust = trustList.find((t) => t.review_id === r.id);
-          const biz = (businesses ?? []).find((b: any) => b.id === r.business_id) ?? null;
-          const usr = (profiles ?? []).find((p: any) => p.id === r.user_id) ?? null;
-          const sig = ((signals ?? []) as any[]).filter((s) => s.review_id === r.id);
+          const biz = (businesses ?? []).find((b) => b.id === r.business_id) ?? null;
+          const usr = (profiles ?? []).find((p) => p.id === r.user_id) ?? null;
+          const sig = ((signals ?? [])).filter((s) => s.review_id === r.id);
           return { trust, review: r, business: biz, user: usr, signals: sig };
         });
 
@@ -147,19 +153,19 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
 
       // Read previous status
       const { data: prev } = await supabase
-        .from("review_trust_scores" as any)
+        .from("review_trust_scores")
         .select("status")
         .eq("review_id", reviewId)
         .maybeSingle();
-      const previous_status = (prev as any)?.status ?? null;
+      const previous_status = (prev)?.status ?? null;
 
-      const updates: Record<string, any> = {
+      const updates = {
         status: newStatus,
         reviewed_by: user.id,
         reviewed_at: new Date().toISOString(),
       };
       const { error: updateError } = await supabase
-        .from("review_trust_scores" as any)
+        .from("review_trust_scores")
         .update(updates)
         .eq("review_id", reviewId);
       if (updateError) return { error: updateError };
@@ -173,7 +179,7 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
             hidden_at: new Date().toISOString(),
             hidden_by: user.id,
             hidden_reason: reason ?? null,
-          } as any)
+          })
           .eq("id", reviewId);
       } else if (action === "restore_review") {
         await supabase
@@ -183,22 +189,22 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
             hidden_at: null,
             hidden_by: null,
             hidden_reason: null,
-          } as any)
+          })
           .eq("id", reviewId);
       } else if (action === "mark_trusted") {
         await supabase
           .from("reviews")
-          .update({ moderation_status: "trusted" } as any)
+          .update({ moderation_status: "trusted" })
           .eq("id", reviewId);
       } else if (action === "mark_needs_review") {
         await supabase
           .from("reviews")
-          .update({ moderation_status: "needs_review" } as any)
+          .update({ moderation_status: "needs_review" })
           .eq("id", reviewId);
       }
 
       // Audit
-      await supabase.from("review_moderation_actions" as any).insert({
+      await supabase.from("review_moderation_actions").insert({
         review_id: reviewId,
         actor_user_id: user.id,
         action,
@@ -206,7 +212,7 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
         previous_status,
         new_status: newStatus,
         metadata: {},
-      } as any);
+      });
 
       refresh();
       return { error: null };
@@ -225,12 +231,12 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
       }
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from("review_moderation_actions" as any).insert({
+        await supabase.from("review_moderation_actions").insert({
           review_id: reviewId,
           actor_user_id: user.id,
           action: "recompute_score",
           metadata: {},
-        } as any);
+        });
       }
       refresh();
     },
@@ -241,13 +247,13 @@ export const useAdminReviewModeration = (filters: ModerationFilters = {}) => {
     async (reviewId: string, note: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      await supabase.from("review_moderation_actions" as any).insert({
+      await supabase.from("review_moderation_actions").insert({
         review_id: reviewId,
         actor_user_id: user.id,
         action: "add_note",
         reason: note,
         metadata: {},
-      } as any);
+      });
       refresh();
     },
     [refresh]

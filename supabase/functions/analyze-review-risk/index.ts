@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
     let userCreatedAt: string | null = null;
     try {
       const { data: userRes } = await admin.auth.admin.getUserById(review.user_id);
-      userCreatedAt = (userRes?.user as any)?.created_at ?? null;
+      userCreatedAt = (userRes?.user)?.created_at ?? null;
     } catch (_e) {
       // Treat as unknown account age. new_account signal will simply not fire.
       userCreatedAt = null;

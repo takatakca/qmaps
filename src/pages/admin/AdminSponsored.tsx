@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import {
+  isSponsoredPlacement,
+  isSponsoredStatus,
   SPONSORED_PLACEMENT_LABELS,
   SPONSORED_RANGE_LABELS,
   SPONSORED_STATUS_LABELS,
@@ -53,13 +55,18 @@ const AdminSponsored = () => {
   const fetchRows = async () => {
     setLoading(true);
     let query = supabase
-      .from("sponsored_campaigns" as any)
+      .from("sponsored_campaigns")
       .select(`*, business:businesses(id, name, city)`)
       .order("created_at", { ascending: false })
       .limit(100);
     if (filter !== "all") query = query.eq("status", filter);
     const { data } = await query;
-    setRows((data as any) || []);
+    setRows(
+      (data ?? []).flatMap((row) => {
+        if (!isSponsoredStatus(row.status) || !isSponsoredPlacement(row.placement) || !row.business) return [];
+        return [{ ...row, status: row.status, placement: row.placement, business: row.business }];
+      }),
+    );
     setLoading(false);
   };
 
@@ -77,14 +84,19 @@ const AdminSponsored = () => {
       });
       return;
     }
-    const patch: any = {
+    const patch: {
+      status: SponsoredStatus;
+      reviewed_at: string;
+      reviewed_by: string | null;
+      admin_note?: string;
+    } = {
       status,
       reviewed_at: new Date().toISOString(),
       reviewed_by: user?.id ?? null,
     };
     if (notes[id]) patch.admin_note = notes[id];
     const { error } = await supabase
-      .from("sponsored_campaigns" as any)
+      .from("sponsored_campaigns")
       .update(patch)
       .eq("id", id);
     if (error) {

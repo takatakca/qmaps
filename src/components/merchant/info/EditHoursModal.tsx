@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toJson } from "@/lib/json";
 import { useToast } from "@/hooks/use-toast";
 import {
   DAYS,
@@ -34,12 +35,12 @@ const EditHoursModal = ({ open, onClose, business, onSaved }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [week, setWeek] = useState<WeeklyHours>(() =>
-    parseWeeklyHours((business as any).hours_json) ?? defaultWeeklyHours(),
+    parseWeeklyHours((business).hours_json) ?? defaultWeeklyHours(),
   );
 
   useEffect(() => {
     if (!open) return;
-    setWeek(parseWeeklyHours((business as any).hours_json) ?? defaultWeeklyHours());
+    setWeek(parseWeeklyHours((business).hours_json) ?? defaultWeeklyHours());
   }, [open, business.id]);
 
   const updateDay = (day: keyof WeeklyHours, patch: Partial<WeeklyHours[keyof WeeklyHours]>) => {
@@ -100,7 +101,7 @@ const EditHoursModal = ({ open, onClose, business, onSaved }: Props) => {
     const text = summarizeWeeklyHours(week);
     const { error } = await supabase
       .from("businesses")
-      .update({ hours_json: week as any, hours: text })
+      .update({ hours_json: toJson(week), hours: text })
       .eq("id", business.id);
     setSaving(false);
     if (error) {

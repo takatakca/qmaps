@@ -10,7 +10,7 @@ import { SlidersHorizontal, X, LayoutGrid, FilePlus2, Store } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { formatDistance } from "@/lib/geo";
-import { mapBusinessToCard } from "@/lib/business";
+import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
 import {
@@ -78,7 +78,7 @@ const Search = () => {
         if (selectedCategory) {
           const cat = pool.find((c) => c.slug === selectedCategory);
           if (!cat) return [];
-          const children = pool.filter((c: any) => c.parent_id === cat.id).map((c) => c.id);
+          const children = pool.filter((child) => child.parent_id === cat.id).map((child) => child.id);
           return [cat.id, ...children];
         }
         if (query && allCategories.length) {
@@ -132,7 +132,7 @@ const Search = () => {
 
       // Client-side openNow using real hours when available
       if (openNow) {
-        results = results.filter((b) => isBusinessOpenNow(b as any));
+        results = results.filter((b) => isBusinessOpenNow(b));
       }
 
       // Distance scoping
@@ -306,8 +306,8 @@ const Search = () => {
               >
                 <BusinessCard business={mapBusinessToCard({
                   ...b,
-                  category_name: categories.find((cat) => cat.slug === selectedCategory)?.name || (b as any).business_categories?.[0]?.categories?.name || "Local",
-                  distance_meters: (b as any).distance_meters,
+                  category_name: categories.find((cat) => cat.slug === selectedCategory)?.name || categoryNameFromEmbed(b),
+                  distance_meters: (b).distance_meters,
                 })} />
               </div>
             ))}

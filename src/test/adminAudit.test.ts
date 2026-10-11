@@ -36,7 +36,7 @@ describe("adminAudit", () => {
 
   it("rejects invalid actions and inputs", () => {
     expect(() =>
-      buildAdminAuditLogPayload({ adminUserId: "a", action: "bad" as any, targetType: "x" })
+      buildAdminAuditLogPayload({ adminUserId: "a", action: "bad", targetType: "x" })
     ).toThrow();
     expect(() =>
       buildAdminAuditLogPayload({ adminUserId: "", action: "claim_approved", targetType: "x" })
@@ -49,7 +49,7 @@ describe("adminAudit", () => {
         { action: "claim_approved" },
         { action: "claim_approved" },
         { action: "report_dismissed" },
-        { action: "" } as any,
+        { action: "" },
       ])
     ).toEqual({ claim_approved: 2, report_dismissed: 1 });
   });

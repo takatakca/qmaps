@@ -41,23 +41,23 @@ export const useActivityFeed = () => {
           .order("created_at", { ascending: false })
           .limit(12),
         user
-          ? supabase.from("follows" as any).select("following_id").eq("follower_id", user.id)
+          ? supabase.from("follows").select("following_id").eq("follower_id", user.id)
           : Promise.resolve({ data: [] }),
       ]);
 
       const userIds = new Set<string>();
-      for (const row of (reviewsResult.data || []) as any[]) userIds.add(row.user_id);
-      for (const row of (photosResult.data || []) as any[]) userIds.add(row.user_id);
-      for (const row of (businessesResult.data || []) as any[]) if (row.owner_user_id) userIds.add(row.owner_user_id);
+      for (const row of (reviewsResult.data || [])) userIds.add(row.user_id);
+      for (const row of (photosResult.data || [])) userIds.add(row.user_id);
+      for (const row of (businessesResult.data || [])) if (row.owner_user_id) userIds.add(row.owner_user_id);
 
       const { data: profiles } = userIds.size
         ? await supabase.from("profiles").select("id, display_name").in("id", Array.from(userIds))
         : { data: [] };
 
       const profileMap = new Map<string, string>();
-      for (const profile of (profiles || []) as any[]) profileMap.set(profile.id, profile.display_name || "Utilisateur");
+      for (const profile of (profiles || [])) profileMap.set(profile.id, profile.display_name || "Utilisateur");
 
-      const reviewItems: ActivityFeedItem[] = ((reviewsResult.data || []) as any[]).map((review) => ({
+      const reviewItems: ActivityFeedItem[] = ((reviewsResult.data || [])).map((review) => ({
         id: `review-${review.id}`,
         type: "review",
         actor_id: review.user_id,
@@ -73,7 +73,7 @@ export const useActivityFeed = () => {
         body: review.body,
       }));
 
-      const photoItems: ActivityFeedItem[] = ((photosResult.data || []) as any[]).map((photo) => ({
+      const photoItems: ActivityFeedItem[] = ((photosResult.data || [])).map((photo) => ({
         id: `photo-${photo.id}`,
         type: "photo",
         actor_id: photo.user_id,
@@ -89,7 +89,7 @@ export const useActivityFeed = () => {
         body: photo.caption,
       }));
 
-      const businessItems: ActivityFeedItem[] = ((businessesResult.data || []) as any[]).map((business) => ({
+      const businessItems: ActivityFeedItem[] = ((businessesResult.data || [])).map((business) => ({
         id: `business-${business.id}`,
         type: "business",
         actor_id: business.owner_user_id || business.id,

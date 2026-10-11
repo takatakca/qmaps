@@ -42,7 +42,7 @@ const ProjectDetail = () => {
     setLoadingReq(true);
     setLoadError(null);
     supabase
-      .from("project_requests" as any)
+      .from("project_requests")
       .select("*")
       .eq("id", id)
       .maybeSingle()

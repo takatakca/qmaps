@@ -23,7 +23,7 @@ export const useConversations = () => {
     setLoading(true);
 
     const { data: participantRows } = await supabase
-      .from("conversation_participants" as any)
+      .from("conversation_participants")
       .select("conversation_id")
       .eq("user_id", user.id);
 
@@ -35,9 +35,9 @@ export const useConversations = () => {
     }
 
     const [{ data: conversationsData }, { data: participantsData }, { data: messagesData }] = await Promise.all([
-      supabase.from("conversations" as any).select("*").in("id", conversationIds).order("updated_at", { ascending: false }),
-      supabase.from("conversation_participants" as any).select("conversation_id, user_id").in("conversation_id", conversationIds),
-      supabase.from("messages" as any).select("*").in("conversation_id", conversationIds).order("created_at", { ascending: false }),
+      supabase.from("conversations").select("*").in("id", conversationIds).order("updated_at", { ascending: false }),
+      supabase.from("conversation_participants").select("conversation_id, user_id").in("conversation_id", conversationIds),
+      supabase.from("messages").select("*").in("conversation_id", conversationIds).order("created_at", { ascending: false }),
     ]);
 
     const participantUserIds = unique((((participantsData || []) as unknown) as ConversationParticipantRow[]).map((row) => row.user_id));
@@ -63,7 +63,7 @@ export const useConversations = () => {
       participantsByConversation.set(participant.conversation_id, list);
     }
 
-    const next = ((conversationsData || []) as any[]).map((conversation) => {
+    const next = ((conversationsData || [])).map((conversation) => {
       const messages = messagesByConversation.get(conversation.id) || [];
       const participants = (participantsByConversation.get(conversation.id) || []).filter((profile) => profile.id !== user.id);
       const unreadCount = messages.filter((message) => !message.is_read && message.sender_id !== user.id).length;
@@ -87,14 +87,14 @@ export const useConversations = () => {
     if (!user) throw new Error("not-authenticated");
 
     const { data: ownParticipation } = await supabase
-      .from("conversation_participants" as any)
+      .from("conversation_participants")
       .select("conversation_id")
       .eq("user_id", user.id);
 
     const existingConversationIds = (((ownParticipation || []) as unknown) as ConversationIdRow[]).map((row) => row.conversation_id);
     if (existingConversationIds.length) {
       const { data: existingOther } = await supabase
-        .from("conversation_participants" as any)
+        .from("conversation_participants")
         .select("conversation_id, user_id")
         .in("conversation_id", existingConversationIds)
         .eq("user_id", participantId);
@@ -104,7 +104,7 @@ export const useConversations = () => {
     }
 
     const { data: conversation, error: conversationError } = await supabase
-      .from("conversations" as any)
+      .from("conversations")
       .insert({ created_by: user.id })
       .select("id")
       .single();
@@ -113,7 +113,7 @@ export const useConversations = () => {
     if (conversationError || !insertedConversation) throw conversationError || new Error("conversation-create-failed");
 
     const { error: participantsError } = await supabase
-      .from("conversation_participants" as any)
+      .from("conversation_participants")
       .insert([
         { conversation_id: insertedConversation.id, user_id: user.id },
         { conversation_id: insertedConversation.id, user_id: participantId },
@@ -149,8 +149,8 @@ export const useConversationThread = (conversationId?: string) => {
     setLoading(true);
 
     const [{ data: messagesData }, { data: participantsData }] = await Promise.all([
-      supabase.from("messages" as any).select("*").eq("conversation_id", conversationId).order("created_at", { ascending: true }),
-      supabase.from("conversation_participants" as any).select("user_id").eq("conversation_id", conversationId),
+      supabase.from("messages").select("*").eq("conversation_id", conversationId).order("created_at", { ascending: true }),
+      supabase.from("conversation_participants").select("user_id").eq("conversation_id", conversationId),
     ]);
 
     const participantIds = ((((participantsData || []) as unknown) as Array<{ user_id: string }>)).map((row) => row.user_id);
@@ -162,7 +162,7 @@ export const useConversationThread = (conversationId?: string) => {
     setParticipants((profilesData || []) as ProfileSummary[]);
 
     await supabase
-      .from("messages" as any)
+      .from("messages")
       .update({ is_read: true })
       .eq("conversation_id", conversationId)
       .neq("sender_id", user.id)
@@ -179,7 +179,7 @@ export const useConversationThread = (conversationId?: string) => {
     if (!trimmed) return;
 
     const { error } = await supabase
-      .from("messages" as any)
+      .from("messages")
       .insert({ conversation_id: conversationId, sender_id: user.id, body: trimmed });
 
     if (error) throw error;

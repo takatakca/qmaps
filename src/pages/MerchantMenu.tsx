@@ -78,7 +78,7 @@ const MerchantMenu = () => {
       .maybeSingle();
     setBusiness(biz);
     if (biz) {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("business_menu_items")
         .select("*")
         .eq("business_id", biz.id)
@@ -131,8 +131,8 @@ const MerchantMenu = () => {
     };
     setSaving(true);
     const res = editing.id
-      ? await (supabase as any).from("business_menu_items").update(payload).eq("id", editing.id)
-      : await (supabase as any).from("business_menu_items").insert(payload);
+      ? await supabase.from("business_menu_items").update(payload).eq("id", editing.id)
+      : await supabase.from("business_menu_items").insert(payload);
     setSaving(false);
     if (res.error) {
       toast({ title: "Erreur", description: res.error.message, variant: "destructive" });
@@ -145,7 +145,7 @@ const MerchantMenu = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer cet article du menu?")) return;
-    const { error } = await (supabase as any).from("business_menu_items").delete().eq("id", id);
+    const { error } = await supabase.from("business_menu_items").delete().eq("id", id);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return;
@@ -155,7 +155,7 @@ const MerchantMenu = () => {
   };
 
   const toggleAvailability = async (item: MenuItem) => {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("business_menu_items")
       .update({ is_available: !item.is_available })
       .eq("id", item.id);

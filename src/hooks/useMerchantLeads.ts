@@ -67,11 +67,11 @@ export const useMerchantLeads = () => {
     if (ownedIds.length > 0) {
       const [areasRes, quotesRes] = await Promise.all([
         supabase
-          .from("merchant_service_areas" as any)
+          .from("merchant_service_areas")
           .select("business_id, city, region, postal_code_prefix")
           .in("business_id", ownedIds),
         supabase
-          .from("project_quotes" as any)
+          .from("project_quotes")
           .select("project_request_id")
           .in("business_id", ownedIds),
       ]);
@@ -84,7 +84,7 @@ export const useMerchantLeads = () => {
 
     // 2. Open project requests (RLS narrows to matching service categories)
     const { data, error } = await supabase
-      .from("project_requests" as any)
+      .from("project_requests")
       .select("*")
       .neq("user_id", user.id)
       .eq("status", "open")
@@ -103,7 +103,7 @@ export const useMerchantLeads = () => {
 
     // 3. Enrich with category names
     const catIds = Array.from(new Set(inArea.map(r => r.category_id).filter(Boolean) as string[]));
-    let catMap: Record<string, string> = {};
+    const catMap: Record<string, string> = {};
     if (catIds.length > 0) {
       const { data: cats } = await supabase
         .from("categories")

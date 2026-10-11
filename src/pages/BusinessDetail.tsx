@@ -25,6 +25,7 @@ import Seo from "@/components/Seo";
 import { slugify } from "@/lib/seo";
 import { isBusinessOpenNow } from "@/lib/searchFilters";
 import { readBusinessStatus } from "@/lib/businessStatus";
+import { categoryNameFromEmbed } from "@/lib/business";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
@@ -50,7 +51,7 @@ const BusinessDetail = () => {
       fetchReviewsWithAuthors(id),
     ]);
     setBusiness(biz);
-    setReviews((revs as any) || []);
+    setReviews((revs) || []);
 
     if (user) {
       const [{ data: bk }, { data: profile }] = await Promise.all([
@@ -167,7 +168,7 @@ const BusinessDetail = () => {
       {/* Hero */}
       <BusinessHero
         name={business.name}
-        imageUrl={business.image_url || getCategoryImage((business as any).business_categories?.[0]?.categories?.name, business.name)}
+        imageUrl={business.image_url || getCategoryImage(categoryNameFromEmbed(business, ""), business.name)}
         avgRating={Number(business.avg_rating)}
         reviewsCount={business.reviews_count}
         isClaimed={business.is_claimed}
@@ -185,7 +186,7 @@ const BusinessDetail = () => {
         businessId={business.id}
         priceLevel={business.price_level}
         categoryName=""
-        isOpen={isBusinessOpenNow(business as any)}
+        isOpen={isBusinessOpenNow(business)}
         hours={business.hours}
         website={business.website}
         phone={business.phone}
@@ -198,7 +199,7 @@ const BusinessDetail = () => {
         }}
       />
 
-      <BusinessTrustBadges business={business as any} />
+      <BusinessTrustBadges business={business} />
 
       {!business.is_claimed && (!user || business.owner_user_id !== user.id) && (
         <div className="mx-4 mt-3 p-3 rounded-xl border border-border bg-secondary/40 flex items-center justify-between gap-2">
@@ -246,10 +247,10 @@ const BusinessDetail = () => {
         {activeTab === "Info" && (
           <BusinessInfoTab
             hours={business.hours}
-            hoursJson={(business as any).hours_json}
-            specialHours={(business as any).special_hours}
-            isOpen={isBusinessOpenNow(business as any)}
-            status={readBusinessStatus(business as any)}
+            hoursJson={(business).hours_json}
+            specialHours={(business).special_hours}
+            isOpen={isBusinessOpenNow(business)}
+            status={readBusinessStatus(business)}
             website={business.website}
             phone={business.phone}
             address={business.address}
@@ -257,10 +258,10 @@ const BusinessDetail = () => {
             region={business.region}
             postalCode={business.postal_code}
             amenities={business.amenities}
-            attributes={(business as any).attributes}
-            paymentMethods={(business as any).payment_methods}
-            languages={(business as any).languages}
-            accessibility={(business as any).accessibility}
+            attributes={(business).attributes}
+            paymentMethods={(business).payment_methods}
+            languages={(business).languages}
+            accessibility={(business).accessibility}
             latitude={business.latitude}
             longitude={business.longitude}
           />

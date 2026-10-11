@@ -24,7 +24,7 @@ const NewMessage = () => {
       .neq("id", user.id)
       .order("display_name", { ascending: true })
       .limit(25)
-      .then(({ data }) => setProfiles((data || []) as any));
+      .then(({ data }) => setProfiles((data || [])));
   }, [user]);
 
   const filtered = profiles.filter((profile) => {

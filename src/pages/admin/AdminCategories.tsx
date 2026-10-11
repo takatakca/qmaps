@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { errorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -66,7 +67,7 @@ const AdminCategories = () => {
     // Safety cap: 20 pages = 20k rows
     try {
       for (let i = 0; i < 20; i++) {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from("categories")
           .select("id,name,slug,icon,parent_id,is_active,sort_order,category_type")
           .order("sort_order", { ascending: true })
@@ -78,8 +79,8 @@ const AdminCategories = () => {
         from += pageSize;
       }
       setRows(all);
-    } catch (e: any) {
-      setLoadError(e?.message || "Erreur de chargement");
+    } catch (error: unknown) {
+      setLoadError(errorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -89,7 +90,7 @@ const AdminCategories = () => {
 
   const audit = async (action: AdminAuditAction, targetId: string, metadata: Record<string, unknown> = {}) => {
     if (!user) return;
-    await (supabase as any).from("admin_audit_logs").insert(
+    await supabase.from("admin_audit_logs").insert(
       buildAdminAuditLogPayload({ adminUserId: user.id, action, targetType: "category", targetId, metadata }),
     );
   };
@@ -106,12 +107,12 @@ const AdminCategories = () => {
     const v = validateCategoryInput(normalized, { id: editing?.id });
     if (!v.ok) { toast({ title: "Validation", description: v.errors.join(" "), variant: "destructive" }); return; }
     if (editing) {
-      const { error } = await (supabase as any).from("categories").update(normalized).eq("id", editing.id);
+      const { error } = await supabase.from("categories").update(normalized).eq("id", editing.id);
       if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
       await audit("category_updated", editing.id, { changes: normalized });
       toast({ title: "Catégorie mise à jour" });
     } else {
-      const { data, error } = await (supabase as any).from("categories").insert(normalized).select("id").single();
+      const { data, error } = await supabase.from("categories").insert(normalized).select("id").single();
       if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
       await audit("category_created", data.id, { name: normalized.name, slug: normalized.slug });
       toast({ title: "Catégorie créée" });
@@ -122,7 +123,7 @@ const AdminCategories = () => {
 
   const toggleActive = async (r: Row) => {
     const next = !r.is_active;
-    const { error } = await (supabase as any).from("categories").update({ is_active: next }).eq("id", r.id);
+    const { error } = await supabase.from("categories").update({ is_active: next }).eq("id", r.id);
     if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
     await audit(next ? "category_reactivated" : "category_deactivated", r.id, {});
     toast({ title: next ? "Catégorie réactivée" : "Catégorie désactivée" });

@@ -40,7 +40,7 @@ const ClaimBusinessModal = ({ businessId, businessName, open, onOpenChange }: Cl
   useEffect(() => {
     if (!open || !user) return;
     void (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("business_claim_requests")
         .select("id")
         .eq("business_id", businessId)
@@ -71,7 +71,7 @@ const ClaimBusinessModal = ({ businessId, businessName, open, onOpenChange }: Cl
     }
 
     setSubmitting(true);
-    const { error } = await (supabase as any).from("business_claim_requests").insert({
+    const { error } = await supabase.from("business_claim_requests").insert({
       business_id: businessId,
       user_id: user.id,
       status: "pending",

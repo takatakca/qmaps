@@ -49,12 +49,12 @@ export const useCollections = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
       supabase
-        .from("collections" as any)
+        .from("collections")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
       supabase
-        .from("collections" as any)
+        .from("collections")
         .select("*")
         .eq("is_public", true)
         .neq("user_id", user.id)
@@ -71,7 +71,7 @@ export const useCollections = () => {
 
       const ids = rows.map((row) => row.id);
       const { data: items } = await supabase
-        .from("collection_items" as any)
+        .from("collection_items")
         .select("collection_id, businesses(image_url, name)")
         .in("collection_id", ids);
 
@@ -99,7 +99,7 @@ export const useCollections = () => {
     const hasDefault = ownCollections.some((collection) => collection.name === DEFAULT_COLLECTION_NAME);
     if (!hasDefault) {
       const { data: inserted } = await supabase
-        .from("collections" as any)
+        .from("collections")
         .insert({ user_id: user.id, name: DEFAULT_COLLECTION_NAME, is_public: false })
         .select("*")
         .single();
@@ -125,7 +125,7 @@ export const useCollections = () => {
     if (!trimmed) throw new Error("empty-name");
 
     const { error } = await supabase
-      .from("collections" as any)
+      .from("collections")
       .insert({ user_id: user.id, name: trimmed, is_public: isPublic });
 
     if (error) throw error;

@@ -70,7 +70,7 @@ const More = () => {
               {section.items.map((item, i) => (
                 <button
                   key={item.label}
-                  onClick={"action" in item ? (item as any).action : undefined}
+                  onClick={"action" in item ? (item).action : undefined}
                   className={`w-full flex items-center justify-between px-4 py-3.5 hover:bg-accent/50 transition-colors ${
                     i > 0 ? "border-t border-border" : ""
                   }`}
@@ -80,9 +80,9 @@ const More = () => {
                     <span className="text-sm text-foreground">{item.label}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {"badge" in item && typeof (item as any).badge === "number" && (item as any).badge > 0 && (
+                    {"badge" in item && typeof (item).badge === "number" && (item).badge > 0 && (
                       <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                        {(item as any).badge}
+                        {(item).badge}
                       </span>
                     )}
                     <ChevronRight size={16} className="text-muted-foreground" />

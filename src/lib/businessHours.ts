@@ -83,26 +83,35 @@ export const defaultWeeklyHours = (): WeeklyHours =>
  * Best-effort parse of an unknown JSON shape into WeeklyHours.
  * Returns null if the input is not a recognisable structure.
  */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const readBlock = (value: unknown): HoursBlock | null => {
+  if (!isRecord(value) || typeof value.open !== "string" || typeof value.close !== "string") return null;
+  const block = { open: value.open, close: value.close };
+  return isValidTime(block.open) && isValidTime(block.close) ? block : null;
+};
+
 export const parseWeeklyHours = (raw: unknown): WeeklyHours | null => {
-  if (!raw || typeof raw !== "object") return null;
-  const obj = raw as Record<string, any>;
+  if (!isRecord(raw)) return null;
   // Must look like at least one day key.
-  const hasAnyDay = DAYS.some((d) => d in obj);
+  const hasAnyDay = DAYS.some((day) => day in raw);
   if (!hasAnyDay) return null;
   const out = emptyWeeklyHours();
   for (const day of DAYS) {
-    const v = obj[day];
-    if (!v || typeof v !== "object") continue;
-    const closed = !!v.closed;
-    const blocks = Array.isArray(v.blocks)
-      ? v.blocks
-          .filter((b: any) => b && typeof b === "object" && isValidTime(b.open) && isValidTime(b.close))
-          .map((b: any) => ({ open: b.open, close: b.close }))
+    const value = raw[day];
+    if (!isRecord(value)) continue;
+    const closed = !!value.closed;
+    const blocks = Array.isArray(value.blocks)
+      ? value.blocks.flatMap((block) => {
+          const parsed = readBlock(block);
+          return parsed ? [parsed] : [];
+        })
       : [];
     out[day] = {
       closed: closed || blocks.length === 0,
       blocks: closed ? [] : blocks,
-      note: typeof v.note === "string" ? v.note : null,
+      note: typeof value.note === "string" ? value.note : null,
     };
   }
   return out;
@@ -161,21 +170,21 @@ export const formatDateKey = (date: Date): string => {
 };
 
 export const parseSpecialHours = (raw: unknown): SpecialHours | null => {
-  if (!raw || typeof raw !== "object") return null;
-  const obj = raw as Record<string, any>;
+  if (!isRecord(raw)) return null;
   const out: SpecialHours = {};
-  for (const [key, v] of Object.entries(obj)) {
-    if (!DATE_KEY.test(key) || !v || typeof v !== "object") continue;
-    const closed = !!v.closed;
-    const blocks = Array.isArray(v.blocks)
-      ? v.blocks
-          .filter((b: any) => b && isValidBlock(b))
-          .map((b: any) => ({ open: b.open, close: b.close }))
+  for (const [key, value] of Object.entries(raw)) {
+    if (!DATE_KEY.test(key) || !isRecord(value)) continue;
+    const closed = !!value.closed;
+    const blocks = Array.isArray(value.blocks)
+      ? value.blocks.flatMap((block) => {
+          const parsed = readBlock(block);
+          return parsed && isValidBlock(parsed) ? [parsed] : [];
+        })
       : [];
     out[key] = {
       closed: closed || blocks.length === 0,
       blocks: closed ? [] : blocks,
-      note: typeof v.note === "string" ? v.note : null,
+      note: typeof value.note === "string" ? value.note : null,
     };
   }
   return Object.keys(out).length === 0 ? null : out;

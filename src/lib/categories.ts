@@ -32,7 +32,17 @@ export function slugifyCategoryName(name: string): string {
     .slice(0, 80);
 }
 
-export function normalizeCategoryInput(input: CategoryInput): CategoryInput {
+export interface NormalizedCategoryInput {
+  name: string;
+  slug: string;
+  parent_id: string | null;
+  icon: string | null;
+  is_active: boolean;
+  sort_order: number;
+  category_type: string;
+}
+
+export function normalizeCategoryInput(input: CategoryInput): NormalizedCategoryInput {
   const name = (input.name ?? "").trim();
   const slugRaw = (input.slug ?? "").trim();
   const slug = slugRaw ? slugifyCategoryName(slugRaw) : slugifyCategoryName(name);

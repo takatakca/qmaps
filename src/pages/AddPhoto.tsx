@@ -10,14 +10,15 @@ import NearbyBusinessPicker from "@/components/business/NearbyBusinessPicker";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import BusinessMediaUploader from "@/components/media/BusinessMediaUploader";
 import BottomNav from "@/components/BottomNav";
+import type { BusinessSearchHit } from "@/lib/business";
 
 const AddPhoto = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<BusinessSearchHit[]>([]);
   const { businesses: nearby, loading: nearbyLoading, error: nearbyError, refresh } = useNearbyBusinesses(8);
-  const [selectedBusiness, setSelectedBusiness] = useState<any | null>(null);
+  const [selectedBusiness, setSelectedBusiness] = useState<BusinessSearchHit | null>(null);
   const [caption, setCaption] = useState("");
 
   const search = async (q: string) => {

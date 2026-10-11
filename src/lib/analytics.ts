@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toJson } from "@/lib/json";
 
 export type BusinessEventType =
   | "profile_view"
@@ -25,12 +26,12 @@ export const trackBusinessEvent = (
   void (async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from("business_events" as any).insert({
+      await supabase.from("business_events").insert({
         business_id: businessId,
         user_id: user?.id ?? null,
         event_type: eventType,
         source: options?.source ?? null,
-        metadata: options?.metadata ?? {},
+        metadata: toJson(options?.metadata ?? {}),
       });
     } catch {
       // silent

@@ -117,7 +117,7 @@ const StartProjectSheet = ({ open, onOpenChange, defaultCategoryId }: Props) => 
       const { error: upErr } = await supabase.storage.from("photos").upload(path, file);
       if (upErr) { console.error("media upload failed", upErr); continue; }
       const { data } = supabase.storage.from("photos").getPublicUrl(path);
-      await supabase.from("project_request_media" as any).insert({
+      await supabase.from("project_request_media").insert({
         project_request_id: projectRequestId,
         url: data.publicUrl,
         media_type: file.type.startsWith("video/") ? "video" : "photo",

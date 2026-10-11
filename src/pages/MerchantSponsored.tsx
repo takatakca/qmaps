@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   useSponsoredCampaigns,
   useSponsoredCampaignMetrics,
+  type SponsoredCampaign,
   type SponsoredMetricsRange,
 } from "@/hooks/useSponsoredCampaigns";
 import {
@@ -325,7 +326,7 @@ const CampaignCard = ({
   onSubmit,
   onPause,
 }: {
-  campaign: any;
+  campaign: SponsoredCampaign;
   onSubmit: () => Promise<void>;
   onPause: () => Promise<void>;
 }) => {

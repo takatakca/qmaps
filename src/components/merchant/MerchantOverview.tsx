@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
+import type { ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/StarRating";
@@ -10,13 +11,14 @@ import {
   MousePointerClick, CalendarCheck, Building, Inbox, Receipt,
   Wifi, Car, Utensils, CreditCard, Accessibility, Baby,
   Wind, PartyPopper, ChefHat, Truck, Wine, Coffee,
-  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck, Plus, Loader2
+  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck, Plus, Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   business: Tables<"businesses">;
-  reviews: any[];
+  reviews: ReviewWithAuthor[];
   onRefresh?: () => void;
 }
 
@@ -84,7 +86,7 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
   ];
 
   const amenities = business.amenities || [];
-  const amenityIcons: Record<string, any> = {
+  const amenityIcons: Record<string, LucideIcon> = {
     wifi: Wifi, parking: Car, delivery: Truck, credit_cards: CreditCard,
     wheelchair: Accessibility, kids_menu: Baby, ac: Wind, private_events: PartyPopper,
     catering: ChefHat, bar: Wine, brunch: Coffee, takeout: Utensils,

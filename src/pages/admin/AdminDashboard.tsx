@@ -23,14 +23,14 @@ const AdminDashboard = () => {
     const load = async () => {
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const [reports, claims, claimRequests, transfers, reviews, businesses, projects, audits] = await Promise.all([
-        supabase.from("reports" as any).select("id", { count: "exact", head: true }).eq("status", "open"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("business_claims").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        (supabase as any).from("business_claim_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        (supabase as any).from("business_owner_transfer_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("business_claim_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("business_owner_transfer_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("reviews").select("id", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("businesses").select("id", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("project_requests").select("id", { count: "exact", head: true }).gte("created_at", since),
-        (supabase as any).from("admin_audit_logs").select("id, action, created_at").order("created_at", { ascending: false }).limit(5),
+        supabase.from("admin_audit_logs").select("id, action, created_at").order("created_at", { ascending: false }).limit(5),
       ]);
       setStats({
         openReports: reports.count || 0,
@@ -41,7 +41,7 @@ const AdminDashboard = () => {
         recentBusinesses: businesses.count || 0,
         recentProjects: projects.count || 0,
       });
-      setRecentAudits((audits.data as any) ?? []);
+      setRecentAudits((audits.data) ?? []);
       setLoading(false);
     };
     void load();

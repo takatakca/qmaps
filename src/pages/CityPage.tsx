@@ -5,7 +5,7 @@ import BottomNav from "@/components/BottomNav";
 import BusinessCard from "@/components/BusinessCard";
 import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
-import { mapBusinessToCard } from "@/lib/business";
+import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityFromSlug } from "@/lib/seo";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
@@ -145,7 +145,7 @@ const CityPage = () => {
           businesses.map((b) => (
             <BusinessCard
               key={b.id}
-              business={mapBusinessToCard({ ...b, category_name: (b as any).business_categories?.[0]?.categories?.name || "Local" })}
+              business={mapBusinessToCard({ ...b, category_name: categoryNameFromEmbed(b) })}
             />
           ))
         )}

@@ -8,13 +8,23 @@ import BottomNav from "@/components/BottomNav";
 import ReviewReactionButtons from "@/components/social/ReviewReactionButtons";
 import { useReviewReactions } from "@/hooks/useReviewReactions";
 import { useToast } from "@/hooks/use-toast";
+import type { Tables } from "@/integrations/supabase/types";
 
 const MyActivity = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<{ display_name: string | null } | null>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Array<Tables<"reviews"> & {
+    businesses: {
+      id: string;
+      name: string;
+      image_url: string | null;
+      avg_rating: number;
+      reviews_count: number;
+      city: string | null;
+    } | null;
+  }>>([]);
   const [stats, setStats] = useState({ reviews: 0, photos: 0 });
   const { byReview, pending, toggleReaction } = useReviewReactions(reviews.map((review) => review.id));
 
@@ -24,7 +34,7 @@ const MyActivity = () => {
     supabase.from("reviews").select("*, businesses(id, name, image_url, avg_rating, reviews_count, city)")
       .eq("user_id", user.id).order("created_at", { ascending: false })
       .then(({ data }) => {
-        setReviews((data as any) || []);
+        setReviews((data) || []);
         setStats(s => ({ ...s, reviews: data?.length || 0 }));
       });
   }, [user]);

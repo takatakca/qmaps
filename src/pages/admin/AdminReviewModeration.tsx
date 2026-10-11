@@ -16,11 +16,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { isOneOf } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import {
   formatRiskLevelAdmin,
   riskLevelTone,
   humanSignalType,
+  asReviewSeverity,
+  asReviewSignalType,
   type ReviewRiskLevel,
   type ReviewModerationStatus,
 } from "@/lib/reviewTrust";
@@ -74,14 +77,14 @@ const AdminReviewModeration = () => {
     void (async () => {
       const ids = filtered.map((f) => f.review.id);
       const { data } = await supabase
-        .from("review_moderation_actions" as any)
+        .from("review_moderation_actions")
         .select("id, review_id, action, reason, previous_status, new_status, created_at")
         .in("review_id", ids)
         .order("created_at", { ascending: false })
         .limit(200);
       if (cancelled) return;
       const map: Record<string, AuditRow[]> = {};
-      for (const row of (data ?? []) as any[]) {
+      for (const row of (data ?? [])) {
         if (!map[row.review_id]) map[row.review_id] = [];
         map[row.review_id].push(row);
       }
@@ -116,13 +119,17 @@ const AdminReviewModeration = () => {
       </div>
 
       <div className="flex flex-wrap gap-3 mb-4">
-        <Select value={riskLevel} onValueChange={(v) => setRiskLevel(v as any)}>
+        <Select value={riskLevel} onValueChange={(value) => {
+          if (isOneOf(value, riskOptions)) setRiskLevel(value);
+        }}>
           <SelectTrigger className="w-44"><SelectValue placeholder="Niveau de risque" /></SelectTrigger>
           <SelectContent>
             {riskOptions.map((r) => (<SelectItem key={r} value={r}>{r === "all" ? "Tous niveaux" : r}</SelectItem>))}
           </SelectContent>
         </Select>
-        <Select value={status} onValueChange={(v) => setStatus(v as any)}>
+        <Select value={status} onValueChange={(value) => {
+          if (isOneOf(value, statusOptions)) setStatus(value);
+        }}>
           <SelectTrigger className="w-44"><SelectValue placeholder="Statut" /></SelectTrigger>
           <SelectContent>
             {statusOptions.map((s) => (<SelectItem key={s} value={s}>{s === "all" ? "Tous statuts" : s}</SelectItem>))}
@@ -154,8 +161,8 @@ const AdminReviewModeration = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant={riskLevelTone(trust?.risk_level ?? "low")}>
-                      {formatRiskLevelAdmin(trust?.risk_level ?? "low")} · {Math.round(Number(trust?.risk_score ?? 0))}
+                    <Badge variant={riskLevelTone(asReviewSeverity(trust?.risk_level))}>
+                      {formatRiskLevelAdmin(asReviewSeverity(trust?.risk_level))} · {Math.round(Number(trust?.risk_score ?? 0))}
                     </Badge>
                     <Badge variant="outline">{trust?.status ?? "visible"}</Badge>
                     <span className="text-xs text-muted-foreground">
@@ -173,10 +180,13 @@ const AdminReviewModeration = () => {
                 <div className="mt-3 space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground">Signaux</p>
                   <ul className="text-xs space-y-1">
-                    {signals.map((s: any) => (
-                      <li key={s.id}>
-                        <span className="font-medium">{humanSignalType(s.signal_type)}</span>
-                        <span className="text-muted-foreground"> · {s.severity} · {s.explanation}</span>
+                    {signals.map((signal) => (
+                      <li key={signal.id}>
+                        <span className="font-medium">{(() => {
+                          const kind = asReviewSignalType(signal.signal_type);
+                          return kind ? humanSignalType(kind) : signal.signal_type;
+                        })()}</span>
+                        <span className="text-muted-foreground"> · {signal.severity} · {signal.explanation}</span>
                       </li>
                     ))}
                   </ul>

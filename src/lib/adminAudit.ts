@@ -1,3 +1,6 @@
+import type { Json } from "@/integrations/supabase/types";
+import { toJson } from "@/lib/json";
+
 export const ADMIN_AUDIT_ACTIONS = [
   "claim_approved",
   "claim_rejected",
@@ -46,7 +49,7 @@ export function isAdminAuditAction(action: unknown): action is AdminAuditAction 
 
 export interface AdminAuditLogInput {
   adminUserId: string;
-  action: AdminAuditAction;
+  action: string;
   targetType: string;
   targetId?: string | null;
   metadata?: Record<string, unknown> | null;
@@ -57,7 +60,7 @@ export interface AdminAuditLogPayload {
   action: AdminAuditAction;
   target_type: string;
   target_id: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Json;
 }
 
 export function buildAdminAuditLogPayload(input: AdminAuditLogInput): AdminAuditLogPayload {
@@ -69,7 +72,7 @@ export function buildAdminAuditLogPayload(input: AdminAuditLogInput): AdminAudit
     action: input.action,
     target_type: input.targetType,
     target_id: input.targetId ?? null,
-    metadata: input.metadata ?? {},
+    metadata: toJson(input.metadata ?? {}),
   };
 }
 

@@ -23,7 +23,7 @@ const AdminAuditLogs = () => {
 
   const load = async () => {
     setLoading(true);
-    let q = (supabase as any)
+    let q = supabase
       .from("admin_audit_logs")
       .select("*")
       .order("created_at", { ascending: false })
