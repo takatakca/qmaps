@@ -44,6 +44,19 @@ const stepFilter = process.env.GO_NO_GO_STEPS
   : null;
 const steps = stepFilter ? allSteps.filter((s) => stepFilter.has(s.name)) : allSteps;
 
+function envForStep(name) {
+  const env = { ...process.env };
+  // CI sets these to an empty string when the secret is missing. An empty
+  // Supabase URL crashes client setup during tests. The Test step leaves
+  // them unset, which is what the suite already passes with.
+  if (name === "Tests") {
+    for (const key of ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY", "VITE_SUPABASE_PROJECT_ID"]) {
+      if (!env[key]) delete env[key];
+    }
+  }
+  return env;
+}
+
 const results = [];
 const overallStart = Date.now();
 
@@ -58,7 +71,7 @@ for (const step of steps) {
   let ok = true;
   let error = null;
   try {
-    execSync(command, { cwd: ROOT, encoding: "utf8", stdio: "pipe" });
+    execSync(command, { cwd: ROOT, encoding: "utf8", stdio: "pipe", env: envForStep(step.name) });
   } catch (e) {
     ok = false;
     const stderr = e && typeof e === "object" && "stderr" in e ? String(e.stderr ?? "") : "";
