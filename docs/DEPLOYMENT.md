@@ -13,9 +13,14 @@
 4. L'activation requiert `QMAPS_DEPLOY_ENABLED=true` plus `QMAPS_DEPLOY_HOST`, `QMAPS_DEPLOY_USER`, `QMAPS_DEPLOY_WEB_ROOT`, `QMAPS_DEPLOY_SSH_PRIVATE_KEY`, `QMAPS_DEPLOY_KNOWN_HOSTS`, `QMAPS_PRODUCTION_URL` et les secrets de build documentés dans [github-ssh-deployment.md](github-ssh-deployment.md).
 5. Aucun secret de serveur ne doit être versionné, y compris dans la relève.
 
+## Suivi de publication
+- Issue P0 : https://github.com/takatakca/qmaps/issues/6.
+- GitHub CI + TypeScript typecheck : réussite au SHA `23aa06e4e38dafc8be6cf30e59eddf426cf533ac` (https://github.com/takatakca/qmaps/actions/runs/38615907405). Ce résultat n'est pas une vérification en ligne.
+- Publication SSH sur qmaps.ca : **non effectuée** via le workflow (tâches `skipped`, activation non configurée).
+
 ## Base et APIs — étapes séparées
 Le projet Supabase du dépôt est `ldvkebjfuldnemfdoted`. La connexion actuellement accessible ne le liste pas ; **ne pas exécuter de migration sur un autre projet**. Une fois l'accès correct établi :
-- Sauvegarder et comparer `supabase/migrations/20261011120000_takatak_workspace_and_review_reply.sql` puis `supabase/migrations/20261014190000_guard_takatak_columns_and_review_replies.sql`.
+- Sauvegarder et comparer, dans l'ordre : `20261011120000_takatak_workspace_and_review_reply.sql`, `20261014190000_guard_takatak_columns_and_review_replies.sql`, `20261014210000_guard_inserts_and_business_owner_assignment.sql`, puis `20261014220000_nullable_business_coordinates_no_fallback.sql` (tous sous `supabase/migrations/`).
 - Appliquer seulement les migrations manquantes après vérification de l'ordre, dont `supabase/migrations/20261014220000_nullable_business_coordinates_no_fallback.sql` après les migrations de protection ; elle supprime les défauts de coordonnées montréalaises sans changer les anciennes fiches.
 - Configurer les secrets fonctionnels et vérifier `takatak-match-businesses` (HMAC), `takatak-link-business`, `takatak-reply-review` et `merchant-reply-review` (JWT).
 - Vérifier les fonctions Stripe, leur liste blanche d'origines et le traitement des webhooks avec des tests autorisés.

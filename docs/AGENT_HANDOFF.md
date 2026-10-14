@@ -32,6 +32,17 @@ Le panneau `BusinessReviewsTab` propose maintenant un vrai filtre par note et le
 ## Contrôle strict ajouté
 `package.json` expose `bun run typecheck` exécuté par le job CI avant la suite Vitest. Si le nouveau contrôle découvre des erreurs préexistantes, corriger les sources et relancer GitHub Actions jusqu'à réussite ; ne pas masquer ni retirer l'étape.
 
+## Dernière relève et preuves (2026-10-14)
+- **Dernière tâche terminée :** ajout d'un contrôle TypeScript complet à la CI, après corrections du portail multi-commerces, de l'intégrité RLS/onboarding, du filtre des avis et des garde-fous du pipeline.
+- **Dernier commit de code poussé et vérifié :** `23aa06e4e38dafc8be6cf30e59eddf426cf533ac`; workflow CI réussi : https://github.com/takatakca/qmaps/actions/runs/38615907405.
+- **Commit contenant ce document :** `git rev-parse HEAD` / `main` sur GitHub (un SHA Git ne peut pas être embarqué dans son propre commit).
+- **Fichiers de la dernière phase :** `.github/workflows/ci.yml`, `package.json`, `src/pages/MerchantOnboarding.tsx`, `src/pages/AddBusiness.tsx`, `src/components/business/BusinessReviewsTab.tsx`, `src/integrations/supabase/types.ts`, les nouveaux tests sous `src/test/`, et les documents `docs/*`.
+- **Vérification exécutée :** GitHub CI (lint/typecheck/test/launch/build/GO-NO-GO) verte sur `23aa06e4`. Deno/contrat TAKATAK vert sur précédentes modifications serveur. Aucune migration de base réelle ni test E2E de production revendiqué.
+- **Problème connu :** accès manquant au Supabase QMAPS `ldvkebjfuldnemfdoted`; DNS, SSL, hébergement et web root de `qmaps.ca` non vérifiés depuis l'environnement disponible. Déploiement SSH automatiquement ignoré ; aucune preuve d'une nouvelle version en production.
+- **Accès requis :** compte/projet Supabase QMAPS autorisé, SSH de l'hébergeur vérifié, GitHub secrets de build/déploiement, configuration Stripe/Maps/OAuth via coffre de secrets. Aucun secret en texte dans ce document.
+- **Suivi du blocage** : [issue #6](https://github.com/takatakca/qmaps/issues/6).
+- **Prochaine action exacte :** vérifier que la CI du commit de cette relève est verte ; ensuite, via l'accès autorisé QMAPS (et pas un autre projet), contrôler les migrations, appliquer celles qui manquent et déployer les fonctions. Après validation du domaine, activer le workflow SSH et vérifier `qmaps-release.json` avec son SHA exact.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
