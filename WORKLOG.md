@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | done | Fixed reply text normalization and merchant dashboard branding from FLEXS to QMAPS | Verify GitHub CI and production Edge deployment prerequisites
+
 2026-10-14 | ChatGPT | main | code ready, deployment pending | Added verified JWT merchant-review reply endpoint and reply UI; SQL guards prevent authors faking replies and merchants hijacking TAKATAK workspaces | Run database migration in QMAPS environment then deploy merchant-reply-review and manually verify customer isolation
 
 2026-10-14 | ChatGPT | main | done | Locked QMAPS SSH deploy to enabled opt-in + main/CI success + qmaps.ca HTTPS and hardened trailing-dot origin validation | Verify CI and deploy only after host and secrets are confirmed

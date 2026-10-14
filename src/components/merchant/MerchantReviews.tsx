@@ -22,7 +22,7 @@ const MerchantReviews = ({ reviews, onReplySaved }: Props) => {
   const notRecommendedCount = 0;
 
   const saveReply = async (reviewId: string) => {
-    const body = replyDraft.trim().replace(/\\s+/g, " ");
+    const body = replyDraft.trim().replace(/\s+/g, " ");
     if (!body || body.length > 2000) {
       toast({ title: "Réponse invalide", description: "Écrivez une réponse de 1 à 2000 caractères.", variant: "destructive" });
       return;

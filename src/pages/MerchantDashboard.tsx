@@ -97,7 +97,7 @@ const MerchantDashboard = () => {
           </button>
           <div className="flex-1">
             <h1 className="font-heading text-xl font-bold text-foreground">
-              FLEXS <span className="text-primary">Dashboard</span>
+              QMAPS <span className="text-primary">Commerçant</span>
             </h1>
           </div>
         </div>
