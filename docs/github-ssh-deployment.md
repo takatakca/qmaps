@@ -30,3 +30,5 @@ Pour stopper la publication automatique, mettre `QMAPS_DEPLOY_ENABLED=false`. Co
 - Déploiement des fonctions Supabase et migration additive TAKATAK à appliquer séparément.
 - Secrets, prix Stripe, OAuth et Google Maps à vérifier, puis tests fonctionnels réels.
 - `docs/production-readiness.md` et `docs/final-owner-signoff.md` à actualiser avec une preuve actuelle.
+
+**Garde-fous du workflow :** même un lancement manuel nécessite `QMAPS_DEPLOY_ENABLED=true` et la branche `main`. Le déclenchement automatique exige également la CI réussie du même dépôt. L'URL vérifiée à la fin doit être `https://qmaps.ca` ou `https://www.qmaps.ca` : aucune autre destination de production ne peut être configurée sans modification du code.

@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | done | Locked QMAPS SSH deploy to enabled opt-in + main/CI success + qmaps.ca HTTPS and hardened trailing-dot origin validation | Verify CI and deploy only after host and secrets are confirmed
+
 2026-10-14 | ChatGPT | main | done | Hardened Stripe Checkout and Billing Portal redirect origins using a server-controlled HTTPS allowlist plus unit tests | Add verified legacy/staging domains in Edge Function secrets only if needed, confirm payments in a real environment
 
 2026-10-14 | ChatGPT | main | done (code only) | Updated qmaps.ca SEO/sitemap, repository README and GitHub-to-SSH deployment workflow with opt-in gate | Verify real hosting, supply secrets, activate deployment, check production end-to-end

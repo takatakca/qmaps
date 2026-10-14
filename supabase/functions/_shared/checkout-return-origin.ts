@@ -14,6 +14,7 @@ export function normalizedHttpsOrigin(value: string): string | null {
     if (
       url.protocol !== "https:" ||
       !url.hostname ||
+      url.hostname.endsWith(".") ||
       url.username ||
       url.password ||
       url.pathname !== "/" ||

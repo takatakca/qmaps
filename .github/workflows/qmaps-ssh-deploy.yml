@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   publish:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && vars.QMAPS_DEPLOY_ENABLED == 'true') }}
+    if: ${{ vars.QMAPS_DEPLOY_ENABLED == 'true' && ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -41,7 +41,7 @@ jobs:
             if [ -z "${!key}" ]; then echo "Missing configuration: $key" >&2; exit 1; fi
           done
           case "$ROOT" in /*) ;; *) echo 'Web root must be absolute' >&2; exit 1;; esac
-          case "$PUBLIC_URL" in https://*) ;; *) echo 'HTTPS production URL is required' >&2; exit 1;; esac
+          case "$PUBLIC_URL" in https://qmaps.ca|https://qmaps.ca/|https://www.qmaps.ca|https://www.qmaps.ca/) ;; *) echo 'Production URL must be qmaps.ca or www.qmaps.ca over HTTPS' >&2; exit 1;; esac
       - name: Build static frontend
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
