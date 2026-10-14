@@ -23,6 +23,9 @@ L'onboarding utilise désormais `is_claimed: false`, conforme à la politique RL
 ## Onboarding — étape de publication sécurisée
 La création du commerce dans `MerchantOnboarding.tsx` stocke une fiche avec `is_active:false` pour que l'étape photo/revue ne publie aucune fiche prématurément. La dernière étape met `is_active:true` uniquement après un UPDATE retournant l'enregistrement de ce propriétaire. En cas d'erreur, aucun faux message de succès. Test `src/test/merchantPublishFlow.test.ts`.
 
+## Avis publics — interactions complétées
+Le panneau `BusinessReviewsTab` propose maintenant un vrai filtre par note et le dépliage de texte, l'ajout de photo mène à `/add-photo` et exige la connexion. Les faux compteurs d'auteur et le bouton « Check in » inactif ont été supprimés. Test `src/test/publicReviewUX.test.ts`.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 

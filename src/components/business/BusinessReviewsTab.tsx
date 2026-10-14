@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Star, Camera, Award, Info, X, ChevronDown, MoreVertical, ShieldAlert } from "lucide-react";
+import { Star, Camera, Info, X, ShieldAlert } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import StarRating from "@/components/StarRating";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,10 +63,13 @@ const RatingDistribution = ({ reviews, avgRating, reviewsCount }: { reviews: Arr
 
 const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, userId, userName, onReviewSubmitted, onNavigateAuth }: BusinessReviewsTabProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [rating, setRating] = useState(0);
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(() => new Set());
   const [showTrustBanner, setShowTrustBanner] = useState(true);
   const [trustByReview, setTrustByReview] = useState<Record<string, { risk_level: ReviewRiskLevel; status: string }>>({});
 
@@ -78,6 +82,19 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
     if (userId && r.user_id === userId) return true;
     return false;
   });
+
+  const filteredReviews = ratingFilter === null
+    ? visibleReviews
+    : visibleReviews.filter((review) => review.rating === ratingFilter);
+
+  const toggleExpanded = (reviewId: string) => {
+    setExpandedReviews((current) => {
+      const next = new Set(current);
+      if (next.has(reviewId)) next.delete(reviewId);
+      else next.add(reviewId);
+      return next;
+    });
+  };
 
   const { byReview, pending, toggleReaction } = useReviewReactions(visibleReviews.map((review) => review.id));
 
@@ -128,7 +145,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
   return (
     <div className="space-y-5">
       {/* Section title */}
-      <h3 className="font-heading text-lg font-bold text-foreground">Avis recommandés</h3>
+      <h3 className="font-heading text-lg font-bold text-foreground">Avis clients</h3>
 
       {/* Trust banner */}
       {showTrustBanner && (
@@ -137,7 +154,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
           <div className="flex-1">
             <p className="text-sm text-foreground">
               <span className="font-semibold">Votre confiance est notre priorité,</span> les commerces ne peuvent pas payer pour modifier ou supprimer leurs avis.{" "}
-              <button className="text-primary font-medium">En savoir plus</button>.
+              Pour signaler un avis, utilisez l'option de signalement sous celui-ci.
             </p>
           </div>
           <button onClick={() => setShowTrustBanner(false)} className="shrink-0">
@@ -149,20 +166,33 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
       {/* Rating distribution */}
       <RatingDistribution reviews={visibleReviews} avgRating={avgRating} reviewsCount={reviewsCount} />
 
-      {/* Filters */}
-      <button className="flex items-center gap-1 text-sm text-foreground font-medium">
-        Voir {visibleReviews.length > 0 ? visibleReviews.length : ""} filtres <ChevronDown size={14} />
-      </button>
+      {/* Rating filter uses the actual loaded, visible reviews. */}
+      <div className="flex items-center justify-between gap-3">
+        <label htmlFor="qmaps-rating-filter" className="text-sm font-medium text-foreground">
+          Filtrer les avis
+        </label>
+        <select
+          id="qmaps-rating-filter"
+          value={ratingFilter === null ? "all" : String(ratingFilter)}
+          onChange={(event) => setRatingFilter(event.target.value === "all" ? null : Number(event.target.value))}
+          className="h-10 rounded-lg border border-input bg-background px-3 text-sm"
+        >
+          <option value="all">Toutes les notes</option>
+          {[5, 4, 3, 2, 1].map((score) => (
+            <option key={score} value={score}>{score} étoile{score > 1 ? "s" : ""}</option>
+          ))}
+        </select>
+      </div>
 
       {/* Review list */}
       <div className="space-y-4">
-        {visibleReviews.length === 0 && (
+        {filteredReviews.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground text-sm">Aucun avis pour le moment</p>
-            <p className="text-muted-foreground text-xs mt-1">Soyez le premier à partager votre expérience!</p>
+            <p className="text-muted-foreground text-sm">{visibleReviews.length === 0 ? "Aucun avis pour le moment" : "Aucun avis avec cette note"}</p>
+            <p className="text-muted-foreground text-xs mt-1">{visibleReviews.length === 0 ? "Soyez le premier à partager votre expérience!" : "Choisissez une autre note pour afficher davantage d'avis."}</p>
           </div>
         )}
-        {visibleReviews.map((review) => {
+        {filteredReviews.map((review) => {
           const displayName = (review).profiles?.display_name || "Utilisateur";
           const trust = trustByReview[review.id];
           return (
@@ -177,10 +207,10 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{displayName}</p>
-                    <p className="text-xs text-muted-foreground">0 avis • 0 photos</p>
+                    <p className="text-xs text-muted-foreground">Avis d'un utilisateur QMAPS</p>
                   </div>
                 </div>
-                <button><MoreVertical size={16} className="text-muted-foreground" /></button>
+                <span className="sr-only">Avis du client</span>
               </div>
 
               {/* Admin-only risk badge (never shown to public users or merchants) */}
@@ -206,8 +236,15 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                 <p className="mt-2 text-sm text-foreground leading-relaxed">
                   {review.body.length > 200 ? (
                     <>
-                      {review.body.slice(0, 200)}...{" "}
-                      <button className="text-primary font-medium text-sm">Lire plus</button>
+                      {expandedReviews.has(review.id) ? review.body : `${review.body.slice(0, 200)}…`}{" "}
+                      <button
+                        type="button"
+                        onClick={() => toggleExpanded(review.id)}
+                        aria-expanded={expandedReviews.has(review.id)}
+                        className="text-primary font-medium text-sm"
+                      >
+                        {expandedReviews.has(review.id) ? "Lire moins" : "Lire plus"}
+                      </button>
                     </>
                   ) : (
                     review.body
@@ -258,7 +295,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{userName || "Utilisateur"}</p>
-            <p className="text-xs text-muted-foreground">0 avis • 0 photos</p>
+            <p className="text-xs text-muted-foreground">{userId ? "Votre nouvel avis" : "Connectez-vous pour participer"}</p>
           </div>
         </div>
 
@@ -280,11 +317,16 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
         )}
 
         <div className="flex gap-2 mt-3">
-          <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-full">
-            <Camera size={14} /> Ajouter photo
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-full">
-            <Award size={14} /> Check in
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 gap-2 rounded-full"
+            onClick={() => {
+              if (!userId) onNavigateAuth();
+              else navigate("/add-photo");
+            }}
+          >
+            <Camera size={14} /> Ajouter une photo
           </Button>
         </div>
       </div>
