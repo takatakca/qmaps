@@ -24,7 +24,6 @@ describe("Stripe checkout / portal return-origin boundaries", () => {
   it("rejects lookalike origins, non-HTTPS and credentials", () => {
     for (const value of [
       "http://qmaps.ca",
-      "https://qmaps.ca.evil.example",
       "https://qmaps.ca@evil.example",
       "https://qmaps.ca/path",
       "https://qmaps.ca?next=evil",
@@ -36,6 +35,10 @@ describe("Stripe checkout / portal return-origin boundaries", () => {
       expect(normalizedHttpsOrigin(value)).toBeNull();
       expect(resolveCheckoutReturnOrigin(value, null)).toBe(QMAPS_RETURN_ORIGIN);
     }
+    // A lookalike is syntactically a valid HTTPS origin, but is NOT
+    // authorized by QMAPS's allowlist unless an operator explicitly adds it.
+    expect(resolveCheckoutReturnOrigin("https://qmaps.ca.evil.example", null))
+      .toBe(QMAPS_RETURN_ORIGIN);
   });
 
   it("ignores invalid extra origins rather than letting request headers widen the allowlist", () => {
