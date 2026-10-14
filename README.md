@@ -1,73 +1,65 @@
-# Welcome to your Lovable project
+# QMAPS.ca — Découverte locale | GROUPE TAKATAK
 
-## Project info
+QMAPS est une application de recherche de commerces, de catégories et de services locaux au Québec : fiches publiques, évaluations, photos, découverte par ville, demandes de projets, portail commerçant et offres de visibilité.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**Site cible :** https://qmaps.ca  
+**Dépôt source :** https://github.com/takatakca/qmaps  
+**Branche d'intégration :** `main`
 
-## How can I edit this code?
+## État réel (14 octobre 2026)
 
-There are several ways of editing your application.
+- Application React 18 + TypeScript, Vite 5, Tailwind, shadcn/ui, Supabase.
+- Quatre PRs précédemment ouvertes (#2–#5) intégrées à `main` ; les corrections de lint, le pont TAKATAK et le matching R2F sont en code.
+- Vérifications GitHub CI et contrat TAKATAK réussies après les fusions du 14 octobre 2026.
+- **Non vérifié :** hébergement actuel de qmaps.ca, DNS/SSL, migration Supabase du pont TAKATAK, secrets Edge Functions, appels signés en conditions réelles et publication effective sur qmaps.ca.
+- Les fonctions Stripe, Google Maps, authentification et Supabase historiques exigent une configuration réelle. Le projet contient encore des intégrations et documents hérités de Lovable ; GitHub est maintenant la source de code, mais la migration complète de toutes les dépendances n'est pas revendiquée.
 
-**Use Lovable**
+## Démarrer en local
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Prérequis : Node.js moderne et Bun. Le dépôt versionne `bun.lock`.
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+git clone https://github.com/takatakca/qmaps.git
+cd qmaps
+cp .env.example .env
+bun install --frozen-lockfile
+bun run dev
 ```
 
-**Edit a file directly in GitHub**
+Renseigner `.env` localement (ne **jamais** le pousser). Configuration navigateur : `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` et, si la carte le nécessite, `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (ancien nom de la variable, pas une instruction de dépendre de Lovable).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Les secrets serveur (Stripe, SUPABASE_SERVICE_ROLE_KEY, QMAPS_TAKATAK_INTEGRATION_SECRET, TAKATAK_QMAPS_MATCHING_SECRET) ne doivent jamais utiliser le préfixe `VITE_` ni apparaître dans les fichiers livrés au navigateur.
 
-**Use GitHub Codespaces**
+## Commandes de validation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+bun run lint
+bun run test
+bun run launch:check
+bun run build
+bun run go:no-go:json
+```
 
-## What technologies are used for this project?
+Les tests/build CI prouvent le code, **pas** la disponibilité de la base, des paiements, de l'hébergement ou du DNS. Le rapport go/no-go historique doit être régénéré et complété par les contrôles humains / production ; un ancien GO n'est pas une preuve de déploiement actuel.
 
-This project is built with:
+## Architecture TAKATAK
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+QMAPS demeure une application enfant distincte ; TAKATAK conserve l'identité maîtresse et la décision de routage pour R2F. Pas d'accès direct R2F à l'auth ou à la base QMAPS. Intégration serveur-à-serveur via adaptateurs : `takatak-match-businesses` (HMAC), `takatak-link-business` et `takatak-reply-review`. Voir [contrat d'intégration](docs/takatak-integration.md), [issue #1](https://github.com/takatakca/qmaps/issues/1).
 
-## How can I deploy this project?
+Les migrations de schéma et le déploiement des Edge Functions restent **séparés** de la publication des fichiers statiques. Ne jamais exécuter les migrations de production à l'aveugle.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Déploiement GitHub vers qmaps.ca
 
-## Can I connect a custom domain to my Lovable project?
+Le build produit `dist/`, à placer dans la racine web d'un hébergement configuré pour les routes d'une SPA. Un workflow GitHub Actions optionnel [QMAPS SSH deploy](.github/workflows/qmaps-ssh-deploy.yml) effectue la construction et le transfert vers un hébergement SSH/cPanel **uniquement après activation explicite** via la variable du dépôt `QMAPS_DEPLOY_ENABLED=true` et installation de ses secrets. Sans ces paramètres, il reste désactivé et **aucun déploiement n'est présumé**.
 
-Yes, you can!
+Détails et instructions de retour arrière : [docs/github-ssh-deployment.md](docs/github-ssh-deployment.md). Ne pas pointer ce workflow sur un autre site/WordPress ou un répertoire contenant des données clients.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Documentation
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- [Relève pour les agents](.agent/CONTINUATION.md) et [journal de travail](WORKLOG.md)
+- [Contrat QMAPS/TAKATAK](docs/takatak-integration.md)
+- [Préparation à la production](docs/production-readiness.md)
+- [Parcours et accès](docs/route-inventory.md)
+- [Checklist de déploiement](docs/deployment-checklist.md)
+
+**Règles :** ne pas générer de faux commerces/avis/connexions ; préserver l'isolation entre commerçants et la confidentialité des clients ; journaliser les changements conformément à [AGENTS.md](AGENTS.md).

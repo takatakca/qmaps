@@ -1,0 +1,84 @@
+name: QMAPS SSH deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qmaps-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && vars.QMAPS_DEPLOY_ENABLED == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: oven-sh/setup-bun@v2
+      - name: Check deployment configuration
+        shell: bash
+        env:
+          HOST: ${{ secrets.QMAPS_DEPLOY_HOST }}
+          USER: ${{ secrets.QMAPS_DEPLOY_USER }}
+          ROOT: ${{ secrets.QMAPS_DEPLOY_WEB_ROOT }}
+          PRIVATE_KEY: ${{ secrets.QMAPS_DEPLOY_SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.QMAPS_DEPLOY_KNOWN_HOSTS }}
+          PUBLIC_URL: ${{ secrets.QMAPS_PRODUCTION_URL }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          for key in HOST USER ROOT PRIVATE_KEY KNOWN_HOSTS PUBLIC_URL SUPABASE_URL SUPABASE_KEY SUPABASE_ID; do
+            if [ -z "${!key}" ]; then echo "Missing configuration: $key" >&2; exit 1; fi
+          done
+          case "$ROOT" in /*) ;; *) echo 'Web root must be absolute' >&2; exit 1;; esac
+          case "$PUBLIC_URL" in https://*) ;; *) echo 'HTTPS production URL is required' >&2; exit 1;; esac
+      - name: Build static frontend
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY: ${{ secrets.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY }}
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+          test -f dist/index.html
+          cat > dist/.htaccess <<'HTACCESS'
+          <IfModule mod_rewrite.c>
+          RewriteEngine On
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule ^ index.html [L]
+          </IfModule>
+          HTACCESS
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.QMAPS_DEPLOY_SSH_PRIVATE_KEY }}
+      - name: Deploy to dedicated static web root
+        env:
+          HOST: ${{ secrets.QMAPS_DEPLOY_HOST }}
+          PORT: ${{ secrets.QMAPS_DEPLOY_PORT }}
+          USER: ${{ secrets.QMAPS_DEPLOY_USER }}
+          ROOT: ${{ secrets.QMAPS_DEPLOY_WEB_ROOT }}
+          KNOWN_HOSTS: ${{ secrets.QMAPS_DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$KNOWN_HOSTS" >> "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          PORT="${PORT:-22}"
+          rsync -az -e "ssh -p $PORT -o StrictHostKeyChecking=yes" dist/ "$USER@$HOST:$ROOT/"
+      - name: Verify production HTTP
+        env:
+          PRODUCTION_URL: ${{ secrets.QMAPS_PRODUCTION_URL }}
+        run: curl --fail --location --silent --show-error --retry 2 "$PRODUCTION_URL/" >/dev/null

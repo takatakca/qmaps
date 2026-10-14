@@ -1,88 +1,28 @@
-# QMAPS Continuation Handoff
+# QMAPS — Relève des agents
 
-Updated: 2026-10-14
-Agent/session: ChatGPT GPT-5.5 Thinking
-Branch: `chore/continuation-security-handoff`
+Mise à jour : 2026-10-14. Source : `takatakca/qmaps`, branche `main`.
 
-## Objective and scope
+## État vérifié dans GitHub
 
-QMAPS is a GROUPE TAKATAK child application for public business discovery, client search, service discovery, merchant onboarding, reviews, merchant tools, advertising/visibility UX, and future TAKATAK adapter-based integration.
+- PR #5 fusionnée : suppression du `.env` suivi et ajout de la relève. Les valeurs précédemment commitées restent dans l'historique Git jusqu'à purge ; examiner la restriction/rotation des clés concernées.
+- PR #3 et #4 fusionnées : typage Supabase/lint, migrations de liens TAKATAK et réponses aux avis commerçants. La migration n'est pas confirmée appliquée en production.
+- PR #2 fusionnée : adaptateur HMAC de matching TAKATAK/R2F, contrôle de taille fail-closed, correction de type Deno.
+- Actions GitHub du 2026-10-14 : CI principale réussie, vérification du contrat TAKATAK réussie (commits antérieurs aux travaux SEO/déploiement).
+- Le test recommendationDedupe est isolé du client Supabase afin que la CI fonctionne sans fichier `.env`.
+- La cible publique est qmaps.ca ; SEO et fichiers statiques mis à jour. Le domaine et l'hébergement réel ne sont **pas** vérifiés par GitHub.
+- Une voie de déploiement SSH/cPanel est préparée, **désactivée tant que QMAPS_DEPLOY_ENABLED n'est pas activé et les secrets fournis**.
 
-This continuation file exists so Codex, Cursor, Claude, Lovable or another agent can resume work from GitHub without relying on chat memory.
+## Étapes restantes (ne pas considérer comme terminées)
 
-## Current repository state observed
+1. Confirmer où pointe réellement `qmaps.ca` (DNS, hébergeur, web root, SSL, serveur web).
+2. Renseigner uniquement les secrets d'environnement GitHub / hébergeur ; ne jamais enregistrer de secrets dans le dépôt.
+3. Déployer `dist/` via workflow SSH si l'hébergement est Apache/cPanel, ou adapter à l'hébergement réel.
+4. Contrôler sauvegarde et application de `supabase/migrations/20261011120000_takatak_workspace_and_review_reply.sql`, puis installer les secrets des trois nouvelles Edge Functions et les déployer de façon contrôlée.
+5. Réaliser un appel TAKATAK HMAC signé en préproduction, vérifier matching, espaces/tenant, données minimisées, absence de mélange entre entreprises et idempotence.
+6. Vérifier Google Maps, authentification, inscription commerçants, fiches, paiements Stripe, avis, suppression de compte, portail marchand et expérience mobile.
+7. Vérifier les URLs et boîtes de courriel historiques en `qmaps.app`, les corriger uniquement lorsque les nouvelles adresses sont opérationnelles.
+8. Mettre à jour le GO/NO-GO et la preuve de déploiement avec une date et un SHA réels.
 
-- Repository: `takatakca/qmaps`
-- Default branch: `main`
-- Stack observed from `package.json`: Vite, React, TypeScript, shadcn/ui, Tailwind CSS, Supabase, Vitest.
-- Existing agent rule: QMAPS is a GROUPE TAKATAK child app; future TAKATAK integration must use a dedicated adapter boundary and must avoid fake sync or coupling.
-- Worklog rule exists in `AGENTS.md` and must be followed by every agent.
-- Open PRs observed before this branch:
-  - PR #2: secure TAKATAK business matching adapter for R2F.
-  - PR #3: lint/type cleanup.
-  - PR #4: TAKATAK workspace link + owner replies.
-- Important: those PRs may affect integration/security work. Do not duplicate or overwrite them.
+## Règles
 
-## Work completed in this session
-
-- Confirmed `.agent/CONTINUATION.md` did not exist on `main` before this branch.
-- Created this continuation handoff file.
-- Removed a committed root `.env` file from this branch because `.gitignore` already says environment files must not be committed.
-- Did not read or expose the `.env` contents.
-- Prepared this as a small, safe handoff/security cleanup for later Codex verification.
-
-## Active task
-
-Security/handoff cleanup only:
-
-1. Remove committed `.env` from repository history going forward.
-2. Establish `.agent/CONTINUATION.md` as the durable continuation file.
-3. Update `WORKLOG.md` so future agents know what happened.
-4. Leave full tests and deeper implementation to Codex later, as requested by the owner.
-
-## Tests executed
-
-No local runtime tests were executed in this chat session.
-
-Reason: this session used the GitHub connector only, not a local checkout/runtime environment. The owner requested that deeper testing happen later with Codex.
-
-## Tests to run later with Codex
-
-Run from a clean local/Codex checkout:
-
-```sh
-npm install
-npm run build
-npm run test
-npm run launch:check
-npm run go:no-go
-npm run release:status
-```
-
-Also verify:
-
-- `.env` is absent from repository contents.
-- `.env.example` remains present.
-- Supabase/Lovable environment configuration still works through the approved secret/environment system.
-- Open PRs #2, #3 and #4 are reviewed before merge.
-- No fake TAKATAK production integration is claimed.
-
-## Known risks / blockers
-
-- `.env` had been present in the repository root before this cleanup branch. If it contained real secrets, rotate/revoke those secrets outside GitHub before merging or deploying.
-- Full test suite was not run in this session.
-- Existing open PRs may need rebase/review after this branch.
-- Current README still contains default Lovable template language; updating it to QMAPS-specific production documentation remains recommended.
-
-## Next recommended tasks
-
-1. Have Codex run the full test/build/check commands above.
-2. Review whether any committed `.env` values require secret rotation.
-3. Merge the security/handoff cleanup if checks pass.
-4. Review and sequence PRs #2, #3 and #4 so integration work does not conflict.
-5. Replace the default Lovable README with real QMAPS production/developer documentation.
-6. Continue visual and merchant-portal alignment only after the current integration PRs are understood.
-
-## Status
-
-CODE CONTINUED — TESTS COMPLETE TO DO LATER.
+Lire [AGENTS.md](../AGENTS.md), le haut de [WORKLOG.md](../WORKLOG.md), les PRs ouvertes et les workflows. Ne pas réintroduire `.env` dans Git. Ne pas déclarer un déploiement effectif à partir d'une CI de build. Ne pas coupler QMAPS directement à R2F : seul TAKATAK orchestre les décisions.

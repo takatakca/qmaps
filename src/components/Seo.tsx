@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 
 const SITE_NAME = "QMaps";
-const DEFAULT_ORIGIN = "https://qmaps.lovable.app";
-export const DEFAULT_OG_IMAGE =
-  "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fd800b5d-13e2-435a-8a83-8ee02fae1858/id-preview-4a1ab253--899a1afd-3cc7-4929-9328-cc8fed5f8294.lovable.app-1772261493991.png";
+const DEFAULT_ORIGIN = "https://qmaps.ca";
+export const DEFAULT_OG_IMAGE = "https://qmaps.ca/icons/icon-512.png";
 
 const upsertMeta = (selector: string, attr: "name" | "property", key: string, content: string) => {
   let el = document.head.querySelector<HTMLMetaElement>(selector);

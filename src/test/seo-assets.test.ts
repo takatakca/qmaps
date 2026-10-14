@@ -43,3 +43,21 @@ describe("pwa: manifest.webmanifest", () => {
     expect((manifest.icons as unknown[]).length).toBeGreaterThan(0);
   });
 });
+
+
+describe("production domain and sitemap", () => {
+  it("uses qmaps.ca and never the legacy preview host", () => {
+    const sitemap = readPublic("sitemap.xml");
+    const robots = readPublic("robots.txt");
+    expect(sitemap).toContain("https://qmaps.ca/");
+    expect(sitemap).not.toContain("lovable.app");
+    expect(robots).toContain("Sitemap: https://qmaps.ca/sitemap.xml");
+  });
+
+  it("does not publicly index user, merchant or admin pages", () => {
+    const sitemap = readPublic("sitemap.xml");
+    for (const route of ["/admin", "/merchant", "/settings", "/notifications", "/collections", "/projects", "/talk", "/events"]) {
+      expect(sitemap).not.toContain("<loc>https://qmaps.ca" + route);
+    }
+  });
+});
