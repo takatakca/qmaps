@@ -1,36 +1,62 @@
 import { useState } from "react";
-import { AlertCircle, X, ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/StarRating";
 import type { ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 
 interface Props {
   reviews: ReviewWithAuthor[];
+  onReplySaved?: () => void;
 }
 
-const MerchantReviews = ({ reviews }: Props) => {
-  const [showPhotoBanner, setShowPhotoBanner] = useState(true);
-  const recommendedReviews = reviews; // In production, filter by recommendation algorithm
-  const notRecommendedCount = 0; // Placeholder
+const MerchantReviews = ({ reviews, onReplySaved }: Props) => {
+  const { toast } = useToast();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [savedReplies, setSavedReplies] = useState<Record<string, string>>({});
+  const recommendedReviews = reviews;
+  const notRecommendedCount = 0;
+
+  const saveReply = async (reviewId: string) => {
+    const body = replyDraft.trim().replace(/\\s+/g, " ");
+    if (!body || body.length > 2000) {
+      toast({ title: "Réponse invalide", description: "Écrivez une réponse de 1 à 2000 caractères.", variant: "destructive" });
+      return;
+    }
+
+    setSavingId(reviewId);
+    try {
+      const { data, error } = await supabase.functions.invoke("merchant-reply-review", {
+        body: { reviewId, body },
+      });
+      if (error || data?.ok !== true) throw new Error(error?.message || "Enregistrement impossible.");
+      setSavedReplies((current) => ({ ...current, [reviewId]: body }));
+      setEditingId(null);
+      setReplyDraft("");
+      toast({ title: "Réponse publiée" });
+      onReplySaved?.();
+    } catch (error) {
+      toast({
+        title: "Impossible d'enregistrer la réponse",
+        description: error instanceof Error ? error.message : "Réessayez après la configuration du service.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingId(null);
+    }
+  };
 
   return (
     <div className="space-y-5">
       <h2 className="font-heading text-2xl font-bold text-foreground">Avis</h2>
 
-      {/* Photo missing banner */}
-      {showPhotoBanner && (
-        <div className="flex gap-3 p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
-          <AlertCircle size={20} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm text-foreground">
-              <span className="font-semibold">Votre photo est manquante!</span> Pour répondre aux avis, vous devez{" "}
-              <button className="text-primary font-medium underline">télécharger une photo de vous-même</button>.
-            </p>
-          </div>
-          <button onClick={() => setShowPhotoBanner(false)} className="shrink-0">
-            <X size={16} className="text-muted-foreground" />
-          </button>
-        </div>
-      )}
+      <p className="text-sm text-muted-foreground">
+        Répondez aux commentaires de vos clients. Votre réponse apparaît sur la fiche publique.
+      </p>
 
       {/* Empty state */}
       {recommendedReviews.length === 0 ? (
@@ -112,12 +138,56 @@ const MerchantReviews = ({ reviews }: Props) => {
                 <StarRating rating={review.rating} size={12} />
               </div>
               <p className="text-sm text-foreground mt-2">{review.body}</p>
-              {review.owner_reply ? (
+              {(savedReplies[review.id] || review.owner_reply) && (
                 <p className="text-sm text-foreground mt-2">
                   <span className="font-medium">Réponse de l'entreprise. </span>
-                  {review.owner_reply}
+                  {savedReplies[review.id] || review.owner_reply}
                 </p>
-              ) : null}
+              )}
+
+              {editingId === review.id ? (
+                <div className="mt-3 space-y-2">
+                  <Textarea
+                    aria-label={`Réponse au commentaire de ${review.profiles?.display_name || "Utilisateur"}`}
+                    value={replyDraft}
+                    onChange={(e) => setReplyDraft(e.target.value)}
+                    maxLength={2000}
+                    placeholder="Merci pour votre avis..."
+                    rows={3}
+                    disabled={savingId === review.id}
+                  />
+                  <p className="text-xs text-muted-foreground">{replyDraft.length}/2000 caractères</p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => void saveReply(review.id)}
+                      disabled={savingId === review.id || !replyDraft.trim()}
+                    >
+                      {savingId === review.id ? "Enregistrement..." : "Publier la réponse"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setEditingId(null); setReplyDraft(""); }}
+                      disabled={savingId === review.id}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  className="mt-3"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setEditingId(review.id);
+                    setReplyDraft(savedReplies[review.id] || review.owner_reply || "");
+                  }}
+                >
+                  {savedReplies[review.id] || review.owner_reply ? "Modifier votre réponse" : "Répondre à cet avis"}
+                </Button>
+              )}
               <p className="text-xs text-muted-foreground mt-2">
                 {new Date(review.created_at).toLocaleDateString("fr-CA")}
               </p>

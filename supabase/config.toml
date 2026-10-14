@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.takatak-match-businesses]
 verify_jwt = false
+
+[functions.merchant-reply-review]
+verify_jwt = true

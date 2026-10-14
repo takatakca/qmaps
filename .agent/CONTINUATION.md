@@ -14,6 +14,9 @@ Mise à jour : 2026-10-14. Source : `takatakca/qmaps`, branche `main`.
 
 - Redirections Stripe protégées par liste de domaines HTTPS autorisés côté serveur ; domaine qmaps.ca utilisé par défaut, anciens domaines à ajouter uniquement après vérification.
 
+- Le portail commerçant comprend maintenant un formulaire de réponse aux avis. La fonction `merchant-reply-review` vérifie JWT, reviewId et ownership, puis enregistre avec la clé service-role (serveur seulement).
+- Protection SQL additionnelle `supabase/migrations/20261014190000_guard_takatak_columns_and_review_replies.sql` à déployer après la migration TAKATAK du 11 octobre. Elle empêche un client ordinaire de forger la réponse commerçant ou de se lier à un espace TAKATAK.
+
 ## Étapes restantes (ne pas considérer comme terminées)
 
 1. Confirmer où pointe réellement `qmaps.ca` (DNS, hébergeur, web root, SSL, serveur web).

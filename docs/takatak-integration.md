@@ -127,3 +127,9 @@ Production status must remain **Not configured** until the Edge Function is depl
 ### Result-set safeguards
 
 Matching fails closed with HTTP 503 (`result_set_too_large`) if more than 500 merchant-category links or 2000 service-area records would be needed for a complete result. This prevents partial area data from being mistaken for unrestricted merchant coverage. Increase capacity only with an explicitly reviewed pagination strategy.
+
+## Owner reply data integrity and merchant UI
+
+QMAPS now has a separate `merchant-reply-review` Edge Function for the signed-in owner of a business. The browser calls it with a normal Supabase JWT; it verifies identity and reads the review's true business ID before checking that `businesses.owner_user_id` matches. Only then does a server-held service-role key update `reviews.owner_reply` and timestamp.
+
+The QMAPS database migration `20261014190000_guard_takatak_columns_and_review_replies.sql` protects both `reviews.owner_reply`/`owner_replied_at` and `businesses.takatak_client_id` from unauthorized direct PostgREST updates. Apply it **after** the additive October 11 migration; this is a required authorization gate before claiming the owner-reply feature safe in production. Neither SQL migration nor Edge deployment has been verified on the real QMAPS Supabase project from GitHub.
