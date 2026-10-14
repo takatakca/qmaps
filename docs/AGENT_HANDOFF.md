@@ -17,6 +17,9 @@ Le tableau de bord commerçant utilise désormais `hours_json` et `hours` comme 
 ## Création de commerce — correction
 Le tableau de bord n'insère plus automatiquement une fiche au nom « Mon entreprise » et à l'adresse fictive « Montréal, QC ». Le bouton utilise le formulaire `/add-business`, déjà existant. Le formulaire renvoie un propriétaire connecté vers `/merchant` après enregistrement. Test : `src/test/merchantBusinessCreation.test.ts`.
 
+## Onboarding et géolocalisation
+L'onboarding utilise désormais `is_claimed: false`, conforme à la politique RLS du 16 mai 2026. Migration `supabase/migrations/20261014220000_nullable_business_coordinates_no_fallback.sql` : coordonnées nullable sans latitude/longitude Montréal par défaut, et trigger géographique effaçant une localisation lorsque les coordonnées sont absentes. Aucun backfill des anciennes fiches. Types Supabase frontend synchronisés manuellement tant que l'accès au projet réel manque. Vérifier la migration et régénérer les types via CLI sur le vrai projet avant livraison.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 

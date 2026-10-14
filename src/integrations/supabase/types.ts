@@ -556,9 +556,9 @@ export type Database = {
           is_claimed: boolean
           is_open: boolean
           languages: string[]
-          latitude: number
+          latitude: number | null
           location: unknown
-          longitude: number
+          longitude: number | null
           name: string
           owner_user_id: string | null
           payment_methods: string[]
@@ -593,9 +593,9 @@ export type Database = {
           is_claimed?: boolean
           is_open?: boolean
           languages?: string[]
-          latitude?: number
+          latitude?: number | null
           location?: unknown
-          longitude?: number
+          longitude?: number | null
           name: string
           owner_user_id?: string | null
           payment_methods?: string[]
@@ -630,9 +630,9 @@ export type Database = {
           is_claimed?: boolean
           is_open?: boolean
           languages?: string[]
-          latitude?: number
+          latitude?: number | null
           location?: unknown
-          longitude?: number
+          longitude?: number | null
           name?: string
           owner_user_id?: string | null
           payment_methods?: string[]

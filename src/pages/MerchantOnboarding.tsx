@@ -196,7 +196,9 @@ const MerchantOnboarding = () => {
         latitude,
         longitude,
         owner_user_id: user.id,
-        is_claimed: true,
+        // A self-registration is not an approved ownership claim.
+        // Existing RLS requires false; admins approve claims separately.
+        is_claimed: false,
 
       })
       .select()

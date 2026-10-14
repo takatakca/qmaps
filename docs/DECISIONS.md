@@ -9,6 +9,7 @@
 | 2026-10-14 | Garder le déploiement SSH optionnel jusqu'à validation de l'hébergement | Éviter d'écraser un autre site, ne pas publier des secrets ou migrer une mauvaise base |
 | 2026-10-14 | Les avis dans un portail multi-entreprises sont invalidés lors du changement d'entreprise | Ne pas afficher les résultats asynchrones de la mauvaise entreprise |
 | 2026-10-14 | Préserver les migrations déjà publiées et ajouter une migration correctrice pour protéger aussi INSERT | Les premiers garde-fous concernaient UPDATE seulement ; les déclencheurs INSERT empêchent l'usurpation avant une mise en production |
+| 2026-10-14 | L'onboarding ne marque plus les nouveaux commerçants comme propriétaires vérifiés ; géolocalisation nulle plutôt que point Montréal fictif | Conformité RLS et honnêteté des cartes ; migration additive, sans suppression de données historiques |
 | 2026-10-14 | Ne pas déclarer `qmaps.ca` actif sans preuve DNS/SSL/HTTP et SHA | Pas d'affirmations de livraison inventées |
 | 2026-10-14 | Les cinq fichiers de suivi vivent dans `docs/` ; `.agent/CONTINUATION.md` reste un pointeur de compatibilité | Relève autonome sans duplication non maîtrisée |
 
