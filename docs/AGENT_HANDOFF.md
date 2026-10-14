@@ -2,6 +2,12 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — inscription commerçant résiliente (2026-10-14)
+- Une fiche sauvegardée avec `is_active=false` n'entraîne plus une redirection vers une nouvelle inscription : l'onboarding reprend son brouillon, ses renseignements et catégories ; une catégorie manquante renvoie à l'étape de sélection.
+- Écriture des catégories via `upsert` idempotent contrôlé ; impossible de publier tant qu'aucune catégorie n'est effectivement liée. Les échecs de création du rôle `merchant` sont signalés ; brouillon privé conservé pour reprise.
+- **Fichiers :** `src/pages/MerchantOnboarding.tsx`, `src/test/merchantDraftRecovery.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.
+- **Prochaine vérification :** CI puis essais E2E sur QMAPS (brouillon existant, échec d'enregistrement des catégories, récupération après rafraîchissement, finalisation). Supabase QMAPS inaccessible pour ce test.
+
 ## Relève — avis commerçants fiables (2026-10-14)
 - **Dernière tâche codée :** `src/lib/reviewsWithAuthors.ts` propage désormais les vraies erreurs Supabase (avis/profils). `MerchantDashboard` cesse de tourner indéfiniment en cas d'erreur et offre « Réessayer » sans afficher zéro avis fictif. L'aperçu ne reçoit pas les avis d'une entreprise antérieure pendant le changement de sélection.
 - **Fichiers :** helper, dashboard, `src/test/merchantReviewLoading.test.ts`, `WORKLOG.md` et documents d'état.

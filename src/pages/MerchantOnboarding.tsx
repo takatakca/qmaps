@@ -81,13 +81,49 @@ const MerchantOnboarding = () => {
     }
     let cancelled = false;
     (async () => {
-      const { data: biz } = await supabase
+      const { data: biz, error: businessError } = await supabase
         .from("businesses")
-        .select("id")
+        .select("id,is_active,name,description,address,city,region,postal_code,phone,website,hours,country,latitude,longitude")
         .eq("owner_user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(1);
       if (cancelled) return;
+      if (businessError) {
+        toast({ title: "Impossible de vérifier vos entreprises", description: businessError.message, variant: "destructive" });
+        setCheckingExisting(false);
+        return;
+      }
       if (biz && biz.length > 0) {
+        const existing = biz[0];
+        if (!existing.is_active) {
+          // Continue a real draft rather than redirecting it to a dashboard.
+          setBusinessId(existing.id);
+          setBusinessName(existing.name);
+          setDescription(existing.description ?? "");
+          setAddress(existing.address);
+          setCity(existing.city);
+          setRegion(existing.region ?? "QC");
+          setPostalCode(existing.postal_code ?? "");
+          setPhone(existing.phone ?? "");
+          setWebsite(existing.website ?? "");
+          setHoursText(existing.hours ?? "");
+          setCountry(existing.country);
+          setLatitude(existing.latitude);
+          setLongitude(existing.longitude);
+          const { data: linkedCategories, error: categoryError } = await supabase
+            .from("business_categories")
+            .select("category_id")
+            .eq("business_id", existing.id);
+          if (cancelled) return;
+          if (categoryError) {
+            toast({ title: "Erreur de récupération des catégories", description: categoryError.message, variant: "destructive" });
+          } else {
+            setSelectedCatIds(new Set((linkedCategories ?? []).map((row) => row.category_id)));
+          }
+          setStep(!categoryError && linkedCategories?.length ? 5 : 3);
+          setCheckingExisting(false);
+          return;
+        }
         await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
         await refreshRoles();
         navigate("/merchant", { replace: true });
@@ -164,13 +200,21 @@ const MerchantOnboarding = () => {
   const createBusiness = async (): Promise<string | null> => {
     if (!user) return null;
     // Re-check at submit time (duplicate guard defeats double-click / dual-tab races).
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
       .from("businesses")
-      .select("id")
+      .select("id,is_active")
       .eq("owner_user_id", user.id)
+      .order("created_at", { ascending: false })
       .limit(1);
-    if (existing && existing.length > 0) {
-      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
+    if (checkError) {
+      toast({ title: "Vérification impossible", description: checkError.message, variant: "destructive" });
+      return null;
+    }
+    if (existing?.length) {
+      if (!existing[0].is_active) {
+        // A previous attempt already inserted a draft; reuse it.
+        return existing[0].id;
+      }
       toast({ title: "Profil déjà créé", description: "Redirection vers votre tableau de bord." });
       navigate("/merchant", { replace: true });
       return null;
@@ -211,29 +255,51 @@ const MerchantOnboarding = () => {
       return null;
     }
 
-    // Link selected categories
-    if (selectedCatIds.size > 0) {
-      const rows = Array.from(selectedCatIds).map(cid => ({ business_id: data.id, category_id: cid }));
-      await supabase.from("business_categories").insert(rows);
+    const { error: roleError } = await supabase.from("user_roles").upsert(
+      { user_id: user.id, role: "merchant" },
+      { onConflict: "user_id,role", ignoreDuplicates: true },
+    );
+    if (roleError) {
+      toast({ title: "Accès professionnel non confirmé", description: roleError.message, variant: "destructive" });
+      // Draft remains private and can be resumed later without duplicating it.
+      return null;
     }
-
-    await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
     await refreshRoles();
     return data.id;
   };
 
+  const saveSelectedCategories = async (id: string): Promise<boolean> => {
+    if (selectedCatIds.size === 0) {
+      toast({ title: "Catégorie requise", description: "Choisissez au moins une catégorie avant la publication.", variant: "destructive" });
+      setStep(3);
+      return false;
+    }
+    const rows = Array.from(selectedCatIds).map((categoryId) => ({ business_id: id, category_id: categoryId }));
+    const { error: categoryError } = await supabase.from("business_categories").upsert(rows, {
+      onConflict: "business_id,category_id",
+      ignoreDuplicates: true,
+    });
+    if (categoryError) {
+      toast({ title: "Enregistrement des catégories impossible", description: categoryError.message, variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
+
   const goNext = async () => {
-    if (!canNext()) return;
+    if (!canNext() || loading) return;
     if (step === 4) {
-      // Transitioning to photos → persist the business now
-      if (!businessId) {
-        setLoading(true);
-        const id = await createBusiness();
-        setLoading(false);
+      setLoading(true);
+      try {
+        // Category persistence is retried for an existing draft as well.
+        const id = businessId || await createBusiness();
         if (!id) return;
         setBusinessId(id);
+        if (!await saveSelectedCategories(id)) return;
+        setStep(5);
+      } finally {
+        setLoading(false);
       }
-      setStep(5);
       return;
     }
     setStep(s => Math.min(s + 1, steps.length - 1));
@@ -242,6 +308,18 @@ const MerchantOnboarding = () => {
   const handlePublish = async () => {
     if (!businessId || !user || loading) return;
     setLoading(true);
+    const { data: savedCategories, error: categoriesError } = await supabase
+      .from("business_categories").select("category_id").eq("business_id", businessId).limit(1);
+    if (categoriesError || !savedCategories?.length) {
+      setLoading(false);
+      setStep(3);
+      toast({
+        title: "Catégories manquantes",
+        description: categoriesError?.message || "Ajoutez une catégorie à votre fiche avant de la publier.",
+        variant: "destructive",
+      });
+      return;
+    }
     const { data: published, error } = await supabase
       .from("businesses")
       .update({ is_active: true })
