@@ -1,4 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
+// This suite exercises pure deduplication keys, not the remote Supabase client.
+// Mock the transport before importing the hook so CI needs no production credentials.
+vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 import {
   buildRecommendationDedupeKey,
   __resetRecommendationDedupeForTests,
