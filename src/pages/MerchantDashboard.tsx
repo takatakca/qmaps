@@ -34,6 +34,8 @@ const MerchantDashboard = () => {
   const [selectedBiz, setSelectedBiz] = useState<Tables<"businesses"> | null>(null);
   const [reviews, setReviews] = useState<ReviewWithAuthor[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsForBusinessId, setReviewsForBusinessId] = useState<string | null>(null);
+  const [businessesOwnerId, setBusinessesOwnerId] = useState<string | null>(null);
   const [reloadReviews, setReloadReviews] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,8 @@ const MerchantDashboard = () => {
       setBusinesses([]);
       setSelectedBiz(null);
       setReviews([]);
+      setBusinessesOwnerId(null);
+      setReviewsForBusinessId(null);
       navigate("/merchant/login");
       return;
     }
@@ -56,16 +60,21 @@ const MerchantDashboard = () => {
   useEffect(() => {
     if (!selectedBiz) {
       setReviews([]);
+      setReviewsForBusinessId(null);
       setReviewsLoading(false);
       return;
     }
     // Ignore responses for a business the user has already switched away from.
     let cancelled = false;
     setReviews([]);
+    setReviewsForBusinessId(null);
     setReviewsLoading(true);
     void fetchReviewsWithAuthors(selectedBiz.id)
       .then((results) => {
-        if (!cancelled) setReviews(results);
+        if (!cancelled) {
+          setReviews(results);
+          setReviewsForBusinessId(selectedBiz.id);
+        }
       })
       .catch((error: unknown) => {
         if (!cancelled) {
@@ -86,6 +95,7 @@ const MerchantDashboard = () => {
     if (!user) return;
     setLoading(true);
     setLoadError(null);
+    setBusinessesOwnerId(null);
     try {
       const { data, error } = await supabase.from("businesses")
         .select("*")
@@ -95,10 +105,12 @@ const MerchantDashboard = () => {
       const ownedBusinesses = data ?? [];
       setBusinesses(ownedBusinesses);
       setSelectedBiz((current) => chooseMerchantBusiness(ownedBusinesses, current?.id));
+      setBusinessesOwnerId(user.id);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Le chargement des entreprises a échoué.");
       setBusinesses([]);
       setSelectedBiz(null);
+      setBusinessesOwnerId(null);
     } finally {
       setLoading(false);
     }
@@ -129,7 +141,7 @@ const MerchantDashboard = () => {
     }
   };
 
-  if (authLoading || loading) {
+  if (authLoading || loading || (user && businessesOwnerId !== user.id && !loadError)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-muted-foreground">Chargement...</p>
@@ -228,18 +240,21 @@ const MerchantDashboard = () => {
               </button>
             )}
 
-            {reviewsLoading && tab === "reviews" ? (
+            {(reviewsLoading || reviewsForBusinessId !== selectedBiz?.id) && tab === "reviews" ? (
               <PanelFallback />
             ) : null}
             <Suspense fallback={<PanelFallback />}>
               {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
               {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}
               {selectedBiz && tab === "edit" && <MerchantEditForm business={selectedBiz} onSaved={fetchBusinesses} />}
-              {selectedBiz && tab === "reviews" && !reviewsLoading && (
+              {selectedBiz && tab === "reviews" && !reviewsLoading && reviewsForBusinessId === selectedBiz.id && (
                 <MerchantReviews
                   key={selectedBiz.id}
                   reviews={reviews}
-                  onReplySaved={() => setReloadReviews((version) => version + 1)}
+                  onReplySaved={() => {
+                    setReviewsForBusinessId(null);
+                    setReloadReviews((version) => version + 1);
+                  }}
                 />
               )}
             </Suspense>

@@ -5,6 +5,9 @@
 ## Dernière tâche terminée
 Implémentation de la sélection multi-entreprises dans `src/pages/MerchantDashboard.tsx`, choix déterministe d'une entreprise appartenant à l'utilisateur et protection contre des réponses asynchrones d'avis périmées. Création des documents de suivi permanents.
 
+## Tâche supplémentaire terminée en code
+Nouvelle migration `supabase/migrations/20261014210000_guard_inserts_and_business_owner_assignment.sql` : gardes INSERT pour les champs propriétaires des avis et liens TAKATAK ; blocage d'attribution d'une fiche à un autre compte. Ajustement de l'interface pour ne **jamais** afficher les avis de l'entreprise précédente pendant un changement. Migration NON appliquée dans la base réelle.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
@@ -14,6 +17,7 @@ Avant cette reprise : `60fcdb8ba60559bc3986c5f9b6a9574390ce0cc5` (CI et TAKATAK 
 ## Fichiers concernés dans cette reprise
 - `src/pages/MerchantDashboard.tsx`
 - `src/lib/merchantSelection.ts`, `src/test/merchantSelection.test.ts`
+- `supabase/migrations/20261014210000_guard_inserts_and_business_owner_assignment.sql`, `src/test/merchantReviewReply.test.ts`
 - `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/AGENT_HANDOFF.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md`
 - `WORKLOG.md`, `.agent/CONTINUATION.md`, `README.md`.
 

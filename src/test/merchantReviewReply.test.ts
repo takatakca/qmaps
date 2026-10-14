@@ -38,3 +38,23 @@ describe("QMAPS merchant owner reply boundaries", () => {
     );
   });
 });
+
+
+describe("TAKATAK and owner-reply INSERT integrity", () => {
+  it("blocks direct creation of a forged owner reply or tenant workspace link", () => {
+    const sql = source("supabase/migrations/20261014210000_guard_inserts_and_business_owner_assignment.sql");
+    expect(sql).toContain("tg_op = 'INSERT'");
+    expect(sql).toContain("new.owner_reply is not null");
+    expect(sql).toContain("new.takatak_client_id is not null");
+    expect(sql).toMatch(/before insert on public\.reviews/i);
+    expect(sql).toMatch(/before insert on public\.businesses/i);
+  });
+
+  it("forbids assigning a business to another authenticated user", () => {
+    const sql = source("supabase/migrations/20261014210000_guard_inserts_and_business_owner_assignment.sql");
+    expect(sql).toContain("new.owner_user_id is distinct from auth.uid()");
+    expect(sql).toContain("qmaps_guard_business_owner_update");
+    expect(sql).toContain("qmaps_guard_business_owner_insert");
+    expect(sql).toContain("new.owner_user_id is not null");
+  });
+});
