@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toJson } from "@/lib/json";
 
 export type SponsoredPlacement =
   | "home"
@@ -15,6 +16,32 @@ export type SponsoredStatus =
   | "paused"
   | "rejected"
   | "ended";
+
+const SPONSORED_STATUSES: readonly SponsoredStatus[] = [
+  "draft",
+  "pending_review",
+  "approved",
+  "paused",
+  "rejected",
+  "ended",
+];
+
+const SPONSORED_PLACEMENTS: readonly SponsoredPlacement[] = [
+  "home",
+  "search",
+  "category",
+  "city",
+  "business_detail",
+  "all",
+];
+
+export function isSponsoredStatus(value: string): value is SponsoredStatus {
+  return (SPONSORED_STATUSES as readonly string[]).includes(value);
+}
+
+export function isSponsoredPlacement(value: string): value is SponsoredPlacement {
+  return (SPONSORED_PLACEMENTS as readonly string[]).includes(value);
+}
 
 export type SponsoredEventType = "impression" | "click";
 
@@ -72,13 +99,13 @@ export const trackSponsoredEvent = (
   void (async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from("sponsored_campaign_events" as any).insert({
+      await supabase.from("sponsored_campaign_events").insert({
         campaign_id: campaignId,
         business_id: businessId,
         user_id: user?.id ?? null,
         event_type: eventType,
         placement: placement ?? null,
-        metadata: metadata ?? {},
+        metadata: toJson(metadata ?? {}),
       });
     } catch {
       // silent

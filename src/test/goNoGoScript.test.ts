@@ -14,7 +14,8 @@ describe("scripts/go-no-go.mjs", () => {
   it("references the four expected commands", () => {
     const src = readFileSync(SCRIPT, "utf8");
     expect(src).toContain("launch:check");
-    expect(src).toContain("vitest run");
+    expect(src).toContain('["run", "test"]');
+    expect(src).toContain("VITE_SUPABASE_URL");
     expect(src).toContain("run build");
     expect(src).toContain("release:status:file");
   });

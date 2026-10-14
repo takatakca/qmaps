@@ -1,4 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+
+export type ReviewWithAuthor = Tables<"reviews"> & {
+  profiles?: { display_name: string | null } | null;
+};
 
 /**
  * Loads a business's reviews plus each author's display name.

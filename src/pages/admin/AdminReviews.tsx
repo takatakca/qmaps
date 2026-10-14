@@ -12,6 +12,7 @@ import StarRating from "@/components/StarRating";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { buildAdminAuditLogPayload, type AdminAuditAction } from "@/lib/adminAudit";
+import { isOneOf } from "@/lib/errors";
 import { getReviewModerationSignals, scoreModerationSignals } from "@/lib/moderationSignals";
 
 interface Review {
@@ -50,7 +51,7 @@ const AdminReviews = () => {
 
   const audit = async (action: AdminAuditAction, targetId: string, metadata: Record<string, unknown> = {}) => {
     if (!user) return;
-    await (supabase as any).from("admin_audit_logs").insert(
+    await supabase.from("admin_audit_logs").insert(
       buildAdminAuditLogPayload({ adminUserId: user.id, action, targetType: "review", targetId, metadata }),
     );
   };
@@ -64,7 +65,7 @@ const AdminReviews = () => {
     } else {
       updates.hidden_at = null; updates.hidden_by = null; updates.hidden_reason = null;
     }
-    const { error } = await supabase.from("reviews").update(updates as any).eq("id", r.id);
+    const { error } = await supabase.from("reviews").update(updates).eq("id", r.id);
     if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
     await audit(next === "hidden" ? "review_hidden" : "review_restored", r.id, { reason: reason ?? null });
     toast({ title: next === "hidden" ? "Avis masqué" : "Avis restauré" });
@@ -92,7 +93,9 @@ const AdminReviews = () => {
   return (
     <AdminLayout title="Avis">
       <div className="flex flex-wrap gap-2 mb-4">
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+        <Select value={statusFilter} onValueChange={(value) => {
+          if (isOneOf(value, STATUS_OPTIONS)) setStatusFilter(value);
+        }}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
             {STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s === "all" ? "Tous" : s}</SelectItem>)}

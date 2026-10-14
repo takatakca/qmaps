@@ -56,7 +56,7 @@ export const useProjectRequests = () => {
     }
     setLoading(true);
     const { data, error } = await supabase
-      .from("project_requests" as any)
+      .from("project_requests")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
@@ -82,7 +82,7 @@ export const useProjectRequests = () => {
       if (!user) return { error: "Not authenticated" as const, data: null };
       const payload = { ...input, user_id: user.id };
       const { data, error } = await supabase
-        .from("project_requests" as any)
+        .from("project_requests")
         .insert(payload)
         .select()
         .single();
@@ -95,7 +95,7 @@ export const useProjectRequests = () => {
   const updateRequest = useCallback(
     async (id: string, patch: Partial<ProjectRequestInput> & { status?: string }) => {
       const { data, error } = await supabase
-        .from("project_requests" as any)
+        .from("project_requests")
         .update(patch)
         .eq("id", id)
         .select()
@@ -107,7 +107,7 @@ export const useProjectRequests = () => {
   );
 
   const deleteRequest = useCallback(async (id: string) => {
-    const { error } = await supabase.from("project_requests" as any).delete().eq("id", id);
+    const { error } = await supabase.from("project_requests").delete().eq("id", id);
     if (!error) window.dispatchEvent(new Event(REFRESH_EVENT));
     return { error: error?.message ?? null };
   }, []);

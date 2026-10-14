@@ -52,7 +52,7 @@ export const useProjectQuotes = (projectRequestId?: string) => {
     }
     setLoading(true);
     const { data, error } = await supabase
-      .from("project_quotes" as any)
+      .from("project_quotes")
       .select("*")
       .eq("project_request_id", projectRequestId)
       .order("created_at", { ascending: false });
@@ -78,7 +78,7 @@ export const useProjectQuotes = (projectRequestId?: string) => {
       if (!user) return { error: "Not authenticated" as const, data: null };
       const payload = { ...input, sender_user_id: user.id };
       const { data, error } = await supabase
-        .from("project_quotes" as any)
+        .from("project_quotes")
         .insert(payload)
         .select()
         .single();
@@ -95,7 +95,7 @@ export const useProjectQuotes = (projectRequestId?: string) => {
 
   const updateQuoteStatus = useCallback(async (id: string, status: string) => {
     const { error } = await supabase
-      .from("project_quotes" as any)
+      .from("project_quotes")
       .update({ status })
       .eq("id", id);
     if (!error) window.dispatchEvent(new Event(REFRESH_EVENT));
@@ -104,7 +104,7 @@ export const useProjectQuotes = (projectRequestId?: string) => {
 
   const fetchQuoteMessages = useCallback(async (quoteId: string) => {
     const { data, error } = await supabase
-      .from("project_quote_messages" as any)
+      .from("project_quote_messages")
       .select("*")
       .eq("quote_id", quoteId)
       .order("created_at", { ascending: true });
@@ -118,7 +118,7 @@ export const useProjectQuotes = (projectRequestId?: string) => {
     async (quoteId: string, body: string) => {
       if (!user) return { error: "Not authenticated" as const, data: null };
       const { data, error } = await supabase
-        .from("project_quote_messages" as any)
+        .from("project_quote_messages")
         .insert({ quote_id: quoteId, sender_user_id: user.id, body })
         .select()
         .single();

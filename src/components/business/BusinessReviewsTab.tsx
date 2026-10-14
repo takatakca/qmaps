@@ -30,7 +30,7 @@ interface BusinessReviewsTabProps {
 
 import { getReviewRatingDistribution } from "@/lib/businessHours";
 
-const RatingDistribution = ({ reviews, avgRating, reviewsCount }: { reviews: any[]; avgRating: number; reviewsCount: number }) => {
+const RatingDistribution = ({ reviews, avgRating, reviewsCount }: { reviews: Array<{ rating?: number | null }>; avgRating: number; reviewsCount: number }) => {
   const dist = getReviewRatingDistribution(reviews);
   const max = Math.max(dist.counts[1], dist.counts[2], dist.counts[3], dist.counts[4], dist.counts[5], 1);
   const barColors = ["bg-muted", "bg-[hsl(30,90%,55%)]", "bg-primary", "bg-primary", "bg-primary"];
@@ -72,7 +72,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
   // Public-safe: hide moderation-hidden reviews from normal viewers.
   // Admins see everything; the review's own author can also see their hidden review.
   const visibleReviews = reviews.filter((r) => {
-    const status = (r as any).moderation_status ?? "visible";
+    const status = (r).moderation_status ?? "visible";
     if (status !== "hidden") return true;
     if (isAdmin) return true;
     if (userId && r.user_id === userId) return true;
@@ -91,12 +91,12 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
     let cancelled = false;
     void (async () => {
       const { data } = await supabase
-        .from("review_trust_scores" as any)
+        .from("review_trust_scores")
         .select("review_id, risk_level, status")
         .in("review_id", visibleReviews.map((r) => r.id));
       if (cancelled) return;
       const map: Record<string, { risk_level: ReviewRiskLevel; status: string }> = {};
-      for (const row of (data ?? []) as any[]) {
+      for (const row of (data ?? [])) {
         map[row.review_id] = { risk_level: row.risk_level as ReviewRiskLevel, status: row.status };
       }
       setTrustByReview(map);
@@ -163,7 +163,7 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
           </div>
         )}
         {visibleReviews.map((review) => {
-          const displayName = (review as any).profiles?.display_name || "Utilisateur";
+          const displayName = (review).profiles?.display_name || "Utilisateur";
           const trust = trustByReview[review.id];
           return (
             <div key={review.id} className="border-b border-border pb-4 last:border-0">
@@ -214,6 +214,12 @@ const BusinessReviewsTab = ({ businessId, reviews, avgRating, reviewsCount, user
                   )}
                 </p>
               )}
+              {review.owner_reply ? (
+                <p className="mt-2 text-sm text-foreground leading-relaxed">
+                  <span className="font-medium">Réponse de l'entreprise. </span>
+                  {review.owner_reply}
+                </p>
+              ) : null}
 
               {/* Reaction buttons */}
               <div className="mt-3 flex items-center justify-between gap-2">

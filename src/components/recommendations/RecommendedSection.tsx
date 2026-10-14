@@ -106,13 +106,13 @@ const RecommendedSection = ({
       weight: 1.2,
       metadata: { reasons: it.reasonCodes ?? [] },
     });
-    void supabase.from("recommendation_feedback" as any).insert({
+    void supabase.from("recommendation_feedback").insert({
       user_id: user?.id ?? null,
       business_id: it.business.id,
       recommendation_source: source,
       feedback_type: "clicked",
       metadata: { reasons: it.reasonCodes ?? [] },
-    } as any);
+    });
   };
 
   const handleDismiss = (it: RecommendationItem) => {
@@ -127,12 +127,12 @@ const RecommendedSection = ({
       source,
       weight: -1.5,
     });
-    void supabase.from("recommendation_feedback" as any).insert({
+    void supabase.from("recommendation_feedback").insert({
       user_id: user?.id ?? null,
       business_id: it.business.id,
       recommendation_source: source,
       feedback_type: "dismissed",
-    } as any);
+    });
   };
 
   return (

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import type { AuthError, User, Session } from "@supabase/supabase-js";
 
 type AppRole = "user" | "merchant" | "admin";
 
@@ -11,8 +11,8 @@ interface AuthContextType {
   roles: AppRole[];
   isMerchant: boolean;
   isAdmin: boolean;
-  signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName?: string) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshRoles: () => Promise<void>;
 }

@@ -35,7 +35,7 @@ export const useReviewTrust = () => {
     if (!reviewId) return null;
     try {
       const { data } = await supabase
-        .from("review_trust_scores" as any)
+        .from("review_trust_scores")
         .select("*")
         .eq("review_id", reviewId)
         .maybeSingle();

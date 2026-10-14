@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { SponsoredPlacement, SponsoredStatus } from "@/lib/sponsored";
+import { isSponsoredPlacement, isSponsoredStatus, type SponsoredPlacement, type SponsoredStatus } from "@/lib/sponsored";
 
 export interface SponsoredCampaign {
   id: string;
@@ -35,11 +35,16 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
     }
     setLoading(true);
     const { data } = await supabase
-      .from("sponsored_campaigns" as any)
+      .from("sponsored_campaigns")
       .select("*")
       .eq("business_id", businessId)
       .order("created_at", { ascending: false });
-    setCampaigns((data as any) ?? []);
+    setCampaigns(
+      (data ?? []).flatMap((row) => {
+        if (!isSponsoredStatus(row.status) || !isSponsoredPlacement(row.placement)) return [];
+        return [{ ...row, status: row.status, placement: row.placement }];
+      }),
+    );
     setLoading(false);
   }, [businessId]);
 
@@ -60,7 +65,7 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("not_authenticated");
       const { data, error } = await supabase
-        .from("sponsored_campaigns" as any)
+        .from("sponsored_campaigns")
         .insert({
           business_id: params.business_id,
           user_id: user.id,
@@ -76,7 +81,7 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
         .single();
       if (error) throw error;
       await fetchCampaigns();
-      return data as any as SponsoredCampaign;
+      return data as SponsoredCampaign;
     },
     [fetchCampaigns],
   );
@@ -84,7 +89,7 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
   const submitForReview = useCallback(
     async (id: string) => {
       const { error } = await supabase
-        .from("sponsored_campaigns" as any)
+        .from("sponsored_campaigns")
         .update({ status: "pending_review" })
         .eq("id", id);
       if (error) throw error;
@@ -96,7 +101,7 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
   const pauseCampaign = useCallback(
     async (id: string) => {
       const { error } = await supabase
-        .from("sponsored_campaigns" as any)
+        .from("sponsored_campaigns")
         .update({ status: "paused" })
         .eq("id", id);
       if (error) throw error;
@@ -108,8 +113,8 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
   const updateCampaign = useCallback(
     async (id: string, patch: Partial<SponsoredCampaign>) => {
       const { error } = await supabase
-        .from("sponsored_campaigns" as any)
-        .update(patch as any)
+        .from("sponsored_campaigns")
+        .update(patch)
         .eq("id", id);
       if (error) throw error;
       await fetchCampaigns();
@@ -155,7 +160,7 @@ export const useApprovedSponsoredListings = (params: {
     const run = async () => {
       setLoading(true);
       let query = supabase
-        .from("sponsored_campaigns" as any)
+        .from("sponsored_campaigns")
         .select(
           `*, business:businesses(id, name, image_url, avg_rating, reviews_count, city, address)`,
         )
@@ -172,10 +177,11 @@ export const useApprovedSponsoredListings = (params: {
       const { data } = await query;
       if (cancelled) return;
       const now = new Date();
-      const filtered = ((data as any) ?? []).filter((c: ApprovedSponsoredListing) => {
-        if (c.starts_at && new Date(c.starts_at) > now) return false;
-        if (c.ends_at && new Date(c.ends_at) < now) return false;
-        return c.business !== null;
+      const filtered = (data ?? []).flatMap((row) => {
+        if (!isSponsoredStatus(row.status) || !isSponsoredPlacement(row.placement) || !row.business) return [];
+        if (row.starts_at && new Date(row.starts_at) > now) return [];
+        if (row.ends_at && new Date(row.ends_at) < now) return [];
+        return [{ ...row, status: row.status, placement: row.placement, business: row.business }];
       });
       setListings(filtered);
       setLoading(false);
@@ -234,7 +240,7 @@ export const useSponsoredCampaignMetrics = (
       setLoading(true);
       const days = range === "7d" ? 7 : range === "30d" ? 30 : null;
       let q = supabase
-        .from("sponsored_campaign_events" as any)
+        .from("sponsored_campaign_events")
         .select("event_type, placement, created_at")
         .eq("campaign_id", campaignId);
       let sinceIso: string | null = null;
@@ -244,7 +250,7 @@ export const useSponsoredCampaignMetrics = (
       }
       const { data } = await q;
       if (cancelled) return;
-      const rows = (data as any[]) ?? [];
+      const rows = (data) ?? [];
       const impressions = rows.filter((r) => r.event_type === "impression").length;
       const clicks = rows.filter((r) => r.event_type === "click").length;
       const ctr = impressions > 0 ? clicks / impressions : 0;
@@ -278,13 +284,13 @@ export const useSponsoredCampaignMetrics = (
       if (days !== null && sinceIso) {
         const prevStart = new Date(Date.now() - 2 * days * 86400000).toISOString();
         const { data: prevData } = await supabase
-          .from("sponsored_campaign_events" as any)
+          .from("sponsored_campaign_events")
           .select("event_type")
           .eq("campaign_id", campaignId)
           .gte("created_at", prevStart)
           .lt("created_at", sinceIso);
         if (cancelled) return;
-        const prevRows = (prevData as any[]) ?? [];
+        const prevRows = (prevData) ?? [];
         previous = {
           impressions: prevRows.filter((r) => r.event_type === "impression").length,
           clicks: prevRows.filter((r) => r.event_type === "click").length,

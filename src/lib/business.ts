@@ -6,12 +6,22 @@ export const priceLabels = ["$", "$$", "$$$", "$$$$"];
 export type BusinessWithDistance = Tables<"businesses"> & {
   distance_meters?: number | null;
   category_name?: string | null;
+  business_categories?: {
+    categories?: { name?: string | null; slug?: string | null } | null;
+  }[] | null;
+};
+
+export type BusinessSearchHit = Pick<Tables<"businesses">, "id" | "name" | "address" | "image_url">;
+
+export const categoryNameFromEmbed = (business: object, fallback = "Local"): string => {
+  const embedded = business as BusinessWithDistance;
+  return embedded.business_categories?.[0]?.categories?.name || embedded.category_name || fallback;
 };
 
 export const mapBusinessToCard = (business: BusinessWithDistance): Business => ({
   id: business.id,
   name: business.name,
-  category: business.category_name || (business as any).business_categories?.[0]?.categories?.name || "Local",
+  category: business.category_name || categoryNameFromEmbed(business),
   rating: Number(business.avg_rating),
   reviewCount: business.reviews_count,
   priceLevel: priceLabels[(business.price_level || 1) - 1] || "$",

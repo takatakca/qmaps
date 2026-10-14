@@ -28,7 +28,7 @@ const MyReviews = () => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        setReviews((data as any) || []);
+        setReviews((data) || []);
         setLoading(false);
       });
   }, [user]);

@@ -59,7 +59,9 @@ export const useHomeListings = (perSection = 10): HomeListings => {
         setRows([]);
       } else {
         setRows(
-          (data ?? []).map((row: any) => {
+          ((data ?? []) as unknown as Array<Tables<"businesses"> & {
+            business_categories?: { categories?: { name?: string | null; slug?: string | null } | null }[] | null;
+          }>).map((row) => {
             const cat = row.business_categories?.[0]?.categories;
             const { business_categories: _drop, ...business } = row;
             return { ...business, category_name: cat?.name ?? null, category_slug: cat?.slug ?? null };

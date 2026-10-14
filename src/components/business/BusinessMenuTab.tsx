@@ -20,7 +20,7 @@ const BusinessMenuTab = ({ businessId }: Props) => {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("business_menu_items")
         .select("*")
         .eq("business_id", businessId)

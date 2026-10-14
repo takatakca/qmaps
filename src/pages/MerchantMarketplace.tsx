@@ -452,7 +452,7 @@ const MerchantMarketplace = () => {
 
         {/* ===== BUSINESS STATUS ===== */}
         {(() => {
-          const currentStatus = readBusinessStatus(business as any);
+          const currentStatus = readBusinessStatus(business);
           const meta = STATUS_LABELS[currentStatus];
           const dot = {
             success: "bg-green-500",

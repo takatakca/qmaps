@@ -18,12 +18,12 @@ export const useUnreadCounts = () => {
 
     const [{ count: notifCount }, { data: participants }] = await Promise.all([
       supabase
-        .from("notifications" as any)
+        .from("notifications")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("is_read", false),
       supabase
-        .from("conversation_participants" as any)
+        .from("conversation_participants")
         .select("conversation_id")
         .eq("user_id", user.id),
     ]);
@@ -37,7 +37,7 @@ export const useUnreadCounts = () => {
     }
 
     const { count: unreadMessages } = await supabase
-      .from("messages" as any)
+      .from("messages")
       .select("id", { count: "exact", head: true })
       .in("conversation_id", conversationIds)
       .neq("sender_id", user.id)

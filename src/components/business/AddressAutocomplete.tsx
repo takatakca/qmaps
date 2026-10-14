@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, Loader2 } from "lucide-react";
-import { loadGoogleMaps, isMapsConfigured } from "@/lib/googleMaps";
+import {
+  isMapsConfigured,
+  loadGoogleMaps,
+  type AddressComponent,
+  type GoogleMap,
+  type GoogleMarker,
+  type PlaceSuggestion,
+} from "@/lib/googleMaps";
 
 export interface ResolvedAddress {
   address: string;
@@ -23,8 +30,8 @@ interface Props {
   longitude: number | null;
 }
 
-const comp = (parts: any[], type: string, short = false) => {
-  const found = parts?.find((p: any) => p.types?.includes(type));
+const comp = (parts: AddressComponent[], type: string, short = false) => {
+  const found = parts?.find((part) => part.types?.includes(type));
   if (!found) return "";
   return short ? found.shortText ?? found.short_name ?? "" : found.longText ?? found.long_name ?? "";
 };
@@ -32,14 +39,14 @@ const comp = (parts: any[], type: string, short = false) => {
 const AddressAutocomplete = ({ value, onChange, onResolved, latitude, longitude }: Props) => {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(!isMapsConfigured());
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [searching, setSearching] = useState(false);
   const [open, setOpen] = useState(false);
 
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstance = useRef<any>(null);
-  const markerInstance = useRef<any>(null);
-  const sessionToken = useRef<any>(null);
+  const mapInstance = useRef<GoogleMap | null>(null);
+  const markerInstance = useRef<GoogleMarker | null>(null);
+  const sessionToken = useRef<object | null>(null);
   const debounceRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -61,7 +68,8 @@ const AddressAutocomplete = ({ value, onChange, onResolved, latitude, longitude 
     debounceRef.current = window.setTimeout(async () => {
       try {
         setSearching(true);
-        const places: any = await (window as any).google.maps.importLibrary("places");
+        const places = await window.google?.maps.importLibrary("places");
+        if (!places) throw new Error("maps_not_ready");
         if (!sessionToken.current) sessionToken.current = new places.AutocompleteSessionToken();
         const { suggestions: res } = await places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
           input: q,
@@ -80,11 +88,11 @@ const AddressAutocomplete = ({ value, onChange, onResolved, latitude, longitude 
     return () => { if (debounceRef.current) window.clearTimeout(debounceRef.current); };
   }, [value, ready, open]);
 
-  const selectSuggestion = async (s: any) => {
+  const selectSuggestion = async (suggestion: PlaceSuggestion) => {
     try {
       setOpen(false);
       setSuggestions([]);
-      const place = s.placePrediction.toPlace();
+      const place = suggestion.placePrediction.toPlace();
       await place.fetchFields({
         fields: ["addressComponents", "location", "formattedAddress", "id"],
       });
@@ -114,16 +122,17 @@ const AddressAutocomplete = ({ value, onChange, onResolved, latitude, longitude 
   // Map preview
   useEffect(() => {
     if (!ready || latitude == null || longitude == null || !mapRef.current) return;
-    const g = (window as any).google;
+    const maps = window.google?.maps;
+    if (!maps) return;
     const pos = { lat: latitude, lng: longitude };
     if (!mapInstance.current) {
-      mapInstance.current = new g.maps.Map(mapRef.current, {
+      mapInstance.current = new maps.Map(mapRef.current, {
         center: pos,
         zoom: 16,
         disableDefaultUI: true,
         zoomControl: true,
       });
-      markerInstance.current = new g.maps.Marker({ position: pos, map: mapInstance.current });
+      markerInstance.current = new maps.Marker({ position: pos, map: mapInstance.current });
     } else {
       mapInstance.current.setCenter(pos);
       markerInstance.current?.setPosition(pos);

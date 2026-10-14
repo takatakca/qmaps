@@ -12,6 +12,26 @@ interface Props {
   onVerified: (phone: string) => void;
 }
 
+type OtpResult = {
+  error?: string;
+  retryAfter?: number;
+  cooldown?: number;
+  verified?: boolean;
+  phone?: string;
+};
+
+const readOtpResult = (data: unknown): OtpResult => {
+  if (!data || typeof data !== "object") return {};
+  const record = data as Record<string, unknown>;
+  return {
+    error: typeof record.error === "string" ? record.error : undefined,
+    retryAfter: typeof record.retryAfter === "number" ? record.retryAfter : undefined,
+    cooldown: typeof record.cooldown === "number" ? record.cooldown : undefined,
+    verified: record.verified === true,
+    phone: typeof record.phone === "string" ? record.phone : undefined,
+  };
+};
+
 type Stage = "idle" | "sent";
 
 const PhoneOtpVerification = ({ initialPhone = "", verified, onVerified }: Props) => {
@@ -30,7 +50,7 @@ const PhoneOtpVerification = ({ initialPhone = "", verified, onVerified }: Props
     (async () => {
       try {
         const { data, error } = await supabase.functions.invoke("send-otp", { method: "GET" });
-        if (!cancelled && !error) setConfig(data as any);
+        if (!cancelled && !error) setConfig(data);
         else if (!cancelled) setConfig({ smsEnabled: false, voiceEnabled: false });
       } catch {
         if (!cancelled) setConfig({ smsEnabled: false, voiceEnabled: false });
@@ -54,7 +74,7 @@ const PhoneOtpVerification = ({ initialPhone = "", verified, onVerified }: Props
     const { data, error } = await supabase.functions.invoke("send-otp", { body: { phone, channel } });
     setSending(false);
 
-    const payload: any = data ?? {};
+    const payload = readOtpResult(data);
     if (error || payload?.error) {
       toast({
         title: "Envoi impossible",
@@ -77,7 +97,7 @@ const PhoneOtpVerification = ({ initialPhone = "", verified, onVerified }: Props
     setChecking(true);
     const { data, error } = await supabase.functions.invoke("verify-otp", { body: { phone, code } });
     setChecking(false);
-    const payload: any = data ?? {};
+    const payload = readOtpResult(data);
     if (error || payload?.error || !payload?.verified) {
       toast({
         title: "Vérification échouée",

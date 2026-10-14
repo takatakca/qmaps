@@ -43,7 +43,7 @@ export const useCreateReport = () => {
       if (!user) throw new Error("not-authenticated");
       setSubmitting(true);
       try {
-        const { error } = await supabase.from("reports" as any).insert({
+        const { error } = await supabase.from("reports").insert({
           reporter_user_id: user.id,
           target_type: input.target_type,
           target_id: input.target_id,
@@ -71,7 +71,7 @@ export const useAdminReports = (filters?: {
   const refresh = useCallback(async () => {
     setLoading(true);
     let query = supabase
-      .from("reports" as any)
+      .from("reports")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
@@ -96,7 +96,7 @@ export const useAdminReports = (filters?: {
         reviewed_at: new Date().toISOString(),
       };
       if (internal_note !== undefined) patch.internal_note = internal_note;
-      const { error } = await supabase.from("reports" as any).update(patch).eq("id", id);
+      const { error } = await supabase.from("reports").update(patch).eq("id", id);
       if (error) throw error;
       await refresh();
     },

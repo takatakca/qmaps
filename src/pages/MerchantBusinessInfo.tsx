@@ -53,7 +53,7 @@ const MerchantBusinessInfo = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Chargement...</p></div>;
   if (!business) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Aucune entreprise trouvée.</p></div>;
 
-  const specialCount = Object.keys(((business as any).special_hours as Record<string, unknown>) ?? {}).length;
+  const specialCount = Object.keys(((business).special_hours as Record<string, unknown>) ?? {}).length;
   const sections = [
     { label: "Informations de base", icon: PenLine, value: `${business.name} · ${business.phone || ""}`, onClick: () => setShowBasicInfo(true) },
     { label: "Catégories", icon: Tag, value: "Restaurants", onClick: () => setShowCategory(true) },
@@ -65,7 +65,7 @@ const MerchantBusinessInfo = () => {
     { label: "Spécialités", icon: Sparkles, value: business.description?.substring(0, 40) || "Ajouter", onClick: () => setShowSpecialties(true) },
     { label: "Historique", icon: BookOpen, value: "Modifier l'historique", onClick: () => setShowHistory(true) },
     { label: "Commodités et plus", icon: List, value: `${business.amenities?.length || 0} options`, onClick: () => setShowAmenities(true) },
-    { label: "Paiements, langues, accessibilité", icon: CreditCard, value: `${((business as any).payment_methods?.length || 0) + ((business as any).languages?.length || 0) + ((business as any).accessibility?.length || 0)} options`, onClick: () => setShowAttributes(true) },
+    { label: "Paiements, langues, accessibilité", icon: CreditCard, value: `${((business).payment_methods?.length || 0) + ((business).languages?.length || 0) + ((business).accessibility?.length || 0)} options`, onClick: () => setShowAttributes(true) },
   ];
 
   return (

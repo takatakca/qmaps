@@ -13,6 +13,7 @@ import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { buildAdminAuditLogPayload } from "@/lib/adminAudit";
+import { isOneOf, errorMessage } from "@/lib/errors";
 
 const STATUS_COLORS: Record<ReportStatus, string> = {
   open: "bg-destructive/10 text-destructive",
@@ -53,21 +54,23 @@ const AdminReports = () => {
           targetId: id,
           metadata: { new_status: status, internal_note: internalNote ?? null },
         });
-        const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(payload);
+        const { error: auditErr } = await supabase.from("admin_audit_logs").insert(payload);
         if (auditErr) toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
       }
       toast({ title: "Signalement mis à jour" });
       setOpenId(null);
       setNote("");
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Erreur", description: errorMessage(error), variant: "destructive" });
     }
   };
 
   return (
     <AdminLayout title="Signalements">
       <div className="flex flex-wrap gap-2 mb-4">
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+        <Select value={statusFilter} onValueChange={(value) => {
+          if (isOneOf(value, ["all", "open", "reviewing", "resolved", "dismissed"] as const)) setStatusFilter(value);
+        }}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>
@@ -77,7 +80,9 @@ const AdminReports = () => {
             <SelectItem value="dismissed">Rejetés</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
+        <Select value={typeFilter} onValueChange={(value) => {
+          if (value === "all" || value in TARGET_LABELS) setTypeFilter(value as ReportTargetType | "all");
+        }}>
           <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les types</SelectItem>

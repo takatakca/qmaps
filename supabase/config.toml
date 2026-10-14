@@ -2,3 +2,9 @@ project_id = "ldvkebjfuldnemfdoted"
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.takatak-link-business]
+verify_jwt = false
+
+[functions.takatak-reply-review]
+verify_jwt = false

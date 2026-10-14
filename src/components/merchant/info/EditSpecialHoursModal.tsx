@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toJson } from "@/lib/json";
 import { useToast } from "@/hooks/use-toast";
 import {
   formatDateKey,
@@ -38,7 +39,7 @@ const EditSpecialHoursModal = ({ open, onClose, business, onSaved }: Props) => {
 
   useEffect(() => {
     if (!open) return;
-    setSpecial(parseSpecialHours((business as any).special_hours) ?? {});
+    setSpecial(parseSpecialHours((business).special_hours) ?? {});
     setNewDate(todayKey());
   }, [open, business.id]);
 
@@ -128,7 +129,7 @@ const EditSpecialHoursModal = ({ open, onClose, business, onSaved }: Props) => {
     const payload = Object.keys(special).length === 0 ? null : special;
     const { error } = await supabase
       .from("businesses")
-      .update({ special_hours: payload as any })
+      .update({ special_hours: payload === null ? null : toJson(payload) })
       .eq("id", business.id);
     setSaving(false);
     if (error) {

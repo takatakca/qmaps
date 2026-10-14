@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { toJson } from "@/lib/json";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { Loader2, X } from "lucide-react";
@@ -36,7 +37,7 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved, isRefreshing = f
   const skipAutoSaveRef = useRef(true);
 
   const initial = useMemo(
-    () => parseAttributes({ attributes: (business as any).attributes, amenities: business.amenities }),
+    () => parseAttributes({ attributes: (business).attributes, amenities: business.amenities }),
     [business.id]
   );
   const [state, setState] = useState<StructuredAttributes>(() => cloneAttrs(initial));
@@ -45,14 +46,14 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved, isRefreshing = f
   useEffect(() => {
     if (!open) return;
     const next = parseAttributes({
-      attributes: (business as any).attributes,
+      attributes: (business).attributes,
       amenities: business.amenities,
     });
     setState(cloneAttrs(next));
     setBaseline(cloneAttrs(next));
     setSavedNotice(null);
     skipAutoSaveRef.current = true;
-  }, [open, business.id, business.amenities, (business as any).attributes]);
+  }, [open, business.id, business.amenities, (business).attributes]);
 
   const hasChanges = useMemo(
     () => JSON.stringify(state) !== JSON.stringify(baseline),
@@ -96,9 +97,9 @@ const EditAmenitiesModal = ({ open, onClose, business, onSaved, isRefreshing = f
     const { error } = await supabase
       .from("businesses")
       .update({
-        attributes: sanitized as any,
+        attributes: toJson(sanitized),
         amenities: toLegacyAmenities(sanitized),
-      } as any)
+      })
       .eq("id", business.id);
     setSaving(false);
 

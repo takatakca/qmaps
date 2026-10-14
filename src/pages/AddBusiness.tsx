@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
+import type { BusinessSearchHit } from "@/lib/business";
 
 type Step = "relationship" | "search" | "form";
 
@@ -18,7 +19,7 @@ const AddBusiness = () => {
   const [step, setStep] = useState<Step>("relationship");
   const [relationship, setRelationship] = useState("");
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<BusinessSearchHit[]>([]);
   const [form, setForm] = useState({ name: "", address: "", phone: "", website: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
 

@@ -28,7 +28,7 @@ const SuggestedUsersList = () => {
 
     const load = async () => {
       const [{ data: follows }, { data: profileRows }] = await Promise.all([
-        supabase.from("follows" as any).select("following_id").eq("follower_id", user.id),
+        supabase.from("follows").select("following_id").eq("follower_id", user.id),
         supabase.from("profiles").select("id, display_name").neq("id", user.id).limit(6),
       ]);
 
@@ -48,8 +48,8 @@ const SuggestedUsersList = () => {
     setFollowingIds((current) => isFollowing ? current.filter((id) => id !== targetId) : [...current, targetId]);
 
     const { error } = isFollowing
-      ? await supabase.from("follows" as any).delete().eq("follower_id", user.id).eq("following_id", targetId)
-      : await supabase.from("follows" as any).insert({ follower_id: user.id, following_id: targetId });
+      ? await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", targetId)
+      : await supabase.from("follows").insert({ follower_id: user.id, following_id: targetId });
 
     if (error) {
       setFollowingIds(previous);

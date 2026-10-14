@@ -34,14 +34,14 @@ const AdminOwnerTransfers = () => {
 
   const load = async () => {
     setLoading(true);
-    let q = (supabase as any)
+    let q = supabase
       .from("business_owner_transfer_requests")
       .select("*, business:business_id(name,city)")
       .order("created_at", { ascending: false })
       .limit(100);
     if (filter !== "all") q = q.eq("status", filter);
     const { data } = await q;
-    setRows((data as TransferRow[]) ?? []);
+    setRows((data ?? []) as unknown as TransferRow[]);
     setLoading(false);
   };
 
@@ -53,7 +53,7 @@ const AdminOwnerTransfers = () => {
     setWorking(row.id);
     const adminNote = (notes[row.id] ?? row.admin_note ?? "").trim() || null;
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("business_owner_transfer_requests")
       .update({
         status: decision,
@@ -91,7 +91,7 @@ const AdminOwnerTransfers = () => {
         previous_owner_user_id: row.current_owner_user_id,
       },
     });
-    const { error: auditErr } = await (supabase as any).from("admin_audit_logs").insert(auditPayload);
+    const { error: auditErr } = await supabase.from("admin_audit_logs").insert(auditPayload);
     if (auditErr) toast({ title: "Avertissement audit", description: auditErr.message, variant: "destructive" });
 
     setWorking(null);

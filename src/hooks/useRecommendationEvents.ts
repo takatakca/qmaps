@@ -12,6 +12,7 @@
  */
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toJson } from "@/lib/json";
 import type { RecommendationEventType } from "@/lib/recommendations";
 
 const SESSION_STORAGE_KEY = "qmaps:rec:session_id";
@@ -129,9 +130,9 @@ export const trackRecommendationEvent = (input: RecommendationEventInput): void 
         event_type: input.event_type,
         source: input.source ?? null,
         weight: typeof input.weight === "number" ? input.weight : 1,
-        metadata: input.metadata ?? {},
+        metadata: toJson(input.metadata ?? {}),
       };
-      await supabase.from("recommendation_events" as any).insert(payload as any);
+      await supabase.from("recommendation_events").insert(payload);
     } catch {
       // silent
     }

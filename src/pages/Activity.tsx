@@ -77,7 +77,7 @@ const Activity = () => {
             title="Tendances de la communauté"
             subtitle="Suggéré pour vous en attendant"
             source="activity_empty_trending"
-            items={trending.slice(0, 4).map((b) => ({ business: b as any, reasonCodes: ["popular"] }))}
+            items={trending.slice(0, 4).map((b) => ({ business: b, reasonCodes: ["popular"] }))}
             loading={recLoading}
           />
         </div>

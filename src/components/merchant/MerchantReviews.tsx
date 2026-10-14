@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { AlertCircle, X, ArrowRight, Star } from "lucide-react";
 import StarRating from "@/components/StarRating";
+import type { ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 
 interface Props {
-  reviews: any[];
+  reviews: ReviewWithAuthor[];
 }
 
 const MerchantReviews = ({ reviews }: Props) => {
@@ -102,17 +103,23 @@ const MerchantReviews = ({ reviews }: Props) => {
       ) : (
         /* Review list */
         <div className="space-y-3">
-          {recommendedReviews.map((r: any) => (
-            <div key={r.id} className="bg-card rounded-xl border border-border p-4">
+          {recommendedReviews.map((review) => (
+            <div key={review.id} className="bg-card rounded-xl border border-border p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-foreground">
-                  {r.profiles?.display_name || "Utilisateur"}
+                  {review.profiles?.display_name || "Utilisateur"}
                 </p>
-                <StarRating rating={r.rating} size={12} />
+                <StarRating rating={review.rating} size={12} />
               </div>
-              <p className="text-sm text-foreground mt-2">{r.body}</p>
+              <p className="text-sm text-foreground mt-2">{review.body}</p>
+              {review.owner_reply ? (
+                <p className="text-sm text-foreground mt-2">
+                  <span className="font-medium">Réponse de l'entreprise. </span>
+                  {review.owner_reply}
+                </p>
+              ) : null}
               <p className="text-xs text-muted-foreground mt-2">
-                {new Date(r.created_at).toLocaleDateString("fr-CA")}
+                {new Date(review.created_at).toLocaleDateString("fr-CA")}
               </p>
             </div>
           ))}

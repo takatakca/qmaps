@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Camera, Clock, ListChecks, Languages, CreditCard, Accessibility, Tag, Phone, MapPin, Sparkles, Utensils, ImageIcon } from "lucide-react";
+import { Camera, Clock, ListChecks, Languages, CreditCard, Accessibility, Tag, Phone, MapPin, Sparkles, Utensils, ImageIcon, type LucideIcon } from "lucide-react";
 import {
   COMPLETENESS_LABELS_FR,
   getBusinessCompleteness,
@@ -7,7 +7,7 @@ import {
 } from "@/lib/businessCompleteness";
 import type { MenuItem } from "@/lib/menuItems";
 
-const ICONS: Record<string, any> = {
+const ICONS: Record<string, LucideIcon> = {
   name: Tag,
   address: MapPin,
   contact: Phone,

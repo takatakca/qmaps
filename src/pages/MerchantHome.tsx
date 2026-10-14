@@ -38,7 +38,7 @@ const MerchantHome = () => {
       setBusiness(biz);
       setDisplayName(profile?.display_name || user.email?.split("@")[0] || "Professionnel");
       if (biz) {
-        const { data: menu } = await (supabase as any)
+        const { data: menu } = await supabase
           .from("business_menu_items")
           .select("*")
           .eq("business_id", biz.id);
@@ -74,7 +74,7 @@ const MerchantHome = () => {
       <HomeHeader business={business} displayName={displayName} />
 
       <div className="p-4 space-y-4">
-        <CompletenessCard business={business as any} menuItems={menuItems} />
+        <CompletenessCard business={business} menuItems={menuItems} />
         <AnalyticsCards businessId={business.id} />
         <RemindersSection />
         <AdPreviewSection business={business} />

@@ -17,7 +17,7 @@ export const useNotifications = () => {
 
     setLoading(true);
     const { data } = await supabase
-      .from("notifications" as any)
+      .from("notifications")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
@@ -32,7 +32,7 @@ export const useNotifications = () => {
 
     setNotifications((current) => current.map((item) => item.id === id ? { ...item, is_read: true } : item));
     const { error } = await supabase
-      .from("notifications" as any)
+      .from("notifications")
       .update({ is_read: true })
       .eq("id", id)
       .eq("user_id", user.id);

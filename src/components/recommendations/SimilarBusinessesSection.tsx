@@ -18,7 +18,7 @@ const SimilarBusinessesSection = ({ businessId, limit = 4 }: Props) => {
   const mapped = items.map((it) => {
     const reason: RecommendationReasonCode =
       it.reason === "Même ville" ? "matches_top_city" : "matches_top_category";
-    return { business: it.business as any, reasonCodes: [reason] };
+    return { business: it.business, reasonCodes: [reason] };
   });
   return (
     <div className="px-4 py-5 border-t border-border">

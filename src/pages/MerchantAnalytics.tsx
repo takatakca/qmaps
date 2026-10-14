@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Phone, Globe, MapPin, MessageSquare, Bookmark, Image as ImageIcon, Briefcase, Send, CheckCircle2, Circle, ChevronRight, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye, Phone, Globe, MapPin, MessageSquare, Bookmark, Image as ImageIcon, Briefcase, Send, CheckCircle2, Circle, ChevronRight, Sparkles, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMerchantAnalytics } from "@/hooks/useMerchantAnalytics";
@@ -11,7 +11,7 @@ import MerchantBottomNav from "@/components/MerchantBottomNav";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
-const EVENT_LABELS: Record<string, { label: string; icon: any }> = {
+const EVENT_LABELS: Record<string, { label: string; icon: LucideIcon }> = {
   profile_view: { label: "Vues du profil", icon: Eye },
   phone_click: { label: "Appels", icon: Phone },
   website_click: { label: "Site web", icon: Globe },
@@ -195,7 +195,7 @@ const MerchantAnalytics = () => {
             <div className="grid grid-cols-2 gap-3">
               {Object.entries(EVENT_LABELS).map(([key, def]) => {
                 const Icon = def.icon;
-                const value = (totals as any)[key] as number;
+                const value = (totals)[key] as number;
                 return (
                   <Card key={key} className="p-3">
                     <div className="flex items-center gap-2 text-muted-foreground">

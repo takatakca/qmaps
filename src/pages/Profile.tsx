@@ -11,13 +11,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Tables } from "@/integrations/supabase/types";
 
 const Profile = () => {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ display_name: string | null; email: string | null } | null>(null);
   const [stats, setStats] = useState({ reviews: 0, bookmarks: 0, photos: 0 });
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<Array<{
+    id: string;
+    businesses: Pick<Tables<"businesses">, "id" | "name" | "image_url" | "address"> | null;
+  }>>([]);
   const [impactTab, setImpactTab] = useState<"reviews" | "photos">("reviews");
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -31,7 +35,7 @@ const Profile = () => {
     supabase.from("bookmarks").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setStats(s => ({ ...s, bookmarks: count || 0 })));
     // Load recently viewed (using bookmarks as proxy)
     supabase.from("bookmarks").select("*, businesses(*)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3)
-      .then(({ data }) => setRecentlyViewed((data as any) || []));
+      .then(({ data }) => setRecentlyViewed((data) || []));
   }, [user]);
 
   if (loading) return (
@@ -245,8 +249,8 @@ const Profile = () => {
               <span className="text-sm text-foreground">{item.label}</span>
             </div>
             <div className="flex items-center gap-2">
-              {"badge" in (item as any) && typeof (item as any).badge === "number" && (item as any).badge > 0 && (
-                <span className="bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">{(item as any).badge}</span>
+              {"badge" in (item) && typeof (item).badge === "number" && (item).badge > 0 && (
+                <span className="bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">{(item).badge}</span>
               )}
               <ChevronRight size={16} className="text-muted-foreground" />
             </div>

@@ -20,8 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
-import { useCreateReport, type ReportTargetType } from "@/hooks/useReports";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateReport, type ReportTargetType } from "@/hooks/useReports";
+import { errorMessage } from "@/lib/errors";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -73,8 +74,8 @@ const ReportButton = ({
       setOpen(false);
       setReason("");
       setDetails("");
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Erreur", description: errorMessage(error), variant: "destructive" });
     }
   };
 

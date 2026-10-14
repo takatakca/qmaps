@@ -34,7 +34,7 @@ describe("special hours", () => {
     expect(parsed!["2026-12-25"].closed).toBe(true);
     expect(parsed!["2026-12-25"].note).toBe("Noël");
     expect(parsed!["2026-12-24"].blocks).toHaveLength(1);
-    expect((parsed as any)["bad-key"]).toBeUndefined();
+    expect((parsed)["bad-key"]).toBeUndefined();
   });
 
   it("returns null for empty/invalid input", () => {

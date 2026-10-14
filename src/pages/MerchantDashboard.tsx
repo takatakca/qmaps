@@ -1,4 +1,4 @@
-import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
+import { fetchReviewsWithAuthors, type ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +30,7 @@ const MerchantDashboard = () => {
   const { toast } = useToast();
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [selectedBiz, setSelectedBiz] = useState<Tables<"businesses"> | null>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<ReviewWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "performance" | "edit" | "reviews">("overview");
   const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
@@ -52,7 +52,7 @@ const MerchantDashboard = () => {
   const selectBiz = async (biz: Tables<"businesses">) => {
     setSelectedBiz(biz);
     const revData = await fetchReviewsWithAuthors(biz.id);
-    setReviews((revData as any) || []);
+    setReviews((revData) || []);
   };
 
   const handleCreateBusiness = async () => {
@@ -66,7 +66,7 @@ const MerchantDashboard = () => {
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else if (data) {
-      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" as any }, { onConflict: "user_id,role", ignoreDuplicates: true });
+      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
       fetchBusinesses();
       setTab("edit");
     }

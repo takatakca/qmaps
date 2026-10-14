@@ -68,15 +68,15 @@ const toSet = (arr?: string[] | null) => new Set(arr ?? []);
 const EditAttributesModal = ({ open, onClose, business, onSaved }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-  const [payments, setPayments] = useState<Set<string>>(() => toSet((business as any).payment_methods));
-  const [languages, setLanguages] = useState<Set<string>>(() => toSet((business as any).languages));
-  const [accessibility, setAccessibility] = useState<Set<string>>(() => toSet((business as any).accessibility));
+  const [payments, setPayments] = useState<Set<string>>(() => toSet((business).payment_methods));
+  const [languages, setLanguages] = useState<Set<string>>(() => toSet((business).languages));
+  const [accessibility, setAccessibility] = useState<Set<string>>(() => toSet((business).accessibility));
 
   useEffect(() => {
     if (!open) return;
-    setPayments(toSet((business as any).payment_methods));
-    setLanguages(toSet((business as any).languages));
-    setAccessibility(toSet((business as any).accessibility));
+    setPayments(toSet((business).payment_methods));
+    setLanguages(toSet((business).languages));
+    setAccessibility(toSet((business).accessibility));
   }, [open, business.id]);
 
   const toggle = (set: Set<string>, setter: (s: Set<string>) => void) => (value: string) => {
@@ -94,7 +94,7 @@ const EditAttributesModal = ({ open, onClose, business, onSaved }: Props) => {
         payment_methods: Array.from(payments),
         languages: Array.from(languages),
         accessibility: Array.from(accessibility),
-      } as any)
+      })
       .eq("id", business.id);
     setSaving(false);
     if (error) {

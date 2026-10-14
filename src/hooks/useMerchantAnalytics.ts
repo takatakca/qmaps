@@ -44,7 +44,7 @@ export const useMerchantAnalytics = (businessId: string | null, days: 7 | 30 = 7
     setLoading(true);
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     const { data } = await supabase
-      .from("business_events" as any)
+      .from("business_events")
       .select("*")
       .eq("business_id", businessId)
       .gte("created_at", since)
