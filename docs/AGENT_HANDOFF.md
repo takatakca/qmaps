@@ -29,6 +29,9 @@ Le panneau `BusinessReviewsTab` propose maintenant un vrai filtre par note et le
 ## Localisation des commerces ajoutés
 `AddBusiness.tsx` exige désormais le nom, l'adresse et la ville du commerce. L'insertion sauvegarde la ville saisie (Québec/QC), au lieu d'accepter le défaut SQL historique Montréal ; l'option propriétaire/gestionnaire n'affirme pas une vérification automatique. Test `src/test/addBusinessCity.test.ts`.
 
+## Contrôle strict ajouté
+`package.json` expose `bun run typecheck` exécuté par le job CI avant la suite Vitest. Si le nouveau contrôle découvre des erreurs préexistantes, corriger les sources et relancer GitHub Actions jusqu'à réussite ; ne pas masquer ni retirer l'étape.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 

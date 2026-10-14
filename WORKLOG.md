@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, typecheck CI pending | Added explicit tsc noEmit typecheck to GitHub CI and package scripts | Resolve any TypeScript errors found by latest CI
+
 2026-10-14 | ChatGPT | main | code ready, CI pending | Made real business city mandatory in AddBusiness to prevent erroneous Montreal fallback; clarified owner choice | Review CI and production mapping
 
 2026-10-14 | ChatGPT | main | done in code, CI pending | Added working review rating filter, text expansion and photo navigation; removed false author counts and inactive check-in control | Review CI and mobile UX, continue production tasks

@@ -4,6 +4,7 @@ Toutes les tâches doivent être validées par des preuves, non par une déclara
 
 | Priorité | État | Tâche | Critère de réussite |
 |---|---|---|---|
+| P0 | TERMINÉ EN CODE, CI À RECONTRÔLER | Vérifier TypeScript explicitement dans GitHub Actions, sans se limiter au build Vite | `bun run typecheck` passe sur HEAD et ne révèle aucune anomalie |
 | P0 | TERMINÉ EN CODE, CI À RECONTRÔLER | Sélectionner plusieurs entreprises dans le portail, préserver la sélection après édition, isoler les avis par entreprise | Tests unitaires verts, bouton de sélection visible pour plusieurs entreprises, aucun résultat d'un ancien commerce après changement |
 | P0 | BLOQUÉ PAR ACCÈS | Identifier l'hébergement réel de qmaps.ca, DNS/SSL, répertoire web et version en ligne | Domaine accessible en HTTPS, empreinte/version déployée vérifiée |
 | P0 | TERMINÉ EN CODE, MIGRATION BLOQUÉE | Fermer les contournements par INSERT : faux lien TAKATAK, réponse d'entreprise falsifiée, attribution d'entreprise à un autre utilisateur | Migration `supabase/migrations/20261014210000_guard_inserts_and_business_owner_assignment.sql` appliquée après les précédentes, tests SQL RLS en environnement autorisé |
