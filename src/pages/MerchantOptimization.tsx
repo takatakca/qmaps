@@ -21,7 +21,7 @@ const MerchantOptimization = () => {
   const [loadingBusiness, setLoadingBusiness] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
-  const { campaigns, loading: loadingCampaigns } = useSponsoredCampaigns(business?.id ?? null);
+  const { campaigns, loading: loadingCampaigns, error: campaignError, refresh: refreshCampaigns } = useSponsoredCampaigns(business?.id ?? null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -95,6 +95,11 @@ const MerchantOptimization = () => {
               </div>
               {loadingCampaigns ? (
                 <p className="text-sm text-muted-foreground" role="status">Chargement des campagnes...</p>
+              ) : campaignError ? (
+                <div role="alert" className="space-y-2">
+                  <p className="text-sm text-destructive">Impossible de charger les campagnes : {campaignError}</p>
+                  <Button size="sm" variant="outline" onClick={() => void refreshCampaigns()}>Réessayer</Button>
+                </div>
               ) : (
                 <>
                   <div className="grid grid-cols-3 gap-2 text-center">

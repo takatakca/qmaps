@@ -2,6 +2,12 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — lecture sécurisée des campagnes (2026-10-14)
+- `useSponsoredCampaigns` contrôle la génération de requête et l'identifiant de commerce effectivement chargé ; les données d'une entreprise précédente ne sont pas exposées lors d'un changement de sélection.
+- Les erreurs Supabase sont maintenant distinctes de « aucune campagne » dans `MerchantOptimization.tsx`, avec bouton Réessayer.
+- Fichiers : `src/hooks/useSponsoredCampaigns.ts`, `src/pages/MerchantOptimization.tsx`, `src/test/sponsoredCampaignIsolation.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.
+- Prochaine vérification : CI sur le commit courant ; ensuite E2E deux commerçants et deux entreprises sur le véritable projet Supabase QMAPS. Aucune migration ni publication en ligne exécutée.
+
 ## Relève — tableau publicitaire ancré sur les données réelles (2026-10-14)
 - **Dernière tâche codée :** remplacement de l'ancien simulateur sans backend de `MerchantOptimization.tsx` par un panneau affichant les campagnes réellement retournées par `useSponsoredCampaigns` pour le commerce appartenant à l'utilisateur. Les statuts et budgets proviennent de Supabase, sans clics/leads fabriqués.
 - **Fichiers :** `src/pages/MerchantOptimization.tsx`, `src/test/merchantAdvertisingTruth.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.

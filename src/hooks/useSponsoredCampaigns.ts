@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isSponsoredPlacement, isSponsoredStatus, type SponsoredPlacement, type SponsoredStatus } from "@/lib/sponsored";
 
@@ -25,31 +25,50 @@ export interface SponsoredCampaign {
 /** Hook for the merchant: list + mutations on their own campaigns. */
 export const useSponsoredCampaigns = (businessId?: string | null) => {
   const [campaigns, setCampaigns] = useState<SponsoredCampaign[]>([]);
+  const [loadedBusinessId, setLoadedBusinessId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const requestVersion = useRef(0);
 
   const fetchCampaigns = useCallback(async () => {
+    const version = ++requestVersion.current;
+    setLoadedBusinessId(null);
+    setError(null);
     if (!businessId) {
       setCampaigns([]);
       setLoading(false);
       return;
     }
     setLoading(true);
-    const { data } = await supabase
-      .from("sponsored_campaigns")
-      .select("*")
-      .eq("business_id", businessId)
-      .order("created_at", { ascending: false });
-    setCampaigns(
-      (data ?? []).flatMap((row) => {
-        if (!isSponsoredStatus(row.status) || !isSponsoredPlacement(row.placement)) return [];
-        return [{ ...row, status: row.status, placement: row.placement }];
-      }),
-    );
-    setLoading(false);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("sponsored_campaigns")
+        .select("*")
+        .eq("business_id", businessId)
+        .order("created_at", { ascending: false });
+      if (version !== requestVersion.current) return;
+      if (fetchError) throw fetchError;
+      setCampaigns(
+        (data ?? []).flatMap((row) => {
+          if (!isSponsoredStatus(row.status) || !isSponsoredPlacement(row.placement)) return [];
+          return [{ ...row, status: row.status, placement: row.placement }];
+        }),
+      );
+      setLoadedBusinessId(businessId);
+    } catch (err) {
+      if (version !== requestVersion.current) return;
+      setCampaigns([]);
+      setLoadedBusinessId(businessId);
+      setError(err instanceof Error ? err.message : "Impossible de charger les campagnes.");
+    } finally {
+      if (version === requestVersion.current) setLoading(false);
+    }
   }, [businessId]);
 
   useEffect(() => {
-    fetchCampaigns();
+    void fetchCampaigns();
+    // Invalidate the old business request on switching businesses/unmount.
+    return () => { requestVersion.current += 1; };
   }, [fetchCampaigns]);
 
   const createDraft = useCallback(
@@ -122,9 +141,14 @@ export const useSponsoredCampaigns = (businessId?: string | null) => {
     [fetchCampaigns],
   );
 
+  // Ignore data from an earlier tenant even before React effects run.
+  const safeCampaigns = loadedBusinessId === (businessId ?? null) ? campaigns : [];
+  const safeLoading = loading || (Boolean(businessId) && loadedBusinessId !== businessId);
+
   return {
-    campaigns,
-    loading,
+    campaigns: safeCampaigns,
+    loading: safeLoading,
+    error: loadedBusinessId === (businessId ?? null) ? error : null,
     refresh: fetchCampaigns,
     createDraft,
     submitForReview,
