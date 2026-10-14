@@ -35,6 +35,7 @@ const MerchantDashboard = () => {
   const [reviews, setReviews] = useState<ReviewWithAuthor[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsForBusinessId, setReviewsForBusinessId] = useState<string | null>(null);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
   const [businessesOwnerId, setBusinessesOwnerId] = useState<string | null>(null);
   const [reloadReviews, setReloadReviews] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -54,6 +55,7 @@ const MerchantDashboard = () => {
       setBusinesses([]);
       setSelectedBiz(null);
       setReviews([]);
+      setReviewsError(null);
       setBusinessesOwnerId(null);
       setReviewsForBusinessId(null);
       navigate("/merchant/login");
@@ -67,6 +69,7 @@ const MerchantDashboard = () => {
     if (!selectedBiz) {
       setReviews([]);
       setReviewsForBusinessId(null);
+      setReviewsError(null);
       setReviewsLoading(false);
       return;
     }
@@ -74,6 +77,7 @@ const MerchantDashboard = () => {
     let cancelled = false;
     setReviews([]);
     setReviewsForBusinessId(null);
+    setReviewsError(null);
     setReviewsLoading(true);
     void fetchReviewsWithAuthors(selectedBiz.id)
       .then((results) => {
@@ -84,11 +88,8 @@ const MerchantDashboard = () => {
       })
       .catch((error: unknown) => {
         if (!cancelled) {
-          toast({
-            title: "Impossible de charger les avis",
-            description: error instanceof Error ? error.message : "Veuillez réessayer.",
-            variant: "destructive",
-          });
+          setReviewsError(error instanceof Error ? error.message : "Veuillez réessayer.");
+          setReviewsForBusinessId(selectedBiz.id);
         }
       })
       .finally(() => {
@@ -246,10 +247,18 @@ const MerchantDashboard = () => {
               <PanelFallback />
             ) : null}
             <Suspense fallback={<PanelFallback />}>
-              {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
+              {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviewsForBusinessId === selectedBiz.id ? reviews : []} onRefresh={fetchBusinesses} />}
               {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}
               {selectedBiz && tab === "edit" && <MerchantEditForm business={selectedBiz} onSaved={fetchBusinesses} />}
-              {selectedBiz && tab === "reviews" && !reviewsLoading && reviewsForBusinessId === selectedBiz.id && (
+              {selectedBiz && tab === "reviews" && !reviewsLoading && reviewsForBusinessId === selectedBiz.id && reviewsError && (
+                <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4" role="alert">
+                  <p className="text-sm text-destructive">Impossible de charger les avis : {reviewsError}</p>
+                  <Button className="mt-3" size="sm" variant="outline" onClick={() => setReloadReviews((v) => v + 1)}>
+                    Réessayer
+                  </Button>
+                </div>
+              )}
+              {selectedBiz && tab === "reviews" && !reviewsError && !reviewsLoading && reviewsForBusinessId === selectedBiz.id && (
                 <MerchantReviews
                   key={selectedBiz.id}
                   reviews={reviews}

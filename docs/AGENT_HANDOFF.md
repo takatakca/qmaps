@@ -2,6 +2,11 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — avis commerçants fiables (2026-10-14)
+- **Dernière tâche codée :** `src/lib/reviewsWithAuthors.ts` propage désormais les vraies erreurs Supabase (avis/profils). `MerchantDashboard` cesse de tourner indéfiniment en cas d'erreur et offre « Réessayer » sans afficher zéro avis fictif. L'aperçu ne reçoit pas les avis d'une entreprise antérieure pendant le changement de sélection.
+- **Fichiers :** helper, dashboard, `src/test/merchantReviewLoading.test.ts`, `WORKLOG.md` et documents d'état.
+- **Reste :** CI, test de panne Supabase et essais d'isolation multi-entreprises dans QMAPS réel. Projet Supabase QMAPS non accessible, hébergement non confirmé.
+
 ## Relève — lecture sécurisée des campagnes (2026-10-14)
 - `useSponsoredCampaigns` contrôle la génération de requête et l'identifiant de commerce effectivement chargé ; les données d'une entreprise précédente ne sont pas exposées lors d'un changement de sélection.
 - Les erreurs Supabase sont maintenant distinctes de « aucune campagne » dans `MerchantOptimization.tsx`, avec bouton Réessayer.
