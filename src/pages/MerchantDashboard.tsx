@@ -123,22 +123,10 @@ const MerchantDashboard = () => {
     setSelectedBiz(owned);
   };
 
-  const handleCreateBusiness = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from("businesses")
-      .insert({ name: "Mon entreprise", address: "Montréal, QC", owner_user_id: user.id, is_claimed: true })
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else if (data) {
-      await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
-      setSelectedBiz(data);
-      void fetchBusinesses();
-      setTab("edit");
-    }
+  const handleCreateBusiness = () => {
+    // Collect a real name and address; do not silently create a fictitious
+    // already-claimed listing from a dashboard shortcut.
+    navigate("/add-business");
   };
 
   if (authLoading || loading || (user && businessesOwnerId !== user.id && !loadError)) {
@@ -207,6 +195,14 @@ const MerchantDashboard = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={handleCreateBusiness}
+                >
+                  <Plus size={14} /> Ajouter une entreprise
+                </Button>
               </div>
             )}
             {/* Tabs */}

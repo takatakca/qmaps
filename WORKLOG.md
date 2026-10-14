@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, verification pending | Removed fake merchant business auto-insert, wired new listings to real AddBusiness form and merchant return route | Validate CI, continue production integration
+
 2026-10-14 | ChatGPT | main | done in code, CI pending | Removed fake merchant hours/discounts/badges and inactive buttons, used actual hours and phone/photo actions | Validate CI and mobile UI; continue production readiness
 
 2026-10-14 | ChatGPT | main | code ready, deploy opt-in remains off | Added exact SHA publishing verification and stale-CI deployment rejection with contract tests | Check CI, activate only after confirmed hosting/DNS/SSH secrets

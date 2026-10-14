@@ -46,7 +46,7 @@ const AddBusiness = () => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Commerce ajouté!" });
-      navigate("/");
+      navigate(relationship === "owner" ? "/merchant" : "/");
     }
     setSubmitting(false);
   };

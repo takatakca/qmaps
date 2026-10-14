@@ -14,6 +14,9 @@ Nouvelle migration `supabase/migrations/20261014210000_guard_inserts_and_busines
 ## Qualité produit — affichage honnête
 Le tableau de bord commerçant utilise désormais `hours_json` et `hours` comme sources d'horaires, n'affiche plus de promotions ou badges inventés, et relie les boutons de téléphone/photos à des actions fonctionnelles. Voir `src/test/merchantOverviewTruth.test.ts`.
 
+## Création de commerce — correction
+Le tableau de bord n'insère plus automatiquement une fiche au nom « Mon entreprise » et à l'adresse fictive « Montréal, QC ». Le bouton utilise le formulaire `/add-business`, déjà existant. Le formulaire renvoie un propriétaire connecté vers `/merchant` après enregistrement. Test : `src/test/merchantBusinessCreation.test.ts`.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
