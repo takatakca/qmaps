@@ -11,10 +11,11 @@ import {
   MousePointerClick, CalendarCheck, Building, Inbox, Receipt,
   Wifi, Car, Utensils, CreditCard, Accessibility, Baby,
   Wind, PartyPopper, ChefHat, Truck, Wine, Coffee,
-  ArrowUpCircle, ImageIcon, Play, Award, ShieldCheck, Plus, Loader2,
+  ArrowUpCircle, ImageIcon, Plus, Loader2,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DAYS, DAY_LABELS_FR, parseWeeklyHours, formatDayHours } from "@/lib/businessHours";
 
 interface Props {
   business: Tables<"businesses">;
@@ -81,7 +82,15 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
   const actionButtons = [
     { icon: Camera, label: "Ajouter photo", action: () => navigate("/merchant/photos") },
     { icon: FileText, label: "Description", action: () => navigate("/merchant/business-info") },
-    { icon: Phone, label: "Appeler", action: () => {} },
+    {
+      icon: Phone,
+      label: business.phone ? "Appeler" : "Ajouter téléphone",
+      action: () => {
+        const phone = business.phone?.replace(/[^+\d]/g, "");
+        if (phone) window.location.href = `tel:${phone}`;
+        else navigate("/merchant/business-info");
+      },
+    },
     { icon: Pencil, label: "Modifier la page", action: () => navigate("/merchant/business-info") },
   ];
 
@@ -92,15 +101,10 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
     catering: ChefHat, bar: Wine, brunch: Coffee, takeout: Utensils,
   };
 
-  const defaultHours = [
-    { day: "Lundi", hours: "Ouvert 24h" },
-    { day: "Mardi", hours: "Ouvert 24h" },
-    { day: "Mercredi", hours: "Ouvert 24h" },
-    { day: "Jeudi", hours: "Ouvert 24h" },
-    { day: "Vendredi", hours: "Ouvert 24h" },
-    { day: "Samedi", hours: "Ouvert 24h" },
-    { day: "Dimanche", hours: "Ouvert 24h" },
-  ];
+  const structuredHours = parseWeeklyHours(business.hours_json);
+  const weeklyRows = structuredHours
+    ? DAYS.map((day) => ({ day: DAY_LABELS_FR[day], hours: formatDayHours(structuredHours[day]) }))
+    : [];
 
   const products = [
     { icon: <Megaphone size={22} className="text-primary" />, title: "Publicités QMAPS", desc: "Touchez plus de clients.", cta: "Créer une publicité", route: "/merchant/ads" },
@@ -148,13 +152,13 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
       <div className="bg-card rounded-xl border border-border p-4">
         <h3 className="font-heading font-bold text-foreground mb-1">Il est temps de vérifier votre résumé</h3>
         <p className="text-xs text-muted-foreground mb-3">
-          QMAPS utilise les avis et les informations de votre page pour créer un résumé IA. Assurez-vous qu'il reflète bien votre entreprise.
+          Vérifiez les horaires, la description, la catégorie et les renseignements publiés sur votre fiche QMAPS.
         </p>
         <div className="flex items-center gap-2 mb-3">
           <StarRating rating={business.avg_rating} size={18} />
         </div>
         <p className="text-xs text-muted-foreground italic mb-3">
-          Vérifiez votre résumé d'entreprise dès aujourd'hui
+          Vérifiez vos informations d'entreprise
         </p>
         <Button className="w-full rounded-full" onClick={() => navigate("/merchant/business-info")}>
           Vérifier le résumé
@@ -202,11 +206,11 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
         <div className="space-y-3">
           <div className="border border-primary/30 bg-primary/5 rounded-lg p-3 flex items-center gap-3">
             <div className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded">
-              10% de réduction pour les nouveaux clients!
+              Aucune promotion active configurée
             </div>
           </div>
           <button onClick={() => navigate("/merchant/cta")} className="w-full text-sm font-medium text-primary text-left">
-            Appel maintenant
+            Configurer l'appel à l'action
           </button>
         </div>
         <p className="text-xs text-muted-foreground mt-3">
@@ -277,14 +281,20 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
       <div className="bg-card rounded-xl border border-border p-4">
         <h3 className="font-heading font-bold text-foreground mb-3">Heures d'ouverture</h3>
         <div className="space-y-2">
-          {(showAllHours ? defaultHours : defaultHours.slice(0, 3)).map((h, i) => (
-            <div key={i} className="flex justify-between text-sm">
-              <span className="text-foreground font-medium">{h.day}</span>
-              <span className="text-muted-foreground">{h.hours}</span>
-            </div>
-          ))}
+          {structuredHours ? (
+            (showAllHours ? weeklyRows : weeklyRows.slice(0, 3)).map((h) => (
+              <div key={h.day} className="flex justify-between gap-3 text-sm">
+                <span className="text-foreground font-medium">{h.day}</span>
+                <span className="text-muted-foreground text-right">{h.hours}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {business.hours || "Heures non configurées. Ajoutez vos horaires pour informer vos clients."}
+            </p>
+          )}
         </div>
-        {!showAllHours && (
+        {structuredHours && !showAllHours && (
           <button onClick={() => setShowAllHours(true)} className="flex items-center gap-1 text-sm font-medium text-primary mt-3">
             Voir tous les horaires <ChevronDown size={14} />
           </button>
@@ -344,55 +354,29 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
           Créez un diaporama avec vos meilleures photos pour impressionner les visiteurs de votre page.
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="rounded-full text-xs gap-1">
-            <ImageIcon size={14} /> Ajouter des photos
-          </Button>
-          <Button variant="outline" size="sm" className="rounded-full text-xs gap-1">
-            <Play size={14} /> Ajouter une vidéo
+          <Button variant="outline" size="sm" className="rounded-full text-xs gap-1" onClick={() => navigate("/merchant/photos")}>
+            <ImageIcon size={14} /> Gérer les photos
           </Button>
         </div>
       </div>
 
       {/* Business Highlights */}
       <div className="bg-card rounded-xl border border-border p-4">
-        <h3 className="font-heading font-bold text-foreground mb-3">Business Highlights</h3>
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          <div className="flex flex-col items-center gap-1 shrink-0 w-20">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <Award size={22} className="text-primary" />
-            </div>
-            <span className="text-[10px] text-foreground text-center leading-tight">Cuisine locale & bio</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 shrink-0 w-20">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <ShieldCheck size={22} className="text-primary" />
-            </div>
-            <span className="text-[10px] text-foreground text-center leading-tight">Propriétaire vérifié</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 shrink-0 w-20">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <Star size={22} className="text-primary" />
-            </div>
-            <span className="text-[10px] text-foreground text-center leading-tight">15 ans d'expérience</span>
-          </div>
-        </div>
+        <h3 className="font-heading font-bold text-foreground mb-3">Mise en valeur</h3>
+        <p className="text-sm text-muted-foreground">
+          Les distinctions et badges de votre entreprise seront affichés ici lorsqu'ils auront été réellement attribués.
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Statut de la fiche : {business.is_claimed ? "Revendiquée" : "Non revendiquée"}.
+        </p>
         <button onClick={() => navigate("/merchant/highlights")} className="text-sm text-primary font-medium mt-2">
-          En savoir plus →
+          Découvrir les options →
         </button>
       </div>
 
-      {/* Mark as claimed */}
-      <Button
-        onClick={() => {}}
-        variant="outline"
-        className="w-full rounded-full border-primary text-primary font-semibold"
-      >
-        Marquer l'entreprise comme revendiquée
-      </Button>
-
       {/* Products grid */}
       <div className="space-y-3 mt-2">
-        <h3 className="font-heading font-semibold text-foreground px-1">Produits & Services FLEXS</h3>
+        <h3 className="font-heading font-semibold text-foreground px-1">Produits et services QMAPS</h3>
         {products.map((p, i) => (
           <button
             key={i}

@@ -11,6 +11,9 @@ Nouvelle migration `supabase/migrations/20261014210000_guard_inserts_and_busines
 ## Contrôle de version en production ajouté
 `.github/workflows/qmaps-ssh-deploy.yml` compare désormais la révision validée au dernier `main`, produit un manifeste `qmaps-release.json` et en vérifie le SHA exact sur le domaine après transfert. Le workflow n'a pas été activé sur un serveur réel.
 
+## Qualité produit — affichage honnête
+Le tableau de bord commerçant utilise désormais `hours_json` et `hours` comme sources d'horaires, n'affiche plus de promotions ou badges inventés, et relie les boutons de téléphone/photos à des actions fonctionnelles. Voir `src/test/merchantOverviewTruth.test.ts`.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
