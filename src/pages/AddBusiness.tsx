@@ -20,7 +20,7 @@ const AddBusiness = () => {
   const [relationship, setRelationship] = useState("");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BusinessSearchHit[]>([]);
-  const [form, setForm] = useState({ name: "", address: "", phone: "", website: "", description: "" });
+  const [form, setForm] = useState({ name: "", address: "", city: "", phone: "", website: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
 
   const searchBusinesses = async (q: string) => {
@@ -32,11 +32,13 @@ const AddBusiness = () => {
 
   const handleSubmit = async () => {
     if (!user) { navigate("/auth"); return; }
-    if (!form.name || !form.address) { toast({ title: "Nom et adresse requis", variant: "destructive" }); return; }
+    if (form.name.trim().length < 2 || form.address.trim().length < 3 || form.city.trim().length < 2) { toast({ title: "Nom, adresse et ville requis", variant: "destructive" }); return; }
     setSubmitting(true);
     const { error } = await supabase.from("businesses").insert({
-      name: form.name,
-      address: form.address,
+      name: form.name.trim(),
+      address: form.address.trim(),
+      city: form.city.trim(),
+      region: "QC",
       phone: form.phone || null,
       website: form.website || null,
       description: form.description || null,
@@ -90,7 +92,7 @@ const AddBusiness = () => {
               <User size={20} /> Je suis un client
             </button>
             <button onClick={() => { setRelationship("owner"); setStep("search"); }} className="w-full p-4 border border-border rounded-xl text-center text-foreground font-medium hover:bg-accent/50 transition-colors flex items-center justify-center gap-3">
-              <Briefcase size={20} /> J'y travaille
+              <Briefcase size={20} /> Je suis propriétaire ou gestionnaire
             </button>
           </div>
         </div>
@@ -129,6 +131,7 @@ const AddBusiness = () => {
         <div className="px-4 pt-4 space-y-4">
           <Input placeholder="Nom du commerce *" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="rounded-xl" />
           <Input placeholder="Adresse *" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} className="rounded-xl" />
+          <Input aria-label="Ville du commerce" placeholder="Ville * (Québec)" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} className="rounded-xl" />
           <Input placeholder="Téléphone" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="rounded-xl" />
           <Input placeholder="Site web" value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} className="rounded-xl" />
           <Textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="rounded-xl" />

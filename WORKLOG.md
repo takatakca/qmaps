@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, CI pending | Made real business city mandatory in AddBusiness to prevent erroneous Montreal fallback; clarified owner choice | Review CI and production mapping
+
 2026-10-14 | ChatGPT | main | done in code, CI pending | Added working review rating filter, text expansion and photo navigation; removed false author counts and inactive check-in control | Review CI and mobile UX, continue production tasks
 
 2026-10-14 | ChatGPT | main | done in code, verification pending | Kept merchant onboarding drafts inactive until explicit successful owner-scoped publish; added tests | Check CI and real Supabase RLS before launch

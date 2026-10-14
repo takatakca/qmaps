@@ -26,6 +26,9 @@ La création du commerce dans `MerchantOnboarding.tsx` stocke une fiche avec `is
 ## Avis publics — interactions complétées
 Le panneau `BusinessReviewsTab` propose maintenant un vrai filtre par note et le dépliage de texte, l'ajout de photo mène à `/add-photo` et exige la connexion. Les faux compteurs d'auteur et le bouton « Check in » inactif ont été supprimés. Test `src/test/publicReviewUX.test.ts`.
 
+## Localisation des commerces ajoutés
+`AddBusiness.tsx` exige désormais le nom, l'adresse et la ville du commerce. L'insertion sauvegarde la ville saisie (Québec/QC), au lieu d'accepter le défaut SQL historique Montréal ; l'option propriétaire/gestionnaire n'affirme pas une vérification automatique. Test `src/test/addBusinessCity.test.ts`.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
