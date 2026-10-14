@@ -3,6 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | chore/continuation-security-handoff → PR #5 | code continued | Added `.agent/CONTINUATION.md` handoff and removed committed `.env` without reading it | Codex runs full checks, reviews secret rotation, then merge if safe
 2026-10-09 | Lovable | managed workspace → no PR | done | Added 6 more visual option boards (search+map, onboarding, city page, mobile screens, notifications, about page), boards 16-21 in Files; no code changes | Owner picks favorites; no publishing
 2026-10-09 | Lovable | managed workspace → no PR | done | Added 6 more visual option boards (dark mode, editorial categories, dark business page, profile, winter hero, light merchant portal), boards 10-15 in Files; no code changes | Owner picks favorites; no publishing
 2026-10-09 | Lovable | managed workspace → no PR | done | Delivered 12 QMaps visual concepts across 3 image boards; no application code changes | Owner can select visual directions; no publishing
