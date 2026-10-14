@@ -20,6 +20,7 @@ Dernière mise à jour : 2026-10-14. Dépôt : `takatakca/qmaps`, publication Gi
 - Domaine cible : `qmaps.ca`. Le 14 octobre 2026, la résolution DNS n'a pas réussi depuis l'environnement d'inspection et le navigateur distant n'a pas pu atteindre le site. Cela ne prouve pas une panne globale, mais **aucun déploiement n'a été vérifié**.
 - `.github/workflows/qmaps-ssh-deploy.yml` : pipeline préparé, volontairement ignoré tant que `QMAPS_DEPLOY_ENABLED=true` et les secrets SSH/environnement ne sont pas configurés.
 - Projet Supabase du code : `ldvkebjfuldnemfdoted`. Il n'est pas présent parmi les projets accessibles dans la connexion Supabase disponible au 14 octobre 2026 ; base et Edge Functions non vérifiées en production.
+- Nouvelles migrations de sécurité en code : verrouillage des badges vérifiés et moyennes commerçants, des champs de modération et de la réattribution des avis. **Non appliquées/confirmées dans QMAPS réel**.
 - Migrations du 11 octobre (association TAKATAK / réponse commerçant) et du 14 octobre (guards UPDATE puis INSERT et coordonnées sans valeurs fictives) : **code en dépôt, application en production non confirmée**.
 
 ## Verdict de livraison

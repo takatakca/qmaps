@@ -2,6 +2,12 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — sécurisation des avis publics (2026-10-14)
+- **Dernière tâche codée :** migration `supabase/migrations/20261014231000_guard_review_moderation_integrity.sql` et test `src/test/reviewModerationIntegrity.test.ts`. Les clients ne peuvent plus, après application de la migration, changer librement `moderation_status`, champs de dissimulation, compteurs `useful/funny/cool` ni `reviews.user_id/business_id` ; la modification de texte/note demeure possible.
+- **Fichiers concernés :** migration, test, `WORKLOG.md` et documents standard `docs/AGENT_HANDOFF.md`, `TASK_QUEUE.md`, `DEPLOYMENT.md`, `DECISIONS.md`, `PROJECT_STATUS.md`.
+- **État réel :** code commité, déploiement DB non exécuté faute d'accès au projet Supabase QMAPS. Tester RLS avec deux comptes, plus l'admin et le service_role dans l'environnement QMAPS seulement.
+- **Prochaines étapes :** surveiller la CI de ce nouveau commit ; si rouge, lire les logs et corriger ; ensuite reprendre les tâches indépendantes en attente.
+
 ## Relève — nouvelle reprise sécurisation (2026-10-14)
 - Source `main` avant intervention : `4b7f56584d90eea52493d0ab5fa6ea699348e544` ; CI principale vérifiée réussie (run 38616348049), workflow SSH `skipped`.
 - **Tâche codée :** fermeture du contournement de `businesses.is_claimed`, `avg_rating` et `reviews_count` par les propriétaires, pour INSERT et UPDATE. Migration `supabase/migrations/20261014230000_protect_business_verification_and_rating_integrity.sql` ; tests `src/test/businessTrustIntegrity.test.ts`.
