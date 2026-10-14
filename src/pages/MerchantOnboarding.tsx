@@ -320,6 +320,18 @@ const MerchantOnboarding = () => {
       });
       return;
     }
+    // A resumed draft may predate the merchant-role write. Do not activate
+    // the business until its owner has their real merchant entitlement.
+    const { error: entitlementError } = await supabase.from("user_roles").upsert(
+      { user_id: user.id, role: "merchant" },
+      { onConflict: "user_id,role", ignoreDuplicates: true },
+    );
+    if (entitlementError) {
+      setLoading(false);
+      toast({ title: "Accès commerçant non confirmé", description: entitlementError.message, variant: "destructive" });
+      return;
+    }
+    await refreshRoles();
     const { data: published, error } = await supabase
       .from("businesses")
       .update({ is_active: true })

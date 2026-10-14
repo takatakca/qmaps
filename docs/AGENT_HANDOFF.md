@@ -2,6 +2,11 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — droit d'accès à une fiche reprise (2026-10-14)
+- **Correction de suivi :** la dernière publication vérifie également la création du rôle `merchant` côté Supabase, pour les brouillons récupérés où une ancienne tentative a pu échouer ; elle actualise les rôles avant `is_active=true`.
+- Fichiers : `MerchantOnboarding.tsx`, `src/test/merchantPublishEntitlement.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`.
+- CI à confirmer ; test E2E du rôle QMAPS toujours bloqué par l'accès Supabase réel.
+
 ## Relève — inscription commerçant résiliente (2026-10-14)
 - Une fiche sauvegardée avec `is_active=false` n'entraîne plus une redirection vers une nouvelle inscription : l'onboarding reprend son brouillon, ses renseignements et catégories ; une catégorie manquante renvoie à l'étape de sélection.
 - Écriture des catégories via `upsert` idempotent contrôlé ; impossible de publier tant qu'aucune catégorie n'est effectivement liée. Les échecs de création du rôle `merchant` sont signalés ; brouillon privé conservé pour reprise.

@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, CI pending | Ensured resumed merchant draft entitlement is verified before setting is_active true, preventing user role failures from appearing as successful publication | Run CI, test real entitlement policy
+
 2026-10-14 | ChatGPT | main | code ready, CI pending | Made merchant onboarding resumable after interrupted draft and checked category writes/RLS before publication | Validate CI, verify resume and category failure scenarios against real QMAPS DB
 
 2026-10-14 | ChatGPT | main | code ready, CI pending | Fixed merchant review fetch silent failures/infinite loading, added retry and barred previous business reviews from overview | Validate CI and two-business review loading
