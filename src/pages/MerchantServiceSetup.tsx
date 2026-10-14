@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, X, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId, saveMerchantBusinessId } from "@/lib/merchantSelection";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,8 @@ const MerchantServiceSetup = () => {
     supabase.from("businesses").select("id, name").eq("owner_user_id", user.id).then(({ data }) => {
       const list = (data ?? []) as { id: string; name: string }[];
       setBusinesses(list);
-      if (list.length > 0) setBusinessId(list[0].id);
+      const selected = chooseMerchantBusiness(list, getSavedMerchantBusinessId(user.id));
+      setBusinessId(selected?.id);
     });
   }, [user]);
 
@@ -98,7 +100,11 @@ const MerchantServiceSetup = () => {
             {businesses.length > 1 && (
               <div className="mb-4">
                 <Label className="text-xs">Entreprise</Label>
-                <Select value={businessId} onValueChange={setBusinessId}>
+                <Select value={businessId} onValueChange={(id) => {
+                  if (!businesses.some((business) => business.id === id)) return;
+                  setBusinessId(id);
+                  if (user) saveMerchantBusinessId(user.id, id);
+                }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {businesses.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}

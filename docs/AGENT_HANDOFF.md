@@ -2,6 +2,14 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — fin de propagation multi-entreprise (2026-10-14)
+- **Dernière tâche codée :** contexte de commerce actif étendu à `MerchantInbox`, `MerchantMessages`, `MerchantMore`, `MerchantOptimization`, `MerchantServiceSetup`, `MerchantSponsored`.
+- **Fichiers modifiés :** les six pages, `src/test/merchantRemainingSelection.test.ts`, `WORKLOG.md` et docs `AGENT_HANDOFF.md` / `TASK_QUEUE.md`.
+- Le commerce mémorisé n'est jamais considéré comme preuve d'autorisation : toutes les pages continuent à filtrer `owner_user_id` sur Supabase.
+- **Contrôles :** test de contrat Vitest à exécuter en CI ; tests bout en bout sur deux comptes et plusieurs entreprises à réaliser dans le bon projet QMAPS.
+- **Statut réel du déploiement :** SSH toujours désactivé, Supabase QMAPS inaccessible, production non vérifiée.
+- **Prochaine action :** surveiller la CI de `main`, puis mettre à jour issue #6 et continuer les corrections hors production.
+
 ## Relève — choix multi-entreprise sur les écrans secondaires (2026-10-14)
 - **Code poussé :** persistance `sessionStorage` du seul identifiant de commerce, isolé par propriétaire connecté. Chaque écran lit ensuite uniquement les entreprises retournées par Supabase avec `owner_user_id = user.id`, et ignore un identifiant mémorisé absent de cette liste. Le stockage local ne tient jamais lieu de permission.
 - **Écrans modifiés :** dashboard, informations, photos, menu, publicités, facturation, forfaits Stripe, marketplace, accueil commerçant, analytics. Helper `src/lib/merchantSelection.ts`, test `src/test/merchantSelectionAcrossPages.test.ts`.

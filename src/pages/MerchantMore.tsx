@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
@@ -25,11 +26,11 @@ const MerchantMore = () => {
   useEffect(() => {
     if (!user) return;
     const fetch = async () => {
-      const [{ data: biz }, { data: prof }] = await Promise.all([
-        supabase.from("businesses").select("*").eq("owner_user_id", user.id).limit(1).maybeSingle(),
+      const [{ data: owned }, { data: prof }] = await Promise.all([
+        supabase.from("businesses").select("*").eq("owner_user_id", user.id).order("name", { ascending: true }),
         supabase.from("profiles").select("id, display_name, avatar_url, created_at, updated_at").eq("id", user.id).maybeSingle(),
       ]);
-      setBusiness(biz);
+      setBusiness(chooseMerchantBusiness(owned ?? [], getSavedMerchantBusinessId(user.id)));
       setProfile(prof);
       setLoading(false);
     };

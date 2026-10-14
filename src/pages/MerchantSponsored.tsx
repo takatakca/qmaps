@@ -3,6 +3,7 @@ import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader"
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Sparkles, Pause, Send, Info, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId, saveMerchantBusinessId } from "@/lib/merchantSelection";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useSponsoredCampaigns,
@@ -113,7 +114,8 @@ const MerchantSponsored = () => {
         .select("*")
         .eq("owner_user_id", user.id);
       setBusinesses(data || []);
-      if (data && data.length > 0) setActiveBusinessId(data[0].id);
+      const chosen = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
+      setActiveBusinessId(chosen?.id ?? null);
       setLoadingBiz(false);
     })();
   }, [user]);
@@ -176,7 +178,11 @@ const MerchantSponsored = () => {
                 <Label className="text-xs">Entreprise</Label>
                 <Select
                   value={activeBusinessId || ""}
-                  onValueChange={setActiveBusinessId}
+                  onValueChange={(id) => {
+                    if (!businesses.some((business) => business.id === id)) return;
+                    setActiveBusinessId(id);
+                    if (user) saveMerchantBusinessId(user.id, id);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />

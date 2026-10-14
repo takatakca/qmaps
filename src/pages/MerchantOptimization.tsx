@@ -3,6 +3,7 @@ import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader"
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import {
   ArrowLeft, Megaphone, Zap, TrendingUp, Eye, Star,
@@ -115,10 +116,9 @@ const MerchantOptimization = () => {
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle()
+      .order("name", { ascending: true })
       .then(({ data }) => {
-        setBusiness(data);
+        setBusiness(chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id)));
         setLoading(false);
       });
   }, [user, authLoading]);

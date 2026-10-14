@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, CI pending | Propagated owner-validated selected business to merchant inbox/messages, menu, optimization, services and sponsored campaign pages | Verify CI and multi-merchant production QA
+
 2026-10-14 | ChatGPT | main | code ready, CI pending | Extended user-scoped selected business across merchant photos, company info, menu, ads, billing/checkout, home, marketplace and analytics, verified against owned rows | Validate CI and end-to-end switching across two businesses
 
 2026-10-14 | ChatGPT | main | code ready, Supabase deployment blocked | Added INSERT+UPDATE guards for hidden-review moderation fields, spoofed reaction counters, and review author/business reassignment | Validate CI, then apply SQL only in QMAPS and exercise live RLS negative tests

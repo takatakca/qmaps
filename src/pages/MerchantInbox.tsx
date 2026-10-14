@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import type { Tables } from "@/integrations/supabase/types";
 
 const MerchantInbox = () => {
@@ -22,10 +23,9 @@ const MerchantInbox = () => {
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle()
+      .order("name", { ascending: true })
       .then(({ data }) => {
-        setBusiness(data);
+        setBusiness(chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id)));
         setLoading(false);
       });
   }, [user]);

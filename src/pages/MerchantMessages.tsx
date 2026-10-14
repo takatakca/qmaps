@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { supabase } from "@/integrations/supabase/client";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import { ArrowLeft, PenSquare, MessageCircle, Search, Settings, Moon } from "lucide-react";
@@ -27,10 +28,9 @@ const MerchantMessages = () => {
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle()
+      .order("name", { ascending: true })
       .then(({ data }) => {
-        setBusiness(data);
+        setBusiness(chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id)));
         setLoading(false);
       });
   }, [user]);
