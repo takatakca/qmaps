@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import StarRating from "@/components/StarRating";
 import EditBasicInfoModal from "@/components/merchant/info/EditBasicInfoModal";
@@ -49,12 +50,12 @@ const MerchantMarketplace = () => {
   const fetchBusiness = async (showPageLoader = false) => {
     if (!user) return;
     if (showPageLoader) setLoading(true);
-    const { data: biz } = await supabase
+    const { data } = await supabase
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle();
+      .order("name", { ascending: true });
+    const biz = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
     setBusiness(biz);
     if (biz) {
       const { data: bc } = await supabase.from("business_categories").select("category_id").eq("business_id", biz.id);

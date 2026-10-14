@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { useToast } from "@/hooks/use-toast";
 import {
   formatPriceCents,
@@ -70,13 +71,14 @@ const MerchantMenu = () => {
 
   const fetchAll = async () => {
     if (!user) return;
-    const { data: biz } = await supabase
+    const { data } = await supabase
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle();
+      .order("name", { ascending: true });
+    const biz = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
     setBusiness(biz);
+    setItems([]);
     if (biz) {
       const { data } = await supabase
         .from("business_menu_items")

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { useToast } from "@/hooks/use-toast";
 import {
   addPhotoUrl,
@@ -35,11 +36,12 @@ const MerchantPhotos = () => {
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        setBusiness(data);
-        setPhotos(dedupePhotoUrls(data?.photos || []));
+      .order("name", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        const owned = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
+        setBusiness(owned);
+        setPhotos(dedupePhotoUrls(owned?.photos || []));
         setLoading(false);
       });
   }, [user]);

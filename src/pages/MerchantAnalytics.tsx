@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, Phone, Globe, MapPin, MessageSquare, Bookmark, Image as ImageIcon, Briefcase, Send, CheckCircle2, Circle, ChevronRight, Sparkles, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { useMerchantAnalytics } from "@/hooks/useMerchantAnalytics";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,11 +48,11 @@ const MerchantAnalytics = () => {
         .from("businesses")
         .select("id,name,description,phone,website,hours,photos,image_url,reviews_count")
         .eq("owner_user_id", user.id)
-        .limit(1)
-        .maybeSingle();
-      setBusinessId(data?.id ?? null);
-      setBusinessName(data?.name ?? "");
-      setBusiness(data ?? null);
+        .order("name", { ascending: true });
+      const selected = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
+      setBusinessId(selected?.id ?? null);
+      setBusinessName(selected?.name ?? "");
+      setBusiness(selected ?? null);
     })();
   }, [user]);
 

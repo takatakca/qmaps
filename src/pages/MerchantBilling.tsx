@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { supabase } from "@/integrations/supabase/client";
 import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
 import { planLabel, statusLabel } from "@/lib/billing";
@@ -42,14 +43,17 @@ const MerchantBilling = () => {
         .from("businesses")
         .select("id")
         .eq("owner_user_id", user.id)
-        .limit(1)
-        .maybeSingle();
-      if (data?.id) setBusinessId(data.id);
+        .order("name", { ascending: true });
+      const selected = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
+      setBusinessId(selected?.id ?? null);
     })();
   }, [user]);
 
   useEffect(() => {
-    if (!businessId) return;
+    if (!businessId) {
+      setEvents([]);
+      return;
+    }
     (async () => {
       const { data } = await supabase
         .from("merchant_billing_events")

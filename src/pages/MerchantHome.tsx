@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import HomeHeader from "@/components/merchant/home/HomeHeader";
 import RemindersSection from "@/components/merchant/home/RemindersSection";
@@ -31,11 +32,13 @@ const MerchantHome = () => {
   useEffect(() => {
     if (authLoading || !user) return;
     const fetchData = async () => {
-      const [{ data: biz }, { data: profile }] = await Promise.all([
-        supabase.from("businesses").select("*").eq("owner_user_id", user.id).limit(1).maybeSingle(),
+      const [{ data: owned }, { data: profile }] = await Promise.all([
+        supabase.from("businesses").select("*").eq("owner_user_id", user.id).order("name", { ascending: true }),
         supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
       ]);
+      const biz = chooseMerchantBusiness(owned ?? [], getSavedMerchantBusinessId(user.id));
       setBusiness(biz);
+      setMenuItems([]);
       setDisplayName(profile?.display_name || user.email?.split("@")[0] || "Professionnel");
       if (biz) {
         const { data: menu } = await supabase

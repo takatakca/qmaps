@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, X, Check, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,10 @@ const MerchantAds = () => {
   }, [user, authLoading]);
 
   const fetchBusiness = async () => {
-    const { data } = await supabase.from("businesses").select("*").eq("owner_user_id", user!.id).limit(1).single();
+    if (!user) return;
+    const { data: owned } = await supabase.from("businesses").select("*")
+      .eq("owner_user_id", user.id).order("name", { ascending: true });
+    const data = chooseMerchantBusiness(owned ?? [], getSavedMerchantBusinessId(user.id));
     setBusiness(data);
     if (data) {
       setFormData(prev => ({
@@ -95,7 +99,7 @@ const MerchantAds = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <h2 className="font-heading text-xl font-bold text-foreground mb-2">Aucune entreprise</h2>
-        <p className="text-sm text-muted-foreground mb-4">Créez d'abord une entreprise dans le tableau de bord FLEXS</p>
+        <p className="text-sm text-muted-foreground mb-4">Créez d'abord une entreprise dans le tableau de bord QMAPS</p>
         <Button onClick={() => navigate("/merchant")} className="rounded-full">Aller au Dashboard</Button>
       </div>
     );

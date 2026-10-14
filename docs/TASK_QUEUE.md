@@ -5,6 +5,7 @@ Toutes les tâches doivent être validées par des preuves, non par une déclara
 | Priorité | État | Tâche | Critère de réussite |
 |---|---|---|---|
 | P0 | CODE VALIDÉ EN CI, PROD À VÉRIFIER | Vérifier TypeScript explicitement dans GitHub Actions, sans se limiter au build Vite | `bun run typecheck` passe sur HEAD et ne révèle aucune anomalie |
+| P0 | CODE ÉCRIT, CI À CONTRÔLER | Propager le choix multi-entreprises à tous les écrans marchand, paiement compris, avec sélection par utilisateur validée côté Supabase | Choix conservé et lecture des photos/menu/billing de la bonne entreprise, aucun accès cross-merchant |
 | P0 | CODE VALIDÉ EN CI, PROD À VÉRIFIER | Sélectionner plusieurs entreprises dans le portail, préserver la sélection après édition, isoler les avis par entreprise | Tests unitaires verts, bouton de sélection visible pour plusieurs entreprises, aucun résultat d'un ancien commerce après changement |
 | P0 | CODE ÉCRIT, MIGRATION BLOQUÉE | Empêcher un auteur d'avis de changer sa modération, les compteurs de réactions, l'auteur ou le commerce visé | `supabase/migrations/20261014231000_guard_review_moderation_integrity.sql` appliquée, écritures non admin refusées et actions administrateur permises |
 | P0 | CODE ÉCRIT, MIGRATION BLOQUÉE | Verrouiller le statut propriétaire vérifié et les agrégats des avis contre les UPDATE/INSERT commerçant | `supabase/migrations/20261014230000_protect_business_verification_and_rating_integrity.sql` appliquée sur QMAPS ; RLS refus marchand + écriture admin et rafraîchissement de note vérifiés |

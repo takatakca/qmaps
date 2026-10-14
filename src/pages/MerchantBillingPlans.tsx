@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId, saveMerchantBusinessId } from "@/lib/merchantSelection";
 import { supabase } from "@/integrations/supabase/client";
 import { useMerchantSubscription } from "@/hooks/useMerchantSubscription";
 import { PLANS, type PlanDefinition, type PlanKey } from "@/lib/billing";
@@ -45,7 +46,8 @@ const MerchantBillingPlans = () => {
         .eq("owner_user_id", user.id);
       const list = data || [];
       setBusinesses(list);
-      if (list.length > 0) setSelectedBizId(list[0].id);
+      const selected = chooseMerchantBusiness(list, getSavedMerchantBusinessId(user.id));
+      setSelectedBizId(selected?.id ?? null);
     })();
   }, [user, authLoading]);
 
@@ -156,7 +158,7 @@ const MerchantBillingPlans = () => {
             {businesses.map((b) => (
               <button
                 key={b.id}
-                onClick={() => setSelectedBizId(b.id)}
+                onClick={() => { setSelectedBizId(b.id); if (user) saveMerchantBusinessId(user.id, b.id); }}
                 className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
                   selectedBizId === b.id
                     ? "bg-primary text-primary-foreground border-primary"

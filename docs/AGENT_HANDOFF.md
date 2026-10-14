@@ -2,6 +2,12 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — choix multi-entreprise sur les écrans secondaires (2026-10-14)
+- **Code poussé :** persistance `sessionStorage` du seul identifiant de commerce, isolé par propriétaire connecté. Chaque écran lit ensuite uniquement les entreprises retournées par Supabase avec `owner_user_id = user.id`, et ignore un identifiant mémorisé absent de cette liste. Le stockage local ne tient jamais lieu de permission.
+- **Écrans modifiés :** dashboard, informations, photos, menu, publicités, facturation, forfaits Stripe, marketplace, accueil commerçant, analytics. Helper `src/lib/merchantSelection.ts`, test `src/test/merchantSelectionAcrossPages.test.ts`.
+- **Vérifications restantes :** CI du nouveau commit puis E2E avec au moins deux entreprises sur le bon projet QMAPS (changer commerce → photos/menu/analytics/Stripe ; déconnexion/reconnexion autre compte → aucun accès croisé).
+- **Statut de production :** accès projet Supabase QMAPS manquant, SSH non activé, donc aucun déploiement confirmé.
+
 ## Relève — sécurisation des avis publics (2026-10-14)
 - **Dernière tâche codée :** migration `supabase/migrations/20261014231000_guard_review_moderation_integrity.sql` et test `src/test/reviewModerationIntegrity.test.ts`. Les clients ne peuvent plus, après application de la migration, changer librement `moderation_status`, champs de dissimulation, compteurs `useful/funny/cool` ni `reviews.user_id/business_id` ; la modification de texte/note demeure possible.
 - **Fichiers concernés :** migration, test, `WORKLOG.md` et documents standard `docs/AGENT_HANDOFF.md`, `TASK_QUEUE.md`, `DEPLOYMENT.md`, `DECISIONS.md`, `PROJECT_STATUS.md`.

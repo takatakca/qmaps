@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId } from "@/lib/merchantSelection";
 import type { Tables } from "@/integrations/supabase/types";
 
 import EditCategoryModal from "@/components/merchant/info/EditCategoryModal";
@@ -38,13 +39,13 @@ const MerchantBusinessInfo = () => {
 
   const fetchBusiness = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("businesses")
       .select("*")
       .eq("owner_user_id", user.id)
-      .limit(1)
-      .maybeSingle();
-    setBusiness(data);
+      .order("name", { ascending: true });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    setBusiness(chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id)));
     setLoading(false);
   };
 
@@ -56,7 +57,7 @@ const MerchantBusinessInfo = () => {
   const specialCount = Object.keys(((business).special_hours as Record<string, unknown>) ?? {}).length;
   const sections = [
     { label: "Informations de base", icon: PenLine, value: `${business.name} · ${business.phone || ""}`, onClick: () => setShowBasicInfo(true) },
-    { label: "Catégories", icon: Tag, value: "Restaurants", onClick: () => setShowCategory(true) },
+    { label: "Catégories", icon: Tag, value: "Gérer les catégories", onClick: () => setShowCategory(true) },
     { label: "Heures d'ouverture", icon: Clock, value: business.hours || "Non définies", onClick: () => setShowHours(true) },
     { label: "Heures spéciales", icon: CalendarDays, value: specialCount > 0 ? `${specialCount} date(s) configurée(s)` : "Gérer les jours fériés", onClick: () => setShowSpecialHours(true) },
     { label: "Adresse", icon: MapPin, value: `${business.address}, ${business.city}`, onClick: () => setShowAddress(true) },

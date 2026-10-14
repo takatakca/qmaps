@@ -1,6 +1,6 @@
 import { fetchReviewsWithAuthors, type ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 import { useState, useEffect, lazy, Suspense } from "react";
-import { chooseMerchantBusiness } from "@/lib/merchantSelection";
+import { chooseMerchantBusiness, getSavedMerchantBusinessId, saveMerchantBusinessId } from "@/lib/merchantSelection";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,6 +41,12 @@ const MerchantDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "performance" | "edit" | "reviews">("overview");
   const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
+
+  useEffect(() => {
+    if (user && selectedBiz && businessesOwnerId === user.id) {
+      saveMerchantBusinessId(user.id, selectedBiz.id);
+    }
+  }, [user?.id, selectedBiz?.id, businessesOwnerId]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -104,7 +110,7 @@ const MerchantDashboard = () => {
       if (error) throw error;
       const ownedBusinesses = data ?? [];
       setBusinesses(ownedBusinesses);
-      setSelectedBiz((current) => chooseMerchantBusiness(ownedBusinesses, current?.id));
+      setSelectedBiz((current) => chooseMerchantBusiness(ownedBusinesses, current?.id ?? getSavedMerchantBusinessId(user.id)));
       setBusinessesOwnerId(user.id);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Le chargement des entreprises a échoué.");
