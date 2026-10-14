@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main (merge PR #2) | done | Added HMAC-authenticated TAKATAK candidate lookup; fails closed when query bounds are reached; addressed Deno BufferSource type error | Configure server-only secrets, deploy function, and verify signed requests before declaring production-ready
+
 2026-10-14 | ChatGPT | main (merge PR #4 + #3) | done | Integrated green-CI typing fixes, TAKATAK workspace link, and merchant review replies while retaining PR #5 security cleanup | Database migration and integration secrets remain deployment prerequisites
 2026-10-11 | cursor | cursor/qmaps-takatak-bridge → PR #4 | done (merged into main) | TAKATAK workspace association and owner reply API with reviewed changes | Apply database migration separately after deployment readiness
 2026-10-11 | cursor | cursor/qmaps-lint-explicit-any → PR #3 | done (included via PR #4) | Replace explicit anys, fix lint and go/no-go script | Watch GitHub CI on main

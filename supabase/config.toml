@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.takatak-reply-review]
 verify_jwt = false
+
+[functions.takatak-match-businesses]
+verify_jwt = false
