@@ -2,6 +2,13 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — tableau publicitaire ancré sur les données réelles (2026-10-14)
+- **Dernière tâche codée :** remplacement de l'ancien simulateur sans backend de `MerchantOptimization.tsx` par un panneau affichant les campagnes réellement retournées par `useSponsoredCampaigns` pour le commerce appartenant à l'utilisateur. Les statuts et budgets proviennent de Supabase, sans clics/leads fabriqués.
+- **Fichiers :** `src/pages/MerchantOptimization.tsx`, `src/test/merchantAdvertisingTruth.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.
+- **Actions réelles :** `/merchant/sponsored` pour brouillons/validation, `/merchant/analytics` pour statistiques, `/merchant/billing/plans` pour abonnements.
+- **Prochain test :** CI de ce commit et test manuel sur le projet QMAPS d'un commerçant possédant des campagnes ; ne pas affirmer de publication publicitaire tant que la diffusion n'est pas prouvée.
+- **Production :** non vérifiée ; connexion à Supabase QMAPS et hébergeur manquants.
+
 ## Relève — fin de propagation multi-entreprise (2026-10-14)
 - **Dernière tâche codée :** contexte de commerce actif étendu à `MerchantInbox`, `MerchantMessages`, `MerchantMore`, `MerchantOptimization`, `MerchantServiceSetup`, `MerchantSponsored`.
 - **Fichiers modifiés :** les six pages, `src/test/merchantRemainingSelection.test.ts`, `WORKLOG.md` et docs `AGENT_HANDOFF.md` / `TASK_QUEUE.md`.

@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, CI pending | Replaced simulated merchant ad optimization with real owned-business sponsored campaign counts/statuses and links to live workflows | Validate CI and review campaign data access in QMAPS production
+
 2026-10-14 | ChatGPT | main | code ready, CI pending | Propagated owner-validated selected business to merchant inbox/messages, menu, optimization, services and sponsored campaign pages | Verify CI and multi-merchant production QA
 
 2026-10-14 | ChatGPT | main | code ready, CI pending | Extended user-scoped selected business across merchant photos, company info, menu, ads, billing/checkout, home, marketplace and analytics, verified against owned rows | Validate CI and end-to-end switching across two businesses
