@@ -199,6 +199,8 @@ const MerchantOnboarding = () => {
         // A self-registration is not an approved ownership claim.
         // Existing RLS requires false; admins approve claims separately.
         is_claimed: false,
+        // Keep the draft private until the owner explicitly publishes it.
+        is_active: false,
 
       })
       .select()
@@ -238,7 +240,24 @@ const MerchantOnboarding = () => {
   };
 
   const handlePublish = async () => {
-    if (!businessId) return;
+    if (!businessId || !user || loading) return;
+    setLoading(true);
+    const { data: published, error } = await supabase
+      .from("businesses")
+      .update({ is_active: true })
+      .eq("id", businessId)
+      .eq("owner_user_id", user.id)
+      .select("id")
+      .maybeSingle();
+    setLoading(false);
+    if (error || !published) {
+      toast({
+        title: "Publication non confirmée",
+        description: error?.message || "Impossible de publier ce commerce. Réessayez.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({ title: "Profil publié!", description: "Bienvenue sur QMAPS Professional." });
     navigate("/merchant", { replace: true });
   };
@@ -567,7 +586,7 @@ const MerchantOnboarding = () => {
             {loading ? <><Loader2 size={16} className="animate-spin" /> Enregistrement...</> : <>Continuer <ChevronRight size={16} /></>}
           </Button>
         ) : (
-          <Button onClick={handlePublish} className="w-full rounded-full gap-2 bg-gradient-to-r from-primary to-accent">
+          <Button onClick={handlePublish} disabled={loading} className="w-full rounded-full gap-2 bg-gradient-to-r from-primary to-accent">
             <Check size={16} /> Publier mon profil
           </Button>
         )}

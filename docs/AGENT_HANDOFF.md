@@ -20,6 +20,9 @@ Le tableau de bord n'insère plus automatiquement une fiche au nom « Mon entrep
 ## Onboarding et géolocalisation
 L'onboarding utilise désormais `is_claimed: false`, conforme à la politique RLS du 16 mai 2026. Migration `supabase/migrations/20261014220000_nullable_business_coordinates_no_fallback.sql` : coordonnées nullable sans latitude/longitude Montréal par défaut, et trigger géographique effaçant une localisation lorsque les coordonnées sont absentes. Aucun backfill des anciennes fiches. Types Supabase frontend synchronisés manuellement tant que l'accès au projet réel manque. Vérifier la migration et régénérer les types via CLI sur le vrai projet avant livraison.
 
+## Onboarding — étape de publication sécurisée
+La création du commerce dans `MerchantOnboarding.tsx` stocke une fiche avec `is_active:false` pour que l'étape photo/revue ne publie aucune fiche prématurément. La dernière étape met `is_active:true` uniquement après un UPDATE retournant l'enregistrement de ce propriétaire. En cas d'erreur, aucun faux message de succès. Test `src/test/merchantPublishFlow.test.ts`.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
