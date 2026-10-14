@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - "supabase/functions/takatak-match-businesses/**"
+      - "supabase/functions/merchant-reply-review/**"
       - "supabase/functions/_shared/takatak-matching.ts"
       - "src/test/takatakMatching.test.ts"
+      - "src/test/merchantReviewReply.test.ts"
       - "docs/takatak-integration.md"
       - "supabase/config.toml"
       - ".github/workflows/takatak-integration-checks.yml"
@@ -15,8 +17,10 @@ on:
       - "feat/takatak-matching-adapter"
     paths:
       - "supabase/functions/takatak-match-businesses/**"
+      - "supabase/functions/merchant-reply-review/**"
       - "supabase/functions/_shared/takatak-matching.ts"
       - "src/test/takatakMatching.test.ts"
+      - "src/test/merchantReviewReply.test.ts"
       - "docs/takatak-integration.md"
       - "supabase/config.toml"
       - ".github/workflows/takatak-integration-checks.yml"
@@ -47,3 +51,6 @@ jobs:
 
       - name: Deno check matching function
         run: deno check --node-modules-dir=none --no-lock supabase/functions/takatak-match-businesses/index.ts
+
+      - name: Deno check merchant reply function
+        run: deno check --node-modules-dir=none --no-lock supabase/functions/merchant-reply-review/index.ts

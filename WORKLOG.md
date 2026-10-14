@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | done | Extended TAKATAK CI to run Deno TypeScript check of verified merchant reply Edge Function | Confirm checks pass before a live Supabase Edge deployment
+
 2026-10-14 | ChatGPT | main | done | Fixed reply text normalization and merchant dashboard branding from FLEXS to QMAPS | Verify GitHub CI and production Edge deployment prerequisites
 
 2026-10-14 | ChatGPT | main | code ready, deployment pending | Added verified JWT merchant-review reply endpoint and reply UI; SQL guards prevent authors faking replies and merchants hijacking TAKATAK workspaces | Run database migration in QMAPS environment then deploy merchant-reply-review and manually verify customer isolation
