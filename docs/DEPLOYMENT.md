@@ -20,9 +20,10 @@
 
 ## Base et APIs — étapes séparées
 Le projet Supabase du dépôt est `ldvkebjfuldnemfdoted`. La connexion actuellement accessible ne le liste pas ; **ne pas exécuter de migration sur un autre projet**. Une fois l'accès correct établi :
-- Sauvegarder et comparer, dans l'ordre : `20261011120000_takatak_workspace_and_review_reply.sql`, `20261014190000_guard_takatak_columns_and_review_replies.sql`, `20261014210000_guard_inserts_and_business_owner_assignment.sql`, puis `20261014220000_nullable_business_coordinates_no_fallback.sql` (tous sous `supabase/migrations/`).
+- Sauvegarder et comparer, dans l'ordre : `20261011120000_takatak_workspace_and_review_reply.sql`, `20261014190000_guard_takatak_columns_and_review_replies.sql`, `20261014210000_guard_inserts_and_business_owner_assignment.sql`, puis `20261014220000_nullable_business_coordinates_no_fallback.sql`, puis `20261014230000_protect_business_verification_and_rating_integrity.sql` (tous sous `supabase/migrations/`).
 - Appliquer seulement les migrations manquantes après vérification de l'ordre, dont `supabase/migrations/20261014220000_nullable_business_coordinates_no_fallback.sql` après les migrations de protection ; elle supprime les défauts de coordonnées montréalaises sans changer les anciennes fiches.
 - Configurer les secrets fonctionnels et vérifier `takatak-match-businesses` (HMAC), `takatak-link-business`, `takatak-reply-review` et `merchant-reply-review` (JWT).
+- Tester en conditions autorisées le refus marchand sur `businesses.is_claimed`, `avg_rating` et `reviews_count`, l'autorisation admin, et la recomputation des notes lors d'un avis. Aucune de ces vérifications SQL n'est encore exécutée sur la production.
 - Vérifier les fonctions Stripe, leur liste blanche d'origines et le traitement des webhooks avec des tests autorisés.
 
 ## Contrôle anti-version périmée et empreinte de production

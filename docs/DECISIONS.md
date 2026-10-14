@@ -10,6 +10,7 @@
 | 2026-10-14 | Les avis dans un portail multi-entreprises sont invalidés lors du changement d'entreprise | Ne pas afficher les résultats asynchrones de la mauvaise entreprise |
 | 2026-10-14 | Préserver les migrations déjà publiées et ajouter une migration correctrice pour protéger aussi INSERT | Les premiers garde-fous concernaient UPDATE seulement ; les déclencheurs INSERT empêchent l'usurpation avant une mise en production |
 | 2026-10-14 | L'onboarding ne marque plus les nouveaux commerçants comme propriétaires vérifiés ; géolocalisation nulle plutôt que point Montréal fictif | Conformité RLS et honnêteté des cartes ; migration additive, sans suppression de données historiques |
+| 2026-10-14 | Réserver is_claimed et les notes agrégées à l'administration et aux processus serveur, y compris lors d'un UPDATE | Empêcher un propriétaire de s'attribuer le badge vérifié ou de fabriquer sa moyenne d'avis sans modifier les autres champs légitimes |
 | 2026-10-14 | Ne pas déclarer `qmaps.ca` actif sans preuve DNS/SSL/HTTP et SHA | Pas d'affirmations de livraison inventées |
 | 2026-10-14 | Élever TypeScript en étape bloquante de CI et suivre la production en issue #6 | Une compilation Vite seule ne contrôle pas les types ; les prérequis externes ont un suivi vérifiable |
 | 2026-10-14 | Les cinq fichiers de suivi vivent dans `docs/` ; `.agent/CONTINUATION.md` reste un pointeur de compatibilité | Relève autonome sans duplication non maîtrisée |

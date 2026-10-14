@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, QMAPS DB access blocked | Added admin/service-only INSERT+UPDATE guards against forged verified-owner flags and rating aggregates; regression coverage | Verify CI then apply SQL on QMAPS project only
+
 2026-10-14 | ChatGPT | main | documentation updated | Latest code SHA 23aa06e4 CI green including typecheck; recorded P0 external deployment issue #6 and updated 5 standard handoff files | Continue from exact GitHub main SHA; unblock real Supabase QMAPS and host/DNS evidence
 
 2026-10-14 | ChatGPT | main | code ready, typecheck CI pending | Added explicit tsc noEmit typecheck to GitHub CI and package scripts | Resolve any TypeScript errors found by latest CI

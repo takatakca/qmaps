@@ -2,6 +2,18 @@
 
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
+## Relève — nouvelle reprise sécurisation (2026-10-14)
+- Source `main` avant intervention : `4b7f56584d90eea52493d0ab5fa6ea699348e544` ; CI principale vérifiée réussie (run 38616348049), workflow SSH `skipped`.
+- **Tâche codée :** fermeture du contournement de `businesses.is_claimed`, `avg_rating` et `reviews_count` par les propriétaires, pour INSERT et UPDATE. Migration `supabase/migrations/20261014230000_protect_business_verification_and_rating_integrity.sql` ; tests `src/test/businessTrustIntegrity.test.ts`.
+- **Fichiers modifiés :** les deux fichiers précédents, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/DECISIONS.md`, `docs/DEPLOYMENT.md`.
+- **Tâche en cours :** validation de la CI déclenchée par ce commit, puis prochain problème indépendant de l'accès Supabase.
+- **Dernier commit de la reprise :** lire `main` sur GitHub ou `git rev-parse HEAD`; son SHA ne peut pas être écrit dans son propre contenu. Parent vérifié `4b7f56584d90eea52493d0ab5fa6ea699348e544`.
+- **Commandes/vérifications :** GitHub GET ref/main, PR/issues/workflow runs, lecture des migrations RLS, comparaison aux écritures dans les écrans admin ; Supabase list_projects/get_project : le projet `ldvkebjfuldnemfdoted` demeure inaccessible. Essais réseau DNS/CURL : `qmaps.ca` non résolu depuis l'environnement disponible.
+- **Déploiement réel :** **aucun nouveau déploiement vérifié**. SSH volontairement désactivé ; migrations et Edge Functions non appliquées/confirmées.
+- **Accès nécessaires :** compte autorisé sur le projet Supabase QMAPS, véritable hébergeur/web root de `qmaps.ca`, secrets de déploiement GitHub (jamais dans Git).
+- **Action exacte suivante :** vérifier CI sur `main`, puis sauvegarder et appliquer la migration sur QMAPS uniquement après accès. Tester compte marchand non admin (échec UPDATE is_claimed/ratings), admin (succès), et calcul des notes via reviews (succès).
+- Suivi [issue #6](https://github.com/takatakca/qmaps/issues/6).
+
 ## Dernière tâche terminée
 Implémentation de la sélection multi-entreprises dans `src/pages/MerchantDashboard.tsx`, choix déterministe d'une entreprise appartenant à l'utilisateur et protection contre des réponses asynchrones d'avis périmées. Création des documents de suivi permanents.
 
