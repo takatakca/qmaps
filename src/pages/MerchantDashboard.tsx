@@ -1,5 +1,6 @@
 import { fetchReviewsWithAuthors, type ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 import { useState, useEffect, lazy, Suspense } from "react";
+import { chooseMerchantBusiness } from "@/lib/merchantSelection";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import MerchantBottomNav from "@/components/MerchantBottomNav";
 import { ArrowLeft, Plus, Store, LayoutDashboard, BarChart3, Settings, MessageSquare, Sparkles } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const MerchantOverview = lazy(() => import("@/components/merchant/MerchantOverview"));
 const MerchantPerformance = lazy(() => import("@/components/merchant/MerchantPerformance"));
@@ -31,28 +33,82 @@ const MerchantDashboard = () => {
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [selectedBiz, setSelectedBiz] = useState<Tables<"businesses"> | null>(null);
   const [reviews, setReviews] = useState<ReviewWithAuthor[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reloadReviews, setReloadReviews] = useState(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "performance" | "edit" | "reviews">("overview");
   const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { navigate("/merchant/login"); return; }
-    fetchBusinesses();
-  }, [user, authLoading]);
+    if (!user) {
+      setBusinesses([]);
+      setSelectedBiz(null);
+      setReviews([]);
+      navigate("/merchant/login");
+      return;
+    }
+    void fetchBusinesses();
+    // Re-fetch when the authenticated identity changes.
+  }, [user?.id, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!selectedBiz) {
+      setReviews([]);
+      setReviewsLoading(false);
+      return;
+    }
+    // Ignore responses for a business the user has already switched away from.
+    let cancelled = false;
+    setReviews([]);
+    setReviewsLoading(true);
+    void fetchReviewsWithAuthors(selectedBiz.id)
+      .then((results) => {
+        if (!cancelled) setReviews(results);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          toast({
+            title: "Impossible de charger les avis",
+            description: error instanceof Error ? error.message : "Veuillez réessayer.",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setReviewsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [selectedBiz?.id, reloadReviews]);
 
   const fetchBusinesses = async () => {
+    if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("businesses").select("*").eq("owner_user_id", user!.id);
-    setBusinesses(data || []);
-    if (data && data.length > 0) selectBiz(data[0]);
-    setLoading(false);
+    setLoadError(null);
+    try {
+      const { data, error } = await supabase.from("businesses")
+        .select("*")
+        .eq("owner_user_id", user.id)
+        .order("name", { ascending: true });
+      if (error) throw error;
+      const ownedBusinesses = data ?? [];
+      setBusinesses(ownedBusinesses);
+      setSelectedBiz((current) => chooseMerchantBusiness(ownedBusinesses, current?.id));
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Le chargement des entreprises a échoué.");
+      setBusinesses([]);
+      setSelectedBiz(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const selectBiz = async (biz: Tables<"businesses">) => {
-    setSelectedBiz(biz);
-    const revData = await fetchReviewsWithAuthors(biz.id);
-    setReviews((revData) || []);
+  const selectBiz = (businessId: string) => {
+    // Only select an already-loaded business belonging to the current user.
+    const owned = businesses.find((business) => business.id === businessId);
+    if (!owned) return;
+    setSelectedBiz(owned);
   };
 
   const handleCreateBusiness = async () => {
@@ -67,7 +123,8 @@ const MerchantDashboard = () => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else if (data) {
       await supabase.from("user_roles").upsert({ user_id: user.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
-      fetchBusinesses();
+      setSelectedBiz(data);
+      void fetchBusinesses();
       setTab("edit");
     }
   };
@@ -103,7 +160,14 @@ const MerchantDashboard = () => {
         </div>
         <p className="text-xs text-muted-foreground mb-4 ml-12">Gérez votre entreprise sur QMAPS</p>
 
-        {businesses.length === 0 ? (
+        {loadError ? (
+          <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 mb-4">
+            <p className="text-sm text-destructive">Impossible de charger vos entreprises : {loadError}</p>
+            <Button size="sm" className="mt-3" variant="outline" onClick={() => void fetchBusinesses()}>
+              Réessayer
+            </Button>
+          </div>
+        ) : businesses.length === 0 ? (
           <div className="text-center py-16">
             <Store size={48} className="mx-auto text-muted-foreground mb-4" />
             <h2 className="font-heading font-semibold text-foreground mb-2">Aucune entreprise</h2>
@@ -114,6 +178,25 @@ const MerchantDashboard = () => {
           </div>
         ) : (
           <>
+            {businesses.length > 1 && selectedBiz && (
+              <div className="mb-4 space-y-2">
+                <label className="text-sm font-medium text-foreground" htmlFor="qmaps-merchant-business">
+                  Entreprise active
+                </label>
+                <Select value={selectedBiz.id} onValueChange={selectBiz}>
+                  <SelectTrigger id="qmaps-merchant-business" aria-label="Choisir l'entreprise active">
+                    <SelectValue placeholder="Sélectionner une entreprise" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {businesses.map((business) => (
+                      <SelectItem key={business.id} value={business.id}>
+                        {business.name}{business.city ? ` — ${business.city}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {/* Tabs */}
             <div className="flex gap-1 bg-secondary rounded-full p-1 mb-4">
               {tabs.map(t => (
@@ -145,11 +228,20 @@ const MerchantDashboard = () => {
               </button>
             )}
 
+            {reviewsLoading && tab === "reviews" ? (
+              <PanelFallback />
+            ) : null}
             <Suspense fallback={<PanelFallback />}>
               {selectedBiz && tab === "overview" && <MerchantOverview business={selectedBiz} reviews={reviews} onRefresh={fetchBusinesses} />}
               {selectedBiz && tab === "performance" && <MerchantPerformance business={selectedBiz} />}
               {selectedBiz && tab === "edit" && <MerchantEditForm business={selectedBiz} onSaved={fetchBusinesses} />}
-              {selectedBiz && tab === "reviews" && <MerchantReviews reviews={reviews} onReplySaved={() => { void selectBiz(selectedBiz); }} />}
+              {selectedBiz && tab === "reviews" && !reviewsLoading && (
+                <MerchantReviews
+                  key={selectedBiz.id}
+                  reviews={reviews}
+                  onReplySaved={() => setReloadReviews((version) => version + 1)}
+                />
+              )}
             </Suspense>
           </>
         )}

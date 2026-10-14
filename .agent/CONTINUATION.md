@@ -31,3 +31,7 @@ Mise à jour : 2026-10-14. Source : `takatakca/qmaps`, branche `main`.
 ## Règles
 
 Lire [AGENTS.md](../AGENTS.md), le haut de [WORKLOG.md](../WORKLOG.md), les PRs ouvertes et les workflows. Ne pas réintroduire `.env` dans Git. Ne pas déclarer un déploiement effectif à partir d'une CI de build. Ne pas coupler QMAPS directement à R2F : seul TAKATAK orchestre les décisions.
+
+## Relève normalisée (2026-10-14)
+
+Le statut actif et la file de travaux sont désormais maintenus dans `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`, `docs/DEPLOYMENT.md` et `docs/DECISIONS.md`. Lire ces fichiers après `AGENTS.md` avant toute nouvelle modification ; `.agent/CONTINUATION.md` conserve l'historique précédent.

@@ -1,0 +1,17 @@
+# QMAPS — File de tâches priorisée
+
+Toutes les tâches doivent être validées par des preuves, non par une déclaration.
+
+| Priorité | État | Tâche | Critère de réussite |
+|---|---|---|---|
+| P0 | TERMINÉ EN CODE, CI À RECONTRÔLER | Sélectionner plusieurs entreprises dans le portail, préserver la sélection après édition, isoler les avis par entreprise | Tests unitaires verts, bouton de sélection visible pour plusieurs entreprises, aucun résultat d'un ancien commerce après changement |
+| P0 | BLOQUÉ PAR ACCÈS | Identifier l'hébergement réel de qmaps.ca, DNS/SSL, répertoire web et version en ligne | Domaine accessible en HTTPS, empreinte/version déployée vérifiée |
+| P0 | BLOQUÉ PAR ACCÈS | Vérifier le projet Supabase `ldvkebjfuldnemfdoted` et appliquer les migrations du 11 et du 14 octobre dans l'ordre | Sauvegarde contrôlée, migrations listées, requêtes RLS/tenant vérifiées |
+| P0 | BLOQUÉ PAR ACCÈS | Installer les secrets côté serveur et déployer les Edge Functions TAKATAK + réponse commerçant + fonctions Stripe mises à jour | Tests réels signés, propriétaire correct, cross-tenant interdit, Stripe fonctionne |
+| P0 | CONFIGURATION | Activer le workflow SSH si le site utilise réellement SSH/Apache avec dossier isolé et secrets GitHub | CI success → transfert réel → HTTP et SHA déployé vérifiés |
+| P1 | À FAIRE | Vérification mobile/tablette, Google Maps, inscription, avis, profils, paiements, suppression de compte, alertes et parcours marchand | Rapport de recette avec preuves et erreurs corrigées |
+| P1 | À FAIRE | Contrôler les anciennes URLs et courriels `qmaps.app`, dépendances historiques Lovable et remplacer sans régression | Services et courriels fonctionnels ; aucune dépendance indispensable laissée sans solution |
+| P1 | À FAIRE | Réviser avertissements RLS, déclencheurs privilégiés et logs d'accès des services | Audit sécurité et tests d'isolement |
+| P2 | À FAIRE | SEO serveur pour pages entreprises et sitemap dynamique sans données privées | Robots/canonical valides, indexation publique vérifiée |
+
+Liens : [PROJECT_STATUS.md](PROJECT_STATUS.md), [DEPLOYMENT.md](DEPLOYMENT.md), [AGENT_HANDOFF.md](AGENT_HANDOFF.md). La vérification des résultats GitHub Actions est obligatoire après chaque push.

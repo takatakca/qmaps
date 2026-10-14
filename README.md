@@ -56,7 +56,7 @@ Détails et instructions de retour arrière : [docs/github-ssh-deployment.md](do
 
 ## Documentation
 
-- [Relève pour les agents](.agent/CONTINUATION.md) et [journal de travail](WORKLOG.md)
+- [Relève active](docs/AGENT_HANDOFF.md), [état du projet](docs/PROJECT_STATUS.md), [file de tâches](docs/TASK_QUEUE.md), [déploiement](docs/DEPLOYMENT.md), [décisions](docs/DECISIONS.md), [ancien journal de relève](.agent/CONTINUATION.md) et [journal des commits](WORKLOG.md)
 - [Contrat QMAPS/TAKATAK](docs/takatak-integration.md)
 - [Préparation à la production](docs/production-readiness.md)
 - [Parcours et accès](docs/route-inventory.md)
