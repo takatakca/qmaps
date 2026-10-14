@@ -12,6 +12,8 @@ Mise à jour : 2026-10-14. Source : `takatakca/qmaps`, branche `main`.
 - La cible publique est qmaps.ca ; SEO et fichiers statiques mis à jour. Le domaine et l'hébergement réel ne sont **pas** vérifiés par GitHub.
 - Une voie de déploiement SSH/cPanel est préparée, **désactivée tant que QMAPS_DEPLOY_ENABLED n'est pas activé et les secrets fournis**.
 
+- Redirections Stripe protégées par liste de domaines HTTPS autorisés côté serveur ; domaine qmaps.ca utilisé par défaut, anciens domaines à ajouter uniquement après vérification.
+
 ## Étapes restantes (ne pas considérer comme terminées)
 
 1. Confirmer où pointe réellement `qmaps.ca` (DNS, hébergeur, web root, SSL, serveur web).

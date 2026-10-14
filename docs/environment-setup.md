@@ -34,3 +34,16 @@ These are server-side only and must be configured via the Lovable Cloud dashboar
 - [ ] No secret values appear in git history (`git log -S VITE_SUPABASE_PUBLISHABLE_KEY`)
 - [ ] Edge function secrets are set in the Lovable Cloud dashboard
 - [ ] `bun run build` succeeds with the current `.env`
+
+## Stripe return URL security (server only)
+
+The Edge Functions `create-merchant-checkout-session` and
+`create-merchant-billing-portal-session` return users only to trusted HTTPS
+origins. By default, `https://qmaps.ca` and `https://www.qmaps.ca` are allowed.
+If a verified alternate deployment (e.g. staging or an active legacy domain)
+must receive Stripe users, configure the **server-side** Edge Function secret
+`QMAPS_ALLOWED_RETURN_ORIGINS` with comma-separated **exact HTTPS origins**
+(e.g. `https://staging.qmaps.ca,https://qmaps.app`).
+Never take this allowlist from browser variables or pass a request `Referer`
+into Stripe session return URLs. Check that authorized alternate hosts remain
+under QMAPS control. No live Stripe keys, price IDs or secrets belong in Git.
