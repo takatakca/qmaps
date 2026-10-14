@@ -8,6 +8,9 @@ Implémentation de la sélection multi-entreprises dans `src/pages/MerchantDashb
 ## Tâche supplémentaire terminée en code
 Nouvelle migration `supabase/migrations/20261014210000_guard_inserts_and_business_owner_assignment.sql` : gardes INSERT pour les champs propriétaires des avis et liens TAKATAK ; blocage d'attribution d'une fiche à un autre compte. Ajustement de l'interface pour ne **jamais** afficher les avis de l'entreprise précédente pendant un changement. Migration NON appliquée dans la base réelle.
 
+## Contrôle de version en production ajouté
+`.github/workflows/qmaps-ssh-deploy.yml` compare désormais la révision validée au dernier `main`, produit un manifeste `qmaps-release.json` et en vérifie le SHA exact sur le domaine après transfert. Le workflow n'a pas été activé sur un serveur réel.
+
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 

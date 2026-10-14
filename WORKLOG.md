@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-14 | ChatGPT | main | code ready, deploy opt-in remains off | Added exact SHA publishing verification and stale-CI deployment rejection with contract tests | Check CI, activate only after confirmed hosting/DNS/SSH secrets
+
 2026-10-14 | ChatGPT | main | code ready, migration pending | Prevent review/TAKATAK spoofing on INSERT and foreign owner assignment; hide stale tenant reviews before next render | Validate CI, apply new SQL only on correct QMAPS Supabase project
 
 2026-10-14 | ChatGPT | main | done in code, verification pending | Added multi-business merchant selection, stale review protection, unit tests, five canonical status/handoff docs | Validate CI on latest SHA and continue with Supabase and hosting readiness

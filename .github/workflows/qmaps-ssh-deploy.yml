@@ -24,6 +24,21 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: oven-sh/setup-bun@v2
+      - name: Require newest validated main revision
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          CURRENT_SHA="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [ -z "$CURRENT_SHA" ] || [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
+            echo "Deploy cancelled: this CI artifact is not the current main revision" >&2
+            exit 1
+          fi
+          if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ]; then
+            echo "Deploy cancelled: checked-out source does not match approved SHA" >&2
+            exit 1
+          fi
       - name: Check deployment configuration
         shell: bash
         env:
@@ -48,10 +63,12 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
           VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY: ${{ secrets.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY }}
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           bun install --frozen-lockfile
           bun run build
           test -f dist/index.html
+          printf '{"sha":"%s"}\n' "$DEPLOY_SHA" > dist/qmaps-release.json
           cat > dist/.htaccess <<'HTACCESS'
           <IfModule mod_rewrite.c>
           RewriteEngine On
@@ -78,7 +95,19 @@ jobs:
           chmod 600 "$HOME/.ssh/known_hosts"
           PORT="${PORT:-22}"
           rsync -az -e "ssh -p $PORT -o StrictHostKeyChecking=yes" dist/ "$USER@$HOST:$ROOT/"
-      - name: Verify production HTTP
+      - name: Verify exact deployed revision
+        shell: bash
         env:
           PRODUCTION_URL: ${{ secrets.QMAPS_PRODUCTION_URL }}
-        run: curl --fail --location --silent --show-error --retry 2 "$PRODUCTION_URL/" >/dev/null
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          BASE_URL="${PRODUCTION_URL%/}"
+          curl --fail --location --silent --show-error --retry 2 "$BASE_URL/" >/dev/null
+          RELEASE="$(curl --fail --location --silent --show-error --retry 2 "$BASE_URL/qmaps-release.json")"
+          EXPECTED="$(printf '{"sha":"%s"}' "$DEPLOY_SHA")"
+          if [ "$RELEASE" != "$EXPECTED" ]; then
+            echo "Deploy verification failed: live revision differs from approved commit" >&2
+            exit 1
+          fi
+          echo "QMAPS release verified: $DEPLOY_SHA"

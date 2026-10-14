@@ -20,6 +20,12 @@ Le projet Supabase du dépôt est `ldvkebjfuldnemfdoted`. La connexion actuellem
 - Configurer les secrets fonctionnels et vérifier `takatak-match-businesses` (HMAC), `takatak-link-business`, `takatak-reply-review` et `merchant-reply-review` (JWT).
 - Vérifier les fonctions Stripe, leur liste blanche d'origines et le traitement des webhooks avec des tests autorisés.
 
+## Contrôle anti-version périmée et empreinte de production
+- Le workflow compare le commit à publier avec `refs/heads/main` juste avant la construction ; il refuse les exécutions CI anciennes.
+- Le build publie `/qmaps-release.json` avec le SHA exact du commit source. Après rsync, le workflow exige que le contenu HTTPS public corresponde **octet pour octet** à `{"sha":"<SHA>"}`.
+- L'artefact de version n'inclut aucune clé ; il n'est pas une preuve des migrations ou de la santé métier.
+- Si le contrôle échoue, le déploiement doit être considéré en échec et le site restauré ou corrigé avant activation du trafic.
+
 ## Conditions d'un GO réel
 CI verte sur SHA exact, accès HTTPS valide, routes SPA, `robots.txt` et sitemap, version déployée traçable, vérifications de login, RLS cross-merchant, cartes, avis, abonnements et retour arrière connu. Les seules CI vertes ne prouvent pas une production fonctionnelle.
 
