@@ -14,6 +14,7 @@
 | 2026-10-14 | Réserver is_claimed et les notes agrégées à l'administration et aux processus serveur, y compris lors d'un UPDATE | Empêcher un propriétaire de s'attribuer le badge vérifié ou de fabriquer sa moyenne d'avis sans modifier les autres champs légitimes |
 | 2026-10-14 | Réserver aux admins/services les champs de modération des avis, compteurs de réactions et la réattribution d'identité | L'auteur peut corriger texte/note mais ne peut ni réafficher un avis caché ni déplacer un avis pour manipuler une moyenne |
 | 2026-10-14 | Afficher les campagnes sponsorisées réelles au lieu du simulateur non persistant et des chiffres publicitaires inventés | Une activation ou un revenu ne peut être revendiqué qu'après stockage, validation et observation des événements |
+| 2026-10-14 | Reprendre les brouillons de fiche privée et vérifier les catégories et droits avant publication | Ne pas transformer une interruption/erreur de base en profil faussement publié ni perdre les progrès des commerçants |
 | 2026-10-14 | Ne pas déclarer `qmaps.ca` actif sans preuve DNS/SSL/HTTP et SHA | Pas d'affirmations de livraison inventées |
 | 2026-10-14 | Élever TypeScript en étape bloquante de CI et suivre la production en issue #6 | Une compilation Vite seule ne contrôle pas les types ; les prérequis externes ont un suivi vérifiable |
 | 2026-10-14 | Les cinq fichiers de suivi vivent dans `docs/` ; `.agent/CONTINUATION.md` reste un pointeur de compatibilité | Relève autonome sans duplication non maîtrisée |

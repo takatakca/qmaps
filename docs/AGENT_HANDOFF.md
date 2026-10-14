@@ -1,5 +1,26 @@
 # QMAPS — Agent handoff
 
+## Point de reprise faisant autorité — 14 octobre 2026
+**Dépôt :** `takatakca/qmaps`, branche `main`. **Dernier commit de code vérifié poussé par l'agent :** `328d8918a8cf6dccb249425628d5411d128b3f6e`. Pour le SHA du présent fichier de relève, lire la référence `refs/heads/main` (impossible d'inscrire son propre SHA dans son contenu).
+
+**Dernière tâche terminée en code :** récupération des inscriptions commerçantes incomplètes : reprise de fiche `is_active=false`, restauration des catégories, validation des écritures de catégories, et contrôle du rôle `merchant` avant de rendre la fiche publique. Tests dans `src/test/merchantDraftRecovery.test.ts` et `src/test/merchantPublishEntitlement.test.ts`.
+
+**Tâche en cours :** vérifier le run CI du SHA `328d8918` sur https://github.com/takatakca/qmaps/actions/runs/38624571461 ; si échec, lire les jobs/logs et corriger, puis continuer les P0 indépendantes de la production.
+
+**Fichiers de la reprise :** `src/pages/MerchantOnboarding.tsx`, `src/pages/MerchantDashboard.tsx`, `src/pages/MerchantOptimization.tsx`, `src/hooks/useSponsoredCampaigns.ts`, `src/lib/reviewsWithAuthors.ts`, `src/lib/merchantSelection.ts`, les écrans marchands secondaires, les tests `src/test/`, les deux nouvelles migrations `supabase/migrations/20261014230000_*.sql` et `20261014231000_*.sql`, la relève et `WORKLOG.md`.
+
+**Vérifications effectuées :** lecture des consignes, du journal et des issues/PR sur GitHub ; lecture des migrations RLS, comparaison des politiques SQL et du code des interfaces, commits en `main` sans force-push ; CI vertes jusqu'à `f774e0af` (run 38624432519), nouveau run lancé sur le dernier code. Supabase `list_projects` et `get_project(ldvkebjfuldnemfdoted)` : le projet n'est pas accessible. Vérification `https://qmaps.ca` et `www` via outils web : inaccessible depuis les outils disponibles. **Aucun test SQL en production ni déploiement d'Edge Functions exécuté.**
+
+**Problèmes et accès requis :** accès autorisé au projet QMAPS `ldvkebjfuldnemfdoted`, hébergeur exact de `qmaps.ca` avec DNS/SSL vérifiables, web root dédié, secrets Actions SSH/build, secrets serveur Stripe/HMAC/JWT sur le bon projet. Aucune valeur secrète à committer.
+
+**Statut de déploiement :** production non vérifiée ; workflow QMAPS SSH volontairement désactivé (`QMAPS_DEPLOY_ENABLED` pas configurée à `true`) ; dernières exécutions `skipped`.
+
+**Prochaine action exacte :** (1) vérifier CI sur dernier commit `main`, corriger si rouge ; (2) avec accès au vrai Supabase QMAPS, contrôler backup/historique des migrations puis appliquer uniquement les SQL manquantes dans l'ordre et déployer les Edge Functions ; (3) identifier le vrai host/web root `qmaps.ca` et installer les secrets Actions ; (4) activer workflow seulement sur la cible vérifiée, confirmer `/qmaps-release.json` égale au SHA et effectuer la recette deux entreprises / Stripe / cartes / avis. Consigner les résultats dans `docs/DEPLOYMENT.md` et fermer issue #6 uniquement après preuves.
+
+---
+Les entrées historiques ci-dessous sont conservées pour permettre aux prochains agents de suivre l'origine des choix.
+
+
 **Mis à jour :** 2026-10-14 | Dépôt `takatakca/qmaps` | branche `main`.
 
 ## Relève — droit d'accès à une fiche reprise (2026-10-14)
@@ -107,7 +128,7 @@ Le panneau `BusinessReviewsTab` propose maintenant un vrai filtre par note et le
 ## Travail en cours / prochaine tâche
 Vérifier les workflows déclenchés par **ce commit** et corriger immédiatement les éventuels échecs ; ensuite relancer l'inspection de production en utilisant uniquement les accès autorisés.
 
-## Dernier commit poussé
+## Dernier commit poussé (historique de la première reprise)
 Avant cette reprise : `60fcdb8ba60559bc3986c5f9b6a9574390ce0cc5` (CI et TAKATAK checks verts). **Pour connaître le dernier commit contenant ce fichier**, exécuter `git rev-parse HEAD` ou consulter la branche `main` sur GitHub : le SHA ne peut pas être inscrit dans son propre commit.
 
 ## Fichiers concernés dans cette reprise

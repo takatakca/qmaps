@@ -1,5 +1,17 @@
 # QMAPS — État du projet
 
+## État de reprise faisant autorité — 14 octobre 2026, fin de session
+- **Repository et branche :** `takatakca/qmaps`, `main`.
+- **Dernier commit de code poussé :** `328d8918a8cf6dccb249425628d5411d128b3f6e`, récupération de brouillon marchand et contrôle du rôle professionnel avant publication.
+- **CI dernière version confirmée avant celui-ci :** `f774e0af203026e1f4b0dec172bcd87baf65f8c7`, GitHub Actions run [38624432519](https://github.com/takatakca/qmaps/actions/runs/38624432519) : succès. CI de `328d8918` déclenchée dans [38624571461](https://github.com/takatakca/qmaps/actions/runs/38624571461), résultat à revérifier à la prochaine lecture.
+- **Code intégré depuis la dernière reprise :** deux migrations additives de sécurité (vérification propriétaire / agrégats de notes ; modération des avis / anti-falsification), sélection multi-entreprises étendue aux sous-écrans et à la facturation, tableau publicitaire alimenté par `sponsored_campaigns`, protection des réponses réseau périmées, gestion d'erreurs des avis et reprise de brouillon onboarding.
+- **En production : NON vérifiée.** Les nouveaux fichiers SQL ne sont **pas appliqués**, les nouvelles Edge Functions **non confirmées déployées** sur QMAPS, le workflow SSH est `skipped` et la résolution/SSL de `qmaps.ca` n'est pas établie dans l'environnement disponible.
+- **Blocages réels :** absence d'accès au projet Supabase `ldvkebjfuldnemfdoted` (permission refusée), host/docroot/secret de déploiement QMAPS inconnus. Ne pas publier sur un autre site ni migrer un autre projet.
+- **Suivi P0 :** [issue #6](https://github.com/takatakca/qmaps/issues/6). Une CI verte ou un rapport Go/No-Go de build **ne remplacent pas** la preuve d'une livraison en ligne.
+
+Les sections suivantes documentent l'historique des travaux précédents et restent utiles, mais le présent état prévaut en cas de divergence.
+
+
 Dernière mise à jour : 2026-10-14. Dépôt : `takatakca/qmaps`, publication GitHub : `main`.
 
 ## Architecture vérifiée

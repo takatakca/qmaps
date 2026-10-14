@@ -1,5 +1,13 @@
 # QMAPS — File de tâches priorisée
 
+## Statut faisant autorité — 14 octobre 2026
+- **Dernier code `main` :** `328d8918a8cf6dccb249425628d5411d128b3f6e`, CI run [38624571461](https://github.com/takatakca/qmaps/actions/runs/38624571461) à revérifier.
+- **CI verte la plus récente confirmée :** `f774e0af`, [run 38624432519](https://github.com/takatakca/qmaps/actions/runs/38624432519).
+- **Priorité bloquante extérieure P0 :** issue [#6](https://github.com/takatakca/qmaps/issues/6) (hébergeur, DNS, accès au vrai projet Supabase QMAPS, migrations et secrets). Ne pas confondre le code CI validé avec un lancement.
+- **Priorités de recette P0 :** tests SQL de modifications interdites des notes/stats/modération, tests d'isolement inter-commerces (avis/campagnes/facturation), reprise de brouillon avec catégorie/role, Stripe/webhook et géolocalisation, empreinte `qmaps-release.json` après publication.
+- Les états ci-dessous reflètent des livraisons **en code uniquement** tant que les validations de production restent bloquées.
+
+
 Toutes les tâches doivent être validées par des preuves, non par une déclaration.
 
 | Priorité | État | Tâche | Critère de réussite |

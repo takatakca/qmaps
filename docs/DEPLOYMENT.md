@@ -1,5 +1,12 @@
 # QMAPS — Déploiement
 
+## Dernière preuve connue (2026-10-14)
+- Code déposé sur `main` au SHA `328d8918a8cf6dccb249425628d5411d128b3f6e`; GitHub CI [38624571461](https://github.com/takatakca/qmaps/actions/runs/38624571461) à confirmer. Dernière CI verte vérifiée : `f774e0af`, [38624432519](https://github.com/takatakca/qmaps/actions/runs/38624432519).
+- **Déploiement sur `qmaps.ca` : aucune preuve de succès.** Le workflow SSH a été `skipped` à chaque exécution ; site et certificat non accessibles depuis les outils de vérification, adresse DNS non résolue.
+- **Migrations et fonctions Supabase QMAPS : non appliquées par cet agent, non vérifiées en production.** L'accès au vrai projet `ldvkebjfuldnemfdoted` est refusé. Seules les modifications GitHub peuvent être considérées comme réalisées.
+- Lancer le vrai déploiement seulement après validation de la cible ; enregistrer SHA et horodatage du manifeste accessible par HTTPS, puis le résultat des tests sur base réelle dans ce document.
+
+
 ## Cible
 - Branche : `main`, build statique Vite, artefact `dist/`.
 - Domaine cible déclaré : `https://qmaps.ca`.
@@ -7,7 +14,7 @@
 - Vérification du 2026-10-14 : `getent ahostsv4 qmaps.ca` n'a retourné aucune adresse dans l'environnement disponible ; `curl -I https://qmaps.ca` et `www` ont échoué sur la résolution de nom. Aucun statut SSL, répertoire ou contenu déployé n'a pu être confirmé.
 
 ## GitHub Actions
-1. `.github/workflows/ci.yml` exécute lint, tests, contrôles de lancement, build et GO/NO-GO.
+1. `.github/workflows/ci.yml` exécute lint, vérification TypeScript explicite, tests, contrôles de lancement, build et GO/NO-GO.
 2. `.github/workflows/takatak-integration-checks.yml` vérifie la fonction HMAC et la fonction de réponse commerçant avec Deno.
 3. `.github/workflows/qmaps-ssh-deploy.yml` compile sur GitHub, transfère `dist/` via rsync/SSH, vérifie HTTPS. Les événements provenant d'un autre dépôt, une branche hors `main`, une CI échouée et les exécutions non activées ne doivent pas déclencher de publication.
 4. L'activation requiert `QMAPS_DEPLOY_ENABLED=true` plus `QMAPS_DEPLOY_HOST`, `QMAPS_DEPLOY_USER`, `QMAPS_DEPLOY_WEB_ROOT`, `QMAPS_DEPLOY_SSH_PRIVATE_KEY`, `QMAPS_DEPLOY_KNOWN_HOSTS`, `QMAPS_PRODUCTION_URL` et les secrets de build documentés dans [github-ssh-deployment.md](github-ssh-deployment.md).

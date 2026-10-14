@@ -35,3 +35,7 @@ Lire [AGENTS.md](../AGENTS.md), le haut de [WORKLOG.md](../WORKLOG.md), les PRs 
 ## Relève normalisée (2026-10-14)
 
 Le statut actif et la file de travaux sont désormais maintenus dans `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`, `docs/DEPLOYMENT.md` et `docs/DECISIONS.md`. Lire ces fichiers après `AGENTS.md` avant toute nouvelle modification ; `.agent/CONTINUATION.md` conserve l'historique précédent.
+
+
+## Mise à jour de continuité — 2026-10-14
+Les cinq fichiers `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/AGENT_HANDOFF.md`, `docs/DEPLOYMENT.md` et `docs/DECISIONS.md` sont la relève active. Dernier code vérifié poussé : `328d8918a8cf6dccb249425628d5411d128b3f6e`. Cette section conserve l'historique ; utiliser les états faisant autorité en tête des documents canoniques avant de poursuivre.
