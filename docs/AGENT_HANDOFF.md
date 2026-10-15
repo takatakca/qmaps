@@ -1,5 +1,15 @@
 # QMAPS — Agent handoff
 
+## Appels à l'action — fiabilité, 15 octobre 2026
+- **Dernière tâche en code :** retrait du faux éditeur CTA qui affichait un rabais, des prix et des sélections non sauvegardées. `MerchantCTA.tsx` indique explicitement l'indisponibilité de la publicité CTA personnalisée et renvoie aux informations réelles du commerce et aux campagnes sponsorisées.
+- **Fichiers :** `src/pages/MerchantCTA.tsx`, `src/test/merchantCtaTruth.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`.
+- **Reste à réaliser :** schéma/API de publication CTA, restrictions propriétaire, facturation et publication réelles ; ne jamais présenter l'ancien formulaire de démonstration comme une fonctionnalité accomplie.
+- **CI / SHA :** consulter la référence `main` et le nouveau GitHub Actions après le push ; parent `41fb2f8c04cbecc0716d6f4c51d6930cf21559da`.
+- **Déploiement réel :** aucun nouveau site publié, QMAPS Supabase inaccessible, workflow SSH toujours désactivé. Pas de secret exposé.
+- **Action exacte suivante :** vérifier CI, corriger si échec, poursuivre tâches exécutables et issue #6 pour la production.
+
+
+
 ## Guest Manager — intégrité commerciale, 15 octobre 2026
 - **Dernière tâche livrée en code :** suppression du formulaire qui annonçait « Demande envoyée! » sans réseau, des prix et témoignages non vérifiés et des statistiques inventées sur Guest Manager. L'écran indique que le produit n'est pas activé et propose le contact existant `/support-policy`.
 - **Fichiers :** `src/pages/MerchantGuestManager.tsx`, `src/test/guestManagerIntegrity.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`, `docs/DECISIONS.md`.

@@ -1,5 +1,10 @@
 # QMAPS — État du projet
 
+## Appels à l'action promotionnels — 15 octobre 2026
+L'ancien éditeur CTA simulait un rabais et permettait des choix non persistés. Il a été remplacé par un état d'indisponibilité clair et des liens vers les fonctions réellement câblées. L'implémentation du véritable système CTA publicitaire reste **inachevée** et dépend de la plateforme de publication/paiement autorisée.
+
+
+
 ## Guest Manager — 15 octobre 2026
 Le formulaire qui affichait faussement « demande envoyée » et les chiffres/tarifs/témoignages non vérifiés ont été supprimés. Le produit Guest Manager est marqué comme non disponible et n'a pas de moteur de réservation actif. Son développement complet reste une tâche bloquée par les exigences et services réels ; cette correction ne constitue pas un lancement.
 

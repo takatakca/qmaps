@@ -41,6 +41,8 @@ Toutes les tâches doivent être validées par des preuves, non par une déclara
 | P1 | CODE ÉCRIT, CI À VÉRIFIER | Rendre fonctionnelles recherche/FAQ/support au lieu de boutons inertes | Filtre questions, réponses accessibles et liens vers vrais écrans et contact, tests unitaires |
 | P1 | CODE ÉCRIT, CI À VÉRIFIER | Retirer les prix, témoignages, statistiques et fausse confirmation de formulaire de Guest Manager | Écran honnête d'indisponibilité, contact réel, aucun prix facturé ni demande simulée |
 | P1 | BLOQUÉ PAR SERVICE / SPÉCIFICATION | Construire réellement Guest Manager (réservation, horaires, contrôle d'accès, confirmations, paiement éventuel) | Backend choisi et autorisé, migrations, Edge Functions, tests E2E de réservation et disponibilité |
+| P1 | CODE ÉCRIT, CI À VÉRIFIER | Retirer les promotions/CTA fictifs et les réglages sans sauvegarde | Écran exact d'indisponibilité, liens vers fonctions réellement disponibles, aucun prix inventé |
+| P1 | À CONSTRUIRE AVEC BACKEND | Publication réelle de campagnes « Bouton d'action » personnalisées avec droits, prix, état et attribution | API, RLS, validation, facturation fournisseur, tests E2E et publication effective |
 | P1 | À FAIRE | Vérification mobile/tablette, Google Maps, inscription, avis, profils, paiements, suppression de compte, alertes et parcours marchand | Rapport de recette avec preuves et erreurs corrigées |
 | P1 | À FAIRE | Contrôler les anciennes URLs et courriels `qmaps.app`, dépendances historiques Lovable et remplacer sans régression | Services et courriels fonctionnels ; aucune dépendance indispensable laissée sans solution |
 | P1 | À FAIRE | Réviser avertissements RLS, déclencheurs privilégiés et logs d'accès des services | Audit sécurité et tests d'isolement |
