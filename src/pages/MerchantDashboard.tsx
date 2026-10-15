@@ -1,7 +1,7 @@
 import { fetchReviewsWithAuthors, type ReviewWithAuthor } from "@/lib/reviewsWithAuthors";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { chooseMerchantBusiness, getSavedMerchantBusinessId, saveMerchantBusinessId } from "@/lib/merchantSelection";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 const MerchantDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [selectedBiz, setSelectedBiz] = useState<Tables<"businesses"> | null>(null);
@@ -41,6 +42,12 @@ const MerchantDashboard = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "performance" | "edit" | "reviews">("overview");
+  const deepLinkedTab = searchParams.get("tab");
+  useEffect(() => {
+    if (deepLinkedTab === "reviews" || deepLinkedTab === "performance" || deepLinkedTab === "edit") {
+      setTab(deepLinkedTab);
+    }
+  }, [deepLinkedTab]);
   const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
 
   useEffect(() => {

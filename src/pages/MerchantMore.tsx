@@ -10,7 +10,7 @@ import {
   Settings, Star, Camera, ChevronRight, ChevronDown, Lock,
   Sparkles, Link2, PhoneCall, Award, Image, Play, ShieldOff,
   Package, Users, MapPin, CreditCard, Bell, ShieldCheck, User,
-  CalendarClock, Scale, FileText, HelpCircle, LogOut, Briefcase, Inbox, BarChart3, Search
+  Scale, FileText, HelpCircle, LogOut, Briefcase, Inbox, BarChart3, Search
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -87,7 +87,7 @@ const MerchantMore = () => {
 
       {/* Location dropdown */}
       {business && (
-        <button className="w-full px-4 py-3 flex items-center justify-between border-y border-border hover:bg-muted/30 transition-colors">
+        <button onClick={() => navigate("/merchant")} className="w-full px-4 py-3 flex items-center justify-between border-y border-border hover:bg-muted/30 transition-colors">
           <span className="text-sm text-foreground">{business.address}, {business.city}</span>
           <ChevronDown size={16} className="text-muted-foreground" />
         </button>
@@ -101,7 +101,7 @@ const MerchantMore = () => {
           <MenuItem icon={Inbox} label="Demandes de projet" badge="Nouveau" onClick={() => navigate("/merchant/leads")} />
           <MenuItem icon={Briefcase} label="Mes services" onClick={() => navigate("/merchant/services")} />
           <MenuItem icon={Users} label="QMAPS Host" badge="Nouveau" onClick={() => navigate("/merchant/host")} />
-          <MenuItem icon={Star} label="Avis" onClick={() => navigate("/merchant/reviews")} />
+          <MenuItem icon={Star} label="Avis" onClick={() => navigate("/merchant?tab=reviews")} />
           <MenuItem icon={Camera} label="Photos & Vidéos" onClick={() => navigate("/merchant/photos")} />
         </Section>
 
@@ -157,12 +157,11 @@ const MerchantMore = () => {
           <MenuItem icon={MapPin} label="Ajouter des emplacements" onClick={() => navigate("/merchant/business-info")} />
           <MenuItem icon={CreditCard} label="Facturation" onClick={() => navigate("/merchant/billing")} />
           <MenuItem icon={Bell} label="Paramètres de notification" onClick={() => navigate("/merchant/notifications")} />
-          <MenuItem icon={ShieldCheck} label="Paramètres de sécurité" onClick={() => navigate("/merchant/business-info")} />
-          <MenuItem icon={User} label="Informations du compte" onClick={() => navigate("/merchant/business-info")} />
-          <MenuItem icon={CalendarClock} label="Outils de planification" badge="Nouveau" onClick={() => navigate("/merchant/business-info")} />
-          <MenuItem icon={Scale} label="Légal & Confidentialité" onClick={() => navigate("/merchant/business-info")} />
-          <MenuItem icon={FileText} label="Conditions d'utilisation" onClick={() => navigate("/merchant/business-info")} />
-          <MenuItem icon={HelpCircle} label="Contacter le support" onClick={() => navigate("/merchant/business-info")} />
+          <MenuItem icon={ShieldCheck} label="Paramètres de sécurité" onClick={() => navigate("/settings")} />
+          <MenuItem icon={User} label="Informations du compte" onClick={() => navigate("/settings")} />
+          <MenuItem icon={Scale} label="Légal & Confidentialité" onClick={() => navigate("/privacy")} />
+          <MenuItem icon={FileText} label="Conditions d'utilisation" onClick={() => navigate("/terms")} />
+          <MenuItem icon={HelpCircle} label="Contacter le support" onClick={() => navigate("/support")} />
         </Section>
 
         <Separator />

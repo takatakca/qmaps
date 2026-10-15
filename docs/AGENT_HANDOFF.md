@@ -1,5 +1,15 @@
 # QMAPS — Agent handoff
 
+## Correctifs de navigation — 15 octobre 2026
+- **Dernière tâche terminée en code :** menu commerçant `/merchant?tab=reviews`, sécurité/compte `/settings`, confidentialité `/privacy`, conditions `/terms` et support `/support`. Le tableau de bord accepte un lien profond à l'onglet des avis. L'outil de planification factice est retiré et la zone d'entreprise mène au sélecteur réel.
+- **Fichiers :** `MerchantMore.tsx`, `MerchantDashboard.tsx`, `src/test/merchantNavigationRoutes.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.
+- **Parent Git de ce travail :** `f61a32f57a277c812403ca35d4fc1b6ebde907d3`, nouveau SHA sur la référence `main`. Vérification du dernier SHA via GitHub requise.
+- **CI :** vérifier job déclenché par ce commit avant de l'annoncer vert ; la première version des tests d'UI a été remplacée par des tests Vitest compatibles avec le lockfile actuel.
+- **État production :** aucun déploiement vérifié ; Supabase QMAPS `ldvkebjfuldnemfdoted` inaccessible et workflow SSH `skipped`. Aucune migration appliquée par cet agent.
+- **Prochaine action exacte :** corriger toute erreur CI, puis effectuer les tests de navigation deux entreprises lorsque la cible réelle et les accès sont confirmés. Issue #6 maintenue ouverte.
+
+
+
 ## Correction de pipeline — 15 octobre 2026
 - Un autre agent a intégré en parallèle des changements d'authentification des rôles en `main`. **Aucun écrasement et aucun force-push.** Le nouveau `main` a été récupéré avant ce commit.
 - Les deux premiers tests React ajoutés ont fait échouer TypeScript CI (`TS2305` sur `screen`, `fireEvent`, `waitFor`) car `@testing-library/dom` n'est pas résolu dans le lockfile du dépôt. Pour ne pas modifier les dépendances de production et leur lockfile à l'aveugle, les tests ont été remplacés par des contrats Vitest lisant le code réel. **Ils ne remplacent pas des essais interactifs E2E**.
