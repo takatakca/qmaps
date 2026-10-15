@@ -20,7 +20,8 @@ jobs:
           bun-version: latest
 
       - name: Validate workflow YAML
-        run: ruby -e 'require "yaml"; Dir.glob(".github/workflows/*.{yml,yaml}").each { |file| YAML.parse_file(file); puts "Validated #{file}" }'
+        run: |
+          ruby -e 'require "yaml"; Dir.glob(".github/workflows/*.{yml,yaml}").each { |file| YAML.parse_file(file); puts file }'
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
