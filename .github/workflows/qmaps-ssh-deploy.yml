@@ -75,8 +75,10 @@ jobs:
             /home/*/*|/var/www/*|/srv/*/*) ;;
             *) echo 'Web root must be a dedicated directory below a known hosting prefix' >&2; exit 1 ;;
           esac
-          case "$ROOT" in
-            *'/..'*|*'/./'*|*' '*|*';'*|*'|'*|*'&'*|*'
+          if [[ ! "$ROOT" =~ ^/[A-Za-z0-9._/-]+$ ]] || [[ "$ROOT" == *..* ]]; then
+            echo 'Unsafe SSH web root path' >&2
+            exit 1
+          fi
           case "$PUBLIC_URL" in https://qmaps.ca|https://qmaps.ca/|https://www.qmaps.ca|https://www.qmaps.ca/) ;; *) echo 'Production URL must be qmaps.ca or www.qmaps.ca over HTTPS' >&2; exit 1;; esac
       - name: Build static frontend
         env:
