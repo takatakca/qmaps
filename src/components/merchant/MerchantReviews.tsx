@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowRight, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,8 +19,6 @@ const MerchantReviews = ({ reviews, onReplySaved }: Props) => {
   const [replyDraft, setReplyDraft] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedReplies, setSavedReplies] = useState<Record<string, string>>({});
-  const recommendedReviews = reviews;
-  const notRecommendedCount = 0;
 
   const saveReply = async (reviewId: string) => {
     const body = replyDraft.trim().replace(/\s+/g, " ");
@@ -55,11 +54,11 @@ const MerchantReviews = ({ reviews, onReplySaved }: Props) => {
       <h2 className="font-heading text-2xl font-bold text-foreground">Avis</h2>
 
       <p className="text-sm text-muted-foreground">
-        Répondez aux commentaires de vos clients. Votre réponse apparaît sur la fiche publique.
+        Consultez les avis disponibles pour votre commerce et répondez-y publiquement.
       </p>
 
       {/* Empty state */}
-      {recommendedReviews.length === 0 ? (
+      {reviews.length === 0 ? (
         <div className="space-y-6">
           {/* Illustration placeholder */}
           <div className="flex justify-center py-6">
@@ -76,60 +75,31 @@ const MerchantReviews = ({ reviews, onReplySaved }: Props) => {
           </div>
 
           <div className="text-center">
-            <h3 className="font-heading text-lg font-bold text-foreground">Aucun avis recommandé pour l'instant</h3>
-            {notRecommendedCount > 0 && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Pour l'instant, vous avez <button className="text-primary font-medium">{notRecommendedCount} avis</button> non recommandés.{" "}
-                <button className="text-primary font-medium">En savoir plus</button>.
-              </p>
-            )}
+            <h3 className="font-heading text-lg font-bold text-foreground">Aucun avis disponible pour le moment</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Les avis apparaîtront ici lorsqu'ils seront disponibles pour votre entreprise.
+            </p>
           </div>
 
-          {/* Tips card */}
-          <div className="bg-card border border-border rounded-xl p-5 space-y-5">
+          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
             <h3 className="font-heading text-lg font-bold text-foreground">
-              Comment obtenir des avis QMAPS pour votre entreprise
+              Préparer votre fiche QMAPS
             </h3>
-
-            <div>
-              <button className="text-primary font-medium text-sm flex items-center gap-1">
-                Terminez la configuration de votre page <ArrowRight size={14} />
-              </button>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ajoutez les informations de votre entreprise, téléchargez des photos et bien plus gratuitement.
-              </p>
-            </div>
-
-            <div>
-              <button className="text-primary font-medium text-sm flex items-center gap-1">
-                Misez sur le service client et le marketing <ArrowRight size={14} />
-              </button>
-              <p className="text-sm text-muted-foreground mt-1">
-                Offrez une excellente expérience client, incluez la marque QMAPS dans votre marketing et créez des espaces dignes de partage pour inspirer les téléchargements de photos sur QMAPS.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-bold text-foreground">Rappel : Ne demandez pas d'avis</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Le logiciel de recommandation automatisé de QMAPS est conçu pour placer les avis sollicités dans la section « non recommandés » d'une page d'entreprise, aidant à uniformiser les règles pour toutes les entreprises sur QMAPS.
-              </p>
-            </div>
-
-            <div className="space-y-1">
-              <button className="text-primary font-medium text-sm flex items-center gap-1">
-                En savoir plus sur le logiciel de recommandation <ArrowRight size={14} />
-              </button>
-              <button className="text-primary font-medium text-sm flex items-center gap-1">
-                Pourquoi certains avis ne sont pas recommandés <ArrowRight size={14} />
-              </button>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Vérifiez vos coordonnées, vos horaires et les photos de votre commerce pour aider les visiteurs à le découvrir.
+            </p>
+            <Link
+              to="/merchant/business-info"
+              className="inline-flex items-center text-sm text-primary font-medium hover:underline"
+            >
+              Compléter les informations de mon commerce
+            </Link>
           </div>
         </div>
       ) : (
         /* Review list */
         <div className="space-y-3">
-          {recommendedReviews.map((review) => (
+          {reviews.map((review) => (
             <div key={review.id} className="bg-card rounded-xl border border-border p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-foreground">
@@ -137,7 +107,11 @@ const MerchantReviews = ({ reviews, onReplySaved }: Props) => {
                 </p>
                 <StarRating rating={review.rating} size={12} />
               </div>
-              <p className="text-sm text-foreground mt-2">{review.body}</p>
+              {review.body ? (
+                <p className="text-sm text-foreground mt-2">{review.body}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-2">Note attribuée sans commentaire.</p>
+              )}
               {(savedReplies[review.id] || review.owner_reply) && (
                 <p className="text-sm text-foreground mt-2">
                   <span className="font-medium">Réponse de l'entreprise. </span>

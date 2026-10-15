@@ -1,5 +1,18 @@
 # QMAPS — Agent handoff
 
+## Reprise du 2026-10-15 — avis commerçants
+- **Dernier HEAD validé avant changement :** `4f17f1dba650eb419441e5c719d816bf8e631c6b`, GitHub CI [38624845077](https://github.com/takatakca/qmaps/actions/runs/38624845077) **success**, déploiement SSH **skipped**.
+- **Dernière tâche codée :** suppression des faux avis « recommandés/non recommandés » et des boutons sans action dans `MerchantReviews.tsx`, remplacement par un état vide exact et un lien vers `/merchant/business-info`. Ajout de `src/test/merchantReviewsUI.test.tsx` (rendu React, navigation, soumission Edge Function).
+- **État en cours :** vérifier CI sur le nouveau SHA, puis reprendre la fiabilité de facturation multi-entreprises.
+- **Fichiers modifiés :** `src/components/merchant/MerchantReviews.tsx`, `src/test/merchantReviewsUI.test.tsx`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`, `docs/DECISIONS.md`.
+- **Dernier commit :** HEAD de `main` ; lire `git rev-parse HEAD` ou GitHub Git Ref (impossible d'indiquer son propre SHA dans le même commit).
+- **Vérifications :** GitHub ref `main`, CI runs, zéro PR ouverte, lecture des écrans et du code de réponse aux avis. Le test d'interface sera exécuté par CI sur ce commit.
+- **Déploiement :** aucune preuve de nouvelle version en ligne ; déploiement SSH toujours désactivé, projet Supabase `ldvkebjfuldnemfdoted` non accessible. Aucun secret exposé.
+- **Accès nécessaires :** autorisation au vrai projet Supabase QMAPS, hébergement réel `qmaps.ca` et web root, secrets build/SSH et Edge Functions via configuration sécurisée.
+- **Prochaine action exacte :** si CI échoue, lire logs et corriger ; sinon continuer l'intégrité des chargements Stripe/abonnements par commerce ; après accès externes, vérifier SQL/Stripe et empreinte HTTPS, puis fermer issue #6 uniquement sur preuve.
+
+
+
 ## Point de reprise faisant autorité — 14 octobre 2026
 **Dépôt :** `takatakca/qmaps`, branche `main`. **Dernier commit de code vérifié poussé par l'agent :** `328d8918a8cf6dccb249425628d5411d128b3f6e`. Pour le SHA du présent fichier de relève, lire la référence `refs/heads/main` (impossible d'inscrire son propre SHA dans son contenu).
 

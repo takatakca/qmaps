@@ -2,6 +2,7 @@
 
 | Date | Décision | Motif et conséquence |
 |---|---|---|
+| 2026-10-15 | Ne pas afficher comme établi un tri d'avis « recommandés/non recommandés » sans donnée ou algorithme réel | Présenter le nombre réel d'avis reçus et une action de configuration vérifiable ; conserver les réponses via Edge Function |
 | 2026-10-14 | Continuer `takatakca/qmaps` sur `main` sans reconstruire de zéro | Code existant, contrats et travaux d'autres agents conservés |
 | 2026-10-14 | QMAPS conserve ses écrans et permissions propres, TAKATAK reste maître identité/routage | Éviter mélange des locataires et dépendances directes entre produits |
 | 2026-10-14 | Limiter le matching TAKATAK à un adaptateur HMAC et données publiques minimales | Pas de service-role exposée au client ni d'accès R2F direct à QMAPS |

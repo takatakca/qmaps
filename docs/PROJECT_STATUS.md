@@ -1,5 +1,10 @@
 # QMAPS — État du projet
 
+## Correction interface — 15 octobre 2026
+L'interface des avis commerçants ne présente plus de politique de classement non étayée ni de boutons inertes, et renvoie le commerçant vers l'édition réelle de sa fiche. Test React ajouté. Les vérifications de production restent bloquées par issue #6.
+
+
+
 ## État de reprise faisant autorité — 14 octobre 2026, fin de session
 - **Repository et branche :** `takatakca/qmaps`, `main`.
 - **Dernier commit de code poussé :** `328d8918a8cf6dccb249425628d5411d128b3f6e`, récupération de brouillon marchand et contrôle du rôle professionnel avant publication.
