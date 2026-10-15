@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Zap, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowLeft, CreditCard, Smartphone, Phone, HelpCircle, ExternalLink, Sparkles, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,35 +34,50 @@ const MerchantBilling = () => {
 
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [events, setEvents] = useState<Tables<"merchant_billing_events">[]>([]);
-  const { subscription, plan, status, isFree, loading: subLoading } = useMerchantSubscription(businessId);
+  const { subscription, plan, status, isFree, loading: subLoading, error: subscriptionError, refresh: refreshSubscription } = useMerchantSubscription(businessId);
+  const [eventsError, setEventsError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
+    let cancelled = false;
+    if (!user) {
+      setBusinessId(null);
+      return;
+    }
+    void (async () => {
+      const { data, error } = await supabase
         .from("businesses")
         .select("id")
         .eq("owner_user_id", user.id)
         .order("name", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        setBusinessId(null);
+        toast({ title: "Erreur de facturation", description: error.message, variant: "destructive" });
+        return;
+      }
       const selected = chooseMerchantBusiness(data ?? [], getSavedMerchantBusinessId(user.id));
       setBusinessId(selected?.id ?? null);
     })();
-  }, [user]);
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   useEffect(() => {
-    if (!businessId) {
-      setEvents([]);
-      return;
-    }
-    (async () => {
-      const { data } = await supabase
+    let cancelled = false;
+    setEvents([]);
+    setEventsError(null);
+    if (!businessId) return;
+    void (async () => {
+      const { data, error } = await supabase
         .from("merchant_billing_events")
         .select("*")
         .eq("business_id", businessId)
         .order("created_at", { ascending: false })
         .limit(10);
-      setEvents(data || []);
+      if (cancelled) return;
+      if (error) setEventsError(error.message);
+      else setEvents(data ?? []);
     })();
+    return () => { cancelled = true; };
   }, [businessId]);
 
 
@@ -87,6 +102,11 @@ const MerchantBilling = () => {
           <CardContent className="space-y-3">
             {subLoading ? (
               <p className="text-sm text-muted-foreground">Chargement...</p>
+            ) : subscriptionError ? (
+              <div role="alert" className="space-y-2 text-sm text-destructive">
+                <p>Impossible de vérifier votre abonnement : {subscriptionError}</p>
+                <Button variant="outline" size="sm" onClick={() => void refreshSubscription()}>Réessayer</Button>
+              </div>
             ) : (
               <>
                 <div className="flex items-center gap-2">
@@ -177,27 +197,14 @@ const MerchantBilling = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold">Résumé de facturation</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Solde impayé :</span>
-              <span className="font-semibold text-foreground">Aucun — 0,00 $</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Prochaine date de facturation :</span>
-              <span className="text-foreground">1 avr. 2026</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Active Promotions */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-bold flex items-center gap-2">
-              Promotions actives <Zap size={16} className="text-primary" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Aucune promotion active</p>
+          <CardContent className="space-y-2 text-sm">
+            <p className="text-muted-foreground">
+              Le solde et les factures détaillées ne sont pas synchronisés dans ce tableau de bord.
+              Consultez votre portail de paiement pour connaître les montants exacts.
+            </p>
+            {subscription && periodEnd && (
+              <p className="text-foreground">Fin de période enregistrée : {periodEnd}</p>
+            )}
           </CardContent>
         </Card>
 
@@ -207,9 +214,13 @@ const MerchantBilling = () => {
             <CardTitle className="text-base font-bold">Historique de facturation</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {events.length === 0 ? (
+            {eventsError ? (
+              <p role="alert" className="text-sm text-destructive">
+                Impossible de charger l'historique : {eventsError}
+              </p>
+            ) : events.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun événement de facturation pour le moment.
+                Aucun événement de facturation enregistré pour ce commerce.
               </p>
             ) : (
               events.map((e) => (
@@ -230,8 +241,8 @@ const MerchantBilling = () => {
             <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">Gérez votre page QMAPS en déplacement</p>
             </div>
-            <Button size="sm" className="rounded-full shrink-0">
-              Ouvrir l'app
+            <Button size="sm" className="rounded-full shrink-0" onClick={() => navigate("/merchant")}>
+              Ouvrir l'application
             </Button>
           </CardContent>
         </Card>

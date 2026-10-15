@@ -2,6 +2,7 @@
 
 | Date | Décision | Motif et conséquence |
 |---|---|---|
+| 2026-10-15 | Ne jamais recycler un abonnement d'une entreprise dans l'affichage d'une autre ; ne pas inventer solde ou prochaine facture | Résultats Supabase vérifiés par businessId et requête, erreur affichée et paiement bloqué jusqu'à vérification |
 | 2026-10-15 | Ne pas afficher comme établi un tri d'avis « recommandés/non recommandés » sans donnée ou algorithme réel | Présenter le nombre réel d'avis reçus et une action de configuration vérifiable ; conserver les réponses via Edge Function |
 | 2026-10-14 | Continuer `takatakca/qmaps` sur `main` sans reconstruire de zéro | Code existant, contrats et travaux d'autres agents conservés |
 | 2026-10-14 | QMAPS conserve ses écrans et permissions propres, TAKATAK reste maître identité/routage | Éviter mélange des locataires et dépendances directes entre produits |

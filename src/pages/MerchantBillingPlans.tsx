@@ -35,7 +35,7 @@ const MerchantBillingPlans = () => {
   const [businesses, setBusinesses] = useState<Pick<Tables<"businesses">, "id" | "name">[]>([]);
   const [selectedBizId, setSelectedBizId] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<PlanKey | null>(null);
-  const { plan: currentPlan, loading: subLoading } = useMerchantSubscription(selectedBizId);
+  const { plan: currentPlan, loading: subLoading, error: subscriptionError, refresh: refreshSubscription } = useMerchantSubscription(selectedBizId);
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -56,6 +56,14 @@ const MerchantBillingPlans = () => {
       toast({
         title: "Aucune entreprise",
         description: "Réclamez d'abord une entreprise pour souscrire à un plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (subLoading || subscriptionError) {
+      toast({
+        title: "Abonnement non vérifié",
+        description: subscriptionError || "Chargement de votre abonnement en cours.",
         variant: "destructive",
       });
       return;
@@ -171,13 +179,19 @@ const MerchantBillingPlans = () => {
           </div>
         )}
 
+        {subscriptionError && (
+          <div role="alert" className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive space-y-2">
+            <p>Impossible de vérifier le plan actuel : {subscriptionError}</p>
+            <Button size="sm" variant="outline" onClick={() => void refreshSubscription()}>Réessayer</Button>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {PLANS.map((p) => {
             const isCurrent = !subLoading && currentPlan === p.key;
             const cta: PlanDefinition["cta"] = isCurrent ? "current" : p.cta;
             const isLoading = checkoutLoading === p.key;
             const disabled =
-              cta === "current" || cta === "coming_soon" || isLoading;
+              cta === "current" || cta === "coming_soon" || isLoading || subLoading || Boolean(subscriptionError) || !selectedBizId;
             return (
               <Card
                 key={p.key}

@@ -1,5 +1,13 @@
 # QMAPS — Agent handoff
 
+## Reprise du 2026-10-15 — facturation fiable et isolation
+- **Dernière tâche codée :** `useMerchantSubscription` isole le résultat par `businessId` et annule les réponses obsolètes. Retourne `error`, affiché dans `MerchantBilling` et `MerchantBillingPlans`. Pas de Checkout tant que l'abonnement n'est pas confirmé ou qu'une lecture a échoué.
+- **Autres correctifs :** suppression des montants fictifs « Aucun — 0,00 $ » et date « 1 avr. 2026 » ; lien « Ouvrir l'application » activé ; les événements de facturation périmés ou en erreur ne sont plus présentés comme inexistants.
+- **Fichiers :** `src/hooks/useMerchantSubscription.ts`, `src/pages/MerchantBilling.tsx`, `src/pages/MerchantBillingPlans.tsx`, `src/test/merchantSubscriptionIsolation.test.tsx`, ainsi que fichiers standards `WORKLOG.md` et `docs/*`.
+- **Tests :** tests React de changement d'entreprise, erreurs Supabase, effacement de la souscription ; exécution CI sur le commit courant à vérifier.
+- **Déploiement :** non effectué ; vrai compte QMAPS Supabase et hébergement non accessibles. Préserver les migrations et les secrets existants sans les copier dans Git.
+- **Suite exacte :** consulter GitHub Actions sur HEAD, corriger toute panne, puis traiter les autres défauts UI vérifiables. Vérifier Stripe en environnement autorisé lorsque le projet QMAPS est connecté.
+
 ## Reprise du 2026-10-15 — avis commerçants
 - **Dernier HEAD validé avant changement :** `4f17f1dba650eb419441e5c719d816bf8e631c6b`, GitHub CI [38624845077](https://github.com/takatakca/qmaps/actions/runs/38624845077) **success**, déploiement SSH **skipped**.
 - **Dernière tâche codée :** suppression des faux avis « recommandés/non recommandés » et des boutons sans action dans `MerchantReviews.tsx`, remplacement par un état vide exact et un lien vers `/merchant/business-info`. Ajout de `src/test/merchantReviewsUI.test.tsx` (rendu React, navigation, soumission Edge Function).

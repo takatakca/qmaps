@@ -1,5 +1,8 @@
 # QMAPS — État du projet
 
+## Sécurisation facturation — 15 octobre 2026
+Protection de la sélection d'entreprise dans le chargement des abonnements, erreurs explicites et refus d'un paiement pendant l'incertitude du statut. Suppression des montants et dates d'échéance fictifs. Livraison en code, tests réels Stripe non exécutés (accès QMAPS absent).
+
 ## Correction interface — 15 octobre 2026
 L'interface des avis commerçants ne présente plus de politique de classement non étayée ni de boutons inertes, et renvoie le commerçant vers l'édition réelle de sa fiche. Test React ajouté. Les vérifications de production restent bloquées par issue #6.
 
