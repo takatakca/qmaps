@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { AuthError, User, Session } from "@supabase/supabase-js";
 
@@ -18,48 +18,81 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const NO_ROLES: AppRole[] = [];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [roles, setRoles] = useState<AppRole[]>([]);
+  // A role applies only to the exact account for which it was loaded.
+  const [roleState, setRoleState] = useState<{ ownerId: string | null; roles: AppRole[] }>({
+    ownerId: null, roles: NO_ROLES,
+  });
+  const activeOwnerId = useRef<string | null>(null);
+  const roleRequestVersion = useRef(0);
 
-  const fetchRoles = async (userId: string) => {
-    const { data } = await supabase
+  const fetchRoles = async (userId: string): Promise<void> => {
+    const version = ++roleRequestVersion.current;
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
-    setRoles((data || []).map(r => r.role as AppRole));
+    if (activeOwnerId.current !== userId || roleRequestVersion.current !== version) return;
+    if (error) {
+      setRoleState({ ownerId: null, roles: NO_ROLES });
+      throw error;
+    }
+    setRoleState({ ownerId: userId, roles: (data ?? []).map((row) => row.role as AppRole) });
   };
 
   const refreshRoles = async () => {
-    if (user) await fetchRoles(user.id);
+    if (activeOwnerId.current) await fetchRoles(activeOwnerId.current);
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        // Defer role fetch to avoid Supabase deadlock
-        setTimeout(() => fetchRoles(session.user.id), 0);
-      } else {
-        setRoles([]);
+    let disposed = false;
+    let receivedAuthEvent = false;
+    const applySession = (next: Session | null) => {
+      if (disposed) return;
+      const nextUserId = next?.user.id ?? null;
+      if (activeOwnerId.current !== nextUserId) {
+        activeOwnerId.current = nextUserId;
+        roleRequestVersion.current += 1;
+        setRoleState({ ownerId: null, roles: NO_ROLES });
       }
+      setSession(next);
+      setUser(next?.user ?? null);
       setLoading(false);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRoles(session.user.id);
+      if (nextUserId) {
+        // Supabase API calls must not be awaited inside onAuthStateChange.
+        setTimeout(() => {
+          if (!disposed && activeOwnerId.current === nextUserId) {
+            void fetchRoles(nextUserId).catch(() => {
+              // Deny privileges until a later successful role refresh.
+            });
+          }
+        }, 0);
       }
-      setLoading(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => {
+      receivedAuthEvent = true;
+      applySession(next);
+    });
+    void supabase.auth.getSession()
+      .then(({ data: { session: initial } }) => {
+        // A stale bootstrap session must not restore a logged-out account.
+        if (!receivedAuthEvent) applySession(initial);
+      })
+      .catch(() => {
+        if (!receivedAuthEvent) applySession(null);
+      });
+
+    return () => {
+      disposed = true;
+      roleRequestVersion.current += 1;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, displayName?: string) => {
@@ -80,10 +113,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    // Prevent a pending role lookup from restoring privilege after sign-out.
+    activeOwnerId.current = null;
+    roleRequestVersion.current += 1;
+    setRoleState({ ownerId: null, roles: NO_ROLES });
     await supabase.auth.signOut();
-    setRoles([]);
   };
 
+  const roles = user && roleState.ownerId === user.id ? roleState.roles : NO_ROLES;
   const isMerchant = roles.includes("merchant") || roles.includes("admin");
   const isAdmin = roles.includes("admin");
 

@@ -264,7 +264,12 @@ const MerchantOnboarding = () => {
       // Draft remains private and can be resumed later without duplicating it.
       return null;
     }
-    await refreshRoles();
+    try {
+      await refreshRoles();
+    } catch (error) {
+      toast({ title: "Droits non vérifiés", description: error instanceof Error ? error.message : "Veuillez réessayer.", variant: "destructive" });
+      return null;
+    }
     return data.id;
   };
 
@@ -331,7 +336,13 @@ const MerchantOnboarding = () => {
       toast({ title: "Accès commerçant non confirmé", description: entitlementError.message, variant: "destructive" });
       return;
     }
-    await refreshRoles();
+    try {
+      await refreshRoles();
+    } catch (error) {
+      setLoading(false);
+      toast({ title: "Droits non vérifiés", description: error instanceof Error ? error.message : "Veuillez réessayer.", variant: "destructive" });
+      return;
+    }
     const { data: published, error } = await supabase
       .from("businesses")
       .update({ is_active: true })

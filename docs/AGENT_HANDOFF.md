@@ -1,5 +1,17 @@
 # QMAPS — Agent handoff
 
+## Reprise 2026-10-15 — garde-fous Auth
+- **Dernier HEAD avant intervention :** `f7431787076273bdc49801644baf96653a3ee0b4`, à vérifier en CI ; conserver les nouveaux travaux sur les avis commerçants déjà poussés par l'autre agent.
+- **Dernière tâche terminée en code :** `useAuth` empêche un rôle `admin/merchant` chargé pour l'ancien compte d'être accordé au nouveau. La route commerçant exige une vérification réelle de l'upsert et offre une reprise visible en cas d'erreur ; l'onboarding ne publie pas si `refreshRoles()` échoue.
+- **Fichiers changés :** `src/hooks/useAuth.tsx`, `src/components/ProtectedMerchantRoute.tsx`, `src/pages/MerchantOnboarding.tsx`, `src/test/authAccountIsolation.test.tsx`, `src/test/merchantRouteAuthorization.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/DECISIONS.md`.
+- **Dernier commit poussé :** lire `refs/heads/main` ; un SHA ne peut pas être enregistré dans son propre commit. Parent connu `f7431787076273bdc49801644baf96653a3ee0b4`.
+- **Contrôles :** nouveau run CI à vérifier ; précédemment CI du code 4f17f1d réussie. Aucun test SQL de production.
+- **Déploiement réel :** non vérifié, workflow SSH ignoré ; projet Supabase `ldvkebjfuldnemfdoted` inaccessible à l'app connectée. Hébergement réel/DNS/docroot de `qmaps.ca` non confirmés.
+- **Accès nécessaires :** projet Supabase QMAPS existant, paramètres réels de l'hébergeur et secrets GitHub/Edge ; ne pas exposer les secrets.
+- **Prochaine action exacte :** vérifier CI puis corriger si échec. Ensuite tests réels de comptes distincts et migration des SQL QMAPS uniquement une fois accès autorisé. Revalider les liens de déploiement et le SHA sur HTTPS avant déclaration de production.
+---
+
+
 ## Reprise du 2026-10-15 — facturation fiable et isolation
 - **Dernière tâche codée :** `useMerchantSubscription` isole le résultat par `businessId` et annule les réponses obsolètes. Retourne `error`, affiché dans `MerchantBilling` et `MerchantBillingPlans`. Pas de Checkout tant que l'abonnement n'est pas confirmé ou qu'une lecture a échoué.
 - **Autres correctifs :** suppression des montants fictifs « Aucun — 0,00 $ » et date « 1 avr. 2026 » ; lien « Ouvrir l'application » activé ; les événements de facturation périmés ou en erreur ne sont plus présentés comme inexistants.

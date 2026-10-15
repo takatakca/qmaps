@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-15 | ChatGPT | main | code ready, CI pending | Scoped auth roles to current session, dropped delayed permissions on account switches, blocked role-sync failure in merchant routes/onboarding with retry | Validate new CI and QMAPS production authorization
+
 2026-10-15 | ChatGPT | main | code ready, CI pending | Hardened cross-business Stripe subscription fetch race and failure state, removed false $0 balance and fabricated due date, blocked checkout during errors | Run CI, test real Stripe and subscriptions when QMAPS backend accessible
 
 2026-10-15 | ChatGPT | main | implemented, CI pending | Removed invented merchant review recommendation claims and dead buttons; real empty state links to business editor; tested reply action in React | Verify CI, continue identity-safe billing
