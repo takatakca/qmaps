@@ -30,7 +30,7 @@ const steps = [
   { key: "address", title: "Adresse & localisation", icon: MapPin, hint: "Où vos clients peuvent vous trouver au Québec." },
   { key: "categories", title: "Catégories & services", icon: Tag, hint: "Aidez les clients à vous découvrir dans les bonnes recherches." },
   { key: "contact", title: "Heures & contact", icon: Clock, hint: "Téléphone, site web et disponibilités de base." },
-  { key: "photos", title: "Photos & logo", icon: Camera, hint: "Une belle photo augmente les visites de 3x." },
+  { key: "photos", title: "Photos & logo", icon: Camera, hint: "Ajoutez des photos authentiques de votre entreprise pour présenter vos services." },
   { key: "review", title: "Révision & publication", icon: Sparkles, hint: "Un dernier coup d'œil avant la mise en ligne." },
 ] as const;
 
@@ -49,7 +49,7 @@ const MerchantOnboarding = () => {
   const [ownerName, setOwnerName] = useState("");
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("Montréal");
+  const [city, setCity] = useState("");
   const [region, setRegion] = useState("QC");
   const [postalCode, setPostalCode] = useState("");
   const [phone, setPhone] = useState("");
