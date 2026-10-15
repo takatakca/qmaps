@@ -15,6 +15,13 @@ describe("QMAPS deployment pipeline contract", () => {
     expect(yaml).toContain("workflow_run.head_repository.full_name == github.repository");
     expect(yaml).toContain("git ls-remote origin refs/heads/main");
     expect(yaml).toContain("git rev-parse HEAD");
+    expect(yaml).toContain("actions: read");
+    expect(yaml).toContain("Require successful main CI before manual dispatch");
+    expect(yaml).toContain("github.event.workflow_run.head_branch == 'main'");
+    expect(yaml).toContain("gh api -X GET");
+    expect(yaml).toContain('select(.head_sha == $sha and .conclusion == "success"');
+    expect(yaml).toContain("Manual deploy refused");
+    expect(yaml).toContain("Unsafe SSH web root path");
   });
 
   it("builds on GitHub and verifies the exact published SHA", () => {

@@ -13,6 +13,7 @@ Toutes les tâches doivent être validées par des preuves, non par une déclara
 | Priorité | État | Tâche | Critère de réussite |
 |---|---|---|---|
 | P0 | CODE ÉCRIT, CI À VÉRIFIER | Bloquer le transfert d'un abonnement d'un commerce à un autre pendant une requête et ne pas déguiser les erreurs Stripe/Supabase en forfait gratuit | Tests React de race et erreur, checkout bloqué, montants et dates fictifs supprimés |
+| P0 | CODE À VALIDER EN CI | Empêcher un déclenchement manuel SSH de publier sans CI réussie pour le SHA exact et refuser les chemins distants dangereux | Test workflow vert, variable d'activation toujours désactivée, production inchangée |
 | P0 | CODE À VALIDER EN CI | Neutraliser les rôles obsolètes lors d'un changement de compte et refuser l'accès commerçant si l'upsert rôle ou la lecture échoue | Test React simulant deux sessions, refus de privilège périmé, retry visible |
 | P0 | CODE VALIDÉ EN CI, PROD À VÉRIFIER | Vérifier TypeScript explicitement dans GitHub Actions, sans se limiter au build Vite | `bun run typecheck` passe sur HEAD et ne révèle aucune anomalie |
 | P0 | CODE ÉCRIT, CI À CONTRÔLER | Achever la propagation des sélections propriétaires vers messagerie, optimisation, catégories services et publicité sponsorisée | Tous ces parcours utilisent le commerce actif et refusent un ID non possédé |

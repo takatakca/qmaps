@@ -1,5 +1,10 @@
 # QMAPS — Déploiement
 
+## Durcissement du pipeline — 15 octobre 2026
+- L'exécution manuelle `workflow_dispatch` exige désormais une CI `push` **réussie sur le SHA exact de main**. Un succès ancien sur une autre révision ne suffit pas.
+- Contrôle supplémentaire des chemins distants SSH pour empêcher copie accidentelle à `/`, `/home` ou autre racine non dédiée. Le répertoire réel reste à confirmer par le propriétaire d'hébergement.
+- Dernière CI de code validée avant ce changement : `f61a32f57a277c812403ca35d4fc1b6ebde907d3`, run [38803826151](https://github.com/takatakca/qmaps/actions/runs/38803826151) (success). Déploiement réel **toujours non effectué**.
+
 ## Dernière preuve connue (2026-10-14)
 - Code déposé sur `main` au SHA `328d8918a8cf6dccb249425628d5411d128b3f6e`; GitHub CI [38624571461](https://github.com/takatakca/qmaps/actions/runs/38624571461) à confirmer. Dernière CI verte vérifiée : `f774e0af`, [38624432519](https://github.com/takatakca/qmaps/actions/runs/38624432519).
 - **Déploiement sur `qmaps.ca` : aucune preuve de succès.** Le workflow SSH a été `skipped` à chaque exécution ; site et certificat non accessibles depuis les outils de vérification, adresse DNS non résolue.

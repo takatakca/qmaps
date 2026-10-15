@@ -21,6 +21,13 @@
 
 
 
+## Reprise 2026-10-15 — protection du déploiement
+- **Tâche terminée en code :** `.github/workflows/qmaps-ssh-deploy.yml` vérifie désormais une CI `push` réussie au même SHA sur `main` avant `workflow_dispatch`. Elle refuse les cibles SSH racines ou chemins suspects et vérifie l'origine de la branche des événements.
+- **Dernier commit CI réussi avant cette tâche :** `f61a32f57a277c812403ca35d4fc1b6ebde907d3`, [run 38803826151](https://github.com/takatakca/qmaps/actions/runs/38803826151) (lint, types, tests, build et GO/NOGO réussis).
+- **Fichiers :** workflow SSH, `src/test/deploymentPipeline.test.ts`, `WORKLOG.md` et les documents de relève.
+- **Statut de production :** déploiement **non autorisé** (`QMAPS_DEPLOY_ENABLED` pas à `true`), aucune version HTTPS vérifiée, projet Supabase QMAPS encore inaccessible. Conserver l'issue #6.
+- **Prochaine action :** vérifier CI sur le SHA du présent commit, ne publier qu'après identification effective du host/docroot `qmaps.ca`, puis comparer `qmaps-release.json` au SHA.
+
 ## Reprise 2026-10-15 — garde-fous Auth
 - **Dernier HEAD avant intervention :** `f7431787076273bdc49801644baf96653a3ee0b4`, à vérifier en CI ; conserver les nouveaux travaux sur les avis commerçants déjà poussés par l'autre agent.
 - **Dernière tâche terminée en code :** `useAuth` empêche un rôle `admin/merchant` chargé pour l'ancien compte d'être accordé au nouveau. La route commerçant exige une vérification réelle de l'upsert et offre une reprise visible en cas d'erreur ; l'onboarding ne publie pas si `refreshRoles()` échoue.
