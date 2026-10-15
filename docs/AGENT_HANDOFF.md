@@ -1,5 +1,16 @@
 # QMAPS — Agent handoff
 
+## Correction de pipeline — 15 octobre 2026
+- Un autre agent a intégré en parallèle des changements d'authentification des rôles en `main`. **Aucun écrasement et aucun force-push.** Le nouveau `main` a été récupéré avant ce commit.
+- Les deux premiers tests React ajoutés ont fait échouer TypeScript CI (`TS2305` sur `screen`, `fireEvent`, `waitFor`) car `@testing-library/dom` n'est pas résolu dans le lockfile du dépôt. Pour ne pas modifier les dépendances de production et leur lockfile à l'aveugle, les tests ont été remplacés par des contrats Vitest lisant le code réel. **Ils ne remplacent pas des essais interactifs E2E**.
+- **Dernière tâche exécutée :** réparation `src/test/merchantReviewsUI.test.tsx` et `src/test/merchantSubscriptionIsolation.test.tsx`, plus relève. Les corrections d'UI, d'isolation des abonnements et d'autorisation concurrente sont conservées.
+- **En cours :** vérifier lint/typecheck/tests/build GitHub Actions sur le nouveau HEAD, traiter tout échec ; production QMAPS non vérifiée.
+- **Dernier SHA poussé :** lire `main` GitHub, car son SHA ne peut être contenu dans son propre commit. Parent sur lequel ce patch est fondé : `4364dada5e18cf8eb54ead626c8ae70e4675f26a`.
+- **Accès requis :** projet Supabase QMAPS `ldvkebjfuldnemfdoted`, host/docroot `qmaps.ca`, secrets build/SSH, configuration Stripe. Ne jamais migrer une autre base.
+- **Prochaine action :** valider CI puis travailler sur les problèmes indépendants ; vérifier l'application réelle seulement après accès à la cible et au domaine.
+
+
+
 ## Reprise 2026-10-15 — garde-fous Auth
 - **Dernier HEAD avant intervention :** `f7431787076273bdc49801644baf96653a3ee0b4`, à vérifier en CI ; conserver les nouveaux travaux sur les avis commerçants déjà poussés par l'autre agent.
 - **Dernière tâche terminée en code :** `useAuth` empêche un rôle `admin/merchant` chargé pour l'ancien compte d'être accordé au nouveau. La route commerçant exige une vérification réelle de l'upsert et offre une reprise visible en cas d'erreur ; l'onboarding ne publie pas si `refreshRoles()` échoue.
