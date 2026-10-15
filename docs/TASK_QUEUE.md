@@ -1,5 +1,13 @@
 # QMAPS — File de tâches priorisée
 
+## Actualisation du 15 octobre 2026
+- **Code corrigé :** isolation des rôles Auth, vérification d'autorisation de la route marchande, véritable saisie de ville, contrôle CI du `workflow_dispatch` et syntaxe YAML du déploiement SSH.
+- **À vérifier :** CI du dernier `main` (parent de cette relève : `2af6db645918c457b3972c6bed50b5c641d81290`), puis tests UI et SQL avec comptes réels.
+- **Blocage P0 :** issue #6 — accès au vrai projet Supabase QMAPS `ldvkebjfuldnemfdoted`, hébergement/docroot, secrets de production et HTTPS; aucun nouveau projet payant ne doit être créé.
+- **Publication :** workflow SSH reconnu par GitHub, mais `skipped`. Aucune preuve de version déployée.
+
+
+
 ## Statut faisant autorité — 14 octobre 2026
 - **Dernier code `main` :** `328d8918a8cf6dccb249425628d5411d128b3f6e`, CI run [38624571461](https://github.com/takatakca/qmaps/actions/runs/38624571461) à revérifier.
 - **CI verte la plus récente confirmée :** `f774e0af`, [run 38624432519](https://github.com/takatakca/qmaps/actions/runs/38624432519).

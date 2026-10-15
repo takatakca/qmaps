@@ -1,5 +1,14 @@
 # QMAPS — État du projet
 
+## État au 15 octobre 2026 — reprise technique
+- GitHub `main` : code de cette reprise poussé, dernière révision avant l'état `2af6db645918c457b3972c6bed50b5c641d81290`. La CI auth est vérifiée verte au SHA `f61a32f5` (run 38803826151) et la CI avec validation de YAML au SHA `7126d0df` (run 38804537975). Les commits ultérieurs demandent leur propre vérification.
+- Sécurité : permission `admin/merchant` liée à l'identité de session, réponses de rôles obsolètes rejetées, contrôle de l'écriture de droits avant navigation commerçant ou publication d'une fiche.
+- Qualité : la ville de l'inscription commerçant n'est plus automatiquement « Montréal » ; plus de promesse photographique chiffrée non étayée.
+- Déploiement : protection CI obligatoire sur lancement manuel, chemin SSH réduit à une racine spécifique, analyse syntaxique YAML en CI.
+- **Production réelle : toujours non prouvée.** Cible Supabase QMAPS inaccessible depuis la connexion, domaine HTTPS non accessible depuis l'outil, SSH désactivé. Ne pas présenter les migrations ou fonctions comme installées.
+
+
+
 ## Appels à l'action promotionnels — 15 octobre 2026
 L'ancien éditeur CTA simulait un rabais et permettait des choix non persistés. Il a été remplacé par un état d'indisponibilité clair et des liens vers les fonctions réellement câblées. L'implémentation du véritable système CTA publicitaire reste **inachevée** et dépend de la plateforme de publication/paiement autorisée.
 

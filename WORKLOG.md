@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-15 | ChatGPT | main | done in code; latest CI pending | Isolated auth roles on account changes, repaired workflow YAML and validated it in CI, gated manual SSH deploy and removed fake Montréal/photo defaults; updated canonical handoff | Verify latest GitHub CI; production blocked by QMAPS Supabase and verified host
+
 2026-10-15 | ChatGPT | main | code ready, CI pending | Replaced unsaved CTA promotion editor with honest prelaunch notice, removed imaginary pricing and coupons; linked available business contact and sponsored campaigns | Validate CI, leave actual CTA publishing backend on task queue
 
 2026-10-15 | ChatGPT | main | code ready, CI pending | Removed fake Guest Manager lead-success toast, ungrounded network volume, plans and fabricated testimonial; replaced with explicit unlaunched-service state and real support contact route | Verify CI, implement booking backend only after authorized product/spec/access

@@ -1,5 +1,14 @@
 # QMAPS — Déploiement
 
+## Point de contrôle — 15 octobre 2026
+- Dernier `main` avant cette documentation : `2af6db645918c457b3972c6bed50b5c641d81290` ; vérifier la CI correspondante et celle de la relève.
+- Workflow SSH protégé contre `workflow_dispatch` sans CI réussie sur le SHA exact. Validation du chemin avant rsync, contrôle post-déploiement `/qmaps-release.json`.
+- Suite à une erreur de génération, le YAML de publication a été rétabli, les blocs dupliqués supprimés et l'analyse syntaxique de tous les workflows a été ajoutée à la CI GitHub. CI avec étape Ruby validée : [38804537975](https://github.com/takatakca/qmaps/actions/runs/38804537975).
+- **Aucune publication sur qmaps.ca n'a été déclenchée.** Exécutions SSH `skipped`. Cible réelle encore inconnue et projet Supabase QMAPS non accessible.
+- Ne pas activer `QMAPS_DEPLOY_ENABLED` sans vérifier host, propriété du domaine, SSL, répertoire et secrets ; ne jamais exécuter les migrations sur une autre base.
+
+
+
 ## Durcissement du pipeline — 15 octobre 2026
 - L'exécution manuelle `workflow_dispatch` exige désormais une CI `push` **réussie sur le SHA exact de main**. Un succès ancien sur une autre révision ne suffit pas.
 - Contrôle supplémentaire des chemins distants SSH pour empêcher copie accidentelle à `/`, `/home` ou autre racine non dédiée. Le répertoire réel reste à confirmer par le propriétaire d'hébergement.

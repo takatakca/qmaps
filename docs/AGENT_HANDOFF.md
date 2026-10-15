@@ -1,5 +1,19 @@
 # QMAPS — Agent handoff
 
+## Relève de session — 15 octobre 2026 (la plus récente)
+- **Dépôt :** `takatakca/qmaps`, branche `main`. **HEAD avant cette relève :** `2af6db645918c457b3972c6bed50b5c641d81290`. Pour le commit contenant cette relève, lire `refs/heads/main`.
+- **Dernières tâches terminées en code :** isolation des rôles Supabase par identité active (`useAuth.tsx`), refus d'accès commerçant quand lecture/réparation de rôle échoue (`ProtectedMerchantRoute.tsx`), interruption de publication si relecture des droits échoue (`MerchantOnboarding.tsx`), suppression de la ville Montréal prédéfinie dans l'inscription et du chiffre marketing « photos +3x ».
+- **Fichiers de la session :** `src/hooks/useAuth.tsx`, `src/components/ProtectedMerchantRoute.tsx`, `src/pages/MerchantOnboarding.tsx`, `src/test/authAccountIsolation.test.tsx`, `src/test/merchantRouteAuthorization.test.ts`, `src/test/merchantRealCity.test.ts`, `.github/workflows/qmaps-ssh-deploy.yml`, `.github/workflows/ci.yml`, les documents `docs/*`, `WORKLOG.md`.
+- **Contrôles exécutés :** GitHub refs, logs CI et jobs ; correction de tests sans peer `@testing-library/dom`. CI auth verte [38803826151](https://github.com/takatakca/qmaps/actions/runs/38803826151) ; CI avec parse YAML verte [38804537975](https://github.com/takatakca/qmaps/actions/runs/38804537975). Les commits plus récents, dont `2af6db645918`, doivent être vérifiés séparément.
+- **Erreur CI récupérée :** le YAML de publication avait un suffixe répété et une mauvaise citation de commande Ruby ; fichiers corrigés ; le workflow SSH apparaît maintenant normalement comme `QMAPS SSH deploy` et passe en `skipped`, pas en déploiement.
+- **État réel du déploiement : NON VÉRIFIÉ.** `qmaps.ca` et `www` inaccessibles depuis le navigateur de vérification ; workflow SSH non activé ; projet Supabase existant `ldvkebjfuldnemfdoted` absent des cinq projets connectés ; migrations et fonctions pas exécutées sur un autre projet.
+- **Accès nécessaires :** accès autorisé à ce projet Supabase, hébergement réel de qmaps.ca avec racine web dédiée et secrets Actions SSH/build ; secrets Stripe/HMAC côté serveur. Aucun secret dans les commits.
+- **Tâche en cours :** confirmer la CI du dernier `main` et nettoyer d'éventuelles erreurs, puis poursuivre des travaux indépendants de la production.
+- **Prochaine action exacte :** `GET refs/heads/main` → inspecter dernier run CI ; si vert, tester les fonctions Supabase sur le vrai projet dès accès, appliquer les migrations SQL manquantes après sauvegarde, puis activer la publication uniquement sur le vrai host, valider SHA `qmaps-release.json` et effectuer la recette end-to-end (deux entreprises, droits, paiements, cartes et avis). Issue [#6](https://github.com/takatakca/qmaps/issues/6) demeure ouverte.
+
+---
+
+
 ## Appels à l'action — fiabilité, 15 octobre 2026
 - **Dernière tâche en code :** retrait du faux éditeur CTA qui affichait un rabais, des prix et des sélections non sauvegardées. `MerchantCTA.tsx` indique explicitement l'indisponibilité de la publicité CTA personnalisée et renvoie aux informations réelles du commerce et aux campagnes sponsorisées.
 - **Fichiers :** `src/pages/MerchantCTA.tsx`, `src/test/merchantCtaTruth.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`.
