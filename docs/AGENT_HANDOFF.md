@@ -1,5 +1,15 @@
 # QMAPS — Agent handoff
 
+## Centre d'aide fonctionnel — 15 octobre 2026
+- **Dernière tâche codée :** `src/pages/Support.tsx` propose désormais recherche réactive, questions/réponses accessibles et liens vers les vraies pages de facturation, avis, fiche, connexion et suppression du compte ; `/support-policy` offre le canal de contact existant, avec précision que le courriel doit être envoyé manuellement.
+- **Fichiers :** `src/pages/Support.tsx`, `src/lib/supportFaq.ts`, `src/test/supportFaq.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.
+- **Parent et version :** ce patch part de `7126d0dfc73ad63fc8ae6276ffbd3aef09be14e4`. Lire HEAD sur GitHub pour le SHA réel du dernier commit, qui ne peut être inclus dans son propre contenu.
+- **Tests :** recherches avec/sans accents et contrôles des routes. CI sur le nouveau commit à vérifier.
+- **Déploiement :** GitHub SSH toujours ignoré, QMAPS Supabase inaccessible, aucun résultat en ligne revendiqué.
+- **Prochaine action exacte :** consulter CI sur HEAD et corriger s'il échoue ; puis reprendre les autres parcours sans boutons fictifs et la finalisation production issue #6 après accès autorisé.
+
+
+
 ## Correctifs de navigation — 15 octobre 2026
 - **Dernière tâche terminée en code :** menu commerçant `/merchant?tab=reviews`, sécurité/compte `/settings`, confidentialité `/privacy`, conditions `/terms` et support `/support`. Le tableau de bord accepte un lien profond à l'onglet des avis. L'outil de planification factice est retiré et la zone d'entreprise mène au sélecteur réel.
 - **Fichiers :** `MerchantMore.tsx`, `MerchantDashboard.tsx`, `src/test/merchantNavigationRoutes.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.
