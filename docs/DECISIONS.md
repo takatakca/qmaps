@@ -2,6 +2,7 @@
 
 | Date | Décision | Motif et conséquence |
 |---|---|---|
+| 2026-10-15 | Ne pas afficher de Guest Manager factice, de tarifs/témoignages non vérifiés ni de fausse confirmation d'envoi | Présenter l'état non lancé et renvoyer vers le contact existant, développer le backend seulement avec une vraie intégration |
 | 2026-10-15 | Ne jamais recycler un abonnement d'une entreprise dans l'affichage d'une autre ; ne pas inventer solde ou prochaine facture | Résultats Supabase vérifiés par businessId et requête, erreur affichée et paiement bloqué jusqu'à vérification |
 | 2026-10-15 | Ne pas afficher comme établi un tri d'avis « recommandés/non recommandés » sans donnée ou algorithme réel | Présenter le nombre réel d'avis reçus et une action de configuration vérifiable ; conserver les réponses via Edge Function |
 | 2026-10-15 | Exiger aussi une CI réussie lors d'un déploiement SSH manuel et un docroot dédié | Une opération manuelle ne contourne pas la validation ni n'écrit à la racine du serveur |

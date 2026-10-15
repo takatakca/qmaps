@@ -1,5 +1,10 @@
 # QMAPS — État du projet
 
+## Guest Manager — 15 octobre 2026
+Le formulaire qui affichait faussement « demande envoyée » et les chiffres/tarifs/témoignages non vérifiés ont été supprimés. Le produit Guest Manager est marqué comme non disponible et n'a pas de moteur de réservation actif. Son développement complet reste une tâche bloquée par les exigences et services réels ; cette correction ne constitue pas un lancement.
+
+
+
 ## Sécurisation facturation — 15 octobre 2026
 Protection de la sélection d'entreprise dans le chargement des abonnements, erreurs explicites et refus d'un paiement pendant l'incertitude du statut. Suppression des montants et dates d'échéance fictifs. Livraison en code, tests réels Stripe non exécutés (accès QMAPS absent).
 

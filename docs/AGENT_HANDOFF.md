@@ -1,5 +1,15 @@
 # QMAPS — Agent handoff
 
+## Guest Manager — intégrité commerciale, 15 octobre 2026
+- **Dernière tâche livrée en code :** suppression du formulaire qui annonçait « Demande envoyée! » sans réseau, des prix et témoignages non vérifiés et des statistiques inventées sur Guest Manager. L'écran indique que le produit n'est pas activé et propose le contact existant `/support-policy`.
+- **Fichiers :** `src/pages/MerchantGuestManager.tsx`, `src/test/guestManagerIntegrity.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`, `docs/DECISIONS.md`.
+- **Reste fonctionnel :** intégration d'un véritable moteur de réservations, tables, disponibilités, permissions, notification et facturation — **pas construit ni déployé**, à prévoir seulement avec exigences approuvées et accès autorisés.
+- **Vérification :** test de contrat + CI GitHub sur le nouveau commit à consulter. Dernier SHA en tête de `main` (ne peut être inscrit dans le même commit).
+- **Déploiement :** workflow SSH QMAPS non activé ; aucun site réel ni base QMAPS confirmés accessibles. Ne pas annoncer Guest Manager opérationnel.
+- **Prochaine action :** valider GitHub CI, puis poursuivre les tâches indépendantes et les prérequis issue #6.
+
+
+
 ## Centre d'aide fonctionnel — 15 octobre 2026
 - **Dernière tâche codée :** `src/pages/Support.tsx` propose désormais recherche réactive, questions/réponses accessibles et liens vers les vraies pages de facturation, avis, fiche, connexion et suppression du compte ; `/support-policy` offre le canal de contact existant, avec précision que le courriel doit être envoyé manuellement.
 - **Fichiers :** `src/pages/Support.tsx`, `src/lib/supportFaq.ts`, `src/test/supportFaq.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`.

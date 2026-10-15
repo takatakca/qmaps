@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-15 | ChatGPT | main | code ready, CI pending | Removed fake Guest Manager lead-success toast, ungrounded network volume, plans and fabricated testimonial; replaced with explicit unlaunched-service state and real support contact route | Verify CI, implement booking backend only after authorized product/spec/access
+
 2026-10-15 | ChatGPT | main | code ready, CI pending | Replaced inert support search and FAQ buttons with accent-insensitive filtering, accessible answers and real help links; contact route clarifies email draft is not automatic delivery | Verify CI and production links
 
 2026-10-15 | ChatGPT | main | code ready, CI pending | Enforced successful GitHub push CI on manual QMAPS SSH deployment, restricted remote web root, and added workflow contract checks | Verify CI and remain opted out until real QMAPS host access
