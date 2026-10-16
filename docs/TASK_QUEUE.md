@@ -1,5 +1,8 @@
 # QMAPS — File de tâches priorisée
 
+## Recherche et création — 16 octobre 2026
+- Livré en code : états de chargement/erreur de la recherche par nom, rejet des réponses asynchrones périmées et blocage des doubles soumissions. Recette réseau et E2E sur QMAPS réel à exécuter.
+
 ## Reprise du 16 octobre 2026
 - **Fait en code, CI à confirmer :** persistance des modifications aux brouillons marchands repris ; ajout et suppression des catégories avec vérification de la liste réellement sauvegardée.
 - **Vérification restant à faire :** test réel Supabase avec plusieurs catégories, déconnexion/reprise, erreurs RLS et publication conditionnelle. Cible Supabase QMAPS non disponible ; voir issue #6.

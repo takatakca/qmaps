@@ -1,5 +1,11 @@
 # QMAPS — Agent handoff
 
+## Reprise du 16 octobre 2026 — recherche et création fiable de commerces
+- **Livraison :** `src/pages/AddBusiness.tsx` invalide les réponses de recherche obsolètes, montre les erreurs et l'état de chargement, évite la promesse de proximité non géolocalisée ; formulaire de création protégé par verrou immédiat anti-double clic et `try/catch/finally`. Statut de propriété non vérifiée sauvegardé explicitement.
+- **Tests :** `src/test/addBusinessReliability.test.ts` plus les précédents tests de saisie. Les étapes en production restent à tester.
+- **Dernier SHA :** voir `refs/heads/main`, parents documentés à la section suivante. **Production non vérifiée** (QMAPS Supabase inaccessible, hébergement réel inconnu).
+- **Prochaine action :** contrôler CI, compléter les travaux non bloqués, puis recette réelle QMAPS avec une recherche rapide et deux soumissions consécutives.
+
 ## Reprise du 16 octobre 2026 — cohérence des brouillons commerçants
 - **Dépôt :** `takatakca/qmaps`, branche `main`. Base inspectée : `8ed5f49dcdb73f042abf8425728b15582e559280` (CI 38805071219 réussie), aucun PR ouvert.
 - **Dernière tâche terminée en code :** les modifications faites après récupération d'un brouillon commerçant sont persistées sur la fiche **non active, appartenant à l'utilisateur**, avant passage à l'étape photo. La liste des catégories est maintenant synchronisée intégralement (ajout, suppression des anciennes associations et relecture de contrôle).

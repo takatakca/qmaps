@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, X, Search, Store, MapPin, User, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,35 +22,75 @@ const AddBusiness = () => {
   const [results, setResults] = useState<BusinessSearchHit[]>([]);
   const [form, setForm] = useState({ name: "", address: "", city: "", phone: "", website: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const searchRequest = useRef(0);
+  const submitInFlight = useRef(false);
+
+  useEffect(() => () => { searchRequest.current += 1; }, []);
 
   const searchBusinesses = async (q: string) => {
+    const request = ++searchRequest.current;
     setQuery(q);
-    if (q.length < 2) { setResults([]); return; }
-    const { data } = await supabase.from("businesses").select("id, name, address, image_url").ilike("name", `%${q}%`).limit(10);
-    setResults(data || []);
+    setSearchError(null);
+    const term = q.trim();
+    if (term.length < 2) {
+      setResults([]);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const { data, error } = await supabase.from("businesses")
+        .select("id, name, address, image_url")
+        .ilike("name", `%${term.slice(0, 100)}%`)
+        .limit(10);
+      if (request !== searchRequest.current) return;
+      if (error) throw error;
+      setResults(data ?? []);
+    } catch (error) {
+      if (request !== searchRequest.current) return;
+      setResults([]);
+      setSearchError(error instanceof Error ? error.message : "Recherche impossible");
+    } finally {
+      if (request === searchRequest.current) setSearchLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
     if (!user) { navigate("/auth"); return; }
-    if (form.name.trim().length < 2 || form.address.trim().length < 3 || form.city.trim().length < 2) { toast({ title: "Nom, adresse et ville requis", variant: "destructive" }); return; }
-    setSubmitting(true);
-    const { error } = await supabase.from("businesses").insert({
-      name: form.name.trim(),
-      address: form.address.trim(),
-      city: form.city.trim(),
-      region: "QC",
-      phone: form.phone || null,
-      website: form.website || null,
-      description: form.description || null,
-      owner_user_id: relationship === "owner" ? user.id : null,
-    });
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Commerce ajouté!" });
-      navigate(relationship === "owner" ? "/merchant" : "/");
+    if (submitInFlight.current) return; // A rapid double-click cannot create duplicate listings.
+    if (form.name.trim().length < 2 || form.address.trim().length < 3 || form.city.trim().length < 2) {
+      toast({ title: "Nom, adresse et ville requis", variant: "destructive" });
+      return;
     }
-    setSubmitting(false);
+    submitInFlight.current = true;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("businesses").insert({
+        name: form.name.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+        region: "QC",
+        phone: form.phone.trim() || null,
+        website: form.website.trim() || null,
+        description: form.description.trim() || null,
+        owner_user_id: relationship === "owner" ? user.id : null,
+        is_claimed: false,
+      });
+      if (error) throw error;
+      toast({ title: "Commerce ajouté!", description: "Les renseignements seront affichés conformément aux règles de publication QMAPS." });
+      navigate(relationship === "owner" ? "/merchant" : "/");
+    } catch (error) {
+      toast({
+        title: "Ajout non confirmé",
+        description: error instanceof Error ? error.message : "Le commerce n'a pas pu être enregistré.",
+        variant: "destructive",
+      });
+    } finally {
+      submitInFlight.current = false;
+      setSubmitting(false);
+    }
   };
 
   if (!user) {
@@ -109,7 +149,12 @@ const AddBusiness = () => {
               className="pl-10 rounded-xl"
             />
           </div>
-          <h3 className="font-heading font-bold text-foreground mb-3">Commerces à proximité</h3>
+          <h3 className="font-heading font-bold text-foreground mb-3">Résultats de recherche</h3>
+          {searchLoading && <p role="status" className="text-sm text-muted-foreground mb-3">Recherche en cours…</p>}
+          {searchError && <p role="alert" className="text-sm text-destructive mb-3">Recherche impossible : {searchError}</p>}
+          {!searchLoading && !searchError && query.trim().length >= 2 && results.length === 0 && (
+            <p className="text-sm text-muted-foreground mb-3">Aucun commerce trouvé avec ce nom.</p>
+          )}
           <div className="divide-y divide-border">
             {results.map(b => (
               <button key={b.id} onClick={() => navigate(`/business/${b.id}`)} className="w-full flex items-center gap-3 py-3">
