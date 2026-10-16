@@ -1,5 +1,18 @@
 # QMAPS — Agent handoff
 
+## Reprise du 16 octobre 2026 — cohérence des brouillons commerçants
+- **Dépôt :** `takatakca/qmaps`, branche `main`. Base inspectée : `8ed5f49dcdb73f042abf8425728b15582e559280` (CI 38805071219 réussie), aucun PR ouvert.
+- **Dernière tâche terminée en code :** les modifications faites après récupération d'un brouillon commerçant sont persistées sur la fiche **non active, appartenant à l'utilisateur**, avant passage à l'étape photo. La liste des catégories est maintenant synchronisée intégralement (ajout, suppression des anciennes associations et relecture de contrôle).
+- **Fichiers modifiés :** `src/pages/MerchantOnboarding.tsx`, `src/test/merchantDraftSaveConsistency.test.ts`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md` et `docs/PROJECT_STATUS.md`.
+- **Dernier commit de la session :** référentiel `main` ; lire `git rev-parse HEAD` (impossible d'inscrire le SHA du commit dans son propre contenu). Parent vérifié : `8ed5f49dcdb73f042abf8425728b15582e559280`.
+- **Tests :** contrôles Vitest de sauvegarde propriétaire, conservation des edits, suppression de catégories et refus de progression en cas de perte de données. Vérifier le run CI de HEAD (lint/typecheck/tests/build) avant tout lancement.
+- **Blocages de production :** domaine `https://qmaps.ca/` et `/qmaps-release.json` inaccessibles depuis l'outil de vérification du 16/10; projet Supabase QMAPS `ldvkebjfuldnemfdoted` non accessible ; hébergeur réel/docroot et secrets SSH non validés. Aucun SQL ni Edge Function QMAPS déployé ici.
+- **Accès nécessaires :** autorisation du projet Supabase QMAPS existant, hébergement vérifié, secrets Actions côté serveur, configuration Stripe/TakataK. Ne pas utiliser une autre base ni créer un nouveau projet payant.
+- **Prochaine action exacte :** contrôler le résultat CI du dernier `main`; corriger si échec, puis tester E2E reprise brouillon modifié + désélection catégorie + reprise d'erreur sur vraie base QMAPS. Ensuite appliquer uniquement les migrations manquantes après sauvegarde sur le projet autorisé et vérifier version HTTPS du site. L'issue #6 reste ouverte.
+
+---
+
+
 ## Relève de session — 15 octobre 2026 (la plus récente)
 - **Dépôt :** `takatakca/qmaps`, branche `main`. **HEAD avant cette relève :** `2af6db645918c457b3972c6bed50b5c641d81290`. Pour le commit contenant cette relève, lire `refs/heads/main`.
 - **Dernières tâches terminées en code :** isolation des rôles Supabase par identité active (`useAuth.tsx`), refus d'accès commerçant quand lecture/réparation de rôle échoue (`ProtectedMerchantRoute.tsx`), interruption de publication si relecture des droits échoue (`MerchantOnboarding.tsx`), suppression de la ville Montréal prédéfinie dans l'inscription et du chiffre marketing « photos +3x ».

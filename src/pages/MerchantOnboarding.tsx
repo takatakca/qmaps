@@ -273,12 +273,59 @@ const MerchantOnboarding = () => {
     return data.id;
   };
 
+  // A resumed draft may have been edited since its first INSERT. Persist the
+  // latest form values before allowing category/photo/review progression.
+  const persistBusinessDraft = async (id: string): Promise<boolean> => {
+    if (!user) return false;
+    const { data: saved, error } = await supabase
+      .from("businesses")
+      .update({
+        name: businessName.trim(),
+        description: description.trim() || null,
+        address: address.trim(),
+        city: city.trim(),
+        region,
+        postal_code: postalCode.trim() || null,
+        phone: phone.trim() || null,
+        website: website.trim() || null,
+        hours: hoursText.trim() || null,
+        country: country || "CA",
+        latitude,
+        longitude,
+      })
+      .eq("id", id)
+      .eq("owner_user_id", user.id)
+      .eq("is_active", false)
+      .select("id")
+      .maybeSingle();
+    if (error || !saved) {
+      toast({
+        title: "Brouillon non enregistré",
+        description: error?.message || "La fiche n'est plus un brouillon modifiable. Rechargez la page.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const saveSelectedCategories = async (id: string): Promise<boolean> => {
     if (selectedCatIds.size === 0) {
       toast({ title: "Catégorie requise", description: "Choisissez au moins une catégorie avant la publication.", variant: "destructive" });
       setStep(3);
       return false;
     }
+    const { data: existing, error: readError } = await supabase
+      .from("business_categories")
+      .select("category_id")
+      .eq("business_id", id);
+    if (readError) {
+      toast({ title: "Lecture des catégories impossible", description: readError.message, variant: "destructive" });
+      return false;
+    }
+
+    // Upsert adds selected categories; remove unselected categories from a
+    // recovered draft. Only this owned business ID is ever modified.
     const rows = Array.from(selectedCatIds).map((categoryId) => ({ business_id: id, category_id: categoryId }));
     const { error: categoryError } = await supabase.from("business_categories").upsert(rows, {
       onConflict: "business_id,category_id",
@@ -286,6 +333,30 @@ const MerchantOnboarding = () => {
     });
     if (categoryError) {
       toast({ title: "Enregistrement des catégories impossible", description: categoryError.message, variant: "destructive" });
+      return false;
+    }
+
+    const toRemove = (existing ?? []).map((item) => item.category_id).filter((categoryId) => !selectedCatIds.has(categoryId));
+    if (toRemove.length) {
+      const { error: deleteError } = await supabase.from("business_categories")
+        .delete().eq("business_id", id).in("category_id", toRemove);
+      if (deleteError) {
+        toast({ title: "Suppression des anciennes catégories impossible", description: deleteError.message, variant: "destructive" });
+        return false;
+      }
+    }
+
+    // Never call this step successful until the persisted set is exactly the
+    // user's current selection, including deletion of deselected old rows.
+    const { data: confirmed, error: verifyError } = await supabase.from("business_categories")
+      .select("category_id").eq("business_id", id);
+    const actual = new Set((confirmed ?? []).map((item) => item.category_id));
+    if (verifyError || actual.size !== selectedCatIds.size || [...selectedCatIds].some((id) => !actual.has(id))) {
+      toast({
+        title: "Catégories non confirmées",
+        description: verifyError?.message || "Vos modifications ne sont pas encore enregistrées. Réessayez.",
+        variant: "destructive",
+      });
       return false;
     }
     return true;
@@ -300,6 +371,7 @@ const MerchantOnboarding = () => {
         const id = businessId || await createBusiness();
         if (!id) return;
         setBusinessId(id);
+        if (!await persistBusinessDraft(id)) return;
         if (!await saveSelectedCategories(id)) return;
         setStep(5);
       } finally {

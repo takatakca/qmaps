@@ -1,5 +1,12 @@
 # QMAPS — État du projet
 
+## Avancement au 16 octobre 2026
+- Base validée : `8ed5f49dcdb73f042abf8425728b15582e559280` sur `main`, CI [38805071219](https://github.com/takatakca/qmaps/actions/runs/38805071219) **success**.
+- Correction ajoutée : brouillon commerçant modifié réellement enregistré avant photos ; catégories retirées vraiment supprimées et état exact relu en base. Tests de régression ajoutés, nouvelle CI à contrôler.
+- **Production non vérifiée :** aucun déploiement QMAPS autorisé, ni preuve de santé Supabase QMAPS / HTTPS qmaps.ca. Voir [issue #6](https://github.com/takatakca/qmaps/issues/6).
+
+
+
 ## État au 15 octobre 2026 — reprise technique
 - GitHub `main` : code de cette reprise poussé, dernière révision avant l'état `2af6db645918c457b3972c6bed50b5c641d81290`. La CI auth est vérifiée verte au SHA `f61a32f5` (run 38803826151) et la CI avec validation de YAML au SHA `7126d0df` (run 38804537975). Les commits ultérieurs demandent leur propre vérification.
 - Sécurité : permission `admin/merchant` liée à l'identité de session, réponses de rôles obsolètes rejetées, contrôle de l'écriture de droits avant navigation commerçant ou publication d'une fiche.

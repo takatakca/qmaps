@@ -1,5 +1,12 @@
 # QMAPS — File de tâches priorisée
 
+## Reprise du 16 octobre 2026
+- **Fait en code, CI à confirmer :** persistance des modifications aux brouillons marchands repris ; ajout et suppression des catégories avec vérification de la liste réellement sauvegardée.
+- **Vérification restant à faire :** test réel Supabase avec plusieurs catégories, déconnexion/reprise, erreurs RLS et publication conditionnelle. Cible Supabase QMAPS non disponible ; voir issue #6.
+- **Production :** toujours non démontrée.
+
+
+
 ## Actualisation du 15 octobre 2026
 - **Code corrigé :** isolation des rôles Auth, vérification d'autorisation de la route marchande, véritable saisie de ville, contrôle CI du `workflow_dispatch` et syntaxe YAML du déploiement SSH.
 - **À vérifier :** CI du dernier `main` (parent de cette relève : `2af6db645918c457b3972c6bed50b5c641d81290`), puis tests UI et SQL avec comptes réels.
