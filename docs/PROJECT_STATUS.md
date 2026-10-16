@@ -1,5 +1,11 @@
 # QMAPS — État du projet
 
+## Confidentialité des brouillons — 16 octobre 2026
+- Migration `supabase/migrations/20261016180000_private_business_category_visibility.sql` en dépôt. Remplacement d'une lecture publique trop large des associations `business_categories` par un filtrage actif/propriétaire/admin. **Pas appliquée en production**.
+- Le test `src/test/privateBusinessCategoryVisibility.test.ts` décrit le contrat attendu. Validation SQL avec vrais profils RLS à exécuter uniquement dans le projet Supabase QMAPS autorisé.
+
+
+
 ## Avancement au 16 octobre 2026
 - Base validée : `8ed5f49dcdb73f042abf8425728b15582e559280` sur `main`, CI [38805071219](https://github.com/takatakca/qmaps/actions/runs/38805071219) **success**.
 - Correction ajoutée : brouillon commerçant modifié réellement enregistré avant photos ; catégories retirées vraiment supprimées et état exact relu en base. Tests de régression ajoutés, nouvelle CI à contrôler.

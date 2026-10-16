@@ -2,6 +2,7 @@
 
 | Date | Décision | Motif et conséquence |
 |---|---|---|
+| 2026-10-16 | Ne pas divulguer publiquement les catégories associées aux brouillons marchands | Les fiches non actives restent visibles seulement au propriétaire et à l'admin; liste publique conservée pour les commerces publiés |
 | 2026-10-15 | Ne pas afficher de Guest Manager factice, de tarifs/témoignages non vérifiés ni de fausse confirmation d'envoi | Présenter l'état non lancé et renvoyer vers le contact existant, développer le backend seulement avec une vraie intégration |
 | 2026-10-15 | Corriger les villes présélectionnées sans preuve et les chiffres de conversion photographique inventés | Les commerçants saisissent leur ville réelle et voient uniquement des messages fondés |
 | 2026-10-15 | Parser le YAML des workflows avant la compilation en CI | Prévenir une publication automatisée qui devient invalide malgré des tests frontend verts |

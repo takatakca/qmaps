@@ -1,5 +1,12 @@
 # QMAPS — Déploiement
 
+## Migration additionnelle — 16 octobre 2026
+- Ajouter **après les migrations existantes** `supabase/migrations/20261016180000_private_business_category_visibility.sql`, uniquement après confirmation du projet QMAPS. Elle modifie la politique SELECT de `public.business_categories`, sans changer de données.
+- Recette RLS indispensable : un visiteur voit les catégories des commerces actifs ; un propriétaire voit aussi ses brouillons ; un autre propriétaire ne voit pas les brouillons ; un administrateur voit les associations modérées.
+- **Aucune application réelle** : le projet Supabase QMAPS demeure refusé à cette connexion. Ne pas déclarer la migration active sans preuve SQL.
+
+
+
 ## Point de contrôle — 15 octobre 2026
 - Dernier `main` avant cette documentation : `2af6db645918c457b3972c6bed50b5c641d81290` ; vérifier la CI correspondante et celle de la relève.
 - Workflow SSH protégé contre `workflow_dispatch` sans CI réussie sur le SHA exact. Validation du chemin avant rsync, contrôle post-déploiement `/qmaps-release.json`.

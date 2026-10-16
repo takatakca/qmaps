@@ -1,5 +1,11 @@
 # QMAPS — Agent handoff
 
+## Reprise du 16 octobre 2026 — confidentialité des catégories
+- **Dernière tâche codée :** migration `supabase/migrations/20261016180000_private_business_category_visibility.sql` retirant la politique `business_categories` SELECT publiquement ouverte et la remplaçant par un filtre fiches actives OU propriétaire OU administrateur. Aucune donnée existante modifiée, politique `FOR ALL` du propriétaire conservée.
+- **Test de contrat :** `src/test/privateBusinessCategoryVisibility.test.ts`; valider CI puis, sur **vrai projet Supabase QMAPS**, exécuter des lectures en anonyme, propriétaire de brouillon, autre commerçant et admin pour vérifier les droits.
+- **Déploiement base :** non effectué, connexion QMAPS `ldvkebjfuldnemfdoted` refusée. Appliquer seulement après sauvegarde/état des migrations et tests.
+- **Relève/commit :** lire HEAD GitHub, le SHA propre du commit ne peut pas figurer dans ce fichier. Les nouvelles actions sont documentées dans `docs/TASK_QUEUE.md`.
+
 ## Reprise du 16 octobre 2026 — recherche et création fiable de commerces
 - **Livraison :** `src/pages/AddBusiness.tsx` invalide les réponses de recherche obsolètes, montre les erreurs et l'état de chargement, évite la promesse de proximité non géolocalisée ; formulaire de création protégé par verrou immédiat anti-double clic et `try/catch/finally`. Statut de propriété non vérifiée sauvegardé explicitement.
 - **Tests :** `src/test/addBusinessReliability.test.ts` plus les précédents tests de saisie. Les étapes en production restent à tester.

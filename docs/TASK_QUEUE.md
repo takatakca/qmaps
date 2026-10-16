@@ -1,5 +1,9 @@
 # QMAPS — File de tâches priorisée
 
+## Contrôle des lectures RLS — 16 octobre 2026
+- P0 : **code ajouté, migration en attente** `supabase/migrations/20261016180000_private_business_category_visibility.sql`. Interdire l'énumération publique des catégories associées aux fiches inactives ; tester les droits anonyme/propriétaire/autre commerçant/admin sur QMAPS avant d'activer.
+- La politique du propriétaire pour les modifications reste en place. Ne pas déployer la migration sur un projet Supabase différent.
+
 ## Recherche et création — 16 octobre 2026
 - Livré en code : états de chargement/erreur de la recherche par nom, rejet des réponses asynchrones périmées et blocage des doubles soumissions. Recette réseau et E2E sur QMAPS réel à exécuter.
 
