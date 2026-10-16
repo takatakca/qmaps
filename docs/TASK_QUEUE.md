@@ -1,5 +1,9 @@
 # QMAPS — File de tâches priorisée
 
+## État des CI — 16 octobre 2026
+- Dernière modification fonctionnelle validée : `731ba7a9e7f6b0288f8699bb8b1089259343778c`, CI [38943539936](https://github.com/takatakca/qmaps/actions/runs/38943539936) **success**.
+- **Priorité P0 inchangée :** issue #6. La migration de lecture des catégories et les migrations antérieures ne sont pas actives dans la base QMAPS tant qu'un administrateur autorisé ne les a pas installées et vérifiées.
+
 ## Contrôle des lectures RLS — 16 octobre 2026
 - P0 : **code ajouté, migration en attente** `supabase/migrations/20261016180000_private_business_category_visibility.sql`. Interdire l'énumération publique des catégories associées aux fiches inactives ; tester les droits anonyme/propriétaire/autre commerçant/admin sur QMAPS avant d'activer.
 - La politique du propriétaire pour les modifications reste en place. Ne pas déployer la migration sur un projet Supabase différent.

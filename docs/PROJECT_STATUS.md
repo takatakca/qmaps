@@ -1,5 +1,10 @@
 # QMAPS — État du projet
 
+## Validation des corrections du 16 octobre 2026
+- `731ba7a9e7f6b0288f8699bb8b1089259343778c` — CI [38943539936](https://github.com/takatakca/qmaps/actions/runs/38943539936) **success**. Contrôles lint, types, tests, build et Go/No-Go exécutés.
+- Brouillons réenregistrés et catégories réconciliées, recherche nom fiable et anti-double soumission, migration SQL limitant la lecture des catégories des fiches non publiées.
+- **Toujours pas un lancement production :** base QMAPS et domaine non accessibles, workflow SSH `skipped`. Vérification du site et déploiement à suivre via [issue #6](https://github.com/takatakca/qmaps/issues/6).
+
 ## Confidentialité des brouillons — 16 octobre 2026
 - Migration `supabase/migrations/20261016180000_private_business_category_visibility.sql` en dépôt. Remplacement d'une lecture publique trop large des associations `business_categories` par un filtrage actif/propriétaire/admin. **Pas appliquée en production**.
 - Le test `src/test/privateBusinessCategoryVisibility.test.ts` décrit le contrat attendu. Validation SQL avec vrais profils RLS à exécuter uniquement dans le projet Supabase QMAPS autorisé.

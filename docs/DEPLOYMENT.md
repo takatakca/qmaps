@@ -1,5 +1,10 @@
 # QMAPS — Déploiement
 
+## Contrôle de publication — 16 octobre 2026
+- Dernier SHA applicatif validé `731ba7a9e7f6b0288f8699bb8b1089259343778c`, CI [38943539936](https://github.com/takatakca/qmaps/actions/runs/38943539936) réussie. La publication SSH liée a conclu `skipped` (run 38943737812).
+- Les requêtes directes vers `https://qmaps.ca` échouent à la résolution DNS depuis l'environnement de vérification : aucune affirmation de disponibilité en ligne n'est possible.
+- Le projet Supabase QMAPS `ldvkebjfuldnemfdoted` n'est pas listé et refuse `get_project`. Aucune des migrations/fonctions nouvelles n'a été installée par cette session.
+
 ## Migration additionnelle — 16 octobre 2026
 - Ajouter **après les migrations existantes** `supabase/migrations/20261016180000_private_business_category_visibility.sql`, uniquement après confirmation du projet QMAPS. Elle modifie la politique SELECT de `public.business_categories`, sans changer de données.
 - Recette RLS indispensable : un visiteur voit les catégories des commerces actifs ; un propriétaire voit aussi ses brouillons ; un autre propriétaire ne voit pas les brouillons ; un administrateur voit les associations modérées.

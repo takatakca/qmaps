@@ -1,5 +1,11 @@
 # QMAPS — Agent handoff
 
+## Reprise du 16 octobre 2026 — preuve CI de clôture de code
+- **Dernière livraison de code confirmée :** `731ba7a9e7f6b0288f8699bb8b1089259343778c`, CI [38943539936](https://github.com/takatakca/qmaps/actions/runs/38943539936) **success** (lint, vérification TypeScript, tests, build, Go/No-Go). Commits intermédiaires `ea52a8e2`, `b85c82ca` et `e553857f` : CI réussies.
+- **GitHub main :** la révision qui contient cette note peut être lue à `refs/heads/main`. Les modifications de cette session sont détaillées dans les sections suivantes.
+- **Suivi incident/prod :** issue [#6](https://github.com/takatakca/qmaps/issues/6), commentaire du 16 octobre ajouté (ID 6221569998). Projet Supabase QMAPS encore inaccessible ; DNS `qmaps.ca` et `qmaps-release.json` non résolus ; workflow SSH `skipped`, aucun déploiement réel.
+- **Prochaine action exacte :** confirmer la CI de la mise à jour documentaire, puis lorsque l'accès à QMAPS existant est fourni, sauvegarder et appliquer les migrations manquantes dont `20261016180000_private_business_category_visibility.sql`, déployer les fonctions, vérifier RLS sur différents comptes et preuve de release SHA sur HTTPS.
+
 ## Reprise du 16 octobre 2026 — confidentialité des catégories
 - **Dernière tâche codée :** migration `supabase/migrations/20261016180000_private_business_category_visibility.sql` retirant la politique `business_categories` SELECT publiquement ouverte et la remplaçant par un filtre fiches actives OU propriétaire OU administrateur. Aucune donnée existante modifiée, politique `FOR ALL` du propriétaire conservée.
 - **Test de contrat :** `src/test/privateBusinessCategoryVisibility.test.ts`; valider CI puis, sur **vrai projet Supabase QMAPS**, exécuter des lectures en anonyme, propriétaire de brouillon, autre commerçant et admin pour vérifier les droits.

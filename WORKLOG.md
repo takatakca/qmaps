@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+2026-10-16 | ChatGPT | main | done, CI successful, production blocked | Last code SHA 731ba7a9 CI 38943539936 green; draft edits, category consistency, listing search reliability and private draft category RLS migration; issue #6 updated | Next session verify main, connect authorized QMAPS project and web host before production deployment
+
 2026-10-16 | ChatGPT | main | code delivered, DB migration pending | Restrict read of categories attached to inactive business drafts to owner/admin while retaining active-business public search | CI then test anon/owner/admin RLS on authorized QMAPS project, apply only after backup
 
 2026-10-16 | ChatGPT | main | done in code, CI pending | Reject out-of-order search results and expose real errors/loading in AddBusiness; block rapid double inserts and handle unexpected write failures | Confirm CI, verify live directory search and claim flow with real users
