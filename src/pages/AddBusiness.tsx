@@ -33,6 +33,8 @@ const AddBusiness = () => {
     const request = ++searchRequest.current;
     setQuery(q);
     setSearchError(null);
+    // Hide old-query results immediately, not only when the new request finishes.
+    setResults([]);
     const term = q.trim();
     if (term.length < 2) {
       setResults([]);
