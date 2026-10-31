@@ -1,3 +1,5 @@
+2026-10-31 | REVEW | revew/review-api-handoff → PR pending | done: documentation handoff; API implementation requested | Owner requested dedicated review/business APIs for the V1 review cockpit; reviewed existing code, recorded missing capabilities, tenant boundaries and acceptance tests in docs/TAKATAK_REVIEW_API_HANDOFF.md; no source/runtime changes | Next: counterpart agent accepts the contract and implements/tests its own APIs; Drive upload blocked by unavailable connector. — REVEW
+
 # Work log
 
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.

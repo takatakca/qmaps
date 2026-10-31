@@ -1,3 +1,7 @@
+# 2026-10-31 — REVEW counterpart request
+
+Read [TAKATAK Review API handoff](TAKATAK_REVIEW_API_HANDOFF.md) for the owner-requested business/review API contract. This is a documentation-only review branch; existing production blockers and code remain unchanged. No key values are requested in public notes. — REVEW
+
 # QMAPS — Agent handoff
 
 ## Reprise du 16 octobre 2026 — preuve CI de clôture de code
