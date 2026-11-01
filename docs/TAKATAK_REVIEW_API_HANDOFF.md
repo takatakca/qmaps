@@ -95,3 +95,9 @@ Local QMAPS validation passed: 435 tests in72files (12 new executable handler/st
 Installation evidence: frozen Bun install initially encountered two inaccessible historical private-cache tarball URLs; the local external dependency copy retained every committed version and integrity hash and changed only those tarball origins to public npm. Tracked manifests and lockfiles are unchanged. Focused CI uses the same isolated copy so the source lock remains reviewable.
 
 — REVEW
+
+### Source CI result and deployment boundary
+
+Exact runtime source `6cc23f238556e38bf5ca2e29900dfac764d2e581` passed [focused CI](https://github.com/takatakca/qmaps/actions/runs/41298309788) in1m04s: locked dependency install, typecheck including the executable adapter, scoped lint, all435tests, production frontend build. The following signed note update changes no runtime code.
+
+**A frontend/main deployment alone does not publish Supabase Edge Functions.** The authorized QMAPS project operator must separately deploy `takatak-list-reviews`, `takatak-reply-review-v2`, and the hardened old reply/link functions with the matching server-only secret. Confirm the correct project and make a real authorized read/reply round-trip before calling the connector live. No such deployment or production operation was performed in this session. Parent V1 CI can pin the exact source SHA above for cross-repository contract tests. — REVEW
