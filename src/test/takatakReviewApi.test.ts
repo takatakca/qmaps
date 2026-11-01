@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createReviewFeedHandler,
+  createReviewVisibilityHandler,
   createReviewReplyHandler,
   createReviewStore,
   parseReviewCursor,
@@ -399,5 +400,139 @@ describe("QMAPS scoped review API", () => {
     expect(
       parseReviewCursor({ createdAt: time, id: "id),business_id.neq.all" }),
     ).toBe(false);
+  });
+});
+
+describe("QMAPS tracked review visibility", () => {
+  const visibilityInput = (overrides: Row = {}) => ({
+    version: 1,
+    clientId: client,
+    businessId: business,
+    reviewIds: [reviewId(1)],
+    ...overrides,
+  });
+  const check = (db: ReturnType<typeof fixture>, body: unknown) =>
+    createReviewVisibilityHandler({
+      authorize: async () => true,
+      store: () => db.store,
+    })(request(body));
+  it("authorizes before accessing source visibility", async () => {
+    const db = fixture();
+    const handler = createReviewVisibilityHandler({
+      authorize: async () => false,
+      store: () => db.store,
+    });
+    expect((await handler(request(visibilityInput()))).status).toBe(401);
+    expect(db.calls).toEqual([]);
+  });
+  it("rejects unknown fields, bad IDs, duplicate UUIDs and batches outside one to100", async () => {
+    for (const overrides of [
+      { version: 2 },
+      { clientId: "invalid" },
+      { businessId: "invalid" },
+      { includePrivate: true },
+      { reviewIds: [] },
+      { reviewIds: "all" },
+      { reviewIds: ["invalid"] },
+      { reviewIds: [reviewId(1), reviewId(1)] },
+      { reviewIds: Array.from({ length: 101 }, (_, index) => reviewId(index)) },
+    ]) {
+      const db = fixture();
+      expect((await check(db, visibilityInput(overrides))).status).toBe(400);
+      expect(db.calls).toEqual([]);
+    }
+    const db = fixture();
+    expect(
+      (
+        await check(
+          db,
+          visibilityInput({
+            reviewIds: [
+              "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA",
+            ],
+          }),
+        )
+      ).status,
+    ).toBe(400);
+    expect(db.calls).toEqual([]);
+  });
+  it("rejects foreign workspace/business mappings before querying reviews", async () => {
+    for (const overrides of [
+      { clientId: otherClient },
+      { businessId: otherBusiness },
+    ]) {
+      const db = fixture();
+      expect((await check(db, visibilityInput(overrides))).status).toBe(404);
+      expect(db.calls.some((call) => call.table === "reviews")).toBe(false);
+    }
+  });
+  it("returns exactly requested IDs once with no distinction among missing, foreign and private rows", async () => {
+    const db = fixture();
+    const ids = Array.from({ length: 7 }, (_, index) => reviewId(index + 1));
+    const response = await check(db, visibilityInput({ reviewIds: ids }));
+    const result = await response.json();
+    expect(response.status).toBe(200);
+    expect(result).toEqual({
+      ok: true,
+      version: 1,
+      clientId: client,
+      businessId: business,
+      reviews: ids.map((id, index) => ({ id, visible: index < 2 })),
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /body|rating|user_id|ownerReply|hidden|private-/,
+    );
+    expect(db.calls).toContainEqual({
+      table: "reviews",
+      operation: "select",
+      args: ["id"],
+    });
+    expect(db.calls).toContainEqual({
+      table: "reviews",
+      operation: "eq",
+      args: ["business_id", business],
+    });
+    expect(db.calls).toContainEqual({
+      table: "reviews",
+      operation: "in",
+      args: ["id", ids],
+    });
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+  });
+  it("preserves public status for100 requested IDs without truncating false values", async () => {
+    const db = fixture();
+    const ids = Array.from({ length: 100 }, (_, index) => reviewId(index + 1));
+    const result = await (
+      await check(db, visibilityInput({ reviewIds: ids }))
+    ).json();
+    expect(result.reviews).toHaveLength(100);
+    expect(
+      result.reviews.filter((row: { visible: boolean }) => row.visible),
+    ).toHaveLength(2);
+    expect(db.calls.some((call) => call.operation === "update")).toBe(false);
+  });
+  it("source query failures do not become negative visibility confirmations", async () => {
+    const db = fixture();
+    db.store.visibleReviewIds = async () => {
+      throw new Error("private-source-error");
+    };
+    const response = await check(db, visibilityInput());
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toMatch(/private-source-error|visible/);
+  });
+  it("refuses malformed/out-of-scope source results rather than silently trusting them", async () => {
+    for (const result of [
+      [reviewId(6)],
+      [reviewId(1), reviewId(1)],
+      ["invalid"],
+    ]) {
+      const db = fixture();
+      db.store.visibleReviewIds = async () => result;
+      expect((await check(db, visibilityInput())).status).toBe(503);
+    }
+    const db = fixture();
+    delete db.store.visibleReviewIds;
+    expect((await check(db, visibilityInput())).status).toBe(503);
   });
 });

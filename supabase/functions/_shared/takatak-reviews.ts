@@ -16,6 +16,7 @@ export type QmapsReview = {
   ownerRepliedAt: string | null;
 };
 export interface ReviewStore {
+  visibleReviewIds?(businessId: string, reviewIds: string[]): Promise<string[]>;
   linkedBusiness(clientId: string, businessId: string): Promise<boolean>;
   reviews(
     businessId: string,
@@ -202,6 +203,63 @@ export function createReviewFeedHandler(deps: Dependencies) {
     }
   };
 }
+/** Confirm only the visibility of already tracked IDs, never private content. */
+export function createReviewVisibilityHandler(deps: Dependencies) {
+  return async (request: Request): Promise<Response> => {
+    try {
+      const decoded = await authorizedInput(request, deps);
+      if (decoded.ok === false) return decoded.response;
+      const input = decoded.value;
+      if (
+        !keys(input, ["version", "clientId", "businessId", "reviewIds"]) ||
+        input.version !== 1 ||
+        !id(input.clientId) ||
+        !id(input.businessId) ||
+        !Array.isArray(input.reviewIds) ||
+        input.reviewIds.length < 1 ||
+        input.reviewIds.length > 100 ||
+        !input.reviewIds.every(id)
+      )
+        return reviewJSON({ ok: false, error: "invalid_request" }, 400);
+      const reviewIds = input.reviewIds as string[];
+      const canonicalIds = reviewIds.map((value) => value.toLowerCase());
+      const requested = new Set(canonicalIds);
+      if (requested.size !== reviewIds.length)
+        return reviewJSON({ ok: false, error: "invalid_request" }, 400);
+      const store = deps.store();
+      if (!(await store.linkedBusiness(input.clientId, input.businessId)))
+        return reviewJSON({ ok: false, error: "not_found" }, 404);
+      if (!store.visibleReviewIds)
+        return reviewJSON({ ok: false, error: "source_unavailable" }, 503);
+      const visible = await store.visibleReviewIds(
+        input.businessId,
+        canonicalIds,
+      );
+      if (
+        !Array.isArray(visible) ||
+        visible.some(
+          (value) => !id(value) || !requested.has(value.toLowerCase()),
+        ) ||
+        new Set(visible.map((value) => value.toLowerCase())).size !==
+          visible.length
+      )
+        return reviewJSON({ ok: false, error: "source_unavailable" }, 503);
+      const visibleSet = new Set(visible.map((value) => value.toLowerCase()));
+      return reviewJSON({
+        ok: true,
+        version: 1,
+        clientId: input.clientId,
+        businessId: input.businessId,
+        reviews: reviewIds.map((value) => ({
+          id: value,
+          visible: visibleSet.has(value.toLowerCase()),
+        })),
+      });
+    } catch {
+      return reviewJSON({ ok: false, error: "source_unavailable" }, 503);
+    }
+  };
+}
 export function createReviewReplyHandler(deps: Dependencies) {
   return async (request: Request): Promise<Response> => {
     try {
@@ -338,6 +396,21 @@ export function createReviewStore(database: {
           ownerReply: row.owner_reply as string | null,
           ownerRepliedAt: row.owner_replied_at as string | null,
         };
+      });
+    },
+    async visibleReviewIds(businessId, reviewIds) {
+      const { data, error } = await query("reviews")
+        .select("id")
+        .eq("business_id", businessId)
+        .in("id", reviewIds)
+        .in("moderation_status", ALLOWED_STATUS)
+        .is("hidden_at", null);
+      if (error || !Array.isArray(data))
+        throw new Error("visibility_query_failed");
+      return data.map((value) => {
+        const row = record(value);
+        if (!row || !id(row.id)) throw new Error("invalid_visibility_result");
+        return row.id;
       });
     },
     async reply(businessId, reviewId, body, now) {

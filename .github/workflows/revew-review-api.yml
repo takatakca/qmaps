@@ -8,6 +8,7 @@ on:
       - "supabase/functions/_shared/takatak-auth.ts"
       - "supabase/functions/_shared/takatak-reviews.ts"
       - "supabase/functions/takatak-list-reviews/**"
+      - "supabase/functions/takatak-review-visibility/**"
       - "supabase/functions/takatak-reply-review*/**"
       - "supabase/functions/takatak-link-business/**"
       - "supabase/config.toml"
@@ -55,7 +56,7 @@ jobs:
       - name: Validate types including executable review adapter tests
         run: npm run typecheck
       - name: Lint review boundaries
-        run: npx eslint supabase/functions/_shared/takatak-reviews.ts supabase/functions/_shared/takatak-auth.ts supabase/functions/takatak-list-reviews/index.ts supabase/functions/takatak-reply-review-v2/index.ts supabase/functions/takatak-reply-review/index.ts supabase/functions/takatak-link-business/index.ts src/test/takatakReviewApi.test.ts src/test/takatakBridge.test.ts
+        run: npx eslint supabase/functions/takatak-review-visibility/index.ts supabase/functions/_shared/takatak-reviews.ts supabase/functions/_shared/takatak-auth.ts supabase/functions/takatak-list-reviews/index.ts supabase/functions/takatak-reply-review-v2/index.ts supabase/functions/takatak-reply-review/index.ts supabase/functions/takatak-link-business/index.ts src/test/takatakReviewApi.test.ts src/test/takatakBridge.test.ts
       - name: Run complete QMAPS test suite
         run: npm run test
       - name: Build QMAPS frontend

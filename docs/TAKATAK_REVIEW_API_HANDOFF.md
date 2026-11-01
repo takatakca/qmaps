@@ -7,7 +7,7 @@ The owner asked REVEW to leave notes for QMAPS to provide its review section and
 ## Existing code inspected — reuse it
 
 - QMAPS main `6e73f0f`: `BusinessReviewsTab`, `MerchantReviews`, `merchant-reply-review`, `takatak-reply-review`, `takatak-link-business`, `takatak-match-businesses`, native review/mapping safeguards and `docs/takatak-integration.md`.
-- V1 already consumes signed QMAPS `BUSINESS_UPSERTED`, `REVIEW_UPSERTED`, `REVIEW_DELETED` events through `/api/integrations/qmaps/events`, with event replay/conflict handling and canonical workspace linking. The prior outbound sync work is referenced on `claude/takatak-listings-reviews-sync`; reconcile its current status instead of creating a competing outbox.
+- V1 implements a receiver for signed QMAPS `BUSINESS_UPSERTED`, `REVIEW_UPSERTED`, `REVIEW_DELETED` events through `/api/integrations/qmaps/events`, with replay/conflict handling and canonical workspace linking. **No matching outbound review event producer was found in this inspected QMAPS source. A receiver alone does not deliver events.** The prior sync branch is an investigation reference, not proof of active delivery.
 - V1 enhancement branch: https://github.com/takatakca/takatak-v1/tree/codex/review-ecosystem . Unified feed reads the existing `ListingReview` records; no sibling database access is introduced.
 
 ## Requested deliverable from the QMAPS agent
@@ -68,7 +68,7 @@ Code on `revew/review-api-handoff` now provides a QMAPS-owned adapter, not a sib
 
 The source business must be active and linked to that exact TAKATAK client. Only `visible`/`trusted` reviews with `hidden_at IS NULL` are returned. Hidden reasons, reviewer identifiers, contacts and internal moderation notes are never selected. The read has a 16KB streamed request limit, `private, no-store` responses and no direct URL fetching.
 
-This is a current-public-review feed, not an immutable snapshot or deletion/tombstone stream. A hidden/deleted review vanishes from the feed. Never archive a prior record based on a failed, partial or capped scan. Existing signed deletion events remain relevant; a consumer doing snapshot reconciliation must wait for a fully successful enumeration and handle concurrent source changes honestly.
+This is a current-public-review feed, not an immutable snapshot or deletion/tombstone stream. A hidden/deleted review vanishes from the feed. Never archive a prior record based on a failed, partial or capped scan. No outbound review event producer is implemented in this inspected QMAPS source. A V1 event receiver is not proof of active deletion delivery. Use the explicit tracked-ID visibility endpoint below to obtain source-confirmed status; a future event producer needs its own implementation and activation evidence.
 
 ### Scoped public owner reply
 
@@ -101,3 +101,17 @@ Installation evidence: frozen Bun install initially encountered two inaccessible
 Exact runtime source `6cc23f238556e38bf5ca2e29900dfac764d2e581` passed [focused CI](https://github.com/takatakca/qmaps/actions/runs/41298309788) in1m04s: locked dependency install, typecheck including the executable adapter, scoped lint, all435tests, production frontend build. The following signed note update changes no runtime code.
 
 **A frontend/main deployment alone does not publish Supabase Edge Functions.** The authorized QMAPS project operator must separately deploy `takatak-list-reviews`, `takatak-reply-review-v2`, and the hardened old reply/link functions with the matching server-only secret. Confirm the correct project and make a real authorized read/reply round-trip before calling the connector live. No such deployment or production operation was performed in this session. Parent V1 CI can pin the exact source SHA above for cross-repository contract tests. — REVEW
+
+## Explicit tracked-review visibility — REVEW, 2026-11-01
+
+`POST /functions/v1/takatak-review-visibility`, same server-only authentication and linked active-business ownership check:
+
+```json
+{ "version": 1, "clientId": "TAKATAK workspace UUID", "businessId": "QMAPS business UUID", "reviewIds": ["previously tracked QMAPS review UUID"] }
+```
+
+Accepts1–100 unique UUIDs. Returns `{ok:true,version:1,clientId,businessId,reviews:[{id,visible}]}` with exactly the supplied IDs once, in order. `visible:true` means the review is currently visible/trusted, has no hidden timestamp, and belongs to the linked source business. Missing, deleted, hidden, privately moderated and other-business IDs all return the same `visible:false`; no private state, body, member identity or moderation reason is disclosed. The source query selects only `id` under the exact business and input ID set.
+
+Invalid IDs/duplicates/bounds are400, foreign workspace mapping404, unavailable source/query503. Failures do **not** become negative visibility acknowledgements. The V1 consumer should supply only its own tracked IDs in bounded batches and archive only the exact source-confirmed false records, never infer absence from a partial review page. The function is read-only; it neither deletes nor changes a QMAPS review. The wrapper is included in `supabase/config.toml` and must be separately deployed on the authorized source project before activating this check.
+
+Seven new executable checks cover authorization, input limits/duplicates, tenant mapping, exact public/private/missing result semantics and projection, 100-ID completeness, failures and malformed source results. App typecheck and boundary lint pass. Earlier source CI evidence remains historical until the new visibility source passes its own CI. No source event outbox, mailbox integration, Edge Function deployment, new database migration or production write is claimed. — REVEW
