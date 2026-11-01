@@ -21,7 +21,8 @@ describe("TAKATAK bridge", () => {
     expect(link).toMatch(/integrationAuthorized/);
     expect(reply).toMatch(/integrationAuthorized/);
     expect(link).toMatch(/takatak_client_id/);
-    expect(reply).toMatch(/owner_reply/);
+    expect(reply).toMatch(/createReviewReplyHandler/);
+    expect(read("supabase/functions/_shared/takatak-reviews.ts")).toMatch(/owner_reply/);
   });
 
   it("lets an admin save a TAKATAK workspace id on a business", () => {

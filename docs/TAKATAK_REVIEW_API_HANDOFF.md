@@ -45,3 +45,53 @@ Test two workspaces, cross-business reply denial, unlinked/ambiguous mapping rej
 DURING / handoff delivered as GitHub branch document: `revew/review-api-handoff`. No production changes, secret values or live review replies were performed. GitHub issue comments are blocked by this session's API network policy. Google Drive copy is prepared but **NOT UPLOADED** because no Drive tool is available.
 
 — **REVEW**, review/reputation specialist
+
+## Implemented review contract — REVEW, 2026-11-01
+
+Code on `revew/review-api-handoff` now provides a QMAPS-owned adapter, not a sibling database connection. Both review functions require the existing server-only `x-qmaps-integration-secret` with `QMAPS_TAKATAK_INTEGRATION_SECRET` of at least 32 characters. The caller must be the trusted TAKATAK backend; no key or Supabase service role goes to a browser or agent prompt.
+
+### Read current public reviews
+
+`POST /functions/v1/takatak-list-reviews`, JSON:
+
+```json
+{
+  "version": 1,
+  "clientId": "TAKATAK workspace UUID",
+  "businessId": "QMAPS business UUID",
+  "limit": 50,
+  "cursor": null
+}
+```
+
+`limit` is 1–100. A next request uses the exact returned `nextCursor` object `{createdAt,id}`; preserve fractional timestamp precision. Pagination is descending `created_at`, then descending UUID. A successful response echoes `version/clientId/businessId` and returns `reviews`, `hasMore`, `nextCursor`. Each review has `{id,businessId,author,rating,body,createdAt,updatedAt,ownerReply,ownerRepliedAt}`. `author` is the explicit generic label `QMAPS customer`, not an invented display identity; private profile IDs are not exported.
+
+The source business must be active and linked to that exact TAKATAK client. Only `visible`/`trusted` reviews with `hidden_at IS NULL` are returned. Hidden reasons, reviewer identifiers, contacts and internal moderation notes are never selected. The read has a 16KB streamed request limit, `private, no-store` responses and no direct URL fetching.
+
+This is a current-public-review feed, not an immutable snapshot or deletion/tombstone stream. A hidden/deleted review vanishes from the feed. Never archive a prior record based on a failed, partial or capped scan. Existing signed deletion events remain relevant; a consumer doing snapshot reconciliation must wait for a fully successful enumeration and handle concurrent source changes honestly.
+
+### Scoped public owner reply
+
+Use the **new** mutation path `POST /functions/v1/takatak-reply-review-v2`:
+
+```json
+{
+  "version": 1,
+  "clientId": "TAKATAK workspace UUID",
+  "businessId": "QMAPS business UUID",
+  "reviewId": "QMAPS review UUID",
+  "body": "Owner-approved public reply"
+}
+```
+
+The response echoes `version/clientId/businessId/reviewId` and the persisted `ownerReply/ownerRepliedAt` only after the exact eligible source row was saved. A missing or mismatched workspace/business/review is `404`; no source edit is made. Comment max2000 characters. No autonomous publication is introduced. The old reply path is hardened through the same scoped handler and rejects old unscoped payloads.
+
+**Rollout must use the new v2 path:** a previously deployed old handler ignores extra tenant IDs and could publish an arbitrary UUID before a new consumer notices the acknowledgement mismatch. A not-yet-deployed v2 path instead returns404 without a mutation. Deploy both read and v2 functions before enabling the consumer; do not silently fall back to the old mutation path. The link function also uses compare-and-set so an existing different tenant link cannot be reassigned by this integration.
+
+### Evidence and activation limits
+
+Local QMAPS validation passed: 435 tests in72files (12 new executable handler/store checks), full frontend typecheck, changed-boundary ESLint and production Vite build. The tests execute the actual adapter query filters against an in-memory Supabase-compatible store; they are not evidence of a live Supabase write or production database transaction. A focused branch CI workflow is included. No migration, secret, Edge Function deployment, frontend deployment or production acceptance test was executed here. Browser/agent callers must still go through the tenant-scoped V1 service, not raw privileged source credentials.
+
+Installation evidence: frozen Bun install initially encountered two inaccessible historical private-cache tarball URLs; the local external dependency copy retained every committed version and integrity hash and changed only those tarball origins to public npm. Tracked manifests and lockfiles are unchanged. Focused CI uses the same isolated copy so the source lock remains reviewable.
+
+— REVEW

@@ -1,0 +1,62 @@
+name: REVEW QMAPS review API
+
+on:
+  push:
+    branches: [revew/review-api-handoff]
+  pull_request:
+    paths:
+      - "supabase/functions/_shared/takatak-auth.ts"
+      - "supabase/functions/_shared/takatak-reviews.ts"
+      - "supabase/functions/takatak-list-reviews/**"
+      - "supabase/functions/takatak-reply-review*/**"
+      - "supabase/functions/takatak-link-business/**"
+      - "supabase/config.toml"
+      - "src/test/takatakReviewApi.test.ts"
+      - "src/test/takatakBridge.test.ts"
+      - ".github/workflows/revew-review-api.yml"
+permissions:
+  contents: read
+concurrency:
+  group: revew-qmaps-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.11"
+      - name: Install pinned dependencies from public tarball mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Preserve the committed versions and integrity hashes. Only two
+          # historical private-cache tarball URLs need a public npm origin.
+          export REVEW_DEPS_DIR="$RUNNER_TEMP/revew-qmaps-deps"
+          mkdir -p "$REVEW_DEPS_DIR"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          target = Path(os.environ['REVEW_DEPS_DIR'])
+          target.joinpath('package.json').write_bytes(Path('package.json').read_bytes())
+          lock = Path('bun.lock').read_text().replace(
+              'https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/',
+              'https://registry.npmjs.org/'
+          )
+          target.joinpath('bun.lock').write_text(lock)
+          PY
+          (cd "$REVEW_DEPS_DIR" && bun install --frozen-lockfile)
+          ln -s "$REVEW_DEPS_DIR/node_modules" node_modules
+      - name: Validate types including executable review adapter tests
+        run: npm run typecheck
+      - name: Lint review boundaries
+        run: npx eslint supabase/functions/_shared/takatak-reviews.ts supabase/functions/_shared/takatak-auth.ts supabase/functions/takatak-list-reviews/index.ts supabase/functions/takatak-reply-review-v2/index.ts supabase/functions/takatak-reply-review/index.ts supabase/functions/takatak-link-business/index.ts src/test/takatakReviewApi.test.ts src/test/takatakBridge.test.ts
+      - name: Run complete QMAPS test suite
+        run: npm run test
+      - name: Build QMAPS frontend
+        run: npm run build

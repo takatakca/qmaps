@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.merchant-reply-review]
 verify_jwt = true
+
+[functions.takatak-list-reviews]
+verify_jwt = false
+
+[functions.takatak-reply-review-v2]
+verify_jwt = false
