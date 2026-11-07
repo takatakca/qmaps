@@ -1,3 +1,5 @@
+2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | active | Revue et intégration séquentielle KLEAN/REVEW, branches anciennes et CI, sans déploiement non vérifié | contrôler contrats puis preuves exactes et notes de fin
+
 # Work log
 
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
