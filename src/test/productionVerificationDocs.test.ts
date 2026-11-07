@@ -21,7 +21,7 @@ describe('Phase 14E — production verification docs', () => {
   it('production-verification-sql.md contains only read-only SELECT queries', () => {
     const content = read('docs/production-verification-sql.md');
     // Extract code fences
-    const blocks = [...content.matchAll(/```sql\n([\s\S]*?)```/g)].map((m) => m[1]);
+    const blocks = [...content.matchAll(/```sql\r?\n([\s\S]*?)```/g)].map((m) => m[1]);
     expect(blocks.length).toBeGreaterThan(0);
 
     const forbidden = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|CREATE)\b/i;

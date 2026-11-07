@@ -10,7 +10,7 @@ async function sha256(value: string): Promise<Uint8Array> {
 export async function integrationAuthorized(request: Request): Promise<boolean> {
   const expected = Deno.env.get("QMAPS_TAKATAK_INTEGRATION_SECRET") ?? "";
   const supplied = request.headers.get("x-qmaps-integration-secret") ?? "";
-  if (!expected || !supplied) return false;
+  if (expected.length < 32 || supplied.length < 32) return false;
   const [left, right] = await Promise.all([sha256(expected), sha256(supplied)]);
   let mismatch = 0;
   for (let i = 0; i < left.length; i += 1) mismatch |= left[i]! ^ right[i]!;

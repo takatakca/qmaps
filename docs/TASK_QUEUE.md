@@ -1,5 +1,25 @@
 # QMAPS — File de tâches priorisée
 
+## Livraison séquentielle — Codex, 2026-11-07 UTC
+
+Source de départ : main `6e73f0f68c1791a3c34c34971b3c6c66f9b0a3cc`. Intégrations successives : PR #7 KLEAN (note historique), REVEW `0fd418b8ac6ed6bedc77520ce8c288b72bdeae68` (API avis), puis SEO `63ef0b53800b0e7857fd0cd9d150dd7ad5a716d0`. Le WORKLOG conserve les notes des agents; aucun squash ni réécriture de leur historique.
+
+- API : lectures, visibilité des IDs suivis et réponses liées au client/commerce actif, avis visibles/trusted non masqués, comparaison atomique du lien existant. Authentification serveur minimale 32 caractères et corps limité. Aucun secret ni migration ajouté. Ces fonctions ne sont PAS déployées par un build du frontend.
+- SEO : métadonnées/canonique de production, recherche non indexable, sitemap de pages publiques, générateur séparé `npm run sitemap:generate`. La génération de données exige un accès explicite au vrai catalogue et n'est pas une condition réseau du build. Routes privées `/projects` et `/search` exclues. Icônes PNG existantes conservées.
+- Conflits Stripe : contrôle actuel `resolveCheckoutReturnOrigin` conservé intégralement (HTTPS/origines exactes); l'ancien helper concurrent et ses tests ne sont pas introduits. Tests actifs des retours conservés.
+- Le build produit désormais `qmaps-release.json` depuis SOURCE_COMMIT, GITHUB_SHA ou le HEAD Git complet; une valeur fournie invalide échoue. Cela permet la même preuve de version via Coolify et SSH.
+- Cible retrouvée : application Coolify 21, UUID `89fbfywlq5aarvqrgbjs2jwp`, contrôleur sur `31.220.96.134`, **destination effective `209.145.49.63`** malgré le nom historique « vps2 ». Nixpacks statique `/dist`, domaines qmaps.ca/www. Ancien conteneur `f48e9db` en service, déploiement du 26 octobre. Ne pas changer la destination sur la base de son nom.
+- Avant livraison, le site répond 200 mais `/qmaps-release.json` retourne du HTML SPA : ce n'est pas une preuve de version. Le pipeline SSH reste skipped. Vérifier CI exacte avant toute publication native et consigner le reçu dans la PR/issue #6.
+- Supabase `ldvkebjfuldnemfdoted` absent des cinq projets connectés. Pas de migration, de fonction, de paiement ni de réponse réelle publiée. Ne pas utiliser un autre projet.
+
+Branches préservées : outbox Claude non intégré car sélection/backfill insuffisants pour le contrat actuel (hidden_at et statuts visible/trusted, événements de suppression à réconcilier). `seo-legal-kit` est une proposition de consentement/SEO distincte avec sept conflits et préférences email non persistées; aucun suivi ajouté/activé ici. Handoff sécurité ancien : suppression .env déjà effective sur main; note historique périmée. Instructions git owner-main anciennes non substituées aux consignes actuelles et à l'autorisation explicite de fusion du propriétaire.
+
+Validation de la combinaison API/SEO : 451 tests passent, typecheck et build passent; lint 0 erreur, 44 avertissements existants. Tests du nouveau manifeste et CI exacte finale à confirmer dans le reçu GitHub. Source et production sont deux preuves séparées.
+
+Signature : Codex — ChatGPT Work.
+
+---
+
 ## État des CI — 16 octobre 2026
 - Dernière modification fonctionnelle validée : `731ba7a9e7f6b0288f8699bb8b1089259343778c`, CI [38943539936](https://github.com/takatakca/qmaps/actions/runs/38943539936) **success**.
 - **Priorité P0 inchangée :** issue #6. La migration de lecture des catégories et les migrations antérieures ne sont pas actives dans la base QMAPS tant qu'un administrateur autorisé ne les a pas installées et vérifiées.

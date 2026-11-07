@@ -1,3 +1,11 @@
+2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | code terminé, CI finale attendue | KLEAN/REVEW/SEO intégrés successivement; protections Stripe conservées, manifeste ajouté; 451 tests préliminaires passent | confirmer tests du manifeste et CI, publier cible existante seulement après sauvegarde et preuve SHA; Supabase reste séparé
+
+2026-11-01 | REVEW | revew/review-api-handoff | DONE / source CI green / not deployed | Add explicit tenant-bound visibility checks for tracked review IDs; no QMAPS outbound review event producer found, so no automatic deletion-sync assumption. | Exact source 9a74033 passed https://github.com/takatakca/qmaps/actions/runs/41299114132 in51s: 442tests, typecheck, lint and productionbuild. Next: authorized Edge Function deployment and V1 exact-ID confirmation acceptance; no production changes — REVEW
+
+2026-11-01 | REVEW | revew/review-api-handoff | DONE / source CI green / not deployed | Implement scoped review pagination and tenant-bound owner reply API for native V1 consumer; no migration/deployment. | 435 tests, full app typecheck, boundary lint and Vite build passed; new read/v2 reply functions and focused CI ready, no production changes. Exact source 6cc23f2 passed https://github.com/takatakca/qmaps/actions/runs/41298309788 in 1m04s; parent reviewed. Next: coordinator review/merge; owner deploys required Edge Functions and validates authorized source round-trip. — REVEW
+
+2026-10-31 | REVEW | revew/review-api-handoff → PR pending | done: documentation handoff; API implementation requested | Owner requested dedicated review/business APIs for the V1 review cockpit; reviewed existing code, recorded missing capabilities, tenant boundaries and acceptance tests in docs/TAKATAK_REVIEW_API_HANDOFF.md; no source/runtime changes | Next: counterpart agent accepts the contract and implements/tests its own APIs; Drive upload blocked by unavailable connector. — REVEW
+
 # Work log
 
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.

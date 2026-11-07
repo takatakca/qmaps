@@ -24,6 +24,31 @@ describe("seo: robots.txt", () => {
     expect(robots).toMatch(/User-agent:\s*\*/i);
     expect(robots).toMatch(/Allow:\s*\//i);
   });
+
+  it("points crawlers to the production sitemap", () => {
+    expect(robots).toContain("Sitemap: https://qmaps.ca/sitemap.xml");
+  });
+
+  it("uses the wildcard exclusions for major search crawlers", () => {
+    expect(robots).not.toMatch(/User-agent:\s*(Googlebot|Bingbot)/i);
+    for (const path of ["/admin", "/merchant", "/settings", "/notifications", "/reset-password"]) {
+      expect(robots).toContain(`Disallow: ${path}`);
+    }
+  });
+});
+
+describe("seo: sitemap.xml", () => {
+  const sitemap = readPublic("sitemap.xml");
+
+  it("uses only the canonical production domain", () => {
+    expect(sitemap).toContain("<loc>https://qmaps.ca/</loc>");
+    expect(sitemap).not.toContain("lovable.app");
+  });
+
+  it("does not submit mutable search results for indexing", () => {
+    expect(sitemap).not.toContain("https://qmaps.ca/search");
+    expect(sitemap).toContain("https://qmaps.ca/services");
+  });
 });
 
 describe("pwa: manifest.webmanifest", () => {

@@ -1,8 +1,10 @@
 import { useEffect } from "react";
+import { buildCanonicalUrl, SITE_ORIGIN } from "@/lib/seo";
 
 const SITE_NAME = "QMaps";
-const DEFAULT_ORIGIN = "https://qmaps.ca";
-export const DEFAULT_OG_IMAGE = "https://qmaps.ca/icons/icon-512.png";
+const DEFAULT_ORIGIN = SITE_ORIGIN;
+export const DEFAULT_OG_IMAGE =
+  `${SITE_ORIGIN}/icons/icon-512.png`;
 
 const upsertMeta = (selector: string, attr: "name" | "property", key: string, content: string) => {
   let el = document.head.querySelector<HTMLMetaElement>(selector);
@@ -60,7 +62,6 @@ const Seo = ({
   noindex = false,
 }: SeoProps) => {
   useEffect(() => {
-    const origin = typeof window !== "undefined" ? window.location.origin : DEFAULT_ORIGIN;
     const fullTitle = title.length > 60 ? title.slice(0, 57) + "..." : title;
     document.title = fullTitle;
 
@@ -81,7 +82,7 @@ const Seo = ({
     upsertMeta("meta[name='twitter:image']", "name", "twitter:image", ogImage);
 
     if (canonicalPath) {
-      const url = canonicalPath.startsWith("http") ? canonicalPath : `${origin}${canonicalPath}`;
+      const url = buildCanonicalUrl(canonicalPath, DEFAULT_ORIGIN);
       upsertCanonical(url);
       upsertMeta("meta[property='og:url']", "property", "og:url", url);
     }

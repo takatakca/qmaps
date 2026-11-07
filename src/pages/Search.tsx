@@ -199,10 +199,11 @@ const Search = () => {
         title={query ? `Recherche : ${query} — QMaps` : "Recherche de commerces — QMaps"}
         description={
           query
-            ? `Résultats pour « ${query} » sur QMaps Montréal.`
-            : "Recherchez des commerces, restaurants et services locaux à Montréal."
+            ? `Résultats pour « ${query} » sur QMaps.`
+            : "Recherchez des commerces, restaurants et services locaux au Québec."
         }
         canonicalPath="/search"
+        noindex
       />
       <div className="px-4 pt-4">
         <SearchBar

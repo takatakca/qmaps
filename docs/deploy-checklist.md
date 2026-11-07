@@ -14,6 +14,8 @@ and `docs/launch-deployment-report.md` (which records the run).
 - [ ] `bun run launch:check` — 16/16 pass
 - [ ] `bun run go:no-go` — decision **GO**
 - [ ] `bun run build` — succeeds
+- [ ] Generated `dist/sitemap.xml` contains active business URLs and only cities
+      with at least three active listings
 - [ ] `docs/launch-deployment-report.md` updated with current results
 - [ ] `docs/final-owner-signoff.md` signed by owner
 - [ ] Manual gates in `docs/launch-deployment-report.md` §3 all signed
@@ -26,7 +28,7 @@ and `docs/launch-deployment-report.md` (which records the run).
 2. Wait for the publish job to finish.
 3. Record the new published version ID in
    `docs/launch-deployment-report.md` §1.
-4. Capture the published URL (e.g. `https://qmaps.lovable.app` or
+4. Capture the published URL (e.g. `https://qmaps.ca` or the configured
    custom domain).
 5. Walk `docs/post-deploy-smoke-test.md` immediately.
 
