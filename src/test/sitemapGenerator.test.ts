@@ -24,6 +24,9 @@ describe("build-time sitemap generation", () => {
     const entries = buildSitemapEntries(businesses);
     const urls = entries.map((entry) => entry.loc);
 
+    expect(urls).not.toContain("https://qmaps.ca/projects");
+    expect(urls).not.toContain("https://qmaps.ca/search");
+    expect(urls).toContain("https://qmaps.ca/privacy");
     expect(urls).toContain("https://qmaps.ca/business/one");
     expect(urls).toContain("https://qmaps.ca/city/montreal");
     expect(urls).not.toContain("https://qmaps.ca/city/laval");

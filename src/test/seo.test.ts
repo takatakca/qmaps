@@ -14,7 +14,7 @@ describe("seo helpers", () => {
   it("uses the production domain for canonical URLs and fallback images", () => {
     expect(SITE_ORIGIN).toBe("https://qmaps.ca");
     expect(buildCanonicalUrl("/search")).toBe("https://qmaps.ca/search");
-    expect(DEFAULT_OG_FALLBACK).toBe("https://qmaps.ca/icons/icon-512.svg");
+    expect(DEFAULT_OG_FALLBACK).toBe("https://qmaps.ca/icons/icon-512.png");
   });
 
   it("builds page title with app name", () => {

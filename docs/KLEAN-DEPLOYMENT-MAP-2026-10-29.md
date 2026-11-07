@@ -1,3 +1,9 @@
+# Historique du 29 octobre 2026 — ne pas utiliser comme état courant
+
+État QMAPS vérifié le 7 novembre : voir AGENT_HANDOFF.md et issue #6. Une application Coolify existante a été retrouvée; les anciens constats de source/hébergement ne sont plus une réception actuelle.
+
+Signature du rectificatif : Codex — ChatGPT Work, 2026-11-07.
+
 # KLEAN — Carte de déploiement — 2026-10-29
 
 Note AVANT / PENDANT / APRÈS, signée KLEAN. Mission déploiement 9/10 lancée 2026-10-29 vers 17:14 EDT.
