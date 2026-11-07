@@ -24,7 +24,7 @@ export const APP_NAME = "QMAPS";
 export const SITE_ORIGIN = "https://qmaps.ca";
 export const DEFAULT_LOCALE = "fr_CA";
 export const DEFAULT_OG_FALLBACK =
-  "https://qmaps.ca/icons/icon-512.png";
+  `${SITE_ORIGIN}/icons/icon-512.png`;
 
 export function buildPageTitle(title: string, appName: string = APP_NAME): string {
   const t = (title ?? "").trim();
