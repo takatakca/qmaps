@@ -1,0 +1,25 @@
+name: QMAPS independent PostgreSQL and API
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  standalone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build QMAPS with upstream PostgreSQL and PostGIS
+        run: |
+          export SERVICE_PASSWORD_POSTGRES="$(openssl rand -hex 32)"
+          export SERVICE_PASSWORD_GATEWAY="$(openssl rand -hex 32)"
+          cat > "$RUNNER_TEMP/qmaps-ci-compose.yml" <<'YAML'
+          services:
+            qmaps-api:
+              ports: ["127.0.0.1:3102:3000"]
+          YAML
+          compose() { docker compose -f compose.qmaps.yaml -f "$RUNNER_TEMP/qmaps-ci-compose.yml" "$@"; }
+          trap 'compose down -v' EXIT
+          compose up --build --wait --wait-timeout 180 || { compose logs --tail 25 qmaps-db qmaps-api; exit 1; }
+          node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }

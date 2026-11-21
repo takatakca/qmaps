@@ -1,0 +1,39 @@
+services:
+  qmaps-db:
+    build:
+      context: .
+      dockerfile: server/Dockerfile.db
+    environment:
+      POSTGRES_DB: qmaps
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:?required}
+      QMAPS_GATEWAY_PASSWORD: ${SERVICE_PASSWORD_GATEWAY:?required}
+    volumes:
+      - qmaps-postgresql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d qmaps"]
+      interval: 8s
+      timeout: 4s
+      retries: 20
+    restart: unless-stopped
+  qmaps-api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      PGHOST: qmaps-db
+      PGDATABASE: qmaps
+      PGUSER: qmaps_gateway
+      PGPASSWORD: ${SERVICE_PASSWORD_GATEWAY:?required}
+    expose: ["3000"]
+    depends_on:
+      qmaps-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:3000/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+volumes:
+  qmaps-postgresql:
