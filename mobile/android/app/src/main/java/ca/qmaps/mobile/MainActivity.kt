@@ -1,6 +1,8 @@
 package ca.qmaps.mobile
 
 import android.app.Activity
+import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.Typeface
@@ -103,6 +105,7 @@ class MainActivity : Activity() {
         for(i in 0 until rows.length()) {
             val row=rows.getJSONObject(i)
             val card=LinearLayout(this).apply {
+                id=R.id.catalogue_place
                 orientation=LinearLayout.VERTICAL;setPadding(dp(12),dp(8),dp(12),dp(8))
                 background=GradientDrawable().apply{setColor(Color.WHITE);cornerRadius=dp(10).toFloat();setStroke(dp(1),Color.LTGRAY)}
                 addView(label(row.getString("name"),18f,true));addView(label(row.optString("city"),14f))
@@ -137,6 +140,14 @@ class MainActivity : Activity() {
         }
     }
     private fun account() {
+        content.addView(action("Supprimer mon compte QMAPS", availableWhileLoading=true) {
+            val url = "https://qmaps.ca/compte/fermeture"
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (_: ActivityNotFoundException) {
+                status.text = "Ouvrez $url dans un navigateur pour supprimer votre compte."
+            }
+        })
         if(vault.read()!=null) {
             content.addView(action("Se déconnecter"){
                 run({api.request("accounts/logout","POST")}){vault.save(null);show("Compte")}

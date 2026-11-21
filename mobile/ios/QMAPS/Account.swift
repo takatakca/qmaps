@@ -33,6 +33,9 @@ struct AccountView: View {
                         catch { message = error.localizedDescription } }
                 }
             }
+            Section("Confidentialité") {
+                Link("Supprimer mon compte QMAPS", destination: URL(string: "https://qmaps.ca/compte/fermeture")!)
+            }
             if loading { ProgressView() }
             if !message.isEmpty { Text(message) }
         }.navigationTitle("Mon compte").disabled(loading)

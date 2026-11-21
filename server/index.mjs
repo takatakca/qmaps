@@ -172,7 +172,29 @@ async function route(req, res) {
   }
   const id = await userFor(pool, authorization);
   const moderation = moderationRoute.exec(path);
-  if ((path === "/v1/console" && method === "GET") || moderation) {
+  if (path === "/v1/me/closure" && ["GET", "POST", "DELETE"].includes(method)) {
+    requireUser(id);
+    if (method === "POST" && (await body(req)).confirmation !== "DELETE")
+      throw new ApiError(400, "Saisissez DELETE pour confirmer la demande");
+    const operation = { GET: "read", POST: "request", DELETE: "cancel" }[
+      method
+    ];
+    try {
+      const result = await scoped(id, (db) =>
+        db.query("SELECT * FROM public.qmaps_account_closure($1)", [operation]),
+      );
+      return reply(res, 200, { request: result.rows[0] || null });
+    } catch (error) {
+      if (error.code === "P0001")
+        throw new ApiError(409, "La demande ne peut plus être annulée");
+      throw error;
+    }
+  }
+  const closures = new RegExp(
+    "^/v1/console/closures(?:/(" + uuid + ")/(start|finish))?$",
+    "i",
+  ).exec(path);
+  if ((path === "/v1/console" && method === "GET") || moderation || closures) {
     requireUser(id);
     const roles = await scoped(id, (db) =>
       db.query(
@@ -181,6 +203,45 @@ async function route(req, res) {
       ),
     );
     if (!roles.rowCount) throw new ApiError(403, "Accès propriétaire requis");
+    if (closures) {
+      if (method === "GET" && !closures[1]) {
+        const result = await scoped(id, (db) =>
+          db.query(
+            "SELECT id,user_id,status,requested_at FROM public.account_deletion_requests WHERE status IN ('pending','processing') ORDER BY requested_at,id",
+          ),
+        );
+        return reply(res, 200, result.rows);
+      }
+      if (method === "POST" && closures[2] === "finish") {
+        if ((await body(req)).confirmation !== closures[1])
+          throw new ApiError(400, "Confirmez le numéro de la demande");
+        const result = await scoped(id, (db) =>
+          db.query("SELECT public.qmaps_finish_closure($1) AS outcome", [
+            closures[1],
+          ]),
+        );
+        const outcome = result.rows[0].outcome;
+        if (outcome !== "completed")
+          throw new ApiError(
+            409,
+            outcome === "review_required"
+              ? "Des données liées doivent être traitées selon la politique de conservation avant la suppression."
+              : "Ce compte ou ce dossier ne peut pas être fermé dans son état actuel.",
+          );
+        return reply(res, 204);
+      }
+      if (method === "POST" && closures[2] === "start") {
+        const result = await scoped(id, (db) =>
+          db.query("SELECT public.qmaps_start_closure($1) AS started", [
+            closures[1],
+          ]),
+        );
+        if (!result.rows[0].started)
+          throw new ApiError(409, "La demande a déjà changé de statut");
+        return reply(res, 204);
+      }
+      throw new ApiError(404, "Introuvable");
+    }
     if (moderation) {
       if (method === "GET" && !moderation[1]) {
         const flagged = await pool.query(

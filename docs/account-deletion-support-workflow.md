@@ -5,6 +5,12 @@ _Phase 10D — usage interne support / admin._
 Ce document décrit la procédure opérationnelle complète pour traiter une
 demande de fermeture de compte enregistrée via `/settings/delete-account`.
 
+### Comptes mobiles sur le PostgreSQL indépendant
+
+Le titulaire ouvre `/compte/fermeture` depuis son navigateur ou depuis **Compte → Supprimer mon compte QMAPS** dans l'application. Il utilise son identifiant QMAPS et peut récupérer son accès avec son code personnel. La console `/console` affiche sa demande et permet sa prise en charge. L'annulation est disponible tant que le traitement n'a pas commencé.
+
+Appliquer la politique de conservation ci-dessous, y compris les vérifications de propriété, de litige et de contenu publié. Dans **Terminer la fermeture**, confirmer le numéro du dossier. La transaction efface les accès, les sessions et les enregistrements privés liés par suppression en cascade. Elle conserve la preuve de traitement. Si d'autres données sont encore liées, la console maintient le dossier ouvert pour leur traitement. Les comptes administrateurs nécessitent au préalable un transfert de leurs responsabilités.
+
 ## 1. Vue d'ensemble
 
 1. L'utilisateur soumet une demande → statut `pending`.

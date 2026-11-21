@@ -4,6 +4,10 @@ import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
+import android.graphics.Bitmap
+import java.io.File
+import ca.qmaps.mobile.R
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -22,17 +26,26 @@ class JourneyInstrumentation : Instrumentation() {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             val activity = startActivitySync(launch)
             try {
-                var interaction: Result<Unit>? = null
-                runOnMainSync {
-                    interaction = runCatching {
-                        val root = activity.window.decorView
-                        check(root.findText("Rechercher") != null) { "Search control missing" }
-                        val accountTab = checkNotNull(root.findText("Compte")) { "Account tab missing" }
-                        check(accountTab.performClick()) { "Account tab did not accept click" }
-                        check(root.findText("Se connecter") != null) { "Sign-in form missing" }
-                    }
+                val root = activity.window.decorView
+                awaitScreen("Catalogue chargé") {
+                    root.findViewById<View>(R.id.catalogue_place)?.isShown == true
                 }
-                checkNotNull(interaction).getOrThrow()
+                capture("accueil")
+                onUi {
+                    check(root.findText("Rechercher") != null)
+                    check(root.findViewById<View>(R.id.catalogue_place).performClick())
+                }
+                awaitScreen("Fiche chargée") {
+                    root.findText("Enregistrer dans mes favoris") != null &&
+                        root.findText("Chargement…") == null
+                }
+                capture("fiche")
+                onUi { check(checkNotNull(root.findText("Compte")).performClick()) }
+                awaitScreen("Compte") {
+                    root.findText("Se connecter") != null &&
+                        root.findText("Supprimer mon compte QMAPS") != null
+                }
+                capture("compte")
             } finally {
                 runOnMainSync { activity.finish() }
             }
@@ -42,6 +55,33 @@ class JourneyInstrumentation : Instrumentation() {
             putString("stream", result.exceptionOrNull()?.stackTraceToString() ?: "Discovery and account verified")
         }
         finish(if (result.isSuccess) Activity.RESULT_OK else Activity.RESULT_CANCELED, response)
+    }
+
+    private fun <T> onUi(operation: () -> T): T {
+        var result: Result<T>? = null
+        runOnMainSync { result = runCatching(operation) }
+        return checkNotNull(result).getOrThrow()
+    }
+
+    private fun awaitScreen(name: String, ready: () -> Boolean) {
+        val deadline = SystemClock.elapsedRealtime() + 45000
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (onUi(ready)) {
+                waitForIdleSync()
+                return
+            }
+            SystemClock.sleep(200)
+        }
+        error("Écran non chargé : $name")
+    }
+
+    private fun capture(name: String) {
+        val shot = checkNotNull(uiAutomation.takeScreenshot()) { "Capture impossible : $name" }
+        try {
+            File(targetContext.cacheDir, "qmaps-$name.png").outputStream().use {
+                check(shot.compress(Bitmap.CompressFormat.PNG, 100, it))
+            }
+        } finally { shot.recycle() }
     }
 
     private fun View.findText(label: String): TextView? {
