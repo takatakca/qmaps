@@ -1,0 +1,5 @@
+FROM postgis/postgis:17-3.5
+COPY supabase/migrations /opt/qmaps/supabase/migrations
+COPY ops/self-host /opt/qmaps/ops/self-host
+COPY server/db /opt/qmaps/server/db
+COPY --chmod=755 server/db/90-qmaps.sh /docker-entrypoint-initdb.d/90-qmaps.sh
