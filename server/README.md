@@ -9,3 +9,26 @@ Le service expose `/v1/health`, `/v1/places`, `/v1/accounts/register`, `/v1/acco
 Pour déployer, choisir **Docker Compose** depuis le dépôt QMAPS dans Coolify, avec `/compose.qmaps.yaml`. Seul le service `qmaps-api`, port 3000, doit recevoir un domaine. Les mots de passe de PostgreSQL et de l’utilisateur applicatif restent dans les variables privées de Coolify. La CI lance la même composition avec des mots de passe éphémères et teste le cycle des comptes, l’isolation des données, les publications commerçantes et les photos.
 
 Les routes `/v1/browser/` utilisent un cookie de session Secure, HttpOnly et SameSite=Strict. Une écriture par navigateur nécessite l’origine HTTPS QMAPS. Les comptes web et mobiles appartiennent au même répertoire. La console lit `/v1/browser/console`, réservé aux administrateurs. Pour le premier propriétaire, vérifier son identifiant auprès de lui, relever son UUID dans PostgreSQL et appliquer `server/db/grant-owner.sql` avec `psql -X -d qmaps -v owner_id=UUID -f grant-owner.sql`. Aucun privilège ne découle de l’inscription.
+
+## Sauvegarde et récupération
+
+La tâche quotidienne Coolify exécute `sh /opt/qmaps/server/db/backup.sh` dans
+`qmaps-db`. Le volume dédié conserve les sept derniers fichiers PostgreSQL au
+format custom, y compris les comptes et les médias. Pour vérifier un fichier
+dans une base temporaire, utiliser `sh /opt/qmaps/server/db/verify-backup.sh /var/backups/qmaps/<archive>.dump`.
+La restauration de vérification s’effectue sur le même cluster pour réutiliser
+les rôles système. Sur un autre serveur, initialiser d’abord le cluster QMAPS,
+puis restaurer dans une base vide avec ces rôles. Une copie hors serveur exige
+une destination indépendante.
+
+## Signature Android
+
+Le service interne `qmaps-signing` possède son propre volume et aucun port
+d’entrée. Dans son terminal Coolify, `qmaps-upload-key init` crée une seule
+clé de téléversement pour le paquet `ca.qmaps.mobile`. Une seconde exécution
+affiche la même empreinte. Le certificat public sert à enregistrer cette clé
+auprès de Google Play. Le fichier PKCS12 et son mot de passe restent sur ce
+volume, accessibles à ses administrateurs. Exporter une sauvegarde privée du
+volume via les contrôles d’hébergement de l’organisation. Le certificat seul
+ne permet pas de signer. Cette clé de téléversement est distincte de la
+clé de distribution gérée par Play App Signing.
