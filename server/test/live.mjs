@@ -131,3 +131,48 @@ await request("/v1/me", "GET", recovery.token, undefined, 401);
 console.log(
   "Independent account lifecycle, customer and merchant permissions, catalogue and media passed.",
 );
+
+const origin = "https://qmaps.ca";
+const browserHandle = "web-" + handle;
+const browserPath = api + "/v1/browser";
+const attempt = (originHeader) =>
+  fetch(browserPath + "/accounts/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: originHeader },
+    body: JSON.stringify({ handle: browserHandle, password }),
+  });
+assert.equal((await attempt("https://example.invalid")).status, 403);
+const registered = await attempt(origin);
+assert.equal(registered.status, 201);
+const cookies = registered.headers.get("set-cookie");
+assert.match(cookies, /HttpOnly/);
+assert.match(cookies, /Secure/);
+assert.match(cookies, /SameSite=Strict/);
+assert.equal((await registered.json()).token, undefined);
+const cookie = cookies.split(";")[0];
+assert.equal(
+  (await fetch(browserPath + "/me", { headers: { Cookie: cookie } })).status,
+  200,
+);
+assert.equal(
+  (await fetch(browserPath + "/console", { headers: { Cookie: cookie } }))
+    .status,
+  403,
+);
+assert.equal((await fetch(browserPath + "/console")).status, 401);
+assert.equal(
+  (
+    await fetch(browserPath + "/accounts/logout", {
+      method: "POST",
+      headers: { Origin: origin, Cookie: cookie },
+    })
+  ).status,
+  204,
+);
+assert.equal(
+  (await fetch(browserPath + "/me", { headers: { Cookie: cookie } })).status,
+  401,
+);
+console.log(
+  "Independent browser sessions, CSRF, role checks and logout passed.",
+);

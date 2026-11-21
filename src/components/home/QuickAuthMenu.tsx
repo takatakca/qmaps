@@ -77,6 +77,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
         </div>
 
         <div className="p-2">
+          <Item icon={UserRound} label="Mon espace QMAPS" onClick={() => go("/compte")} />
           {user ? (
             <>
               <Item icon={UserRound} label={t("publicProfile")} onClick={() => go("/profile")} />
