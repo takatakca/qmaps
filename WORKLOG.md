@@ -1,3 +1,5 @@
+2026-11-21 | Codex — ChatGPT Work | main · lancement autonome | en cours | Décision de Matthieu : QMAPS démarre sur une base neuve de démonstration dans Coolify. L’ancienne base Lovable n’est plus un prérequis. Les livraisons #12, #14, #15 et #16 sont fusionnées. Chaque intervenant signe ici ses modifications avec sa branche, ses vérifications et la prochaine étape | Installer le schéma et la console, vérifier les parcours avec des identités de test, puis basculer le site. Conserver le déploiement précédent pour un retour arrière
+
 2026-11-21 | Codex | codex/collections-galerie → PR #16 | En revue | Collections personnelles et publiques, favoris et galerie de visiteurs sur le schéma existant | CI puis lecture en production. Les API publiques des collections et des photos répondent sur le schéma actuel
 
 2026-11-21 | Codex | codex/liens-commercants → PR #15 | Déployé | Validation des liens web sur les fiches et dans les formulaires commerçants. Livraisons #12 et #14 vérifiées en production | 474 tests réussis, CI verte. Manifeste public 0913ac9 confirmé
