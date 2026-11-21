@@ -6,3 +6,4 @@ psql -X -v ON_ERROR_STOP=1 -v gateway_password="$QMAPS_GATEWAY_PASSWORD" -f /opt
 sh /opt/qmaps/ops/self-host/install.sh
 psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/99-api-grants.sql
 psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/upgrades/001-reviews.sql
+psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/upgrades/002-gallery.sql

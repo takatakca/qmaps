@@ -23,8 +23,16 @@ export async function ownedApi<T>(
     method,
     credentials: "same-origin",
     cache: "no-store",
-    headers: body === undefined ? {} : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    headers:
+      body instanceof Blob || body === undefined
+        ? {}
+        : { "Content-Type": "application/json" },
+    body:
+      body instanceof Blob
+        ? body
+        : body === undefined
+          ? undefined
+          : JSON.stringify(body),
   });
   if (!response.ok) {
     const detail = await response.json().catch(() => ({}));

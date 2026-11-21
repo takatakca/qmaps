@@ -1,3 +1,5 @@
+import PhotoModeration from "@/components/account/PhotoModeration";
+import OwnedGallery from "@/components/account/OwnedGallery";
 import OwnedReviews from "@/components/account/OwnedReviews";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -59,6 +61,7 @@ function Console({ userId }: { userId: string }) {
         })}
       </div>
       <p>Base de données · {status.data.database}</p>
+      <PhotoModeration userId={userId} />
       {version.data && (
         <p>
           Version en ligne ·{" "}
@@ -177,6 +180,11 @@ function Marketplace({ user }: { user: QmapsUser }) {
             {selected.address ? " · " + selected.address : ""}
           </p>
           {selected.description && <p>{selected.description}</p>}
+          <OwnedGallery
+            key={"photos-" + selected.id}
+            place={selected.id}
+            viewer={user.id}
+          />
           <OwnedReviews
             key={selected.id}
             place={selected.id}

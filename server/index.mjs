@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
+import { listPhotos, changePhoto } from "./gallery.mjs";
 import {
   account,
   ApiError,
@@ -22,7 +23,14 @@ const placeRoute = new RegExp(
     ")(?:/(bookmark|guest-settings|waitlist|photos|posts|reviews))?$",
   "i",
 );
-const photoRoute = new RegExp("^/v1/photos/(" + uuid + ")$", "i");
+const moderationRoute = new RegExp(
+  "^/v1/console/photo-reports(?:/(" + uuid + ")/(dismiss|remove))?$",
+  "i",
+);
+const photoRoute = new RegExp(
+  "^/v1/photos/(" + uuid + ")(?:/(cover|report))?$",
+  "i",
+);
 const catalogue =
   "id,name,city,address,description,latitude,longitude,price_level,avg_rating,reviews_count,hours_json";
 function reply(res, status, value) {
@@ -163,7 +171,8 @@ async function route(req, res) {
     return reply(res, 204);
   }
   const id = await userFor(pool, authorization);
-  if (path === "/v1/console" && method === "GET") {
+  const moderation = moderationRoute.exec(path);
+  if ((path === "/v1/console" && method === "GET") || moderation) {
     requireUser(id);
     const roles = await scoped(id, (db) =>
       db.query(
@@ -172,6 +181,39 @@ async function route(req, res) {
       ),
     );
     if (!roles.rowCount) throw new ApiError(403, "Accès propriétaire requis");
+    if (moderation) {
+      if (method === "GET" && !moderation[1]) {
+        const flagged = await pool.query(
+          `SELECT r.photo_id AS id,b.name,count(*)::int AS reports
+           FROM qmaps_private.gallery_reports r JOIN qmaps_private.media m ON m.id=r.photo_id
+           JOIN public.businesses b ON b.id=m.business_id GROUP BY r.photo_id,b.name
+           ORDER BY min(r.created_at),r.photo_id LIMIT 50`,
+        );
+        return reply(res, 200, flagged.rows);
+      }
+      if (method === "POST" && moderation[1]) {
+        await transaction(pool, async (db) => {
+          // Lock the photo before resolving reports so concurrent decisions serialize.
+          first(
+            await db.query(
+              "SELECT id FROM qmaps_private.media WHERE id=$1 FOR UPDATE",
+              [moderation[1]],
+            ),
+          );
+          const reports = await db.query(
+            "DELETE FROM qmaps_private.gallery_reports WHERE photo_id=$1 RETURNING photo_id",
+            [moderation[1]],
+          );
+          first(reports);
+          if (moderation[2] === "remove")
+            await db.query("DELETE FROM qmaps_private.media WHERE id=$1", [
+              moderation[1],
+            ]);
+        });
+        return reply(res, 204);
+      }
+      throw new ApiError(404, "Introuvable");
+    }
     const stats = await pool.query(
       "SELECT (SELECT count(*)::int FROM public.businesses WHERE is_active) AS places, (SELECT count(*)::int FROM qmaps_private.accounts) AS accounts, (SELECT count(*)::int FROM qmaps_private.media) AS media",
     );
@@ -277,7 +319,16 @@ async function route(req, res) {
     return reply(res, 204);
   }
   const photo = photoRoute.exec(path);
-  if (photo && method === "GET") {
+  if (
+    photo &&
+    ((method === "DELETE" && !photo[2]) ||
+      (method === "PUT" && photo[2] === "cover") ||
+      (method === "POST" && photo[2] === "report"))
+  ) {
+    await changePhoto(pool, photo[1], id, photo[2] || "delete");
+    return reply(res, 204);
+  }
+  if (photo && !photo[2] && method === "GET") {
     const value = first(
       await pool.query(
         "SELECT m.mime,m.data FROM qmaps_private.media m JOIN public.businesses b ON b.id=m.business_id AND b.is_active WHERE m.id=$1",
@@ -305,6 +356,17 @@ async function route(req, res) {
             [business],
           ),
         ),
+      ),
+    );
+  if (action === "photos" && method === "GET")
+    return reply(
+      res,
+      200,
+      await listPhotos(
+        pool,
+        business,
+        id,
+        Number(url.searchParams.get("offset") || "0"),
       ),
     );
   if (action === "reviews" && method === "GET") {
