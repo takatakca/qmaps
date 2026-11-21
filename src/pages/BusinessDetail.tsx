@@ -1,3 +1,4 @@
+import { businessWebsite } from "@/lib/businessWebsite";
 import { getCategoryImage } from "@/lib/categoryImages";
 import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
@@ -122,6 +123,7 @@ const BusinessDetail = () => {
     </main>;
   }
 
+  const website = businessWebsite(business.website);
   const seoTitle = `${business.name}${business.city ? ` · ${business.city}` : ""} | QMaps`;
   const seoDescription = (business.description?.trim()
     ? business.description
@@ -132,7 +134,7 @@ const BusinessDetail = () => {
     name: business.name,
     image: business.image_url || undefined,
     telephone: business.phone || undefined,
-    url: business.website || `${typeof window !== "undefined" ? window.location.origin : ""}/business/${business.id}`,
+    url: website || `${typeof window !== "undefined" ? window.location.origin : ""}/business/${business.id}`,
     address: {
       "@type": "PostalAddress",
       streetAddress: business.address,
@@ -187,7 +189,7 @@ const BusinessDetail = () => {
         categoryName={categoryNameFromEmbed(business, "Commerce")}
         isOpen={isBusinessOpenNow(business)}
         hours={business.hours}
-        website={business.website}
+        website={website}
         phone={business.phone}
         onWriteReview={() => { if (!user) navigate("/auth"); else setActiveTab("Avis"); }}
         onViewHours={() => {
@@ -250,7 +252,7 @@ const BusinessDetail = () => {
             specialHours={(business).special_hours}
             isOpen={isBusinessOpenNow(business)}
             status={readBusinessStatus(business)}
-            website={business.website}
+            website={website}
             phone={business.phone}
             address={business.address}
             city={business.city}
