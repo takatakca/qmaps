@@ -43,11 +43,12 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
+            adb shell input keyevent KEYCODE_WAKEUP
+            adb shell wm dismiss-keyguard
             adb install mobile/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -W -n ca.qmaps.mobile/.MainActivity
             adb shell pidof ca.qmaps.mobile
-            adb shell uiautomator dump /sdcard/qmaps-ui.xml
-            adb shell cat /sdcard/qmaps-ui.xml | grep -q Découvrir
+            sh mobile/android/verify-ui.sh
       - name: Sign the production Android bundle when owner signing is available
         if: github.event_name != 'pull_request'
         working-directory: mobile/android
