@@ -5,6 +5,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "ca.qmaps.mobile"
+        testInstrumentationRunner = "ca.qmaps.mobile.test.JourneyInstrumentation"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

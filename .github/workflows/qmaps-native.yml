@@ -19,7 +19,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build APK and bundle
         working-directory: mobile/android
-        run: ./gradlew --no-daemon assembleDebug bundleRelease
+        run: ./gradlew --no-daemon assembleDebug assembleDebugAndroidTest bundleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: QMAPS-Android-test-APK
@@ -48,7 +48,15 @@ jobs:
             adb install mobile/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -W -n ca.qmaps.mobile/.MainActivity
             adb shell pidof ca.qmaps.mobile
+            adb install mobile/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
             sh mobile/android/verify-ui.sh
+            adb shell am start -W -n ca.qmaps.mobile/.MainActivity
+            adb exec-out screencap -p > QMAPS-Android-accueil.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QMAPS-Android-capture
+          path: QMAPS-Android-accueil.png
+          if-no-files-found: error
       - name: Sign the production Android bundle when owner signing is available
         if: github.event_name != 'pull_request'
         working-directory: mobile/android
