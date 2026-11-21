@@ -10,7 +10,7 @@ const enhanceItems = [
   { icon: Link2, label: "QMAPS Connect", route: "/merchant/connect", locked: false },
   { icon: MousePointerClick, label: "Appel à l'action", route: "/merchant/cta", locked: false },
   { icon: Sparkles, label: "Points forts", route: "/merchant/highlights", locked: false },
-  { icon: Image, label: "Logo", route: "/merchant/photos", locked: false },
+  { icon: Image, label: "Logo", route: "/merchant/highlights", locked: false },
   { icon: Film, label: "Diaporama", route: "/merchant/photos", locked: true },
   { icon: ShieldX, label: "Retirer pubs concurrents", route: "/merchant/optimization", locked: true },
 ];

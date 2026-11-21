@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search as SearchIcon } from "lucide-react";
-import { normalizeSearchText } from "@/lib/searchFilters";
+import { normalizeSearchText, serviceFilters } from "@/lib/searchFilters";
 
 interface CategoryOption {
   id: string;
@@ -19,6 +19,8 @@ interface SearchFiltersSheetProps {
   selectedCategory: string;
   selectedPrice: number[];
   minRating: number | null;
+  services: string[];
+  onToggleService: (key: string) => void;
   openNow: boolean;
   radiusKm: number;
   onCategoryChange: (slug: string) => void;
@@ -40,6 +42,8 @@ const SearchFiltersSheet = ({
   selectedCategory,
   selectedPrice,
   minRating,
+  services,
+  onToggleService,
   openNow,
   radiusKm,
   onCategoryChange,
@@ -135,6 +139,13 @@ const SearchFiltersSheet = ({
             </div>
           </section>
 
+          <fieldset>
+            <legend className="mb-2 text-sm font-semibold">Services offerts</legend>
+            <div className="grid gap-2">{serviceFilters.map(option => <label key={option.key} className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={services.includes(option.key)} onChange={() => onToggleService(option.key)} />
+              {option.label}
+            </label>)}</div>
+          </fieldset>
           <section>
             <h3 className="mb-2 text-sm font-semibold text-foreground">Note minimale</h3>
             <div className="flex flex-wrap gap-2">

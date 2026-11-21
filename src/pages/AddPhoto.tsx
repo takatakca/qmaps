@@ -62,7 +62,7 @@ const AddPhoto = () => {
             </div>
             <Textarea placeholder="Ajouter une légende facultative..." value={caption} onChange={(e) => setCaption(e.target.value)} rows={3} />
             <div className="flex gap-2">
-              <BusinessMediaUploader businessId={selectedBusiness.id} userId={user.id} kind="business" onUploaded={() => navigate(`/business/${selectedBusiness.id}`)} />
+              <BusinessMediaUploader businessId={selectedBusiness.id} userId={user.id} kind="business" caption={caption} onUploaded={() => navigate(`/business/${selectedBusiness.id}`)} />
               <Button variant="outline" className="rounded-full" onClick={() => setSelectedBusiness(null)}>Changer</Button>
             </div>
           </div>

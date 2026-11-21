@@ -6,6 +6,9 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+type MailParticipants = { business_id: string; merchant_id: string; customer_id: string };
+type MailRow = MailParticipants & { id: string; body: string; created_at: string; author_id: string };
+
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
@@ -14,6 +17,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_endorsements: {
+        Row: { business_id: string; user_id: string; recommended: boolean }
+        Insert: { business_id: string; recommended: boolean }
+        Update: { recommended?: boolean }
+        Relationships: []
+      }
+      business_mail: {
+        Row: MailRow
+        Insert: MailParticipants & { id: string; body: string }
+        Update: never
+        Relationships: []
+      }
+      guest_services: {
+        Row: { business_id: string; reservations: boolean; waitlist: boolean }
+        Insert: { business_id: string; reservations?: boolean; waitlist?: boolean }
+        Update: { reservations?: boolean; waitlist?: boolean }
+        Relationships: []
+      }
+      guest_requests: {
+        Row: {
+          id: string; business_id: string; user_id: string; kind: "reservation" | "waitlist"; guest_name: string
+          party_size: number; requested_time: string | null; status: "pending" | "accepted" | "declined" | "cancelled" | "completed"; created_at: string
+        }
+        Insert: { business_id: string; kind: "reservation" | "waitlist"; guest_name: string; party_size: number; requested_time?: string | null }
+        Update: { status?: "pending" | "accepted" | "declined" | "cancelled" | "completed" }
+        Relationships: []
+      }
+      business_content: {
+        Row: {
+          id: string
+          business_id: string
+          kind: "action" | "post"
+          title: string
+          body: string
+          link_url: string | null
+          is_published: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          kind: "action" | "post"
+          title: string
+          body?: string
+          link_url?: string | null
+          is_published?: boolean
+          created_at?: string
+        }
+        Update: {
+          title?: string
+          body?: string
+          link_url?: string | null
+          is_published?: boolean
+        }
+        Relationships: [{
+          foreignKeyName: "business_content_business_id_fkey"
+          columns: ["business_id"]
+          isOneToOne: false
+          referencedRelation: "businesses"
+          referencedColumns: ["id"]
+        }]
+      }
       account_deletion_request_events: {
         Row: {
           actor_user_id: string | null
@@ -539,6 +604,10 @@ export type Database = {
       }
       businesses: {
         Row: {
+          business_history: string | null
+          founding_year: number | null
+          logo_url: string | null
+          profile_highlights: string[]
           accessibility: string[]
           address: string
           amenities: string[] | null
@@ -576,6 +645,10 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          business_history?: string | null
+          founding_year?: number | null
+          logo_url?: string | null
+          profile_highlights?: string[]
           accessibility?: string[]
           address: string
           amenities?: string[] | null
@@ -613,6 +686,10 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          business_history?: string | null
+          founding_year?: number | null
+          logo_url?: string | null
+          profile_highlights?: string[]
           accessibility?: string[]
           address?: string
           amenities?: string[] | null
@@ -1996,6 +2073,10 @@ export type Database = {
       }
     }
     Views: {
+      business_mail_threads: {
+        Row: Omit<MailRow, "author_id"> & { business_name: string }
+        Relationships: []
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null

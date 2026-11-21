@@ -1,10 +1,15 @@
 import { getCategoryImage } from "@/lib/categoryImages";
 import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
+import { highlights } from "@/lib/profileHighlights";
+import { publicContentUrl } from "@/lib/businessContent";
+import ListingMedia from "@/components/media/ListingMedia";
+import GuestRequests from "@/components/business/GuestRequests";
+import BusinessContentFeed from "@/components/business/BusinessContentFeed";
 import BusinessHero from "@/components/business/BusinessHero";
 import BusinessActions from "@/components/business/BusinessActions";
 import BusinessMenuTab from "@/components/business/BusinessMenuTab";
@@ -33,35 +38,41 @@ type Tab = typeof tabs[number];
 
 const BusinessDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  return <Listing key={id + (user?.id ?? "")} />;
+};
+
+const Listing = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
   const [reviews, setReviews] = useState<(Tables<"reviews"> & { profiles?: { display_name: string | null } })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bookmarked, setBookmarked] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>("Menu");
+  const [params] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(params.get("tab") === "reviews" ? "Avis" : "Menu");
+  const [readError, setReadError] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [claimOpen, setClaimOpen] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
-    const [{ data: biz }, revs] = await Promise.all([
-      supabase.from("businesses").select("*, business_categories(categories(name))").eq("id", id).maybeSingle(),
-      fetchReviewsWithAuthors(id),
-    ]);
-    setBusiness(biz);
-    setReviews((revs) || []);
-
-    if (user) {
-      const [{ data: bk }, { data: profile }] = await Promise.all([
-        supabase.from("bookmarks").select("id").eq("user_id", user.id).eq("business_id", id).maybeSingle(),
-        supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+    setReadError(false);
+    try {
+      const [{ data: biz, error }, revs] = await Promise.all([
+        supabase.from("businesses").select("*, business_categories(categories(name))").eq("id", id).maybeSingle(),
+        fetchReviewsWithAuthors(id),
       ]);
-      setBookmarked(!!bk);
-      setUserName(profile?.display_name || null);
-    }
-    setLoading(false);
+      if (error) throw error;
+      setBusiness(biz);
+      setReviews((revs) || []);
+
+      if (user) {
+        const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
+        setUserName(profile?.display_name || null);
+      }
+    } catch { setReadError(true); } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, [id, user]);
@@ -83,31 +94,11 @@ const BusinessDetail = () => {
     }
   }, [business?.id, business?.city]);
 
-  const handleBookmark = async () => {
-    if (!user) { navigate("/auth"); return; }
-    if (!id) return;
-    if (bookmarked) {
-      await supabase.from("bookmarks").delete().eq("user_id", user.id).eq("business_id", id);
-      setBookmarked(false);
-      trackRecommendationEvent({
-        business_id: id,
-        event_type: "bookmark_remove",
-        source: "business_detail",
-        city: business?.city ?? null,
-      });
-    } else {
-      await supabase.from("bookmarks").insert({ user_id: user.id, business_id: id });
-      setBookmarked(true);
-      trackBusinessEvent(id, "save_click", { source: "business_detail" });
-      trackRecommendationEvent({
-        business_id: id,
-        event_type: "bookmark_add",
-        source: "business_detail",
-        city: business?.city ?? null,
-      });
-    }
-  };
-
+  if (!loading && (readError || !business)) return <main className="p-6 space-y-3">
+    <h1>{readError ? "Impossible de charger la fiche" : "Fiche introuvable"}</h1>
+    {readError && <Button onClick={fetchData}>Réessayer</Button>}
+    <Link to="/search" className="block text-primary underline">Retour à la recherche</Link>
+  </main>;
   if (loading || !business) {
     return (
       <div className="min-h-screen bg-background max-w-lg mx-auto">
@@ -173,8 +164,7 @@ const BusinessDetail = () => {
         reviewsCount={business.reviews_count}
         isClaimed={business.is_claimed}
         photosCount={(business.photos || []).length}
-        bookmarked={bookmarked}
-        onBookmark={handleBookmark}
+        businessId={business.id}
       />
       {/* hidden link kept for SSR-friendly category link */}
       {business.city && (
@@ -185,7 +175,7 @@ const BusinessDetail = () => {
       <BusinessActions
         businessId={business.id}
         priceLevel={business.price_level}
-        categoryName=""
+        categoryName={categoryNameFromEmbed(business)}
         isOpen={isBusinessOpenNow(business)}
         hours={business.hours}
         website={business.website}
@@ -199,6 +189,17 @@ const BusinessDetail = () => {
         }}
       />
 
+      {(business.logo_url || business.business_history || business.founding_year || business.profile_highlights?.length > 0) &&
+        <section className="mx-4 mt-4 space-y-2 rounded-xl border p-4">
+          <h2 className="font-heading font-semibold">Du propriétaire</h2>
+          {publicContentUrl(business.logo_url) && <img src={publicContentUrl(business.logo_url)} alt={`Logo de ${business.name}`} className="h-14 max-w-full object-contain" />}
+          {business.founding_year && <p>En activité depuis {business.founding_year}</p>}
+          {business.business_history && <p className="whitespace-pre-line break-words">{business.business_history}</p>}
+          {!!business.profile_highlights?.length && <ul className="flex flex-wrap gap-2">{business.profile_highlights.filter(id=>Object.prototype.hasOwnProperty.call(highlights,id)).map(id =>
+            <li className="rounded-full border px-2 py-1 text-xs" key={id}>{highlights[id]}</li>)}</ul>}
+        </section>}
+      <BusinessContentFeed key={business.id} businessId={business.id} />
+      <GuestRequests key={"guest-" + business.id} businessId={business.id} />
       <BusinessTrustBadges business={business} />
 
       {!business.is_claimed && (!user || business.owner_user_id !== user.id) && (
@@ -242,7 +243,7 @@ const BusinessDetail = () => {
       <div className="px-4 pt-4">
         {activeTab === "Menu" && <BusinessMenuTab businessId={business.id} />}
         {activeTab === "Demander" && (
-          <BusinessAskTab businessName={business.name} isClaimed={business.is_claimed} />
+          <BusinessAskTab businessName={business.name} businessId={business.id} merchantId={business.owner_user_id} />
         )}
         {activeTab === "Info" && (
           <BusinessInfoTab
@@ -282,15 +283,15 @@ const BusinessDetail = () => {
 
       {/* Vibe section or photo empty-state */}
       {(business.photos || []).length > 0 ? (
-        <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
+        <div id="business-photos"><BusinessVibeSection photos={business.photos || []} amenities={business.amenities} /></div>
       ) : (
         <div className="px-4 py-6 border-t border-border bg-secondary/30 text-center">
-          <p className="text-sm font-medium text-foreground">Aucune photo pour le moment</p>
+          <p className="text-sm font-medium text-foreground">Aucune photo du propriétaire pour le moment</p>
           {user && business.owner_user_id === user.id ? (
             <>
               <p className="text-xs text-muted-foreground mt-1">Mettez en valeur votre commerce avec quelques photos.</p>
               <button
-                onClick={() => navigate("/merchant/business-info")}
+                onClick={() => navigate("/merchant/photos")}
                 className="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
               >
                 Ajouter des photos
@@ -304,6 +305,7 @@ const BusinessDetail = () => {
         </div>
       )}
 
+      <ListingMedia key={business.id} businessId={business.id} />
       {/* Similar businesses (Phase 9F) */}
       <SimilarBusinessesSection businessId={business.id} />
 
@@ -311,7 +313,7 @@ const BusinessDetail = () => {
       <BusinessNearbySection currentBusinessId={business.id} city={business.city} isClaimed={business.is_claimed} />
 
       {/* Report listing */}
-      <div className="px-4 mt-4 flex justify-center">
+      <div id="report-business" className="px-4 mt-4 flex justify-center">
         <ReportButton targetType="business" targetId={business.id} variant="ghost" />
       </div>
 

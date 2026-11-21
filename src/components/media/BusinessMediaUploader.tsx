@@ -4,15 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
+const extensions: Record<string, string> = {
+  "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "image/avif": "avif",
+  "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov",
+};
+
 interface BusinessMediaUploaderProps {
   businessId: string;
   userId: string;
   kind: "review" | "business";
   reviewId?: string;
+  caption?: string;
   onUploaded?: (urls: string[]) => void;
 }
 
-const BusinessMediaUploader = ({ businessId, userId, kind, reviewId, onUploaded }: BusinessMediaUploaderProps) => {
+const BusinessMediaUploader = ({ businessId, userId, kind, reviewId, caption, onUploaded }: BusinessMediaUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -25,14 +31,15 @@ const BusinessMediaUploader = ({ businessId, userId, kind, reviewId, onUploaded 
 
     try {
       for (const file of Array.from(files)) {
-        const ext = file.name.split(".").pop() || "jpg";
-        const folder = kind === "review" ? "review-photos" : "business-user-media";
-        const path = `${folder}/${businessId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const ext = extensions[file.type];
+        if (!ext) throw new Error("Format de média non pris en charge.");
+        if (kind === "review" && !reviewId) throw new Error("Choisissez d’abord votre avis.");
+        const folder = kind === "review" ? `review-photos/${reviewId}` : `customer-media/${userId}/${businessId}`;
+        const path = `${folder}/${crypto.randomUUID()}.${ext}`;
         const { error: uploadError } = await supabase.storage.from("photos").upload(path, file);
         if (uploadError) throw uploadError;
 
         const { data } = supabase.storage.from("photos").getPublicUrl(path);
-        uploadedUrls.push(data.publicUrl);
 
         if (kind === "review" && reviewId) {
           const { error } = await supabase.from("review_photos").insert({
@@ -46,6 +53,7 @@ const BusinessMediaUploader = ({ businessId, userId, kind, reviewId, onUploaded 
 
         if (kind === "business") {
           const { error } = await supabase.from("business_photos").insert({
+            caption: caption?.trim() || null,
             business_id: businessId,
             user_id: userId,
             url: data.publicUrl,
@@ -53,13 +61,14 @@ const BusinessMediaUploader = ({ businessId, userId, kind, reviewId, onUploaded 
           });
           if (error) throw error;
         }
+        uploadedUrls.push(data.publicUrl);
       }
 
       onUploaded?.(uploadedUrls);
       toast({ title: kind === "review" ? "Photos ajoutées" : "Photo publiée" });
     } catch (error) {
       toast({
-        title: "Erreur d'envoi",
+        title: uploadedUrls.length ? `${uploadedUrls.length} média(s) publié(s) avant l’interruption` : "Erreur d’envoi",
         description: error instanceof Error ? error.message : "Impossible de téléverser le média.",
         variant: "destructive",
       });
@@ -73,7 +82,7 @@ const BusinessMediaUploader = ({ businessId, userId, kind, reviewId, onUploaded 
     <Button variant="outline" size="sm" className="relative rounded-full">
       {uploading ? <Loader2 className="mr-1 animate-spin" /> : <Upload className="mr-1" />}
       Ajouter média
-      <input type="file" multiple accept="image/*,video/*" onChange={handleUpload} disabled={uploading} className="absolute inset-0 cursor-pointer opacity-0" />
+      <input type="file" multiple accept={Object.keys(extensions).join(",")} onChange={handleUpload} disabled={uploading} className="absolute inset-0 cursor-pointer opacity-0" />
     </Button>
   );
 };

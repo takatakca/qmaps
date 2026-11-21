@@ -17,7 +17,8 @@ import {
   sortBusinesses,
   SORT_OPTIONS,
   type SortOption,
-  isBusinessOpenNow,
+  filterBusinesses,
+  serviceFilters,
   normalizeSearchText,
 } from "@/lib/searchFilters";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
@@ -30,6 +31,8 @@ const Search = () => {
 
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
   const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [searchFailed,setSearchFailed] = useState(false);
+  const [attempt,setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -38,6 +41,8 @@ const Search = () => {
   const [selectedCategory, setSelectedCategory] = useState(categorySlug);
   const [selectedPrice, setSelectedPrice] = useState<number[]>([]);
   const [minRating, setMinRating] = useState<number | null>(null);
+  const servicesKey = searchParams.getAll("service").sort().join("|");
+  const services = useMemo(() => serviceFilters.map(f => f.key).filter(key => servicesKey.split("|").includes(key)), [servicesKey]);
   const [openNow, setOpenNow] = useState(false);
   const [radiusKm, setRadiusKm] = useState(5);
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
@@ -56,9 +61,11 @@ const Search = () => {
   }, []);
 
   useEffect(() => {
+    let active = true;
     const fetchBusinesses = async () => {
       setLoading(true);
-      let q = supabase.from("businesses").select("*, business_categories(categories(name))");
+      setSearchFailed(false);
+      let q = supabase.from("businesses").select("*, business_categories(categories(name))").eq("is_active", true);
 
       // Broader text matching across name, city and description
       if (query) {
@@ -97,14 +104,16 @@ const Search = () => {
       const catIds = resolveCategoryIds();
       let businessIdsFromCategory: string[] | null = null;
       if (catIds.length > 0) {
-        const { data: bcData } = await supabase
+        const { data: bcData, error: categoryError } = await supabase
           .from("business_categories")
           .select("business_id")
           .in("category_id", catIds);
+        if (categoryError) throw categoryError;
         businessIdsFromCategory = Array.from(new Set((bcData || []).map((bc) => bc.business_id)));
         if (selectedCategory) {
           // Strict filter when user explicitly picked a category
           if (businessIdsFromCategory.length === 0) {
+            if (!active) return;
             setBusinesses([]);
             setLoading(false);
             return;
@@ -114,7 +123,8 @@ const Search = () => {
       }
 
       q = q.order("avg_rating", { ascending: false });
-      const { data } = await q;
+      const { data, error } = await q;
+      if (error) throw error;
       let results = data || [];
 
       // If query had no name/city/description hits but matched categories, union those businesses
@@ -122,18 +132,16 @@ const Search = () => {
         const have = new Set(results.map((b) => b.id));
         const missing = businessIdsFromCategory.filter((id) => !have.has(id));
         if (missing.length > 0) {
-          const { data: extra } = await supabase
+          const { data: extra, error: extraError } = await supabase
             .from("businesses")
             .select("*, business_categories(categories(name))")
-            .in("id", missing);
+            .in("id", missing).eq("is_active", true);
+          if (extraError) throw extraError;
           if (extra) results = [...results, ...extra];
         }
       }
 
-      // Client-side openNow using real hours when available
-      if (openNow) {
-        results = results.filter((b) => isBusinessOpenNow(b));
-      }
+      results = filterBusinesses(results, { openNow, minRating, priceLevels: selectedPrice, amenities: services });
 
       // Distance scoping
       const scoped = query || !nearbyBusinesses.length
@@ -142,11 +150,15 @@ const Search = () => {
             const nearby = nearbyBusinesses.find((item) => item.id === business.id);
             return !nearby || ((nearby.distance_meters || 0) <= radiusKm * 1000);
           });
+      if (!active) return;
       setBusinesses(scoped as Tables<"businesses">[]);
       setLoading(false);
     };
-    fetchBusinesses();
-  }, [query, selectedCategory, selectedPrice, minRating, openNow, radiusKm, categories, allCategories, nearbyBusinesses]);
+    void fetchBusinesses().catch(() => {
+      if (active) { setBusinesses([]); setSearchFailed(true); setLoading(false); }
+    });
+    return () => { active = false; };
+  }, [attempt, services, query, selectedCategory, selectedPrice, minRating, openNow, radiusKm, categories, allCategories, nearbyBusinesses]);
 
   const clearFilters = () => {
     setSelectedCategory("");
@@ -157,6 +169,7 @@ const Search = () => {
     // Also clear URL category param so refresh keeps cleared state
     const next = new URLSearchParams(searchParams);
     next.delete("category");
+    next.delete("service");
     setSearchParams(next, { replace: true });
   };
 
@@ -173,6 +186,7 @@ const Search = () => {
   };
 
   const activeFiltersCount =
+    services.length +
     (selectedCategory ? 1 : 0) +
     (selectedPrice.length > 0 ? 1 : 0) +
     (minRating ? 1 : 0) +
@@ -251,6 +265,14 @@ const Search = () => {
           selectedCategory={selectedCategory}
           selectedPrice={selectedPrice}
           minRating={minRating}
+          services={services}
+          onToggleService={key => {
+            const next = new URLSearchParams(searchParams);
+            next.delete("service");
+            const toggled = services.some(s => s === key) ? services.filter(s => s !== key) : [...services,key];
+            for (const value of toggled) next.append("service",value);
+            setSearchParams(next, {replace:true});
+          }}
           openNow={openNow}
           radiusKm={radiusKm}
           onCategoryChange={handleCategoryChange}
@@ -273,7 +295,7 @@ const Search = () => {
             <p className="text-sm text-muted-foreground">
               {loading
                 ? "Recherche..."
-                : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}`}
+                : searchFailed ? "Recherche indisponible" : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}`}
             </p>
             <select
               aria-label="Trier les résultats"
@@ -327,7 +349,8 @@ const Search = () => {
               </div>
             )}
 
-            {!loading && businesses.length === 0 && (
+            {searchFailed && <Button variant="outline" onClick={()=>setAttempt(n=>n+1)}>Réessayer la recherche</Button>}
+            {!loading && !searchFailed && businesses.length === 0 && (
               <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
                 <div className="text-center">
                   <p className="font-heading text-base font-semibold text-foreground">

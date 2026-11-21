@@ -118,3 +118,14 @@ describe("sortBusinesses", () => {
     expect(sortBusinesses(list, "recommended")[0].id).toBe("c");
   });
 });
+
+describe("merchant service filters", () => {
+  it("honours an explicit removal even if an old listing still has the flat label", () => {
+    const row = make({ attributes: { boolean: { "Offers Delivery": false } }, amenities: ["Offers Delivery"] });
+    expect(matchesAmenityFilter(row, ["Offers Delivery"])).toBe(false);
+  });
+  it("finds a service in both legacy and structured listings", () => {
+    const rows = [make({ id: "old", amenities: ["Offers Takeout"] }), make({ id: "new", attributes: { boolean: { "Offers Takeout": true } } })];
+    expect(filterBusinesses(rows,{amenities:["Offers Takeout"]}).map(b=>b.id)).toEqual(["old","new"]);
+  });
+});

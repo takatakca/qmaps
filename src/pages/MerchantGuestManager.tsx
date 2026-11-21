@@ -1,63 +1,175 @@
-import { Link } from "react-router-dom";
-import { CalendarDays, Mail, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import OwnedBusinessPanel from "@/components/merchant/OwnedBusinessPanel";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  guestServices,
+  guestDescription,
+  statusLabel,
+  changeGuestStatus,
+  type GuestRequest,
+} from "@/lib/guestRequests";
 import { Button } from "@/components/ui/button";
-import MerchantPageHeader from "@/components/merchant/layout/MerchantPageHeader";
-import Seo from "@/components/Seo";
 
-/**
- * QMAPS Guest Manager has no deployed booking backend at present.
- * Never collect a lead and report "sent" locally or display unverified
- * prices, testimonials or network reach as if reservations were live.
- */
-const MerchantGuestManager = () => (
-  <main className="min-h-screen bg-background max-w-lg mx-auto pb-12">
-    <Seo
-      title="QMAPS Guest Manager — information"
-      description="Renseignements sur le projet de gestion de réservations QMAPS."
-      noindex
-    />
-    <MerchantPageHeader title="QMAPS Guest Manager" back="/merchant/more" />
-
-    <div className="px-5 py-10 space-y-7">
-      <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-        <CalendarDays size={36} className="text-primary" aria-hidden="true" />
-        <h1 className="font-heading text-2xl font-bold text-foreground">
-          Gestion des réservations — en préparation
-        </h1>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Le service QMAPS Guest Manager n'est pas encore activé.
-          Cette page ne permet pas actuellement de recevoir, confirmer ou gérer des réservations.
-        </p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Aucun forfait Guest Manager ne peut être souscrit ici et aucune demande n'est
-          enregistrée automatiquement lorsque vous consultez cette présentation.
-        </p>
-      </div>
-
-      <section className="rounded-2xl border border-border p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <Mail size={21} className="text-primary" aria-hidden="true" />
-          <h2 className="font-heading text-lg font-bold text-foreground">Vous souhaitez en savoir plus?</h2>
+function GuestDesk({
+  businessId,
+  userId,
+}: {
+  businessId: string;
+  userId: string;
+}) {
+  const cache = useQueryClient();
+  const [page, setPage] = useState(0);
+  const settings = useQuery({
+    queryKey: ["guest-services", businessId, userId],
+    queryFn: () => guestServices(businessId),
+  });
+  const queue = useQuery({
+    queryKey: ["guest-queue", businessId, userId, page],
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("guest_requests")
+        .select("*")
+        .eq("business_id", businessId)
+        .in("status", ["pending", "accepted"])
+        .order("created_at")
+        .order("id")
+        .range(page * 20, page * 20 + 20);
+      if (error) throw error;
+      return data;
+    },
+  });
+  const config = useMutation({
+    mutationFn: async (field: "reservations" | "waitlist") => {
+      const table = supabase.from("guest_services");
+      const values = { [field]: !settings.data?.[field] };
+      const result = settings.data
+        ? await table
+            .update(values)
+            .eq("business_id", businessId)
+            .select("business_id")
+            .single()
+        : await table
+            .insert({ business_id: businessId, ...values })
+            .select("business_id")
+            .single();
+      if (result.error) throw result.error;
+    },
+    onSettled: () =>
+      cache.invalidateQueries({ queryKey: ["guest-services", businessId] }),
+  });
+  const transition = useMutation({
+    mutationFn: ({
+      row,
+      status,
+    }: {
+      row: GuestRequest;
+      status: GuestRequest["status"];
+    }) => changeGuestStatus(row, status),
+    onSettled: async () => {
+      setPage(0);
+      await cache.invalidateQueries({ queryKey: ["guest-queue", businessId] });
+    },
+  });
+  return (
+    <div className="space-y-4">
+      <h2 className="font-semibold">Demandes acceptées sur la fiche</h2>
+      {settings.isError ? (
+        <Button onClick={() => settings.refetch()}>
+          Réessayer de charger les réglages
+        </Button>
+      ) : (
+        <div className="space-y-2">
+          {(["reservations", "waitlist"] as const).map((field) => (
+            <label key={field} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!settings.data?.[field]}
+                disabled={settings.isPending || config.isPending}
+                onChange={() => config.mutate(field)}
+              />
+              {field === "reservations"
+                ? "Réservations sur demande"
+                : "Liste d’attente"}
+            </label>
+          ))}
         </div>
-        <p className="text-sm text-muted-foreground">
-          Consultez la page officielle de contact QMAPS pour obtenir les coordonnées et
-          préparer un courriel. Le message ne sera pas envoyé sans votre intervention.
+      )}
+      {config.isError && (
+        <p role="alert">Le réglage n’a pas pu être enregistré.</p>
+      )}
+      <h2 className="font-semibold">Demandes en cours</h2>
+      {queue.isPending ? (
+        <p>Chargement…</p>
+      ) : queue.isError ? (
+        <Button onClick={() => queue.refetch()}>Recharger les demandes</Button>
+      ) : !queue.data.length ? (
+        <p>Aucune demande sur cette page.</p>
+      ) : (
+        queue.data.slice(0, 20).map((row) => (
+          <article key={row.id} className="rounded-xl border p-3 space-y-2">
+            <h3 className="font-semibold">{row.guest_name}</h3>
+            <p>{guestDescription(row)}</p>
+            <p>{statusLabel[row.status]}</p>
+            <div className="flex flex-wrap gap-2">
+              {(row.status === "pending"
+                ? (["accepted", "declined"] as const)
+                : (["completed", "cancelled"] as const)
+              ).map((status) => (
+                <Button
+                  key={status}
+                  variant="outline"
+                  disabled={transition.isPending}
+                  onClick={() => transition.mutate({ row, status })}
+                >
+                  {
+                    {
+                      accepted: "Accepter",
+                      declined: "Refuser",
+                      completed: "Terminer",
+                      cancelled: "Annuler",
+                    }[status]
+                  }
+                </Button>
+              ))}
+            </div>
+          </article>
+        ))
+      )}
+      {transition.isError && (
+        <p role="alert">
+          La demande a changé ou l’enregistrement a échoué. Vérifiez son état.
         </p>
-        <Button asChild className="w-full rounded-full">
-          <Link to="/support-policy">Voir les coordonnées de contact</Link>
-        </Button>
-        <Button asChild variant="outline" className="w-full rounded-full">
-          <Link to="/merchant">Retour à mon commerce</Link>
-        </Button>
-      </section>
-
-      <p className="flex items-start gap-2 text-xs text-muted-foreground">
-        <ShieldCheck size={16} className="text-primary shrink-0" aria-hidden="true" />
-        Les réservations, disponibilités, tarifs et paiements ne seront affichés que
-        lorsqu'un service de réservation réel et autorisé sera opérationnel.
-      </p>
+      )}
+      {(page > 0 || queue.data?.length > 20) && (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            disabled={!page}
+            onClick={() => setPage(page - 1)}
+          >
+            Précédent
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!(queue.data?.length > 20)}
+            onClick={() => setPage(page + 1)}
+          >
+            Suivant
+          </Button>
+        </div>
+      )}
     </div>
-  </main>
-);
+  );
+}
 
-export default MerchantGuestManager;
+export default function MerchantGuestManager() {
+  return (
+    <OwnedBusinessPanel title="Réservations et liste d’attente">
+      {(businessId, userId) => (
+        <GuestDesk businessId={businessId} userId={userId} />
+      )}
+    </OwnedBusinessPanel>
+  );
+}

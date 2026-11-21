@@ -1,0 +1,34 @@
+name: Merchant and guest database journeys
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: local-test
+          POSTGRES_DB: qmaps_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public, customer and separate merchant accounts
+        env:
+          PGHOST: localhost
+          PGDATABASE: qmaps_test
+          PGUSER: postgres
+          PGPASSWORD: local-test
+        run: |
+          psql -X --set ON_ERROR_STOP=1 --single-transaction \
+            -f scripts/testdb/guest-content-fixture.sql \
+            -f supabase/migrations/20261121060007_merchant_public_content.sql \
+            -f supabase/migrations/20261121060249_guest_requests.sql \
+            -f supabase/migrations/20261121060842_business_mailbox.sql \
+            -f supabase/migrations/20261121061220_customer_media_uploads.sql \
+            -f supabase/migrations/20261121061557_merchant_profile_and_endorsements.sql \
+            -f scripts/testdb/guest-content-check.sql

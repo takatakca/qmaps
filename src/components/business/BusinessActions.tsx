@@ -1,3 +1,4 @@
+import EndorseBusiness from "./EndorseBusiness";
 import { Star, ExternalLink, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackBusinessEvent } from "@/lib/analytics";
@@ -70,6 +71,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
         {phone && (
           <Button
             variant="outline"
+            aria-label="Appeler le commerce"
             size="icon"
             className="rounded-full shrink-0"
             onClick={handlePhone}
@@ -79,14 +81,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
         )}
       </div>
 
-      {/* Recommend prompt */}
-      <div className="flex items-center justify-between mt-5 py-3 border-t border-border">
-        <p className="text-sm font-semibold text-foreground">Recommandez-vous ce commerce?</p>
-        <div className="flex gap-2">
-          <button className="px-5 py-1.5 border border-border rounded-full text-sm font-medium text-foreground hover:bg-secondary transition-colors">Oui</button>
-          <button className="px-5 py-1.5 border border-border rounded-full text-sm font-medium text-foreground hover:bg-secondary transition-colors">Non</button>
-        </div>
-      </div>
+      {businessId && <EndorseBusiness businessId={businessId} />}
     </div>
   );
 };

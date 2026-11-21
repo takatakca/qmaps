@@ -110,7 +110,7 @@ const MerchantOverview = ({ business, reviews, onRefresh }: Props) => {
     { icon: <Megaphone size={22} className="text-primary" />, title: "Publicités QMAPS", desc: "Touchez plus de clients.", cta: "Créer une publicité", route: "/merchant/ads" },
     { icon: <MessageSquare size={22} className="text-primary" />, title: "QMAPS Connect", desc: "Partagez des publications.", cta: "Découvrir", route: "/merchant/connect" },
     { icon: <MousePointerClick size={22} className="text-primary" />, title: "Call to Action", desc: "Convertissez les visites.", cta: "CA$2/jour", route: "/merchant/cta" },
-    { icon: <Star size={22} className="text-primary" />, title: "Business Highlights", desc: "Badges et mise en valeur.", cta: "CA$2/jour", route: "/merchant/highlights" },
+    { icon: <Star size={22} className="text-primary" />, title: "Business Highlights", desc: "Badges et mise en valeur.", cta: "Modifier", route: "/merchant/highlights" },
     { icon: <Camera size={22} className="text-primary" />, title: "Photos & Vidéos", desc: "Gérez vos photos.", cta: "Gérer", route: "/merchant/photos" },
     { icon: <Phone size={22} className="text-primary" />, title: "QMAPS Host", desc: "Réceptionniste virtuel IA.", cta: "Découvrir", route: "/merchant/host" },
     { icon: <CalendarCheck size={22} className="text-primary" />, title: "Guest Manager", desc: "Réservations en ligne.", cta: "Découvrir", route: "/merchant/guest-manager" },
