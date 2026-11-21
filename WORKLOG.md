@@ -1,3 +1,5 @@
+2026-11-21 | Codex | codex/liens-commercants → PR #15 | En revue | Validation des liens web sur les fiches et dans les formulaires commerçants. Livraisons #12 et #14 vérifiées en production | 474 tests locaux réussis. Confirmer la CI et la version déployée sur QMAPS.ca
+
 2026-11-21 | Codex | codex/recherche-horaires-quebec | en revue | Recherche par services et horaires après minuit. La page Montréal de la PR #12 sert la version 11fd328 vérifiée en production avec Chez Schwartz et La Banquise | Vérifier la CI, le manifeste public et les filtres après déploiement
 
 2026-11-21 | Codex | codex/local-discovery-20261121 → PR #12 | done in source | Fixed Montréal/Montreal discovery, city + category search, distance, favorites, reviews, photos and project entry points after live comparison with Yelp Montréal | Check GitHub CI, production release SHA and Opera after reconnection
