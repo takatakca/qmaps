@@ -7,7 +7,7 @@ createdb --template=template0 "$target"
 trap 'dropdb --if-exists "$target"' EXIT
 pg_restore --exit-on-error --dbname="$target" "$archive"
 psql -X -d "$target" -v ON_ERROR_STOP=1 <<'SQL'
-SELECT 'public_catalogue', count(*) FROM public.businesses;
+SELECT 'public_catalogue', count(*) FROM public.businesses WHERE is_active;
 SELECT 'private_accounts', count(*) FROM qmaps_private.accounts;
 DO $check$
 BEGIN
