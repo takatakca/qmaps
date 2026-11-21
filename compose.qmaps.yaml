@@ -10,6 +10,7 @@ services:
       QMAPS_GATEWAY_PASSWORD: ${SERVICE_PASSWORD_GATEWAY:?required}
     volumes:
       - qmaps-postgresql:/var/lib/postgresql/data
+      - qmaps-logical-backups:/var/backups/qmaps
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d qmaps"]
       interval: 8s
@@ -35,5 +36,22 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+  qmaps-signing:
+    build:
+      context: .
+      dockerfile: server/signing/Dockerfile
+    volumes:
+      - qmaps-signing:/var/lib/qmaps-signing
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    networks: [signing]
+    restart: unless-stopped
+networks:
+  signing:
+    internal: true
 volumes:
   qmaps-postgresql:
+  qmaps-logical-backups:
+  qmaps-signing:
