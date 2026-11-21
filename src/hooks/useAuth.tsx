@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   roles: AppRole[];
+  rolesLoading: boolean;
   isMerchant: boolean;
   isAdmin: boolean;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: AuthError | null }>;
@@ -39,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("user_id", userId);
     if (activeOwnerId.current !== userId || roleRequestVersion.current !== version) return;
     if (error) {
-      setRoleState({ ownerId: null, roles: NO_ROLES });
+      setRoleState({ ownerId: userId, roles: NO_ROLES });
       throw error;
     }
     setRoleState({ ownerId: userId, roles: (data ?? []).map((row) => row.role as AppRole) });
@@ -121,11 +122,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const roles = user && roleState.ownerId === user.id ? roleState.roles : NO_ROLES;
+  const rolesLoading = !!user && roleState.ownerId !== user.id;
   const isMerchant = roles.includes("merchant") || roles.includes("admin");
   const isAdmin = roles.includes("admin");
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, roles, isMerchant, isAdmin, signUp, signIn, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, roles, rolesLoading, isMerchant, isAdmin, signUp, signIn, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );

@@ -17,3 +17,7 @@ Le propriétaire crée un compte personnel et confirme son adresse. Un opérateu
 Configurer le domaine de retour de GoTrue et son SMTP pour envoyer les confirmations et réinitialisations de mot de passe. Les SMS, paiements et appels Google exigent leurs propres identifiants. La modération travaille par règles par défaut. Son extension facultative utilise un service choisi par l’opérateur avec `AI_REVIEW_ANALYSIS_ENABLED`, `QMAPS_AI_URL`, `QMAPS_AI_MODEL` et `QMAPS_AI_API_KEY`.
 
 Conserver les secrets dans Coolify. Pour restaurer la plateforme, il faut les données PostgreSQL, les objets du stockage et la configuration opérateur. Garder les sauvegardes privées et tester la restauration sur une instance distincte avant de remplacer des données.
+
+## Vérification sur le serveur
+
+Exécuter `node verify-live.mjs --qmaps-test` dans le conteneur Studio à partir du fichier `ops/self-host/verify-live.mjs` de la révision déployée. Le test crée trois comptes fictifs déjà confirmés, connecte chaque compte par mot de passe et vérifie la publication, la liste d’attente, l’isolation des collections et le stockage. Il supprime ses propres objets, son commerce et ses utilisateurs à la fin. Les confirmations par courriel se testent séparément avec une boîte autorisée.

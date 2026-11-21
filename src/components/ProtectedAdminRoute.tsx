@@ -7,12 +7,12 @@ interface Props {
 }
 
 const ProtectedAdminRoute = ({ children }: Props) => {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, rolesLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || rolesLoading) return;
     if (!user) {
       navigate(pathname === "/console" ? "/auth?next=console" : "/auth", { replace: true });
       return;
@@ -20,9 +20,9 @@ const ProtectedAdminRoute = ({ children }: Props) => {
     if (!isAdmin) {
       navigate("/");
     }
-  }, [user, loading, isAdmin, navigate, pathname]);
+  }, [user, loading, rolesLoading, isAdmin, navigate, pathname]);
 
-  if (loading) {
+  if (loading || rolesLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-muted-foreground">Vérification de l'accès...</p>
