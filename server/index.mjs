@@ -93,8 +93,38 @@ function imageType(buf) {
 }
 async function route(req, res) {
   const url = new URL(req.url, "http://localhost"),
-    path = url.pathname,
+    browser = url.pathname.startsWith("/v1/browser/"),
+    path = browser
+      ? url.pathname.replace("/v1/browser/", "/v1/")
+      : url.pathname,
     method = req.method;
+  const cookieName = "__Host-qmaps_session";
+  const writeCookie = (value, age) =>
+    res.setHeader(
+      "Set-Cookie",
+      cookieName +
+        "=" +
+        value +
+        "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=" +
+        age,
+    );
+  if (
+    browser &&
+    !["GET", "HEAD"].includes(method) &&
+    req.headers.origin !== "https://qmaps.ca" &&
+    req.headers.origin !== "https://www.qmaps.ca"
+  )
+    throw new ApiError(403, "Origine non autorisée");
+  const cookie = (req.headers.cookie || "")
+    .split(";")
+    .map((v) => v.trim())
+    .find((v) => v.startsWith(cookieName + "="))
+    ?.slice(cookieName.length + 1);
+  const authorization = browser
+    ? cookie
+      ? "Bearer " + cookie
+      : undefined
+    : req.headers.authorization;
   if (path === "/v1/health" && method === "GET") {
     await pool.query("SELECT 1 FROM qmaps_private.accounts LIMIT 0");
     return reply(res, 200, {
@@ -108,21 +138,49 @@ async function route(req, res) {
     method === "POST"
   ) {
     const action = path.split("/").pop();
-    return reply(
-      res,
-      action === "register" ? 201 : 200,
-      await account(
-        pool,
-        action,
-        await body(req),
-        req.socket.remoteAddress || "local",
+    const result = await account(
+      pool,
+      action,
+      await body(req),
+      req.socket.remoteAddress || "local",
+    );
+    if (browser) {
+      writeCookie(result.token, result.expires_in);
+      const { token: unused, ...safe } = result;
+      return reply(res, action === "register" ? 201 : 200, safe);
+    }
+    return reply(res, action === "register" ? 201 : 200, result);
+  }
+  if (path === "/v1/accounts/logout" && method === "POST") {
+    if (browser) writeCookie("", 0);
+    if (authorization) {
+      try {
+        await logout(pool, authorization);
+      } catch (error) {
+        if (!(error instanceof ApiError && error.status === 401)) throw error;
+      }
+    }
+    return reply(res, 204);
+  }
+  const id = await userFor(pool, authorization);
+  if (path === "/v1/console" && method === "GET") {
+    requireUser(id);
+    const roles = await scoped(id, (db) =>
+      db.query(
+        "SELECT 1 FROM public.user_roles WHERE user_id=$1 AND role='admin'",
+        [id],
       ),
     );
-  }
-  const id = await userFor(pool, req.headers.authorization);
-  if (path === "/v1/accounts/logout" && method === "POST") {
-    await logout(pool, req.headers.authorization);
-    return reply(res, 204);
+    if (!roles.rowCount) throw new ApiError(403, "Accès propriétaire requis");
+    const stats = await pool.query(
+      "SELECT (SELECT count(*)::int FROM public.businesses WHERE is_active) AS places, (SELECT count(*)::int FROM qmaps_private.accounts) AS accounts, (SELECT count(*)::int FROM qmaps_private.media) AS media",
+    );
+    return reply(res, 200, {
+      ...stats.rows[0],
+      database: "PostgreSQL / PostGIS",
+      api: "QMAPS",
+      source: "https://github.com/takatakca/qmaps",
+    });
   }
   if (path === "/v1/me" && method === "GET") {
     requireUser(id);
