@@ -48,16 +48,48 @@ const place = await request(
   201,
 );
 const reviewsPath = "/v1/places/" + place.id + "/reviews";
-await request(reviewsPath, "PUT", owner.token, {rating:5,body:"Mon commerce"},403);
-const review = await request(reviewsPath,"PUT",customer.token,{rating:4,body:"Essai client"});
-assert.equal((await request(reviewsPath))[0].mine,false);
-assert.equal((await request(reviewsPath,"GET",customer.token))[0].mine,true);
-assert.equal((await request(reviewsPath,"PUT",customer.token,{rating:5,body:"Essai modifié"})).id,review.id);
-await request(reviewsPath + "/" + review.id + "/reply","PUT",customer.token,{body:"Réponse"},403);
-await request(reviewsPath + "/" + review.id + "/reply","PUT",owner.token,{body:"Merci de votre visite"},204);
-assert.equal((await request(reviewsPath))[0].owner_reply,"Merci de votre visite");
-await request(reviewsPath,"DELETE",customer.token,undefined,204);
-assert.deepEqual(await request(reviewsPath),[]);
+await request(
+  reviewsPath,
+  "PUT",
+  owner.token,
+  { rating: 5, body: "Mon commerce" },
+  403,
+);
+const review = await request(reviewsPath, "PUT", customer.token, {
+  rating: 4,
+  body: "Essai client",
+});
+assert.equal((await request(reviewsPath))[0].mine, false);
+assert.equal((await request(reviewsPath, "GET", customer.token))[0].mine, true);
+assert.equal(
+  (
+    await request(reviewsPath, "PUT", customer.token, {
+      rating: 5,
+      body: "Essai modifié",
+    })
+  ).id,
+  review.id,
+);
+await request(
+  reviewsPath + "/" + review.id + "/reply",
+  "PUT",
+  customer.token,
+  { body: "Réponse" },
+  403,
+);
+await request(
+  reviewsPath + "/" + review.id + "/reply",
+  "PUT",
+  owner.token,
+  { body: "Merci de votre visite" },
+  204,
+);
+assert.equal(
+  (await request(reviewsPath))[0].owner_reply,
+  "Merci de votre visite",
+);
+await request(reviewsPath, "DELETE", customer.token, undefined, 204);
+assert.deepEqual(await request(reviewsPath), []);
 await request(
   "/v1/places/" + place.id + "/posts",
   "POST",
