@@ -18,6 +18,8 @@ import {
   SORT_OPTIONS,
   type SortOption,
   isBusinessOpenNow,
+  matchesAmenityFilter,
+  serviceFilters,
   normalizeSearchText,
 } from "@/lib/searchFilters";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
@@ -27,6 +29,10 @@ const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const city = cityLabelFor(searchParams.get("city") || "");
+  const services = useMemo(() => {
+    const selected = searchParams.getAll("service");
+    return serviceFilters.map(option => option.key).filter(key => selected.includes(key));
+  }, [searchParams]);
   const selectedCategory = searchParams.get("category") || "";
 
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
@@ -110,11 +116,12 @@ const Search = () => {
       ...b,
       distance_meters: position ? distanceMeters(position, b.latitude, b.longitude) : undefined,
     })).filter(b =>
+      matchesAmenityFilter(b, services) &&
       (!openNow || isBusinessOpenNow(b)) &&
       (radiusKm === null || (b.distance_meters != null && b.distance_meters <= radiusKm * 1000))
     );
     return sortBusinesses(rows, sortBy);
-  }, [businesses, position, openNow, radiusKm, sortBy]);
+  }, [businesses, position, openNow, radiusKm, sortBy, services]);
 
   const clearFilters = () => {
     setSelectedPrice([]);
@@ -124,6 +131,7 @@ const Search = () => {
     // Also clear URL category param so refresh keeps cleared state
     const next = new URLSearchParams(searchParams);
     next.delete("category");
+    next.delete("service");
     setSearchParams(next, { replace: true });
   };
 
@@ -138,7 +146,15 @@ const Search = () => {
     setSearchParams(next, { replace: true });
   };
 
+  const toggleService = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (next.getAll("service").includes(key)) next.delete("service", key);
+    else next.append("service", key);
+    setSearchParams(next, { replace: true });
+  };
+
   const activeFiltersCount =
+    services.length +
     (selectedCategory ? 1 : 0) +
     (selectedPrice.length > 0 ? 1 : 0) +
     (minRating ? 1 : 0) +
@@ -218,6 +234,8 @@ const Search = () => {
           selectedCategory={selectedCategory}
           selectedPrice={selectedPrice}
           minRating={minRating}
+          services={services}
+          onToggleService={toggleService}
           openNow={openNow}
           radiusKm={radiusKm}
           hasPosition={!!position}

@@ -7,6 +7,16 @@
 
 import { isOpenAtWithSpecialHours, parseSpecialHours, parseWeeklyHours } from "@/lib/businessHours";
 
+import { isBusinessStatus } from "@/lib/businessStatus";
+import { parseAttributes } from "@/lib/businessAttributes";
+
+export const serviceFilters = [
+  { key: "Offers Delivery", label: "Livraison" },
+  { key: "Offers Takeout", label: "Pour emporter" },
+  { key: "Takes Reservations", label: "Accepte les réservations" },
+  { key: "Wheelchair Accessible", label: "Accessible en fauteuil roulant" },
+] as const;
+
 export type SortOption =
   | "recommended"
   | "rating"
@@ -29,10 +39,12 @@ export interface SearchableBusiness {
   reviews_count?: number | null;
   price_level?: number | null;
   is_open?: boolean | null;
+  status?: string | null;
   hours?: string | null;
   hours_json?: unknown;
   special_hours?: unknown;
   amenities?: string[] | null;
+  attributes?: unknown;
   city?: string | null;
   created_at?: string | null;
   distance_meters?: number | null;
@@ -81,7 +93,12 @@ export const matchesAmenityFilter = (
   required: string[] | undefined,
 ): boolean => {
   if (!required || required.length === 0) return true;
-  const have = (business.amenities ?? []).map(normalizeSearchText);
+  const attrs = parseAttributes(business);
+  const have = Object.keys(attrs.boolean).filter(key => attrs.boolean[key]).map(normalizeSearchText);
+  for (const [group, value] of Object.entries(attrs.single)) have.push(normalizeSearchText(`${group}::${value}`));
+  for (const [group, values] of Object.entries(attrs.multi)) {
+    for (const value of values) have.push(normalizeSearchText(`${group}::${value}`));
+  }
   return required.every((a) => have.includes(normalizeSearchText(a)));
 };
 
@@ -94,6 +111,7 @@ export const isBusinessOpenNow = (
   business: SearchableBusiness,
   now: Date = new Date(),
 ): boolean => {
+  if (isBusinessStatus(business.status) && business.status !== "open") return false;
   const week = parseWeeklyHours(business.hours_json);
   const special = parseSpecialHours(business.special_hours);
   if (week || special) return isOpenAtWithSpecialHours(week, special, now);
