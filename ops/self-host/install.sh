@@ -52,6 +52,7 @@ for path in "$root"/supabase/migrations/*.sql; do
   append_sql "$path" "${name%%_*}"
 done
 append_sql "$root/ops/self-host/demo.sql" demo-001
+append_sql "$root/ops/self-host/demo-services.sql" demo-002
 cat >> "$batch" <<'SQL'
 notify pgrst, 'reload schema';
 select count(*) as recorded_install_steps from qmaps_ops.applied_migrations;

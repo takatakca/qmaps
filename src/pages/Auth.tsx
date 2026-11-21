@@ -18,7 +18,7 @@ const Auth = () => {
   const clientDestination = searchParams.get("next") === "review" ? "/add-review" : searchParams.get("next") === "console" ? "/console" : "/";
   const isMerchantRoute = location.pathname.startsWith("/merchant") || searchParams.get("role") === "merchant";
 
-  const [mode, setMode] = useState<AuthMode>("login");
+  const [mode, setMode] = useState<AuthMode>(searchParams.get("mode") === "signup" ? "signup" : "login");
   const [role, setRole] = useState<AuthRole>(isMerchantRoute ? "merchant" : "client");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -134,7 +134,14 @@ const Auth = () => {
 
     // New account created — assign role and redirect
     const { data: { user: u } } = await supabase.auth.getUser();
-    if (u && role === "merchant") {
+    if (!u) {
+      setMode("login");
+      setPassword("");
+      toast({ title: "Confirmez votre courriel", description: "Ouvrez le lien de confirmation pour activer votre compte QMAPS." });
+      setLoading(false);
+      return;
+    }
+    if (role === "merchant") {
       await supabase.from("user_roles").upsert({ user_id: u.id, role: "merchant" }, { onConflict: "user_id,role", ignoreDuplicates: true });
       await refreshRoles();
       toast({ title: "Compte pro créé!", description: "Complétez votre profil professionnel." });

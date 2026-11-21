@@ -30,6 +30,8 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
 const Observe = () => {
@@ -39,11 +41,11 @@ const Observe = () => {
 const asSession = (id: string) => ({ user: { id } } as Session);
 
 const mounted: Array<{ host: HTMLDivElement; root: Root }> = [];
-const mount = (): HTMLDivElement => {
+const mount = (child = <Observe />): HTMLDivElement => {
   const host = document.createElement("div");
   document.body.append(host);
   const root = createRoot(host);
-  act(() => { root.render(<AuthProvider><Observe /></AuthProvider>); });
+  act(() => { root.render(<AuthProvider>{child}</AuthProvider>); });
   mounted.push({ host, root });
   return host;
 };
@@ -89,6 +91,22 @@ describe("AuthProvider account-scoped privileges", () => {
     });
     await act(async () => { mock.initial?.({ data: { session: asSession("alice") } }); });
     expect(read(host)).toBe("bob:false:false");
+  });
+
+  it("keeps a direct console visit open until its own authenticated role arrives", async () => {
+    const host = mount(
+      <MemoryRouter initialEntries={["/console"]}>
+        <Routes>
+          <Route path="/console" element={<ProtectedAdminRoute><span>Console ouverte</span></ProtectedAdminRoute>} />
+          <Route path="*" element={<span>Accès refusé</span>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    act(() => { mock.initial?.({ data: { session: asSession("operator") } }); });
+    await until(() => expect(mock.requests.some((r) => r.id === "operator")).toBe(true));
+    expect(host.textContent).toContain("Vérification");
+    await act(async () => { mock.requests.find((r) => r.id === "operator")!.resolve({ data: [{ role: "admin" }], error: null }); });
+    expect(host.textContent).toBe("Console ouverte");
   });
 
   it("drops pending privileged results after signout", async () => {
