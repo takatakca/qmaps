@@ -1,3 +1,4 @@
+import { OwnedClosure, ClosureQueue } from "@/components/account/OwnedClosure";
 import PhotoModeration from "@/components/account/PhotoModeration";
 import OwnedGallery from "@/components/account/OwnedGallery";
 import OwnedReviews from "@/components/account/OwnedReviews";
@@ -62,6 +63,7 @@ function Console({ userId }: { userId: string }) {
       </div>
       <p>Base de données · {status.data.database}</p>
       <PhotoModeration userId={userId} />
+      <ClosureQueue userId={userId} />
       {version.data && (
         <p>
           Version en ligne ·{" "}
@@ -367,7 +369,9 @@ function Marketplace({ user }: { user: QmapsUser }) {
   );
 }
 export default function OwnedWorkspace() {
-  const consolePage = useLocation().pathname === "/console";
+  const { pathname } = useLocation();
+  const consolePage = pathname === "/console";
+  const closurePage = pathname === "/compte/fermeture";
   const [user, setUser] = useState<QmapsUser | null>(null),
     [ready, setReady] = useState(false),
     [error, setError] = useState("");
@@ -404,6 +408,16 @@ export default function OwnedWorkspace() {
             QMAPS
           </Link>
           <nav className="flex gap-3 text-sm">
+            {!closurePage && (
+              <Link className="underline" to="/compte/fermeture">
+                Fermeture du compte
+              </Link>
+            )}
+            {closurePage && (
+              <Link className="underline" to="/compte">
+                Mon compte
+              </Link>
+            )}
             {user?.roles.includes("admin") && (
               <Link
                 className="underline"
@@ -424,8 +438,24 @@ export default function OwnedWorkspace() {
         }
       >
         <h1 className="font-heading text-3xl font-bold">
-          {consolePage ? "Console QMAPS" : "Mon espace QMAPS"}
+          {closurePage
+            ? "Supprimer mon compte QMAPS"
+            : consolePage
+              ? "Console QMAPS"
+              : "Mon espace QMAPS"}
         </h1>
+        {closurePage && (
+          <p>
+            Connectez-vous avec l’identifiant de l’application QMAPS pour
+            demander la fermeture de votre compte et la suppression de vos
+            données personnelles. Vous pouvez annuler votre demande avant sa
+            prise en charge.{" "}
+            <Link className="underline" to="/account-deletion-policy">
+              Données concernées et délais
+            </Link>
+            .
+          </p>
+        )}
         {!ready ? (
           <p>Vérification de la session…</p>
         ) : error ? (
@@ -437,6 +467,8 @@ export default function OwnedWorkspace() {
           </div>
         ) : !user ? (
           <OwnedLogin onReady={() => void refresh()} />
+        ) : closurePage ? (
+          <OwnedClosure key={user.id} userId={user.id} />
         ) : consolePage ? (
           user.roles.includes("admin") ? (
             <Console userId={user.id} />

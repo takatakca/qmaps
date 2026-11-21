@@ -10,11 +10,11 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 const renderEn = () => (
   <>
     <p className="text-foreground">
-      QMAPS Inc. ("QMAPS", "we") operates a local business discovery and review platform. This
+      QMAPS is a local business discovery and review platform from Groupe TAKATAK. This
       policy explains what data we collect and how we use it.
     </p>
     <Section title="1. Account data">
-      <p>When you create an account, we collect your email, display name, and optionally a profile picture.</p>
+      <p>The Android and iOS apps use a QMAPS handle. QMAPS stores password and recovery-code hashes to authenticate you. The apps store a session token on your device. Your account can hold your favorite listings, and participating merchants receive the name and party size you enter when joining a waitlist. Classic web accounts use an email, display name and optional profile photo.</p>
     </Section>
     <Section title="2. Business listings">
       <p>Listings on QMAPS contain public information (name, address, phone, hours, photos). Verified owners can manage their content.</p>
@@ -62,7 +62,7 @@ const renderEn = () => (
       </p>
     </Section>
     <Section title="13. Your rights (Quebec Law 25)">
-      <p>You can access, rectify and request deletion of your personal data. Contact us at <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a>.</p>
+      <p>You can access, rectify and request deletion of your personal data. Our privacy officer is Pierre Lévesque. Contact him at <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a>.</p>
     </Section>
   </>
 );
@@ -70,11 +70,10 @@ const renderEn = () => (
 const renderFr = () => (
   <>
     <p className="text-foreground">
-      QMAPS Inc. (« QMAPS », « nous ») exploite une plateforme de découverte de commerces locaux et
-      d'avis. Cette politique explique quelles données nous collectons et comment nous les utilisons.
+      QMAPS est une plateforme de Groupe TAKATAK pour découvrir des commerces locaux et consulter des avis. Cette politique explique quelles données nous collectons et comment nous les utilisons.
     </p>
     <Section title="1. Données de compte">
-      <p>Lors de la création d'un compte, nous collectons votre adresse courriel, votre nom d'affichage et, optionnellement, une photo de profil.</p>
+      <p>Sur Android et iOS, vous utilisez un identifiant QMAPS. QMAPS conserve des empreintes de votre mot de passe et de votre code de récupération pour vérifier votre identité. L’application conserve un jeton de session sur votre appareil. Votre compte peut contenir vos favoris. Lorsque vous joignez une liste d’attente, le commerce reçoit le nom et le nombre de personnes que vous saisissez. Le compte du site classique utilise un courriel, un nom d’affichage et une photo de profil facultative.</p>
     </Section>
     <Section title="2. Fiches commerciales">
       <p>Les commerces présents sur QMAPS contiennent des informations publiques (nom, adresse, téléphone, horaires, photos). Les propriétaires vérifiés peuvent en gérer le contenu.</p>
@@ -122,7 +121,7 @@ const renderFr = () => (
       </p>
     </Section>
     <Section title="13. Vos droits (Loi 25 — Québec)">
-      <p>Vous avez le droit d'accéder, de rectifier et de demander la suppression de vos données personnelles. Contactez-nous à <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a>.</p>
+      <p>Vous avez le droit d'accéder, de rectifier et de demander la suppression de vos données personnelles. Pierre Lévesque est le responsable de la protection des renseignements personnels. Vous pouvez le joindre à <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a>.</p>
     </Section>
   </>
 );
@@ -135,8 +134,9 @@ const Privacy = () => (
       fr: "Comment QMAPS collecte, utilise et protège vos données personnelles au Québec.",
     }}
     canonicalPath="/privacy"
-    lastUpdated="2026-04-25"
+    lastUpdated="2026-11-21"
     reviewHistory={[
+      { date: "2026-11-21", en: "Added mobile account data and the privacy officer.", fr: "Ajout des données des comptes mobiles et du responsable de la protection des renseignements personnels." },
       { date: "2026-04-25", en: "Initial public privacy policy.", fr: "Politique de confidentialité publique initiale." },
       { date: "2026-04-25", en: "Added bilingual legal content and cookies/tracking reference.", fr: "Ajout du contenu juridique bilingue et de la référence aux témoins/suivi." },
     ]}

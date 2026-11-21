@@ -216,6 +216,7 @@ const App = () => (
               {/* Admin routes */}
               <Route path="/console" element={<OwnedWorkspace />} />
               <Route path="/compte" element={<OwnedWorkspace />} />
+              <Route path="/compte/fermeture" element={<OwnedWorkspace />} />
               <Route path="/admin/plateforme" element={<ProtectedAdminRoute><PlatformConsole /></ProtectedAdminRoute>} />
               <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
               <Route path="/admin/reports" element={<ProtectedAdminRoute><AdminReports /></ProtectedAdminRoute>} />

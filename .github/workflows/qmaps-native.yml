@@ -45,17 +45,20 @@ jobs:
           script: |
             adb shell input keyevent KEYCODE_WAKEUP
             adb shell wm dismiss-keyguard
+            adb shell wm size 800x1280
+            adb shell wm density 213
             adb install mobile/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -W -n ca.qmaps.mobile/.MainActivity
             adb shell pidof ca.qmaps.mobile
             adb install mobile/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
             sh mobile/android/verify-ui.sh
-            adb shell am start -W -n ca.qmaps.mobile/.MainActivity
-            adb exec-out screencap -p > QMAPS-Android-accueil.png
+            adb exec-out run-as ca.qmaps.mobile cat cache/qmaps-accueil.png > QMAPS-Android-accueil.png
+            adb exec-out run-as ca.qmaps.mobile cat cache/qmaps-fiche.png > QMAPS-Android-fiche.png
+            adb exec-out run-as ca.qmaps.mobile cat cache/qmaps-compte.png > QMAPS-Android-compte.png
       - uses: actions/upload-artifact@v4
         with:
           name: QMAPS-Android-capture
-          path: QMAPS-Android-accueil.png
+          path: QMAPS-Android-*.png
           if-no-files-found: error
       - name: Sign the production Android bundle when owner signing is available
         if: github.event_name != 'pull_request'

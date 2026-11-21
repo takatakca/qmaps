@@ -47,6 +47,36 @@ const place = await request(
   { name: "QMAPS test", city: "Laval", address: "Adresse fictive" },
   201,
 );
+const closure = "/v1/me/closure";
+await request(closure, "GET", null, undefined, 401);
+assert.equal((await request(closure, "GET", customer.token)).request, null);
+await request(closure, "POST", customer.token, { confirmation: "" }, 400);
+const attempts = await Promise.all(
+  [1, 2].map(() =>
+    request(closure, "POST", customer.token, { confirmation: "DELETE" }),
+  ),
+);
+assert.equal(attempts[0].request.id, attempts[1].request.id);
+assert.equal(attempts[0].request.status, "pending");
+assert.equal((await request(closure, "GET", owner.token)).request, null);
+await request("/v1/console/closures", "GET", customer.token, undefined, 403);
+await request(
+  "/v1/console/closures/" + attempts[0].request.id + "/start",
+  "POST",
+  customer.token,
+  undefined,
+  403,
+);
+await request(closure, "DELETE", owner.token, undefined, 409);
+for (let retry = 0; retry < 2; retry++)
+  assert.equal(
+    (await request(closure, "DELETE", customer.token)).request.status,
+    "canceled",
+  );
+const next = await request(closure, "POST", customer.token, {
+  confirmation: "DELETE",
+});
+assert.notEqual(next.request.id, attempts[0].request.id);
 const reviewsPath = "/v1/places/" + place.id + "/reviews";
 await request(
   reviewsPath,

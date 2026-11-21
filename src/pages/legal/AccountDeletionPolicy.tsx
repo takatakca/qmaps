@@ -10,7 +10,7 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 const renderEn = () => (
   <>
     <p className="text-foreground">
-      You can request to close your account at any time from Settings &gt; Close account. Here is
+      <a href="/compte/fermeture" className="underline">Request deletion of your QMAPS mobile account</a>. For a classic web account, use <a href="/settings/delete-account" className="underline">Close account in Settings</a>. Here is
       how each type of data is handled.
     </p>
     <Section title="✅ Deleted">
@@ -50,8 +50,7 @@ const renderEn = () => (
 const renderFr = () => (
   <>
     <p className="text-foreground">
-      Vous pouvez demander la fermeture de votre compte à tout moment depuis Paramètres &gt; Fermer
-      le compte. Voici comment chaque type de donnée est traité.
+      <a href="/compte/fermeture" className="underline">Demander la suppression de mon compte mobile QMAPS</a>. Pour un compte du site classique, ouvrez <a href="/settings/delete-account" className="underline">Fermer le compte dans les paramètres</a>. Voici comment chaque type de donnée est traité.
     </p>
     <Section title="✅ Supprimé">
       <ul className="list-disc pl-5 space-y-1">
