@@ -1,4 +1,5 @@
 import type { Tables } from "@/integrations/supabase/types";
+import { isBusinessOpenNow } from "@/lib/searchFilters";
 import type { Business } from "@/types";
 
 export const priceLabels = ["$", "$$", "$$$", "$$$$"];
@@ -28,7 +29,7 @@ export const mapBusinessToCard = (business: BusinessWithDistance): Business => (
   priceLevel: priceLabels[(business.price_level ?? 0) - 1] || "",
   neighborhood: business.city,
   image: business.image_url || "/placeholder.svg",
-  isOpen: business.is_open,
+  isOpen: isBusinessOpenNow(business),
   distance: business.distance_meters != null ? `${Math.round(business.distance_meters)} m` : undefined,
   address: business.address,
   phone: business.phone || "",

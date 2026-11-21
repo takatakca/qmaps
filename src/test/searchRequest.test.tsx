@@ -50,6 +50,11 @@ describe("directory search requests", () => {
       await act(async () => first.reply([{ id: "old", name: "Stale result", city: "Montréal" }]));
       expect(host).toHaveTextContent("Laval result");
       expect(host).not.toHaveTextContent("Stale result");
+      await act(async () => navigate("/search?category=restaurants&city=Laval&service=Offers+Delivery"));
+      expect(host).not.toHaveTextContent("Laval result");
+      expect(requests).toHaveLength(2);
+      await act(async () => navigate("/search?category=restaurants&city=Laval"));
+      expect(host).toHaveTextContent("Laval result");
     } finally {
       act(() => root.unmount());
       host.remove();

@@ -15,7 +15,8 @@ const at = (iso: string) => new Date(iso);
 describe("businessHours", () => {
   it("validates HH:MM blocks", () => {
     expect(isValidBlock({ open: "09:00", close: "17:00" })).toBe(true);
-    expect(isValidBlock({ open: "17:00", close: "09:00" })).toBe(false);
+    expect(isValidBlock({ open: "17:00", close: "09:00" })).toBe(true);
+    expect(isValidBlock({ open: "09:00", close: "09:00" })).toBe(false);
     expect(isValidBlock({ open: "9:00", close: "17:00" })).toBe(false);
     expect(isValidBlock({ open: "25:00", close: "26:00" })).toBe(false);
   });
@@ -76,6 +77,18 @@ describe("businessHours", () => {
     expect(isOpenAt(week, at("2024-04-15T11:30:00"))).toBe(true);
     expect(isOpenAt(week, at("2024-04-15T13:00:00"))).toBe(false);
     expect(isOpenAt(week, at("2024-04-15T15:00:00"))).toBe(true);
+  });
+
+  it("keeps a Sunday evening service open into Monday, until the closing minute", () => {
+    const week = emptyWeeklyHours();
+    week.sunday = { closed: false, blocks: [{ open: "16:00", close: "03:00" }] };
+    expect(formatDayHours(week.sunday)).toBe("16:00 – 03:00 (lendemain)");
+    for (const time of ["2024-04-14T16:00", "2024-04-14T23:59", "2024-04-15T00:00", "2024-04-15T02:59"]) {
+      expect(isOpenAt(week, at(time))).toBe(true);
+    }
+    for (const time of ["2024-04-14T02:00", "2024-04-14T15:59", "2024-04-15T03:00"]) {
+      expect(isOpenAt(week, at(time))).toBe(false);
+    }
   });
 
   it("isOpenAt: missing hours fallback (empty week is closed everywhere)", () => {

@@ -71,6 +71,13 @@ describe("matchesAmenityFilter", () => {
 });
 
 describe("isBusinessOpenNow", () => {
+  it("keeps an explicit closure even during an overnight shift", () => {
+    const hours_json = { monday: { closed: false, blocks: [{ open: "16:00", close: "03:00" }] } };
+    const now = new Date(2026, 10, 17, 2);
+    const row = make({ hours_json, status: "open" });
+    expect(isBusinessOpenNow(row, now)).toBe(true);
+    expect(isBusinessOpenNow({ ...row, status: "temporarily_closed" }, now)).toBe(false);
+  });
   it("falls back to is_open boolean", () => {
     expect(isBusinessOpenNow(make({ is_open: true, hours: null }))).toBe(true);
     expect(isBusinessOpenNow(make({ is_open: false, hours: null }))).toBe(false);
@@ -116,5 +123,16 @@ describe("sortBusinesses", () => {
   });
   it("recommended puts sponsored first", () => {
     expect(sortBusinesses(list, "recommended")[0].id).toBe("c");
+  });
+});
+
+describe("merchant service filters", () => {
+  it("honours an explicit removal even if an old listing still has the flat label", () => {
+    const row = make({ attributes: { boolean: { "Offers Delivery": false } }, amenities: ["Offers Delivery"] });
+    expect(matchesAmenityFilter(row, ["Offers Delivery"])).toBe(false);
+  });
+  it("finds a service in both legacy and structured listings", () => {
+    const rows = [make({ id: "old", amenities: ["Offers Takeout"] }), make({ id: "new", attributes: { boolean: { "Offers Takeout": true } } })];
+    expect(filterBusinesses(rows,{amenities:["Offers Takeout"]}).map(b=>b.id)).toEqual(["old","new"]);
   });
 });

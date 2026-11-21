@@ -57,11 +57,11 @@ export const timeToMinutes = (s: string): number => {
   return h * 60 + m;
 };
 
-/** True iff close > open (split shifts allowed but no overnight in v1). */
+/** A closing time earlier than opening ends the shift on the following date. */
 export const isValidBlock = (b: HoursBlock): boolean => {
   const o = timeToMinutes(b.open);
   const c = timeToMinutes(b.close);
-  return Number.isFinite(o) && Number.isFinite(c) && c > o;
+  return Number.isFinite(o) && Number.isFinite(c) && c !== o;
 };
 
 export const emptyWeeklyHours = (): WeeklyHours =>
@@ -129,22 +129,13 @@ const JS_DAY_TO_KEY: DayKey[] = [
 
 export const dayKeyForDate = (d: Date): DayKey => JS_DAY_TO_KEY[d.getDay()];
 
-/** True iff the given date falls inside any block of that day. */
-export const isOpenAt = (week: WeeklyHours, date: Date): boolean => {
-  const day = week[dayKeyForDate(date)];
-  if (!day || day.closed || day.blocks.length === 0) return false;
-  const minutes = date.getHours() * 60 + date.getMinutes();
-  return day.blocks.some((b) => {
-    const o = timeToMinutes(b.open);
-    const c = timeToMinutes(b.close);
-    return Number.isFinite(o) && Number.isFinite(c) && minutes >= o && minutes < c;
-  });
-};
+export const isOpenAt = (week: WeeklyHours, date: Date): boolean =>
+  isOpenAtWithSpecialHours(week, null, date);
 
 /** Render a single day's hours in French ("Fermé" or "09:00 – 17:00, 18:00 – 22:00"). */
 export const formatDayHours = (day: DayHours): string => {
   if (!day || day.closed || day.blocks.length === 0) return "Fermé";
-  return day.blocks.map((b) => `${b.open} – ${b.close}`).join(", ");
+  return day.blocks.map((b) => `${b.open} – ${b.close}${b.close < b.open ? " (lendemain)" : ""}`).join(", ");
 };
 
 /** Compact summary of the legacy text hours field, untouched by structured helpers. */
@@ -207,14 +198,22 @@ export const isOpenAtWithSpecialHours = (
   special: SpecialHours | null,
   date: Date,
 ): boolean => {
-  const { day } = getHoursForDate(week, special, date);
-  if (!day || day.closed || day.blocks.length === 0) return false;
+  const today = getHoursForDate(week, special, date);
   const minutes = date.getHours() * 60 + date.getMinutes();
-  return day.blocks.some((b) => {
-    const o = timeToMinutes(b.open);
-    const c = timeToMinutes(b.close);
-    return Number.isFinite(o) && Number.isFinite(c) && minutes >= o && minutes < c;
+  const openToday = !today.day?.closed && today.day?.blocks.some(block => {
+    if (!isValidBlock(block)) return false;
+    const open = timeToMinutes(block.open);
+    const close = timeToMinutes(block.close);
+    return minutes >= open && (close < open || minutes < close);
   });
+  // A dated override sets the hours of the whole calendar day.
+  if (openToday || today.isSpecial) return Boolean(openToday);
+  const yesterday = new Date(date);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const { day } = getHoursForDate(week, special, yesterday);
+  return Boolean(day && !day.closed && day.blocks.some(block =>
+    isValidBlock(block) && block.close < block.open && minutes < timeToMinutes(block.close)
+  ));
 };
 
 export const formatSpecialHoursForDate = (special: SpecialHours | null, date: Date): string => {

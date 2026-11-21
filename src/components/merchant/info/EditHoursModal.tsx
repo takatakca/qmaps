@@ -89,7 +89,7 @@ const EditHoursModal = ({ open, onClose, business, onSaved }: Props) => {
         if (!isValidBlock(b)) {
           toast({
             title: "Heures invalides",
-            description: `${DAY_LABELS_FR[d]}: l'heure de fermeture doit être après l'ouverture.`,
+            description: `${DAY_LABELS_FR[d]}: indiquez deux heures valides et différentes.`,
             variant: "destructive",
           });
           return;
@@ -102,7 +102,9 @@ const EditHoursModal = ({ open, onClose, business, onSaved }: Props) => {
     const { error } = await supabase
       .from("businesses")
       .update({ hours_json: toJson(week), hours: text })
-      .eq("id", business.id);
+      .eq("id", business.id)
+      .select("id")
+      .single();
     setSaving(false);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -156,7 +158,7 @@ const EditHoursModal = ({ open, onClose, business, onSaved }: Props) => {
                           </select>
                         </div>
                         <div className="flex-1">
-                          <label className="text-[11px] text-muted-foreground">À</label>
+                          <label className="text-[11px] text-muted-foreground">À{b.close < b.open ? " (lendemain)" : ""}</label>
                           <select
                             value={b.close}
                             onChange={(e) => updateBlock(d, idx, { close: e.target.value })}
