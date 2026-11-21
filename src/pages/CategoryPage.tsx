@@ -7,7 +7,8 @@ import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
-import { cityFromSlug } from "@/lib/seo";
+import { cityFilter, cityLabelFromSlug } from "@/lib/localSearch";
+import SearchBar from "@/components/SearchBar";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
@@ -15,7 +16,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 const CategoryPage = () => {
   const { categorySlug = "", citySlug } = useParams();
-  const cityLabel = citySlug ? cityFromSlug(citySlug) : null;
+  const cityLabel = citySlug ? cityLabelFromSlug(citySlug) : null;
 
   const [category, setCategory] = useState<Tables<"categories"> | null>(null);
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
@@ -57,27 +58,14 @@ const CategoryPage = () => {
         return;
       }
 
-      const { data: links } = await supabase
-        .from("business_categories")
-        .select("business_id")
-        .eq("category_id", cat.id)
-        .limit(50);
-      const ids = (links || []).map((l) => l.business_id);
-
-      if (ids.length === 0) {
-        setBusinesses([]);
-        setLoading(false);
-        return;
-      }
-
       let query = supabase
         .from("businesses")
-        .select("*")
-        .in("id", ids)
+        .select("*, business_categories!inner(category_id)")
+        .eq("business_categories.category_id", cat.id)
         .eq("is_active", true)
         .order("avg_rating", { ascending: false })
         .limit(30);
-      if (cityLabel) query = query.ilike("city", cityLabel);
+      if (cityLabel) query = query.or(cityFilter(cityLabel));
       const { data: biz } = await query;
       if (cancelled) return;
       setBusinesses(biz || []);
@@ -133,6 +121,7 @@ const CategoryPage = () => {
             Voir tous les {category.name} →
           </Link>
         )}
+        <div className="mt-4"><SearchBar initialCity={cityLabel || ""} initialCategory={categorySlug} /></div>
       </header>
 
       {category && (

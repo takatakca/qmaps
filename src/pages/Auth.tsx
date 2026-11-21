@@ -15,6 +15,7 @@ type AuthRole = "client" | "merchant";
 const Auth = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const clientDestination = searchParams.get("next") === "review" ? "/add-review" : "/";
   const isMerchantRoute = location.pathname.startsWith("/merchant") || searchParams.get("role") === "merchant";
 
   const [mode, setMode] = useState<AuthMode>("login");
@@ -83,7 +84,7 @@ const Auth = () => {
       }
     } else {
       toast({ title: "Bienvenue!", description: "Connexion réussie." });
-      navigate("/");
+      navigate(clientDestination);
     }
   };
 
@@ -140,7 +141,7 @@ const Auth = () => {
       navigate("/merchant/onboarding");
     } else {
       toast({ title: "Compte créé!", description: "Bienvenue sur QMAPS." });
-      navigate("/");
+      navigate(clientDestination);
     }
     setLoading(false);
   };
@@ -253,7 +254,7 @@ const Auth = () => {
               onClick={async () => {
                 setLoading(true);
                 const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: window.location.origin,
+                  redirect_uri: new URL(role === "client" ? clientDestination : "/", window.location.origin).href,
                 });
                 if (result.error) {
                   toast({

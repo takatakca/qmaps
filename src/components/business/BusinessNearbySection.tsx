@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { cityFilter } from "@/lib/localSearch";
 import StarRating from "@/components/StarRating";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,17 +23,20 @@ const BusinessNearbySection = ({ currentBusinessId, city, isClaimed }: BusinessN
   const { toast } = useToast();
 
   useEffect(() => {
+    let current = true;
     const fetchNearby = async () => {
       const { data } = await supabase
         .from("businesses")
         .select("*")
-        .eq("city", city)
+        .or(cityFilter(city))
+        .eq("is_active", true)
         .neq("id", currentBusinessId)
         .order("avg_rating", { ascending: false })
         .limit(4);
-      setNearby(data || []);
+      if (current) setNearby(data || []);
     };
-    fetchNearby();
+    void fetchNearby();
+    return () => { current = false; };
   }, [currentBusinessId, city]);
 
   return (
@@ -40,7 +44,7 @@ const BusinessNearbySection = ({ currentBusinessId, city, isClaimed }: BusinessN
       {/* People also viewed */}
       {nearby.length > 0 && (
         <div className="px-4 py-5 border-t border-border">
-          <h3 className="font-heading text-lg font-bold text-foreground mb-4">Les gens ont aussi consulté</h3>
+          <h3 className="font-heading text-lg font-bold text-foreground mb-4">Autres commerces à {city}</h3>
           <div className="space-y-0">
             {nearby.map((biz, i) => (
               <div key={biz.id}>

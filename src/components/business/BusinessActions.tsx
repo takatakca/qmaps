@@ -20,7 +20,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
   const handleWebsite = () => {
     if (!website) return;
     if (businessId) trackBusinessEvent(businessId, "website_click", { source: "business_detail" });
-    window.open(website, "_blank");
+    window.open(website, "_blank", "noopener,noreferrer");
   };
   const handlePhone = () => {
     if (!phone) return;
@@ -31,8 +31,10 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
     <div className="px-4 pt-4">
       {/* Category + status */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-foreground font-medium">{priceLabels[(priceLevel || 1) - 1]}</span>
-        <span className="text-muted-foreground">•</span>
+        {priceLevel != null && priceLabels[priceLevel - 1] && <>
+          <span className="text-foreground font-medium">{priceLabels[priceLevel - 1]}</span>
+          <span className="text-muted-foreground">•</span>
+        </>}
         <span className="text-foreground">{categoryName || "Commerce"}</span>
       </div>
       <div className="flex items-center gap-1.5 mt-1">
@@ -79,14 +81,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
         )}
       </div>
 
-      {/* Recommend prompt */}
-      <div className="flex items-center justify-between mt-5 py-3 border-t border-border">
-        <p className="text-sm font-semibold text-foreground">Recommandez-vous ce commerce?</p>
-        <div className="flex gap-2">
-          <button className="px-5 py-1.5 border border-border rounded-full text-sm font-medium text-foreground hover:bg-secondary transition-colors">Oui</button>
-          <button className="px-5 py-1.5 border border-border rounded-full text-sm font-medium text-foreground hover:bg-secondary transition-colors">Non</button>
-        </div>
-      </div>
+
     </div>
   );
 };

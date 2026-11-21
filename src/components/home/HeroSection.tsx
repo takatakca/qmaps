@@ -1,5 +1,8 @@
+import { searchUrl } from "@/lib/localSearch";
 import { Link } from "react-router-dom";
-import { MapPin, Search, ShieldCheck, Star } from "lucide-react";
+import { ChevronDown, MapPin, Search, ShieldCheck, Star } from "lucide-react";
+import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import SearchBar from "@/components/SearchBar";
 import LanguageSwitcher from "@/components/home/LanguageSwitcher";
 import QuickAuthMenu from "@/components/home/QuickAuthMenu";
@@ -10,7 +13,33 @@ const CHIPS = [
   "Construction", "Automobile", "Beauté", "Santé",
 ];
 
-const HeroSection = () => (
+function CategoryLinks({ city }: { city: string }) {
+  const { categories } = useAllCategories();
+  return (
+    <nav aria-label="Catégories de commerces" className="mt-4 flex max-w-4xl flex-wrap gap-1.5 md:gap-2">
+      {CHIPS.map(label => {
+        const match = searchCategories(categories, label, 1)[0];
+        const children = match ? categories.filter(c => c.parent_id === match.id) : [];
+        const href = match ? searchUrl("", city, match.slug) : searchUrl(label.toLowerCase(), city);
+        return <div key={label} className="qmaps-scene-control inline-flex items-center rounded-md text-xs font-medium">
+          <Link to={href} className="px-3 py-2 hover:underline">{label}</Link>
+          {children.length > 0 && <DropdownMenu>
+            <DropdownMenuTrigger aria-label={`Sous-catégories : ${label}`} className="self-stretch px-2">
+              <ChevronDown size={14} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="max-h-72 overflow-y-auto">
+              {children.map(child => <DropdownMenuItem asChild key={child.id}>
+                <Link to={searchUrl("", city, child.slug)}>{child.name}</Link>
+              </DropdownMenuItem>)}
+            </DropdownMenuContent>
+          </DropdownMenu>}
+        </div>;
+      })}
+    </nav>
+  );
+}
+
+const HeroSection = ({ city, onCityChange }: { city: string; onCityChange: (value: string) => void }) => (
   <header className="qmaps-scene relative isolate overflow-hidden">
     <img src={heroImg} alt="Panorama illustré du Vieux-Port de Montréal à l’heure bleue" width={1920} height={1024} className="absolute inset-0 h-full w-full object-cover" />
     <div className="qmaps-scene-overlay absolute inset-0" />
@@ -51,21 +80,16 @@ const HeroSection = () => (
 
       <div className="relative mt-5 max-w-2xl md:mt-8 animate-fade-up [animation-delay:120ms]">
         <div className="relative rounded-lg border border-border bg-card p-2 text-card-foreground shadow-elevated">
-          <SearchBar smart />
+          <SearchBar smart onCityChange={onCityChange} />
         </div>
       </div>
 
-      <div className="mt-4 flex max-w-3xl flex-wrap gap-1.5 md:gap-2 animate-fade-up [animation-delay:200ms]">
-        {CHIPS.map((chip) => (
-          <Link
-            key={chip}
-            to={`/search?q=${encodeURIComponent(chip.toLowerCase())}`}
-            className="qmaps-scene-control rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-          >
-            {chip}
-          </Link>
-        ))}
-      </div>
+      <CategoryLinks city={city} />
+
+      <nav aria-label="Communauté QMaps" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium qmaps-scene-text">
+        <Link to="/add-review" className="hover:underline">Écrire un avis</Link>
+        <Link to="/activity" className="hover:underline">Activité récente</Link>
+      </nav>
 
       <div className="qmaps-scene-muted qmaps-scene-rule mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 border-t pt-4 text-[10px] font-medium uppercase tracking-normal">
         <span className="inline-flex items-center gap-1.5">

@@ -8,8 +8,8 @@ import SearchFiltersSheet from "@/components/search/SearchFiltersSheet";
 import CategoryPickerDialog from "@/components/search/CategoryPickerDialog";
 import { SlidersHorizontal, X, LayoutGrid, FilePlus2, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
-import { formatDistance } from "@/lib/geo";
+import { distanceMeters, getCurrentPosition, type Coordinates } from "@/lib/geo";
+import { cityFilter, cityLabelFor, textSearchFilter } from "@/lib/localSearch";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
@@ -26,134 +26,101 @@ import type { Tables } from "@/integrations/supabase/types";
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const categorySlug = searchParams.get("category") || "";
+  const city = cityLabelFor(searchParams.get("city") || "");
+  const selectedCategory = searchParams.get("category") || "";
 
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
-  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [searchError, setSearchError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   // Filters (initialized from URL)
-  const [selectedCategory, setSelectedCategory] = useState(categorySlug);
   const [selectedPrice, setSelectedPrice] = useState<number[]>([]);
   const [minRating, setMinRating] = useState<number | null>(null);
   const [openNow, setOpenNow] = useState(false);
-  const [radiusKm, setRadiusKm] = useState(5);
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
-  const { businesses: nearbyBusinesses } = useNearbyBusinesses(12);
-  const { categories: allCategories } = useAllCategories();
-
-  // Keep selectedCategory in sync if URL changes
-  useEffect(() => {
-    setSelectedCategory(categorySlug);
-  }, [categorySlug]);
+  const [position, setPosition] = useState<Coordinates | null>(null);
+  const { categories, loading: categoriesLoading, error: categoryError, retry: retryCategories } = useAllCategories();
 
   useEffect(() => {
-    supabase.from("categories").select("*").order("name").then(({ data }) => {
-      if (data) setCategories(data);
-    });
+    let active = true;
+    getCurrentPosition().then(value => { if (active) setPosition(value); }).catch(() => {});
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
-    const fetchBusinesses = async () => {
-      setLoading(true);
-      let q = supabase.from("businesses").select("*, business_categories(categories(name))");
-
-      // Broader text matching across name, city and description
-      if (query) {
-        const safe = query.replace(/[,()]/g, " ").trim();
-        const pattern = `%${safe}%`;
-        q = q.or(
-          `name.ilike.${pattern},city.ilike.${pattern},description.ilike.${pattern}`,
-        );
+    let current = true;
+    setLoading(true);
+    setSearchError(false);
+    setBusinesses([]);
+    const load = async () => {
+      if (categoriesLoading && (selectedCategory || query)) return;
+      if (categoryError && (selectedCategory || query)) throw new Error("Catégories indisponibles");
+      const matched = selectedCategory
+        ? categories.filter(c => c.slug === selectedCategory)
+        : searchCategories(categories, query, 4);
+      if (selectedCategory && !matched.length) {
+        setLoading(false);
+        return;
       }
-      if (minRating) q = q.gte("avg_rating", minRating);
-      if (selectedPrice.length > 0) q = q.in("price_level", selectedPrice);
-
-      // Resolve category set: selected + its children, OR categories matching the free-text query
-      const resolveCategoryIds = (): string[] => {
-        const pool = categories.length ? categories : allCategories;
-        if (!pool.length) return [];
-        if (selectedCategory) {
-          const cat = pool.find((c) => c.slug === selectedCategory);
-          if (!cat) return [];
-          const children = pool.filter((child) => child.parent_id === cat.id).map((child) => child.id);
-          return [cat.id, ...children];
-        }
-        if (query && allCategories.length) {
-          const matches = searchCategories(allCategories, query, 4);
-          if (!matches.length) return [];
-          const ids = new Set<string>();
-          for (const m of matches) {
-            ids.add(m.id);
-            for (const c of allCategories) if (c.parent_id === m.id) ids.add(c.id);
-          }
-          return Array.from(ids);
-        }
-        return [];
-      };
-
-      const catIds = resolveCategoryIds();
-      let businessIdsFromCategory: string[] | null = null;
-      if (catIds.length > 0) {
-        const { data: bcData } = await supabase
-          .from("business_categories")
-          .select("business_id")
-          .in("category_id", catIds);
-        businessIdsFromCategory = Array.from(new Set((bcData || []).map((bc) => bc.business_id)));
-        if (selectedCategory) {
-          // Strict filter when user explicitly picked a category
-          if (businessIdsFromCategory.length === 0) {
-            setBusinesses([]);
-            setLoading(false);
-            return;
-          }
-          q = q.in("id", businessIdsFromCategory);
-        }
+      const categoryIds = new Set(matched.map(c => c.id));
+      for (const child of categories) {
+        if (child.parent_id && matched.some(parent => parent.id === child.parent_id)) categoryIds.add(child.id);
       }
-
-      q = q.order("avg_rating", { ascending: false });
-      const { data } = await q;
-      let results = data || [];
-
-      // If query had no name/city/description hits but matched categories, union those businesses
-      if (query && !selectedCategory && businessIdsFromCategory && businessIdsFromCategory.length) {
-        const have = new Set(results.map((b) => b.id));
-        const missing = businessIdsFromCategory.filter((id) => !have.has(id));
-        if (missing.length > 0) {
-          const { data: extra } = await supabase
-            .from("businesses")
-            .select("*, business_categories(categories(name))")
-            .in("id", missing);
-          if (extra) results = [...results, ...extra];
+      // Empty embed filters matching categories without removing other display
+      // categories or relaxing the city, visibility, rating and price filters.
+      const rows: Tables<"businesses">[] = [];
+      const pageSize = 250;
+      for (let offset = 0; current; offset += pageSize) {
+        let request = supabase.from("businesses")
+          .select("*, business_categories(categories(name)), matched:business_categories()")
+          .eq("is_active", true)
+          .in("status", ["open", "temporarily_closed", "seasonal"]);
+        if (city) request = request.or(cityFilter(city));
+        if (minRating) request = request.gte("avg_rating", minRating);
+        if (selectedPrice.length) request = request.in("price_level", selectedPrice);
+        if (categoryIds.size) request = request.in("matched.category_id", [...categoryIds]);
+        if (selectedCategory) request = request.not("matched", "is", null);
+        if (query) {
+          const text = textSearchFilter(query);
+          request = request.or(!selectedCategory && categoryIds.size ? text + ",matched.not.is.null" : text);
         }
+        const { data, error } = await request.order("id").range(offset, offset + pageSize - 1);
+        if (!current) return;
+        if (error) throw error;
+        rows.push(...(data || []));
+        if (!data || data.length < pageSize) break;
       }
-
-      // Client-side openNow using real hours when available
-      if (openNow) {
-        results = results.filter((b) => isBusinessOpenNow(b));
+      if (current) {
+        setBusinesses(rows);
+        setLoading(false);
       }
-
-      // Distance scoping
-      const scoped = query || !nearbyBusinesses.length
-        ? results
-        : results.filter((business) => {
-            const nearby = nearbyBusinesses.find((item) => item.id === business.id);
-            return !nearby || ((nearby.distance_meters || 0) <= radiusKm * 1000);
-          });
-      setBusinesses(scoped as Tables<"businesses">[]);
-      setLoading(false);
     };
-    fetchBusinesses();
-  }, [query, selectedCategory, selectedPrice, minRating, openNow, radiusKm, categories, allCategories, nearbyBusinesses]);
+    void load().catch(() => {
+      if (current) { setSearchError(true); setLoading(false); }
+    });
+    return () => { current = false; };
+  }, [query, city, selectedCategory, selectedPrice, minRating, categories, categoriesLoading, categoryError, attempt]);
+
+  const results = useMemo(() => {
+    const rows = businesses.map(b => ({
+      ...b,
+      distance_meters: position ? distanceMeters(position, b.latitude, b.longitude) : undefined,
+    })).filter(b =>
+      (!openNow || isBusinessOpenNow(b)) &&
+      (radiusKm === null || (b.distance_meters != null && b.distance_meters <= radiusKm * 1000))
+    );
+    return sortBusinesses(rows, sortBy);
+  }, [businesses, position, openNow, radiusKm, sortBy]);
 
   const clearFilters = () => {
-    setSelectedCategory("");
     setSelectedPrice([]);
     setMinRating(null);
     setOpenNow(false);
-    setRadiusKm(5);
+    setRadiusKm(null);
     // Also clear URL category param so refresh keeps cleared state
     const next = new URLSearchParams(searchParams);
     next.delete("category");
@@ -165,7 +132,6 @@ const Search = () => {
   };
 
   const handleCategoryChange = (slug: string) => {
-    setSelectedCategory(slug);
     const next = new URLSearchParams(searchParams);
     if (slug) next.set("category", slug);
     else next.delete("category");
@@ -177,24 +143,23 @@ const Search = () => {
     (selectedPrice.length > 0 ? 1 : 0) +
     (minRating ? 1 : 0) +
     (openNow ? 1 : 0) +
-    (radiusKm !== 5 ? 1 : 0);
+    (radiusKm !== null ? 1 : 0);
 
   // Related suggestions for no-results state
   const relatedSuggestions = useMemo(() => {
-    if (!allCategories.length) return [];
+    if (!categories.length) return [];
     const seed = query || selectedCategory;
     if (!seed) return [];
-    return searchCategories(allCategories, normalizeSearchText(seed), 6).filter(
+    return searchCategories(categories, normalizeSearchText(seed), 6).filter(
       (c) => c.slug !== selectedCategory,
     );
-  }, [allCategories, query, selectedCategory]);
+  }, [categories, query, selectedCategory]);
 
   const selectedCategoryName =
-    categories.find((c) => c.slug === selectedCategory)?.name ||
-    allCategories.find((c) => c.slug === selectedCategory)?.name;
+    categories.find((c) => c.slug === selectedCategory)?.name;
 
   return (
-    <div className="min-h-screen bg-background pb-20 max-w-lg mx-auto">
+    <div className="min-h-screen bg-background pb-20 max-w-5xl mx-auto">
       <Seo
         title={query ? `Recherche : ${query} — QMaps` : "Recherche de commerces — QMaps"}
         description={
@@ -208,12 +173,14 @@ const Search = () => {
       <div className="px-4 pt-4">
         <SearchBar
           initialValue={query}
+          initialCity={city}
+          initialCategory={selectedCategory}
           smart
           onOpenAllCategories={() => setShowCategoryPicker(true)}
         />
 
         {/* Action row */}
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex flex-wrap items-center gap-2 mt-3">
           <Button
             size="sm"
             variant={activeFiltersCount > 0 ? "default" : "outline"}
@@ -253,6 +220,7 @@ const Search = () => {
           minRating={minRating}
           openNow={openNow}
           radiusKm={radiusKm}
+          hasPosition={!!position}
           onCategoryChange={handleCategoryChange}
           onTogglePrice={togglePrice}
           onMinRatingChange={setMinRating}
@@ -273,7 +241,7 @@ const Search = () => {
             <p className="text-sm text-muted-foreground">
               {loading
                 ? "Recherche..."
-                : `${businesses.length} résultat${businesses.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}`}
+                : searchError ? "Recherche indisponible" : `${results.length} résultat${results.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}${city ? ` à ${city}` : ""}`}
             </p>
             <select
               aria-label="Trier les résultats"
@@ -281,54 +249,42 @@ const Search = () => {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="text-xs bg-card border border-border rounded-full px-3 py-1.5 text-foreground"
             >
-              {SORT_OPTIONS.map((o) => (
+              {SORT_OPTIONS.filter(o => o.id !== "distance" || position).map((o) => (
                 <option key={o.id} value={o.id}>{o.label}</option>
               ))}
             </select>
           </div>
 
-          <div className="space-y-4">
-            {sortBusinesses(
-              businesses.map((b) => ({
-                ...b,
-                distance_meters: nearbyBusinesses.find((item) => item.id === b.id)?.distance_meters,
-              })) as (Tables<"businesses"> & { distance_meters?: number })[],
-              sortBy,
-            ).map((b) => (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((b) => (
               <div
                 key={b.id}
-                onMouseDown={() => trackRecommendationEvent({
-                  business_id: b.id,
-                  event_type: "search_click",
-                  source: "search_results",
-                  city: b.city ?? null,
-                  metadata: { query, category: selectedCategory || null, sort: sortBy },
-                })}
+                onClick={(event) => {
+                  if (!(event.target instanceof Element) || !event.target.closest("a")) return;
+                  trackRecommendationEvent({
+                    business_id: b.id,
+                    event_type: "search_click",
+                    source: "search_results",
+                    city: b.city ?? null,
+                    metadata: { query, category: selectedCategory || null, sort: sortBy },
+                  });
+                }}
               >
                 <BusinessCard business={mapBusinessToCard({
                   ...b,
-                  category_name: categories.find((cat) => cat.slug === selectedCategory)?.name || categoryNameFromEmbed(b),
-                  distance_meters: (b).distance_meters,
+                  category_name: categoryNameFromEmbed(b, selectedCategoryName || "Commerce"),
                 })} />
               </div>
             ))}
 
-            {!query && !selectedCategory && nearbyBusinesses.length > 0 && (
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-sm font-semibold text-foreground">Autour de vous</p>
-                <div className="mt-3 space-y-2">
-                  {nearbyBusinesses.slice(0, 4).map((business) => (
-                    <div key={business.id} className="flex items-center justify-between text-sm">
-                      <span className="truncate text-foreground">{business.name}</span>
-                      <span className="text-xs text-muted-foreground">{formatDistance(business.distance_meters)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!loading && businesses.length === 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+            {searchError && <div role="alert" className="col-span-full rounded-xl border p-4">
+              Impossible de charger les résultats. <Button variant="outline" onClick={() => {
+                if (categoryError) retryCategories();
+                setAttempt(value => value + 1);
+              }}>Réessayer</Button>
+            </div>}
+            {!loading && !searchError && results.length === 0 && (
+              <div className="col-span-full rounded-2xl border border-border bg-card p-6 space-y-5">
                 <div className="text-center">
                   <p className="font-heading text-base font-semibold text-foreground">
                     Aucun résultat trouvé
