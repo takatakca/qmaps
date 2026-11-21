@@ -1,3 +1,5 @@
+2026-11-21 | Codex | livraison/qmaps-mobile-1.0.0-rc1 → ticket 17 | active | Publication des fichiers mobiles déjà vérifiés et de leurs empreintes | Contrôler les téléchargements et la fiche Amazon.
+
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-web-independant → ticket nº 17 | En cours | L’API autonome répond en production sur /api/v1/health et retrouve les deux fiches de Montréal sur /api/v1/places. Raccordement du compte web, de la console propriétaire et des parcours QMAPS à cette même API que les clients mobiles | Tester les cookies, les rôles et la confidentialité en CI et dans Chrome.
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-applications-natives → ticket nº 17 | En cours | Projets Android Kotlin et iOS Swift de QMAPS avec vues natives et API propriétaire sur /api/v1. Le site public et le backend de transition restent accessibles pendant cette livraison | Construire les fichiers installables et conserver les preuves avant soumission aux boutiques.
 

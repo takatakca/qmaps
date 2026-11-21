@@ -1,0 +1,29 @@
+name: Publish verified QMAPS mobile files
+on:
+  push:
+    branches: [livraison/qmaps-mobile-1.0.0-rc1]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify files and publish mobile release candidate
+        working-directory: mobile/livraison-20261121
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          sha256sum --check SHA256SUMS
+          jarsigner -verify -verbose QMAPS-Android-production.aab > "$RUNNER_TEMP/qmaps-signature.txt"
+          grep -q 'jar verified' "$RUNNER_TEMP/qmaps-signature.txt"
+          if gh release view mobile-1.0.0-rc.1 >/dev/null 2>&1; then
+            echo "Release already exists; keeping its assets intact"
+            exit 0
+          fi
+          gh release create mobile-1.0.0-rc.1 --prerelease \
+            --target 88ca31d4fd9ab915fa9d71a1d1ee73fb52ddb94b \
+            --title "QMAPS mobile 1.0.0 — version candidate" \
+            --notes "Android : APK de test installé et lancé sur émulateur, AAB signé par QMAPS. iOS : compilation pour simulateur et compilation non signée pour iPhone. Les soumissions aux boutiques sont suivies au ticket #17. Les empreintes SHA-256 sont jointes." \
+            QMAPS-* SHA256SUMS
