@@ -40,9 +40,9 @@ class MainActivity : Activity() {
         text=value; textSize=size; setTextColor(navy); setPadding(0,dp(6),0,dp(6))
         if(bold) setTypeface(typeface,Typeface.BOLD)
     }
-    private fun action(title:String, fn:()->Unit) = Button(this).apply {
+    private fun action(title:String, availableWhileLoading:Boolean=false, fn:()->Unit) = Button(this).apply {
         text=title; isAllCaps=false; setTextColor(blue)
-        setOnClickListener { if(!pending) fn() }
+        setOnClickListener { if(availableWhileLoading || !pending) fn() }
     }
     private fun input(hintText:String, secret:Boolean=false) = EditText(this).apply {
         hint=hintText; isSingleLine=true; contentDescription=hintText
@@ -57,7 +57,7 @@ class MainActivity : Activity() {
         root.addView(header)
         val tabs=HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled=false }
         val items=LinearLayout(this)
-        for(t in listOf("Découvrir","Favoris","Commerce","Compte")) items.addView(action(t){show(t)})
+        for(t in listOf("Découvrir","Favoris","Commerce","Compte")) items.addView(action(t, availableWhileLoading=true){show(t)})
         tabs.addView(items);root.addView(tabs)
         val scroll=ScrollView(this)
         content=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL;setPadding(dp(18),dp(10),dp(18),dp(24)) }
