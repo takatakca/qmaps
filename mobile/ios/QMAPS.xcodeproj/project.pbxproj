@@ -1,0 +1,28 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+5A7F563707935082D731E3E9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QmapsApp.swift; sourceTree = "<group>"; };
+7437357BE3692EEA89266CF2 = { isa = PBXBuildFile; fileRef = 5A7F563707935082D731E3E9; };
+7D8CFA98D8D3943FEE0BEE98 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+664F0C774A5FC9264AB04BD2 = { isa = PBXBuildFile; fileRef = 7D8CFA98D8D3943FEE0BEE98; };
+9E17CA2B00999FB02DD9328D = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Places.swift; sourceTree = "<group>"; };
+9B2C81CFB65E8A3C557825DA = { isa = PBXBuildFile; fileRef = 9E17CA2B00999FB02DD9328D; };
+35EA9B9113D279D8580424AC = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+974B4A2A30C7470354BCE6B5 = { isa = PBXBuildFile; fileRef = 35EA9B9113D279D8580424AC; };
+795A02A63DC9C1E86758E98F = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+070048F437A415A8B24F192B = { isa = PBXBuildFile; fileRef = 795A02A63DC9C1E86758E98F; };
+A172CEDCAE47474B615C54D5 = { isa = PBXFileReference; explicitFileType = wrapper.application; path = QMAPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+878A52FC5FF6A57D50B7B870 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (7437357BE3692EEA89266CF2,664F0C774A5FC9264AB04BD2,9B2C81CFB65E8A3C557825DA,974B4A2A30C7470354BCE6B5,); runOnlyForDeploymentPostprocessing = 0; };
+41D311A605520FC7B8B9A980 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (070048F437A415A8B24F192B,); runOnlyForDeploymentPostprocessing = 0; };
+E2AA269EB967A8853A258BFA = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+B92ABFAC95CFF2B9F275BD24 = { isa = PBXGroup; children = (D0C480A8B8900B7B3130FBB7,0A3E27B8CA818264D75C8D81,); sourceTree = "<group>"; };
+D0C480A8B8900B7B3130FBB7 = { isa = PBXGroup; children = (5A7F563707935082D731E3E9,7D8CFA98D8D3943FEE0BEE98,9E17CA2B00999FB02DD9328D,35EA9B9113D279D8580424AC,795A02A63DC9C1E86758E98F,); path = QMAPS; sourceTree = "<group>"; };
+0A3E27B8CA818264D75C8D81 = { isa = PBXGroup; children = (A172CEDCAE47474B615C54D5,); name = Products; sourceTree = "<group>"; };
+73EBF6644258C120893E685D = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; ENABLE_TESTABILITY = YES; }; name = Debug; };
+0B0C687DF8B6B8DC790B519C = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; SWIFT_COMPILATION_MODE = wholemodule; }; name = Release; };
+187B327489003FCA55B00C62 = { isa = XCConfigurationList; buildConfigurations = (73EBF6644258C120893E685D,0B0C687DF8B6B8DC790B519C,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+6C7EFF6369083C8E1F2B1994 = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_NAME = QMAPS; PRODUCT_BUNDLE_IDENTIFIER = ca.qmaps.mobile; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = QMAPS; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; TARGETED_DEVICE_FAMILY = "1,2"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 1.0.0; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; }; name = Debug; };
+DD75E2CB1C510A828AC72D96 = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_NAME = QMAPS; PRODUCT_BUNDLE_IDENTIFIER = ca.qmaps.mobile; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = QMAPS; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; TARGETED_DEVICE_FAMILY = "1,2"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 1.0.0; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; }; name = Release; };
+DA6C49DB5A7137BA75102BE3 = { isa = XCConfigurationList; buildConfigurations = (6C7EFF6369083C8E1F2B1994,DD75E2CB1C510A828AC72D96,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+34A04005BCAF206EEC990BD9 = { isa = PBXNativeTarget; buildConfigurationList = DA6C49DB5A7137BA75102BE3; buildPhases = (878A52FC5FF6A57D50B7B870,E2AA269EB967A8853A258BFA,41D311A605520FC7B8B9A980,); buildRules = (); dependencies = (); name = QMAPS; productName = QMAPS; productReference = A172CEDCAE47474B615C54D5; productType = "com.apple.product-type.application"; };
+244210E48437B6556980A702 = { isa = PBXProject; attributes = { LastSwiftUpdateCheck = 1600; LastUpgradeCheck = 1600; }; buildConfigurationList = 187B327489003FCA55B00C62; compatibilityVersion = "Xcode 14.0"; developmentRegion = fr; hasScannedForEncodings = 0; knownRegions = (fr,en,Base); mainGroup = B92ABFAC95CFF2B9F275BD24; productRefGroup = 0A3E27B8CA818264D75C8D81; projectDirPath = ""; projectRoot = ""; targets = (34A04005BCAF206EEC990BD9,); };
+}; rootObject = 244210E48437B6556980A702; }

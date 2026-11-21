@@ -1,0 +1,110 @@
+name: QMAPS native applications
+on:
+  pull_request:
+    paths: ['mobile/**', '.github/workflows/qmaps-native.yml']
+  push:
+    branches: [main]
+    paths: ['mobile/**', '.github/workflows/qmaps-native.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build APK and bundle
+        working-directory: mobile/android
+        run: ./gradlew --no-daemon assembleDebug assembleDebugAndroidTest bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QMAPS-Android-test-APK
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QMAPS-Android-release-bundle-unsigned
+          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and start the real Android application
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            adb shell input keyevent KEYCODE_WAKEUP
+            adb shell wm dismiss-keyguard
+            adb install mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n ca.qmaps.mobile/.MainActivity
+            adb shell pidof ca.qmaps.mobile
+            adb install mobile/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            sh mobile/android/verify-ui.sh
+            adb shell am start -W -n ca.qmaps.mobile/.MainActivity
+            adb exec-out screencap -p > QMAPS-Android-accueil.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QMAPS-Android-capture
+          path: QMAPS-Android-accueil.png
+          if-no-files-found: error
+      - name: Sign the production Android bundle when owner signing is available
+        if: github.event_name != 'pull_request'
+        working-directory: mobile/android
+        env:
+          UPLOAD_STORE_B64: ${{ secrets.QMAPS_UPLOAD_STORE_B64 }}
+          QMAPS_UPLOAD_STORE_PASSWORD: ${{ secrets.QMAPS_UPLOAD_STORE_PASSWORD }}
+          QMAPS_UPLOAD_KEY_ALIAS: ${{ secrets.QMAPS_UPLOAD_KEY_ALIAS }}
+          QMAPS_UPLOAD_KEY_PASSWORD: ${{ secrets.QMAPS_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$UPLOAD_STORE_B64" ]; then echo 'Owner upload key has not been configured.'; exit 0; fi
+          set -eu
+          umask 077
+          export QMAPS_UPLOAD_STORE_FILE="$RUNNER_TEMP/qmaps-upload.jks"
+          trap 'rm -f "$QMAPS_UPLOAD_STORE_FILE"' EXIT
+          echo "$UPLOAD_STORE_B64" | base64 -d > "$QMAPS_UPLOAD_STORE_FILE"
+          ./gradlew --no-daemon bundleRelease
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab | grep -q 'jar verified'
+          cp app/build/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/QMAPS-production.aab"
+      - name: Keep the owner-signed production bundle
+        uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: QMAPS-Android-production-signed
+          path: ${{ runner.temp }}/QMAPS-production.aab
+          if-no-files-found: ignore
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile the SwiftUI app for simulator and iPhone
+        working-directory: mobile/ios
+        run: |
+          xcodebuild -project QMAPS.xcodeproj -scheme QMAPS -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath build/simulator CODE_SIGNING_ALLOWED=NO build > "$RUNNER_TEMP/qmaps-ios.log" || { tail -100 "$RUNNER_TEMP/qmaps-ios.log"; exit 1; }
+          xcodebuild -project QMAPS.xcodeproj -scheme QMAPS -configuration Release -destination 'generic/platform=iOS' -derivedDataPath build/device CODE_SIGNING_ALLOWED=NO build > "$RUNNER_TEMP/qmaps-iphone.log" || { tail -100 "$RUNNER_TEMP/qmaps-iphone.log"; exit 1; }
+          ditto -c -k --keepParent build/simulator/Build/Products/Debug-iphonesimulator/QMAPS.app "$RUNNER_TEMP/QMAPS-simulator.zip"
+          ditto -c -k --keepParent build/device/Build/Products/Release-iphoneos/QMAPS.app "$RUNNER_TEMP/QMAPS-iPhone-unsigned.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QMAPS-iOS-builds
+          path: |
+            ${{ runner.temp }}/QMAPS-simulator.zip
+            ${{ runner.temp }}/QMAPS-iPhone-unsigned.zip
+      - name: Install and launch the iOS application
+        working-directory: mobile/ios
+        run: |
+          device=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; print(next(d["udid"] for k,v in json.load(sys.stdin)["devices"].items() if "iOS" in k for d in v if "iPhone" in d["name"]))')
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device" -b
+          xcrun simctl install "$device" build/simulator/Build/Products/Debug-iphonesimulator/QMAPS.app
+          xcrun simctl launch "$device" ca.qmaps.mobile
