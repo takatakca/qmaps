@@ -107,8 +107,8 @@ export function buildSitemapFiles(entries, origin = SITE_ORIGIN) {
   return files;
 }
 
-async function fetchActiveBusinesses(supabaseUrl, publishableKey) {
-  const endpoint = new URL("/rest/v1/businesses", supabaseUrl);
+export async function fetchActiveBusinesses(supabaseUrl, publishableKey) {
+  const endpoint = new URL("rest/v1/businesses", supabaseUrl.replace(/\/?$/, "/"));
   endpoint.searchParams.set("select", "id,city,updated_at");
   endpoint.searchParams.set("is_active", "eq.true");
   endpoint.searchParams.set("order", "updated_at.desc,id.asc");

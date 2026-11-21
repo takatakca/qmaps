@@ -109,7 +109,7 @@ lines.push("");
 lines.push(`## Manual launch blockers`);
 lines.push("");
 lines.push(`- Stripe in **Live** mode + webhook secret set`);
-lines.push(`- Custom domain DNS + SSL active (\`qmaps.app\`)`);
+lines.push(`- Custom domain DNS + SSL active (\`qmaps.ca\`)`);
 lines.push(`- Support mailboxes monitored daily`);
 lines.push(`- Real-device mobile QA walk completed`);
 lines.push(`- Owner sign-off on \`docs/app-store-readiness.md\``);

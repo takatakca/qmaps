@@ -1,14 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildSitemapEntries,
   buildSitemapFiles,
   buildUrlSet,
+  fetchActiveBusinesses,
   CITY_MINIMUM_LISTINGS,
   escapeXml,
   SITEMAP_URL_LIMIT,
 } from "../../scripts/generate-sitemap.mjs";
 
 describe("build-time sitemap generation", () => {
+  it.each(["https://qmaps.ca/qmaps-api", "https://qmaps.ca/qmaps-api/"])("fetches the catalogue beneath %s", async (apiOrigin) => {
+    const request = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json([]));
+    try {
+      await fetchActiveBusinesses(apiOrigin, "public-test");
+      expect(new URL(String(request.mock.calls[0][0])).pathname).toBe("/qmaps-api/rest/v1/businesses");
+    } finally {
+      request.mockRestore();
+    }
+  });
+
   it("escapes XML values", () => {
     expect(escapeXml(`A & <B> "C" 'D'`)).toBe("A &amp; &lt;B&gt; &quot;C&quot; &apos;D&apos;");
   });

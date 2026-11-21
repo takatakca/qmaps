@@ -1,4 +1,4 @@
-project_id = "ldvkebjfuldnemfdoted"
+project_id = "qmaps-coolify"
 
 [functions.stripe-webhook]
 verify_jwt = false
