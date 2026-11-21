@@ -1,3 +1,5 @@
+2026-11-21 | Codex — ChatGPT Work | release/qmaps-mobile-rc3 → ticket 17 | Livraison | Android 1.0.0 compilation 3 signé, captures de parcours vérifiées et applications iOS compilées. | Publier les fichiers contrôlés dans la livraison mobile-1.0.0-rc.3.
+
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-migrations-deploiement → ticket 17 | En vérification | Application automatique des migrations sur le volume PostgreSQL existant avant le démarrage de la nouvelle API. | Vérifier la réexécution et le catalogue sur Coolify.
 
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-moderation-mobile → ticket 17 | En vérification | Signalement et blocage des éditeurs de fiches dans les applications natives, accord sur les règles avant publication. | Tester les deux rôles et la modération sur le service QMAPS.

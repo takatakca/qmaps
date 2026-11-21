@@ -1,0 +1,41 @@
+name: QMAPS mobile RC3 release
+on:
+  push:
+    branches: [release/qmaps-mobile-rc3]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gather the tested public artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          gh run download 44928726796 --name QMAPS-Android-release-bundle-unsigned --dir unsigned
+          gh run download 44928726796 --name QMAPS-Android-capture --dir output
+          gh run download 44928486136 --name QMAPS-Android-test-APK --dir android
+          gh run download 44928486136 --name QMAPS-iOS-builds --dir ios
+          cp android/app-debug.apk output/QMAPS-Android-test-build-3.apk
+          cp ios/QMAPS-simulator.zip output/QMAPS-simulator-build-3.zip
+          cp ios/QMAPS-iPhone-unsigned.zip output/QMAPS-iPhone-unsigned-build-3.zip
+          cp mobile/release-rc3/{QMAPS-*,SHA256SUMS} output/
+          python3 mobile/release-rc3/assemble.py unsigned/app-release.aab mobile/release-rc3/signature.zip output/QMAPS-Android-production-build-3.aab
+          (cd output && sha256sum -c SHA256SUMS)
+          jarsigner -verify output/QMAPS-Android-production-build-3.aab | grep 'jar verified'
+      - name: Publish the verified QMAPS candidate
+        run: |
+          set -euo pipefail
+          tag=mobile-1.0.0-rc.3
+          if gh release view "$tag" >/dev/null 2>&1; then
+            mkdir existing
+            gh release download "$tag" --dir existing
+            cmp existing/SHA256SUMS output/SHA256SUMS
+            (cd existing && sha256sum -c SHA256SUMS)
+          else
+            gh release create "$tag" --target ee467b957f6a58d4bc4392b9243b7602db68142b --prerelease --title "QMAPS mobile 1.0.0 · compilation 3" --notes-file mobile/release-rc3/NOTES.md output/*
+          fi
