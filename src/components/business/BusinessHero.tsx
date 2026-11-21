@@ -1,4 +1,4 @@
-import { ArrowLeft, Share2 } from "lucide-react";
+import { ArrowLeft, Share2, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ShareSheet from "@/components/ShareSheet";
@@ -20,6 +20,19 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
   const navigate = useNavigate();
   const [sharing, setSharing] = useState(false);
 
+  const shareUrl = new URL("/business/" + businessId, window.location.origin).href;
+  const share = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: name, url: shareUrl });
+        return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+      }
+    }
+    setSharing(true);
+  };
+
   return (
     <div className="relative">
       <img src={imageUrl || "/placeholder.svg"} alt={name} className="w-full h-72 object-cover" />
@@ -33,14 +46,15 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
           <ArrowLeft size={18} className="text-foreground" />
         </button>
         <div className="flex items-center gap-2">
-          <BookmarkButton id={businessId} city={city} source="business_detail" />
-          <button aria-label="Partager la fiche" onClick={() => setSharing(true)} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+          <BookmarkButton businessId={businessId} city={city} source="business_detail" className="w-9 h-9 bg-card/80 rounded-full flex items-center justify-center" />
+          <button aria-label="Partager la fiche" onClick={share} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
             <Share2 size={16} className="text-foreground" />
           </button>
+          <a href="#report-business" aria-label="Signaler la fiche" className="w-9 h-9 bg-card/80 rounded-full flex items-center justify-center"><Flag size={16} /></a>
         </div>
       </div>
 
-      <ShareSheet open={sharing} onClose={() => setSharing(false)} title="Partager la fiche" text={name} url={new URL("/business/" + businessId, window.location.origin).href} />
+      <ShareSheet open={sharing} onClose={() => setSharing(false)} title="Partager la fiche" text={name} url={shareUrl} />
 
       {/* Bottom overlay content */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">

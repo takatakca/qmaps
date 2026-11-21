@@ -1,68 +1,126 @@
-import { useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { trackBusinessEvent } from "@/lib/analytics";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 
-export default function BookmarkButton({ id, city, source }: { id: string; city: string; source: string }) {
+export default function BookmarkButton({
+  businessId,
+  source,
+  city,
+  className,
+}: {
+  businessId: string;
+  source: string;
+  city?: string;
+  className: string;
+}) {
   const { user, loading } = useAuth();
+  const userId = user?.id;
   const navigate = useNavigate();
+  const cache = useQueryClient();
   const { toast } = useToast();
-  const client = useQueryClient();
   const lock = useRef(false);
-  const [saving, setSaving] = useState(false);
-  const key = ["saved-businesses", user?.id];
+  const key = ["saved-businesses", userId];
   const saved = useQuery({
     queryKey: key,
-    enabled: !!user,
-    staleTime: 60000,
+    enabled: !!userId,
+    staleTime: 60_000,
     queryFn: async () => {
       const ids: string[] = [];
-      const size = 500;
-      for (let start = 0; ; start += size) {
-        const { data, error } = await supabase.from("bookmarks").select("business_id")
-          .eq("user_id", user!.id).eq("list_name", "saved")
-          .order("business_id").range(start, start + size - 1);
+      for (let offset = 0; ; offset += 250) {
+        const { data, error } = await supabase
+          .from("bookmarks")
+          .select("business_id")
+          .eq("user_id", userId)
+          .eq("list_name", "saved")
+          .order("business_id")
+          .range(offset, offset + 249);
         if (error) throw error;
-        ids.push(...data.map(row => row.business_id));
-        if (data.length < size) return ids;
+        ids.push(...data.map((row) => row.business_id));
+        if (data.length < 250) return ids;
       }
     },
   });
-  const selected = saved.data?.includes(id) ?? false;
-  const toggle = async () => {
-    if (!user) { navigate("/auth"); return; }
-    if (lock.current) return;
-    lock.current = true;
-    setSaving(true);
-    try {
-      if (!saved.data) {
-        await saved.refetch({ throwOnError: true });
-        return;
-      }
-      const row = { business_id: id, user_id: user.id, list_name: "saved" };
+  const selected = !!userId && (saved.data?.includes(businessId) ?? false);
+  const write = useMutation({
+    mutationFn: async () => {
+      const entry = {
+        user_id: userId,
+        business_id: businessId,
+        list_name: "saved",
+      };
+      const table = supabase.from("bookmarks");
       const { error } = selected
-        ? await supabase.from("bookmarks").delete().match(row)
-        : await supabase.from("bookmarks").upsert(row, { onConflict: "user_id,business_id,list_name", ignoreDuplicates: true });
+        ? await table.delete().match(entry)
+        : await table.upsert(entry, {
+            onConflict: "user_id,business_id,list_name",
+            ignoreDuplicates: true,
+          });
       if (error) throw error;
-      client.setQueryData<string[]>(key, (ids = []) =>
-        selected ? ids.filter(value => value !== id) : [...new Set([...ids, id])]);
-      if (!selected) trackBusinessEvent(id, "save_click", { source });
-      trackRecommendationEvent({ business_id: id, event_type: selected ? "bookmark_remove" : "bookmark_add", source, city });
-    } catch {
-      toast({ title: "Impossible de mettre vos favoris à jour.", variant: "destructive" });
-    } finally {
-      setSaving(false);
+      await cache.cancelQueries({ queryKey: key });
+      cache.setQueryData<string[]>(key, (old = []) =>
+        selected
+          ? old.filter((id) => id !== businessId)
+          : [...new Set([...old, businessId])],
+      );
+      void cache.invalidateQueries({
+        queryKey: ["collection-contents", "saved", userId],
+      });
+      window.dispatchEvent(new CustomEvent("qmaps:collections-updated"));
+      if (!selected) trackBusinessEvent(businessId, "save_click", { source });
+      trackRecommendationEvent({
+        business_id: businessId,
+        event_type: selected ? "bookmark_remove" : "bookmark_add",
+        source,
+        city,
+      });
+    },
+    onError: () =>
+      toast({
+        title: "Impossible de modifier vos favoris. Réessayez.",
+        variant: "destructive",
+      }),
+    onSettled: () => {
       lock.current = false;
-    }
-  };
-  return <button type="button" aria-label={selected ? "Retirer des favoris" : "Enregistrer"}
-    aria-pressed={selected} disabled={loading || saving || (!!user && saved.isPending)} onClick={toggle}
-    className="flex h-9 w-9 items-center justify-center rounded-full bg-card/95 shadow-soft hover:text-primary">
-    <Bookmark size={16} className={selected ? "fill-primary text-primary" : "text-foreground"} />
-  </button>;
+    },
+  });
+  return (
+    <button
+      type="button"
+      aria-label={
+        saved.isError
+          ? "Recharger les favoris"
+          : selected
+            ? "Retirer des favoris"
+            : "Enregistrer"
+      }
+      aria-pressed={selected}
+      disabled={loading || (!!userId && saved.isPending) || write.isPending}
+      className={className}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!userId) {
+          navigate("/auth");
+          return;
+        }
+        if (saved.isError) {
+          void saved.refetch();
+          return;
+        }
+        if (lock.current) return;
+        lock.current = true;
+        write.mutate();
+      }}
+    >
+      <Bookmark
+        size={16}
+        className={selected ? "text-primary fill-primary" : "text-foreground"}
+      />
+    </button>
+  );
 }

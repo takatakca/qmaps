@@ -1,3 +1,5 @@
+import { isValidPhotoUrl } from "@/lib/businessPhotos";
+
 interface BusinessVibeSectionProps {
   photos: string[];
   amenities: string[] | null;
@@ -21,10 +23,10 @@ const BusinessVibeSection = ({ photos, amenities }: BusinessVibeSectionProps) =>
         <>
           <h3 className="font-heading text-lg font-bold text-foreground mb-3">L'ambiance</h3>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-            {photos.map((photo, i) => (
+            {photos.filter(isValidPhotoUrl).map((photo, i) => (
               <div key={i} className="shrink-0 w-40">
-                <a href={photo} target="_blank" rel="noopener noreferrer">
-                  <img src={photo} alt={`Photo ${i + 1} du commerce`} loading="lazy" className="w-40 h-28 object-cover rounded-xl" />
+                <a href={photo} target="_blank" rel="noopener noreferrer" aria-label={`Voir la photo ${i + 1} en grand`}>
+                  <img loading="lazy" src={photo} alt={`Photo ${i + 1}`} className="w-40 h-28 object-cover rounded-xl" />
                 </a>
               </div>
             ))}

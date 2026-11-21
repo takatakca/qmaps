@@ -1,4 +1,6 @@
-2026-11-21 | Codex | codex/liens-commercants → PR #15 | En revue | Validation des liens web sur les fiches et dans les formulaires commerçants. Livraisons #12 et #14 vérifiées en production | 474 tests locaux réussis. Confirmer la CI et la version déployée sur QMAPS.ca
+2026-11-21 | Codex | codex/collections-galerie → PR #16 | En revue | Collections personnelles et publiques, favoris et galerie de visiteurs sur le schéma existant | CI puis lecture en production. Les API publiques des collections et des photos répondent sur le schéma actuel
+
+2026-11-21 | Codex | codex/liens-commercants → PR #15 | Déployé | Validation des liens web sur les fiches et dans les formulaires commerçants. Livraisons #12 et #14 vérifiées en production | 474 tests réussis, CI verte. Manifeste public 0913ac9 confirmé
 
 2026-11-21 | Codex | codex/recherche-horaires-quebec | en revue | Recherche par services et horaires après minuit. La page Montréal de la PR #12 sert la version 11fd328 vérifiée en production avec Chez Schwartz et La Banquise | Vérifier la CI, le manifeste public et les filtres après déploiement
 
