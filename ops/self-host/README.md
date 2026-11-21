@@ -20,7 +20,7 @@ Conserver les secrets dans Coolify. Pour restaurer la plateforme, il faut les do
 
 ## Vérification sur le serveur
 
-Exécuter `node verify-live.mjs --qmaps-test` dans le conteneur Studio à partir du fichier `ops/self-host/verify-live.mjs` de la révision déployée. Le test crée trois comptes fictifs déjà confirmés, connecte chaque compte par mot de passe et vérifie la publication, la liste d’attente, l’isolation des collections et le stockage. Il supprime ses propres objets, son commerce et ses utilisateurs à la fin. Les confirmations par courriel se testent séparément avec une boîte autorisée.
+Exécuter `node verify-live.mjs --qmaps-test` dans le conteneur Studio à partir du fichier `ops/self-host/verify-live.mjs` de la révision déployée. Le test crée trois comptes fictifs déjà confirmés, connecte chaque compte par mot de passe et vérifie la publication, la liste d’attente, l’isolation des collections et le stockage. Il supprime ses propres objets, son commerce et ses utilisateurs à la fin. Ajouter `--public` pour vérifier les requêtes du visiteur via le domaine public QMAPS.ca. Les opérations de création et de retrait des comptes de test utilisent exclusivement le réseau interne. Les confirmations par courriel se testent séparément avec une boîte autorisée.
 
 ## Production QMAPS.ca
 

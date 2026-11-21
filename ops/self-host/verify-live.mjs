@@ -4,6 +4,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 const origin = new URL(process.env.SUPABASE_URL);
 assert.equal(origin.origin, "http://supabase-kong:8000", "Run inside the QMAPS Studio container");
 assert.equal(process.argv[2], "--qmaps-test", "Explicit fixture creation required");
+const visitorOrigin = process.argv.includes("--public") ? new URL("https://qmaps.ca/qmaps-api/") : origin;
 const anon = process.env.SUPABASE_ANON_KEY;
 const operator = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 assert.ok(anon && operator, "Studio integration unavailable");
@@ -18,7 +19,9 @@ async function api(path, options = {}) {
   const headers = { apikey: key, Authorization: "Bearer " + token, Prefer: "return=representation" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (binary) headers["Content-Type"] = "image/png";
-  const res = await fetch(new URL(path, origin), { method, headers, body: binary || JSON.stringify(body), signal: AbortSignal.timeout(20000) });
+  // Operator calls stay inside the service network, including fixture cleanup.
+  const target = new URL(path.slice(1), key === operator ? origin : visitorOrigin);
+  const res = await fetch(target, { method, headers, body: binary || JSON.stringify(body), signal: AbortSignal.timeout(20000) });
   if (res.status !== expected) {
     const data = await res.json().catch(() => ({}));
     throw new Error(method + " " + path.split("?")[0] + " returned " + res.status + " " + (data.code || data.error_code || ""));
