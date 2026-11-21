@@ -26,7 +26,8 @@ begin
   if not public.qmaps_report_listing(listing,'business','Essai du traitement') then raise exception 'Could not report listing'; end if;
   select id into strict flag from public.reports where reporter_user_id=client_id and target_id=listing;
   perform set_config('qmaps.user_id',admin_id::text,true);
-  if not public.qmaps_moderate_listing(flag,'hide') or exists(select 1 from public.businesses where id=listing and is_active) then raise exception 'Reported listing still visible'; end if;
+  if not public.qmaps_moderate_listing(flag,'hide') then raise exception 'Could not resolve report'; end if;
+  if exists(select 1 from public.businesses where id=listing and is_active) then raise exception 'Reported listing still visible'; end if;
   -- The moderation audit may need manual retention processing. Test closure on a clean reporter identity.
   update public.reports set reporter_user_id=gen_random_uuid() where id=flag;
   if not public.qmaps_start_closure(merchant_case) or not public.qmaps_start_closure(case_id) then raise exception 'Cases not claimed'; end if;
