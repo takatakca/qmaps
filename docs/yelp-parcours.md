@@ -19,6 +19,6 @@ Comparaison du 21 novembre 2026. Points de référence visités dans le navigate
 
 ## Publication et critères de bascule
 
-Les cinq migrations datées du 21 novembre sont additives. La CI utilise PostgreSQL et des identités de test. Elle exerce les règles d’accès, les transitions et les lectures entre commerçant et client. Les tests React vérifient aussi le bouton publié et le refus d’enregistrement. Ces contrôles doivent être complétés sur la pile qui dessert QMAPS avec de vrais services Auth, Storage et PostgREST.
+Les cinq migrations datées du 21 novembre sont additives. La CI applique les migrations à PostgreSQL et exerce les règles d’accès avec des identités de test. Trois parcours passent aussi par l’API HTTP PostgREST avec un client et deux commerçants : publier un bouton, confirmer une réservation et répondre à un message privé. Les tests React vérifient aussi le bouton publié et le refus d’enregistrement. Ces contrôles doivent être complétés sur la pile qui dessert QMAPS avec de vrais services Auth, Storage et PostgREST.
 
 Avant de fusionner vers la branche de déploiement, appliquer les migrations dans un environnement de recette restauré, essayer les parcours du tableau et sauvegarder la base source. Pour la production, livrer d’abord le schéma compatible avec l’ancienne interface, puis le frontend. Une restauration du précédent frontend conserve les données ajoutées. Le transfert vers Coolify et la décision de facturation suivent un chantier distinct.

@@ -1,4 +1,4 @@
-2026-11-21 | Codex | codex/qmaps-portability-and-parity | code et essais locaux terminés, PR en préparation | Parcours Yelp client et commerçant, contenu public, réservations, messages et médias. 464 tests et contrôles SQL réussis | Valider la CI puis les cinq migrations sur une copie de QMAPS avant publication. Migration de l’hébergement en pause
+2026-11-21 | Codex | codex/qmaps-portability-and-parity → PR #13 | En revue | Parcours Yelp client et commerçant, publication, réservations, messagerie et médias. 464 tests réussis. PostgreSQL et trois parcours HTTP vérifiés avec des comptes d’essai | Appliquer les cinq migrations sur une copie de QMAPS et valider les parcours avant publication. Migration d’hébergement en pause
 
 2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | code terminé, CI finale attendue | KLEAN/REVEW/SEO intégrés successivement; protections Stripe conservées, manifeste ajouté; 451 tests préliminaires passent | confirmer tests du manifeste et CI, publier cible existante seulement après sauvegarde et preuve SHA; Supabase reste séparé
 

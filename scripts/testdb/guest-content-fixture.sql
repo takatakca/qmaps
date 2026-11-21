@@ -4,7 +4,8 @@ create role authenticated;
 create schema auth;
 create table auth.users(id uuid primary key);
 create function auth.uid() returns uuid language sql stable as
-  $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+  $$select coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),
+                    nullif(current_setting('request.jwt.claims',true),'')::jsonb ->> 'sub')::uuid$$;
 grant usage on schema auth to authenticated, anon;
 create table public.businesses(id uuid primary key, owner_user_id uuid references auth.users(id), is_active boolean not null);
 alter table public.businesses enable row level security;
