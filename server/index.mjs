@@ -1,3 +1,8 @@
+import {
+  blockPublisher,
+  publishingTerms,
+  termsVersion,
+} from "./publishers.mjs";
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
@@ -20,7 +25,7 @@ const uuid = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const placeRoute = new RegExp(
   "^/v1/places/(" +
     uuid +
-    ")(?:/(bookmark|guest-settings|waitlist|photos|posts|reviews))?$",
+    ")(?:/(bookmark|guest-settings|waitlist|photos|posts|reviews|report|block-publisher))?$",
   "i",
 );
 const moderationRoute = new RegExp(
@@ -172,6 +177,55 @@ async function route(req, res) {
   }
   const id = await userFor(pool, authorization);
   const moderation = moderationRoute.exec(path);
+  if (path === "/v1/me/publication-terms" && ["GET", "PUT"].includes(method)) {
+    requireUser(id);
+    if (method === "PUT" && (await body(req)).version !== termsVersion)
+      throw new ApiError(400, "Version des conditions incorrecte");
+    return reply(res, 200, await publishingTerms(pool, id, method === "PUT"));
+  }
+  const blocked = new RegExp(
+    "^/v1/me/blocked-publishers(?:/(" + uuid + "))?$",
+    "i",
+  ).exec(path);
+  if (blocked) {
+    requireUser(id);
+    if (!blocked[1] && method === "GET")
+      return reply(
+        res,
+        200,
+        (
+          await pool.query(
+            "SELECT id,label FROM qmaps_private.publisher_blocks WHERE viewer=$1 ORDER BY label,id",
+            [id],
+          )
+        ).rows,
+      );
+    if (blocked[1] && method === "DELETE") {
+      await pool.query(
+        "DELETE FROM qmaps_private.publisher_blocks WHERE viewer=$1 AND id=$2",
+        [id, blocked[1]],
+      );
+      return reply(res, 204);
+    }
+    throw new ApiError(404, "Introuvable");
+  }
+  const publishing =
+    (path === "/v1/places" && method === "POST") ||
+    (method === "PUT" &&
+      path.startsWith("/v1/places/") &&
+      path.endsWith("/reply")) ||
+    (placeRoute.test(path) &&
+      ((method === "POST" && /\/(photos|posts)$/.test(path)) ||
+        (method === "PUT" && path.endsWith("/reviews"))));
+  if (publishing && !(await publishingTerms(pool, requireUser(id))).accepted)
+    throw new ApiError(
+      403,
+      "Acceptez les conditions de publication dans votre compte QMAPS.",
+    );
+  const listingReport = new RegExp(
+    "^/v1/console/listing-reports(?:/(" + uuid + ")/(dismiss|hide))?$",
+    "i",
+  ).exec(path);
   if (path === "/v1/me/closure" && ["GET", "POST", "DELETE"].includes(method)) {
     requireUser(id);
     if (method === "POST" && (await body(req)).confirmation !== "DELETE")
@@ -194,7 +248,12 @@ async function route(req, res) {
     "^/v1/console/closures(?:/(" + uuid + ")/(start|finish))?$",
     "i",
   ).exec(path);
-  if ((path === "/v1/console" && method === "GET") || moderation || closures) {
+  if (
+    (path === "/v1/console" && method === "GET") ||
+    moderation ||
+    closures ||
+    listingReport
+  ) {
     requireUser(id);
     const roles = await scoped(id, (db) =>
       db.query(
@@ -203,6 +262,28 @@ async function route(req, res) {
       ),
     );
     if (!roles.rowCount) throw new ApiError(403, "Accès propriétaire requis");
+    if (listingReport) {
+      if (!listingReport[1] && method === "GET") {
+        const entries = await scoped(id, (db) =>
+          db.query(
+            "SELECT id,target_type,target_id,reason,details,created_at FROM public.reports WHERE target_type IN ('user','business') AND status IN ('open','reviewing') ORDER BY created_at,id",
+          ),
+        );
+        return reply(res, 200, entries.rows);
+      }
+      if (listingReport[1] && method === "POST") {
+        const result = await scoped(id, (db) =>
+          db.query("SELECT public.qmaps_moderate_listing($1,$2) AS changed", [
+            listingReport[1],
+            listingReport[2],
+          ]),
+        );
+        if (!result.rows[0].changed)
+          throw new ApiError(409, "Signalement déjà traité");
+        return reply(res, 204);
+      }
+      throw new ApiError(404, "Introuvable");
+    }
     if (closures) {
       if (method === "GET" && !closures[1]) {
         const result = await scoped(id, (db) =>
@@ -303,9 +384,9 @@ async function route(req, res) {
   if (path === "/v1/places" && method === "GET") {
     const city = (url.searchParams.get("city") || "").slice(0, 120),
       q = (url.searchParams.get("q") || "").slice(0, 150);
-    const result = await scoped(null, (db) =>
+    const result = await scoped(id, (db) =>
       db.query(
-        `SELECT ${catalogue} FROM public.businesses WHERE is_active AND ($1='' OR lower(unaccent(city))=lower(unaccent($1))) AND ($2='' OR strpos(lower(unaccent(name)),lower(unaccent($2)))>0) ORDER BY name,id LIMIT 100`,
+        `SELECT ${catalogue} FROM public.businesses WHERE is_active AND public.qmaps_can_see_publisher(owner_user_id) AND ($1='' OR lower(unaccent(city))=lower(unaccent($1))) AND ($2='' OR strpos(lower(unaccent(name)),lower(unaccent($2)))>0) ORDER BY name,id LIMIT 100`,
         [city, q],
       ),
     );
@@ -355,7 +436,7 @@ async function route(req, res) {
       (
         await scoped(id, (db) =>
           db.query(
-            "SELECT b.id,b.name,b.city FROM public.bookmarks m JOIN public.businesses b ON b.id=m.business_id WHERE m.user_id=$1 ORDER BY b.name",
+            "SELECT b.id,b.name,b.city FROM public.bookmarks m JOIN public.businesses b ON b.id=m.business_id WHERE m.user_id=$1 AND b.is_active AND public.qmaps_can_see_publisher(b.owner_user_id) ORDER BY b.name",
             [id],
           ),
         )
@@ -406,14 +487,46 @@ async function route(req, res) {
   const place = placeRoute.exec(path);
   if (!place) throw new ApiError(404, "Introuvable");
   const [, business, action] = place;
+  if (action === "report" && method === "POST") {
+    requireUser(id);
+    const data = await body(req);
+    if (!["business", "user"].includes(data.subject))
+      throw new ApiError(400, "Sujet de signalement invalide");
+    const reason = field(data, "details", 1000);
+    if (reason.length < 3) throw new ApiError(400, "Précisez le motif");
+    const result = await scoped(id, (db) =>
+      db.query("SELECT public.qmaps_report_listing($1,$2,$3) AS reported", [
+        business,
+        data.subject,
+        reason,
+      ]),
+    );
+    if (!result.rows[0].reported)
+      throw new ApiError(404, "Signalement indisponible");
+    return reply(res, 204);
+  }
+  if (action === "block-publisher" && method === "PUT") {
+    requireUser(id);
+    await blockPublisher(pool, id, business);
+    return reply(res, 204);
+  }
+  if (id && action)
+    first(
+      await scoped(id, (db) =>
+        db.query(
+          "SELECT id FROM public.businesses WHERE id=$1 AND is_active AND public.qmaps_can_see_publisher(owner_user_id)",
+          [business],
+        ),
+      ),
+    );
   if (!action && method === "GET")
     return reply(
       res,
       200,
       first(
-        await scoped(null, (db) =>
+        await scoped(id, (db) =>
           db.query(
-            `SELECT ${catalogue} FROM public.businesses WHERE id=$1 AND is_active`,
+            `SELECT ${catalogue}, owner_user_id IS NOT NULL AND owner_user_id IS DISTINCT FROM auth.uid() AS can_block FROM public.businesses WHERE id=$1 AND is_active AND public.qmaps_can_see_publisher(owner_user_id)`,
             [business],
           ),
         ),
@@ -438,7 +551,7 @@ async function route(req, res) {
               COALESCE(r.user_id=auth.uid(),false) AS mine
        FROM public.reviews r JOIN public.businesses b ON b.id=r.business_id AND b.is_active
        LEFT JOIN public.profiles p ON p.id=r.user_id
-       WHERE r.business_id=$1 AND r.moderation_status IN ('visible','trusted')
+       WHERE r.business_id=$1 AND public.qmaps_can_see_publisher(r.user_id) AND r.moderation_status IN ('visible','trusted')
        ORDER BY r.created_at DESC,r.id LIMIT 100`,
         [business],
       ),

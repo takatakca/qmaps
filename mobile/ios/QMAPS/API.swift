@@ -9,7 +9,10 @@ enum APIError: LocalizedError {
 struct Place: Identifiable, Decodable {
     let id, name, city: String
     let address, description: String?
+    let can_block: Bool?
 }
+struct PublisherTerms: Decodable { let accepted: Bool; let version: String }
+struct BlockedPublisher: Identifiable, Decodable { let id, label: String }
 struct Story: Identifiable, Decodable { let id, title, body: String }
 struct Settings: Decodable { let reservations, waitlist: Bool }
 struct AccountResult: Decodable { let token, handle: String; let recovery_code: String? }

@@ -8,3 +8,4 @@ psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/99-api-grants.sql
 psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/upgrades/001-reviews.sql
 psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/upgrades/002-gallery.sql
 psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/upgrades/003-account-closure.sql
+psql -X -v ON_ERROR_STOP=1 -f /opt/qmaps/server/db/upgrades/004-publisher-moderation.sql
