@@ -1,7 +1,7 @@
 import { getCategoryImage } from "@/lib/categoryImages";
 import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
-import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
@@ -52,30 +52,45 @@ const Listing = () => {
   const [loading, setLoading] = useState(true);
   const [params] = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>(params.get("tab") === "reviews" ? "Avis" : "Menu");
-  const [readError, setReadError] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [claimOpen, setClaimOpen] = useState(false);
 
-  const fetchData = async () => {
-    if (!id) return;
-    setReadError(false);
+  const request = useRef<symbol | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const fetchData = useCallback(async () => {
+    const current = Symbol();
+    request.current = current;
+    setLoadError(false);
     try {
+      if (!id) return;
       const [{ data: biz, error }, revs] = await Promise.all([
         supabase.from("businesses").select("*, business_categories(categories(name))").eq("id", id).maybeSingle(),
         fetchReviewsWithAuthors(id),
       ]);
+      if (current !== request.current) return;
       if (error) throw error;
       setBusiness(biz);
       setReviews((revs) || []);
 
       if (user) {
         const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
-        setUserName(profile?.display_name || null);
+        if (current === request.current) setUserName(profile?.display_name || null);
       }
-    } catch { setReadError(true); } finally { setLoading(false); }
-  };
+    } catch {
+      if (request.current === current) setLoadError(true);
+    } finally {
+      if (request.current === current) setLoading(false);
+    }
+  }, [id, user]);
 
-  useEffect(() => { fetchData(); }, [id, user]);
+  useEffect(() => {
+    setLoading(true);
+    setUserName(null);
+    void fetchData();
+    return () => { request.current = null; };
+  }, [fetchData]);
+
+  useEffect(() => { setActiveTab(params.get("tab") === "reviews" ? "Avis" : "Menu"); }, [params, id]);
 
   // Track profile view once per business id
   useEffect(() => {
@@ -94,12 +109,7 @@ const Listing = () => {
     }
   }, [business?.id, business?.city]);
 
-  if (!loading && (readError || !business)) return <main className="p-6 space-y-3">
-    <h1>{readError ? "Impossible de charger la fiche" : "Fiche introuvable"}</h1>
-    {readError && <Button onClick={fetchData}>Réessayer</Button>}
-    <Link to="/search" className="block text-primary underline">Retour à la recherche</Link>
-  </main>;
-  if (loading || !business) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background max-w-lg mx-auto">
         {/* Skeleton */}
@@ -112,6 +122,15 @@ const Listing = () => {
         <BottomNav />
       </div>
     );
+  }
+
+  if (loadError || !business) {
+    return <main className="mx-auto max-w-lg px-4 py-10">
+      <h1 className="mb-3 text-xl font-bold">{loadError ? "Impossible de charger la fiche" : "Commerce introuvable"}</h1>
+      {loadError && <Button onClick={fetchData}>Réessayer</Button>}
+      <Button variant="link" onClick={() => navigate("/search")}>Retour à la recherche</Button>
+      <BottomNav />
+    </main>;
   }
 
   const seoTitle = `${business.name}${business.city ? ` · ${business.city}` : ""} | QMaps`;
@@ -165,6 +184,7 @@ const Listing = () => {
         isClaimed={business.is_claimed}
         photosCount={(business.photos || []).length}
         businessId={business.id}
+        city={business.city}
       />
       {/* hidden link kept for SSR-friendly category link */}
       {business.city && (
@@ -175,7 +195,7 @@ const Listing = () => {
       <BusinessActions
         businessId={business.id}
         priceLevel={business.price_level}
-        categoryName={categoryNameFromEmbed(business)}
+        categoryName={categoryNameFromEmbed(business, "Commerce")}
         isOpen={isBusinessOpenNow(business)}
         hours={business.hours}
         website={business.website}

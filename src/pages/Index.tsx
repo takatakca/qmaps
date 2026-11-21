@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { searchUrl } from "@/lib/localSearch";
 import BottomNav from "@/components/BottomNav";
 import HeroSection from "@/components/home/HeroSection";
 import CategoryShowcase from "@/components/home/CategoryShowcase";
@@ -8,7 +10,7 @@ import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
-import { useHomeListings, type HomeListing } from "@/hooks/useHomeListings";
+import { useHomeListings } from "@/hooks/useHomeListings";
 import { useLang } from "@/i18n/language";
 import { categoryImages } from "@/lib/categoryImages";
 import Seo from "@/components/Seo";
@@ -70,9 +72,10 @@ const PROS_RECOMMENDED = [
 ];
 
 const Index = () => {
+  const [city, setCity] = useState("");
   const { t } = useLang();
   const listings = useHomeListings(10);
-  const { businesses: nearbyBusinesses } = useNearbyBusinesses(6);
+  const { businesses: nearbyBusinesses, loading: nearbyLoading, error: nearbyError } = useNearbyBusinesses(6);
   const { recommended, trending, loading: recLoading } = useRecommendedBusinesses({ limit: 5 });
 
   return (
@@ -83,21 +86,23 @@ const Index = () => {
         canonicalPath="/"
       />
 
-      <HeroSection />
+      <HeroSection city={city} onCityChange={setCity} />
 
       <main className="mx-auto w-full max-w-6xl space-y-12 px-5 pt-10 sm:px-8 md:space-y-16 md:pt-14">
-        <CategoryShowcase />
+        <CategoryShowcase city={city} />
 
         {/* Real listings — every card below is backed by public.businesses */}
         <BusinessListingRow
           eyebrow="Autour de vous"
           title={t("nearby")}
-          subtitle={nearbyBusinesses.length ? t("nearbySubGeo") : t("nearbySubNoGeo")}
-          businesses={nearbyBusinesses as unknown as HomeListing[]}
+          subtitle={nearbyError || t("nearbySubGeo")}
+          businesses={nearbyBusinesses}
+          loading={nearbyLoading}
+          emptyTitle="Explorer par ville"
           fallbackShortcuts={NEARBY_HINTS}
           fallbackTitle="Explorer par ville"
           fallbackImage={categoryImages.pro}
-          emptyMessage="Partagez votre position ou explorez par ville pour découvrir les entreprises près de chez vous."
+          emptyMessage={nearbyError ? "Choisissez une ville pour découvrir ses commerces." : "Aucun commerce trouvé dans un rayon de 10 km."}
         />
 
         <BusinessListingRow
@@ -106,7 +111,7 @@ const Index = () => {
           subtitle={t("restaurantsSub")}
           businesses={listings.restaurants}
           loading={listings.loading}
-          seeAllHref="/search?q=restaurants"
+          seeAllHref={searchUrl("restaurants", city)}
           fallbackShortcuts={RESTAURANT_SHORTCUTS}
           fallbackImage={categoryImages.restaurant}
           emptyMessage="Les premiers restaurants du Québec arrivent bientôt sur QMaps — explorez les catégories en attendant."

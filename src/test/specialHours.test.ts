@@ -70,6 +70,16 @@ describe("special hours", () => {
     expect(res.day?.closed).toBe(false);
   });
 
+  it("uses the prior night's dated hours across a year boundary and honours a holiday closure", () => {
+    const night = { closed: false, blocks: [{ open: "16:00", close: "03:00" }] };
+    const special = parseSpecialHours({ "2026-12-31": night });
+    const afterMidnight = new Date(2027, 0, 1, 2, 30);
+    expect(isOpenAtWithSpecialHours(null, special, afterMidnight)).toBe(true);
+    const holiday = { ...special, "2027-01-01": { closed: true, blocks: [] } };
+    expect(isOpenAtWithSpecialHours(null, holiday, afterMidnight)).toBe(false);
+    expect(isOpenAtWithSpecialHours(null, special, new Date(2027, 0, 1, 3))).toBe(false);
+  });
+
   it("invalid block times are filtered out", () => {
     const parsed = parseSpecialHours({
       "2026-12-24": { closed: false, blocks: [{ open: "bad", close: "15:00" }] },

@@ -7,6 +7,7 @@
 
 import { isOpenAtWithSpecialHours, parseSpecialHours, parseWeeklyHours } from "@/lib/businessHours";
 
+import { isBusinessStatus } from "@/lib/businessStatus";
 import { parseAttributes } from "@/lib/businessAttributes";
 
 export const serviceFilters = [
@@ -38,6 +39,7 @@ export interface SearchableBusiness {
   reviews_count?: number | null;
   price_level?: number | null;
   is_open?: boolean | null;
+  status?: string | null;
   hours?: string | null;
   hours_json?: unknown;
   special_hours?: unknown;
@@ -109,6 +111,7 @@ export const isBusinessOpenNow = (
   business: SearchableBusiness,
   now: Date = new Date(),
 ): boolean => {
+  if (isBusinessStatus(business.status) && business.status !== "open") return false;
   const week = parseWeeklyHours(business.hours_json);
   const special = parseSpecialHours(business.special_hours);
   if (week || special) return isOpenAtWithSpecialHours(week, special, now);

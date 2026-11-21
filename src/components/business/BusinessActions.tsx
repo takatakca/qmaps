@@ -21,7 +21,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
   const handleWebsite = () => {
     if (!website) return;
     if (businessId) trackBusinessEvent(businessId, "website_click", { source: "business_detail" });
-    window.open(website, "_blank");
+    window.open(website, "_blank", "noopener,noreferrer");
   };
   const handlePhone = () => {
     if (!phone) return;
@@ -32,8 +32,10 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
     <div className="px-4 pt-4">
       {/* Category + status */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-foreground font-medium">{priceLabels[(priceLevel || 1) - 1]}</span>
-        <span className="text-muted-foreground">•</span>
+        {priceLevel != null && priceLabels[priceLevel - 1] && <>
+          <span className="text-foreground font-medium">{priceLabels[priceLevel - 1]}</span>
+          <span className="text-muted-foreground">•</span>
+        </>}
         <span className="text-foreground">{categoryName || "Commerce"}</span>
       </div>
       <div className="flex items-center gap-1.5 mt-1">

@@ -7,7 +7,8 @@ import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
-import { cityFromSlug } from "@/lib/seo";
+import { cityFilter, cityLabelFor, cityLabelFromSlug } from "@/lib/localSearch";
+import SearchBar from "@/components/SearchBar";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
@@ -15,9 +16,10 @@ import type { Tables } from "@/integrations/supabase/types";
 
 const CityPage = () => {
   const { citySlug = "" } = useParams();
-  const cityLabel = cityFromSlug(citySlug);
+  const cityLabel = cityLabelFromSlug(citySlug);
   const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
-  const [categories, setCategories] = useState<Tables<"categories">[]>([]);
+  const [categories, setCategories] = useState<Pick<Tables<"categories">, "id" | "name" | "slug">[]>([]);
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const { recommended, loading: recLoading } = useRecommendedBusinesses({ city: cityLabel, limit: 4 });
 
@@ -39,40 +41,21 @@ const CityPage = () => {
     let cancelled = false;
     void (async () => {
       setLoading(true);
-      const { data: biz } = await supabase
+      setError(false);
+      const { data: biz, error } = await supabase
         .from("businesses")
-        .select("*, business_categories(categories(name))")
-        .ilike("city", cityLabel)
+        .select("*, business_categories(categories(id, name, slug))")
+        .or(cityFilter(cityLabel))
         .eq("is_active", true)
-        .order("avg_rating", { ascending: false })
-        .limit(20);
+        .in("status", ["open", "temporarily_closed", "seasonal"])
+        .order("avg_rating", { ascending: false, nullsFirst: false })
+        .order("id").limit(20);
       if (cancelled) return;
+      setError(!!error);
       setBusinesses(biz || []);
-
-      // Popular categories: prefer those linked to businesses in this city
-      const ids = (biz || []).map((b) => b.id);
-      let cityCats: Tables<"categories">[] = [];
-      if (ids.length > 0) {
-        const { data: links } = await supabase
-          .from("business_categories")
-          .select("category_id")
-          .in("business_id", ids);
-        const catIds = Array.from(new Set((links || []).map((l) => l.category_id)));
-        if (catIds.length > 0) {
-          const { data: cats } = await supabase
-            .from("categories")
-            .select("*")
-            .in("id", catIds)
-            .limit(12);
-          cityCats = cats || [];
-        }
-      }
-      if (cityCats.length === 0) {
-        const { data: cats } = await supabase.from("categories").select("*").limit(12);
-        cityCats = cats || [];
-      }
-      if (cancelled) return;
-      setCategories(cityCats);
+      const localCategories = new Map((biz ?? []).flatMap(row =>
+        row.business_categories.flatMap(({ categories: cat }) => cat ? [[cat.id, cat] as const] : [])));
+      setCategories([...localCategories.values()].slice(0, 12));
       setLoading(false);
     })();
     return () => {
@@ -98,7 +81,7 @@ const CityPage = () => {
           description,
           about: { "@type": "City", name: cityLabel },
         }}
-        noindex={!loading && businesses.length === 0}
+        noindex={!loading && !error && businesses.length === 0}
       />
 
       <header className="px-4 pt-6 pb-4">
@@ -107,6 +90,7 @@ const CityPage = () => {
         <p className="text-sm text-muted-foreground mt-1">
           Les meilleurs commerces et pros à {cityLabel}.
         </p>
+        <div className="mt-4"><SearchBar initialCity={cityLabel || ""} /></div>
       </header>
 
       <SponsoredListings placement="city" city={cityLabel} />
@@ -135,6 +119,8 @@ const CityPage = () => {
             <Skeleton className="h-56 w-full" />
             <Skeleton className="h-56 w-full" />
           </div>
+        ) : error ? (
+          <p role="alert">Impossible de charger les commerces de cette ville.</p>
         ) : businesses.length === 0 ? (
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <p className="text-sm font-medium">Aucun commerce trouvé à {cityLabel}</p>
@@ -157,7 +143,7 @@ const CityPage = () => {
           title={`Recommandé à ${cityLabel}`}
           subtitle="Sélectionné pour vous selon votre activité"
           source="city_recommended"
-          items={recommended.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
+          items={recommended.filter(r => cityLabelFor(r.business.city || "") === cityLabel).map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
           loading={recLoading}
         />
       </div>

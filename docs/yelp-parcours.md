@@ -17,6 +17,10 @@ Comparaison du 21 novembre 2026. Points de référence visités dans le navigate
 | Accueil téléphonique | La page mène aux demandes du commerce et au contact par courriel. La réception des appels et le routage vocal restent à intégrer. | Faire un appel entrant réel vers un numéro autorisé et vérifier le transfert et la prise en charge en français. |
 | Fil d’activité, abonnements sociaux, événements, interface mobile native et produits partenaires | Comparaison détaillée et essais métier encore à faire. | Définir les parcours québécois à reproduire et les essayer de bout en bout. |
 
+## Vérifications sur QMAPS.ca
+
+Les livraisons [nº 12](https://github.com/takatakca/qmaps/pull/12) et [nº 14](https://github.com/takatakca/qmaps/pull/14) sont en production. Le 21 novembre, le manifeste public indiquait `efec629`. La page de Montréal affiche Chez Schwartz et La Banquise. Le filtre « Livraison » sur la recherche de restaurants à Montréal garde la ville dans le lien et passe de deux résultats à zéro avec les services déclarés ce jour-là. Les tests de la deuxième livraison couvrent aussi le service de 16 h à 3 h illustré dans le dossier Yelp de Notre-Dame-de-Grâce.
+
 ## Publication et critères de bascule
 
 Les cinq migrations datées du 21 novembre sont additives. La CI applique les migrations à PostgreSQL et exerce les règles d’accès avec des identités de test. Trois parcours passent aussi par l’API HTTP PostgREST avec un client et deux commerçants : publier un bouton, confirmer une réservation et répondre à un message privé. Les tests React vérifient aussi le bouton publié et le refus d’enregistrement. Ces contrôles doivent être complétés sur la pile qui dessert QMAPS avec de vrais services Auth, Storage et PostgREST.

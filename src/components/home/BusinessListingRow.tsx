@@ -16,6 +16,7 @@ interface Props {
   fallbackShortcuts: Shortcut[];
   fallbackTitle?: string;
   fallbackImage?: string;
+  emptyTitle?: string;
   emptyMessage?: string;
 }
 
@@ -56,6 +57,7 @@ const BusinessListingRow = ({
   fallbackShortcuts,
   fallbackTitle,
   fallbackImage,
+  emptyTitle = "Cette section attend ses premières entreprises",
   emptyMessage = "Aucune entreprise active pour l'instant dans cette section.",
 }: Props) => {
   if (loading) {
@@ -76,7 +78,7 @@ const BusinessListingRow = ({
       <section className="space-y-4">
         <SectionHeader title={title} subtitle={subtitle} eyebrow={eyebrow} />
         <PremiumEmptyState
-          title="Cette section attend ses premières entreprises"
+          title={emptyTitle}
           message={emptyMessage}
           image={fallbackImage}
           actions={[

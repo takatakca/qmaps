@@ -1,4 +1,8 @@
-2026-11-21 | Codex | codex/qmaps-portability-and-parity → PR #13 | En revue | Parcours Yelp client et commerçant, publication, réservations, messagerie et médias. 464 tests réussis. PostgreSQL et trois parcours HTTP vérifiés avec des comptes d’essai | Appliquer les cinq migrations sur une copie de QMAPS et valider les parcours avant publication. Migration d’hébergement en pause
+2026-11-21 | Codex | codex/qmaps-portability-and-parity → PR #13 | En revue | Parcours client et commerçant intégrés aux livraisons #12 et #14. 472 tests locaux réussis. Essai automatisé de la pile entière ajouté | Vérifier la restauration de la source Lovable Cloud et les cinq migrations avant de publier les fonctions qui en dépendent
+
+2026-11-21 | Codex | codex/recherche-horaires-quebec → PR #14 | Déployé | QMAPS.ca sert efec629. Montréal affiche les fiches attendues et la sélection du filtre Livraison est confirmée dans Chrome. 464 tests réussis | Poursuivre la validation des parcours authentifiés dans la branche #13
+
+2026-11-21 | Codex | codex/local-discovery-20261121 → PR #12 | done in source | Fixed Montréal/Montreal discovery, city + category search, distance, favorites, reviews, photos and project entry points after live comparison with Yelp Montréal | Check GitHub CI, production release SHA and Opera after reconnection
 
 2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | code terminé, CI finale attendue | KLEAN/REVEW/SEO intégrés successivement; protections Stripe conservées, manifeste ajouté; 451 tests préliminaires passent | confirmer tests du manifeste et CI, publier cible existante seulement après sauvegarde et preuve SHA; Supabase reste séparé
 

@@ -1,7 +1,8 @@
 import { ArrowLeft, Share2, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import BookmarkButton from "./BookmarkButton";
 import { useState } from "react";
+import ShareSheet from "@/components/ShareSheet";
+import BookmarkButton from "./BookmarkButton";
 import StarRating from "@/components/StarRating";
 
 interface BusinessHeroProps {
@@ -12,20 +13,25 @@ interface BusinessHeroProps {
   isClaimed: boolean;
   photosCount: number;
   businessId: string;
+  city: string;
 }
 
-const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, photosCount, businessId }: BusinessHeroProps) => {
+const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, photosCount, businessId, city }: BusinessHeroProps) => {
   const navigate = useNavigate();
-  const [shareUrl, setShareUrl] = useState("");
-  async function share() {
-    const url = new URL(`/business/${businessId}`, window.location.origin).href;
-    try {
-      if (navigator.share) { await navigator.share({ title: name, url }); return; }
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") return;
+  const [sharing, setSharing] = useState(false);
+
+  const shareUrl = new URL("/business/" + businessId, window.location.origin).href;
+  const share = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: name, url: shareUrl });
+        return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+      }
     }
-    setShareUrl(url);
-  }
+    setSharing(true);
+  };
 
   return (
     <div className="relative">
@@ -40,15 +46,16 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
           <ArrowLeft size={18} className="text-foreground" />
         </button>
         <div className="flex items-center gap-2">
-          <BookmarkButton businessId={businessId} source="business_detail" className="w-9 h-9 bg-card/80 rounded-full flex items-center justify-center" />
-          <button aria-label="Partager la fiche" onClick={share} className="w-9 h-9 bg-card/80 rounded-full flex items-center justify-center"><Share2 size={16} /></button>
+          <BookmarkButton businessId={businessId} city={city} source="business_detail" className="w-9 h-9 bg-card/80 rounded-full flex items-center justify-center" />
+          <button aria-label="Partager la fiche" onClick={share} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+            <Share2 size={16} className="text-foreground" />
+          </button>
           <a href="#report-business" aria-label="Signaler la fiche" className="w-9 h-9 bg-card/80 rounded-full flex items-center justify-center"><Flag size={16} /></a>
         </div>
       </div>
 
-      {shareUrl && <label className="absolute top-14 right-3 z-10 rounded-lg bg-card p-3 shadow">Lien à partager
-        <input className="block w-full border p-1" readOnly value={shareUrl} onFocus={e => e.target.select()} autoFocus />
-        <button type="button" className="text-sm underline" onClick={() => setShareUrl("")}>Fermer</button></label>}
+      <ShareSheet open={sharing} onClose={() => setSharing(false)} title="Partager la fiche" text={name} url={shareUrl} />
+
       {/* Bottom overlay content */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
         {!isClaimed && (
@@ -62,7 +69,7 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
           <span className="text-sm text-white/80">({reviewsCount} avis)</span>
         </div>
         {photosCount > 0 && (
-          <a href="#business-photos" className="block mt-2 w-full py-2 bg-card/20 backdrop-blur-sm border border-white/30 rounded-lg text-sm font-medium text-white text-center">
+          <a href="#business-photos" className="mt-2 block w-full py-2 bg-card/20 backdrop-blur-sm border border-white/30 rounded-lg text-sm font-medium text-white text-center">
             Voir les {photosCount} photos
           </a>
         )}

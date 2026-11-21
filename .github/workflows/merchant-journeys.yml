@@ -43,3 +43,18 @@ jobs:
           curl --fail --silent --retry 15 --retry-connrefused --retry-delay 1 \
             'http://127.0.0.1:25490/businesses?select=id' >/dev/null
           node scripts/testdb/merchant-journeys-http.mjs
+  full-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.2.0
+      - name: Apply the complete QMAPS migration history on an isolated stack
+        run: |
+          umask 077
+          supabase start --exclude realtime,imgproxy,studio,postgres-meta,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/qmaps-start.log"
+          supabase status -o json > "$RUNNER_TEMP/qmaps-ephemeral.json"
+      - name: Exercise Auth, Data API and Storage
+        run: node scripts/testdb/supabase-stack.mjs "$RUNNER_TEMP/qmaps-ephemeral.json"

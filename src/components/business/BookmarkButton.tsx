@@ -11,10 +11,12 @@ import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 export default function BookmarkButton({
   businessId,
   source,
+  city,
   className,
 }: {
   businessId: string;
   source: string;
+  city?: string;
   className: string;
 }) {
   const { user, loading } = useAuth();
@@ -75,6 +77,7 @@ export default function BookmarkButton({
         business_id: businessId,
         event_type: selected ? "bookmark_remove" : "bookmark_add",
         source,
+        city,
       });
     },
     onError: () =>

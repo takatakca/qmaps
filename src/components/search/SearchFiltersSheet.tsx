@@ -22,12 +22,13 @@ interface SearchFiltersSheetProps {
   services: string[];
   onToggleService: (key: string) => void;
   openNow: boolean;
-  radiusKm: number;
+  radiusKm: number | null;
+  hasPosition: boolean;
   onCategoryChange: (slug: string) => void;
   onTogglePrice: (price: number) => void;
   onMinRatingChange: (rating: number | null) => void;
   onOpenNowChange: (value: boolean) => void;
-  onRadiusChange: (value: number) => void;
+  onRadiusChange: (value: number | null) => void;
   onClearFilters: () => void;
 }
 
@@ -46,6 +47,7 @@ const SearchFiltersSheet = ({
   onToggleService,
   openNow,
   radiusKm,
+  hasPosition,
   onCategoryChange,
   onTogglePrice,
   onMinRatingChange,
@@ -141,11 +143,16 @@ const SearchFiltersSheet = ({
 
           <fieldset>
             <legend className="mb-2 text-sm font-semibold">Services offerts</legend>
-            <div className="grid gap-2">{serviceFilters.map(option => <label key={option.key} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={services.includes(option.key)} onChange={() => onToggleService(option.key)} />
-              {option.label}
-            </label>)}</div>
+            <div className="grid gap-2">
+              {serviceFilters.map(option => (
+                <label key={option.key} className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={services.includes(option.key)} onChange={() => onToggleService(option.key)} />
+                  {option.label}
+                </label>
+              ))}
+            </div>
           </fieldset>
+
           <section>
             <h3 className="mb-2 text-sm font-semibold text-foreground">Note minimale</h3>
             <div className="flex flex-wrap gap-2">
@@ -167,11 +174,14 @@ const SearchFiltersSheet = ({
 
           <section>
             <h3 className="mb-2 text-sm font-semibold text-foreground">Distance</h3>
+            {!hasPosition && <p className="mb-2 text-xs text-muted-foreground">La position est nécessaire pour filtrer par distance.</p>}
             <div className="flex gap-2">
               {radiusOptions.map((value) => (
                 <button
                   key={value}
-                  onClick={() => onRadiusChange(value)}
+                  disabled={!hasPosition}
+                  aria-pressed={radiusKm === value}
+                  onClick={() => onRadiusChange(radiusKm === value ? null : value)}
                   className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
                     radiusKm === value
                       ? "border-primary bg-primary text-primary-foreground"

@@ -71,6 +71,13 @@ describe("matchesAmenityFilter", () => {
 });
 
 describe("isBusinessOpenNow", () => {
+  it("keeps an explicit closure even during an overnight shift", () => {
+    const hours_json = { monday: { closed: false, blocks: [{ open: "16:00", close: "03:00" }] } };
+    const now = new Date(2026, 10, 17, 2);
+    const row = make({ hours_json, status: "open" });
+    expect(isBusinessOpenNow(row, now)).toBe(true);
+    expect(isBusinessOpenNow({ ...row, status: "temporarily_closed" }, now)).toBe(false);
+  });
   it("falls back to is_open boolean", () => {
     expect(isBusinessOpenNow(make({ is_open: true, hours: null }))).toBe(true);
     expect(isBusinessOpenNow(make({ is_open: false, hours: null }))).toBe(false);

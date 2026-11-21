@@ -1,9 +1,14 @@
-import { LayoutGrid, Search, Sparkles } from "lucide-react";
+import { LayoutGrid, MapPin, Search, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
 
+import { searchUrl } from "@/lib/localSearch";
+
 interface SearchBarProps {
+  initialCity?: string;
+  initialCategory?: string;
+  onCityChange?: (city: string) => void;
   initialValue?: string;
   smart?: boolean;
   onOpenAllCategories?: () => void;
@@ -16,8 +21,9 @@ const ROTATING_PLACEHOLDERS = [
   "Rénovation cuisine, ménage, photographe…",
 ];
 
-const SearchBar = ({ initialValue = "", smart = false, onOpenAllCategories }: SearchBarProps) => {
-  const [query, setQuery] = useState("");
+const SearchBar = ({ initialValue = "", initialCity = "", initialCategory = "", onCityChange, smart = false, onOpenAllCategories }: SearchBarProps) => {
+  const [query, setQuery] = useState(initialValue);
+  const [city, setCity] = useState(initialCity);
   const [phIndex, setPhIndex] = useState(0);
   const [focused, setFocused] = useState(false);
   const navigate = useNavigate();
@@ -27,6 +33,8 @@ const SearchBar = ({ initialValue = "", smart = false, onOpenAllCategories }: Se
   useEffect(() => {
     setQuery(initialValue);
   }, [initialValue]);
+
+  useEffect(() => setCity(initialCity), [initialCity]);
 
   useEffect(() => {
     if (!smart) return;
@@ -51,16 +59,14 @@ const SearchBar = ({ initialValue = "", smart = false, onOpenAllCategories }: Se
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      setFocused(false);
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
+    setFocused(false);
+    navigate(searchUrl(query, city, initialCategory));
   };
 
   const pickSuggestion = (slug: string) => {
     setFocused(false);
     setQuery("");
-    navigate(`/search?category=${encodeURIComponent(slug)}`);
+    navigate(searchUrl("", city, slug));
   };
 
   const placeholder = smart
@@ -71,35 +77,30 @@ const SearchBar = ({ initialValue = "", smart = false, onOpenAllCategories }: Se
 
   return (
     <form onSubmit={handleSubmit} className="relative" ref={rootRef}>
-      <div className="group flex items-center rounded-full bg-card border border-border shadow-soft hover:shadow-elevated focus-within:shadow-glow focus-within:border-primary/40 transition-all overflow-hidden">
-        <div className="pl-4">
-          {smart ? (
-            <Sparkles size={18} className="text-primary" />
-          ) : (
-            <Search size={18} className="text-primary" />
-          )}
-        </div>
-        <input
-          type="text"
-          placeholder={placeholder}
-          aria-label="Recherche intelligente QMAPS"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setFocused(true)}
-          className="flex-1 px-3 py-3.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none font-body transition-[placeholder] duration-300"
-        />
-        {query.trim() ? (
-          <button
-            type="submit"
-            className="mr-1.5 my-1 px-4 py-2 rounded-full bg-brand-gradient text-primary-foreground text-xs font-semibold shadow-soft hover:shadow-glow transition-shadow"
-          >
-            Rechercher
-          </button>
-        ) : smart ? (
-          <span className="mr-3 text-[10px] font-semibold uppercase tracking-wide text-primary/70 hidden sm:inline">
-            Recherche intelligente
-          </span>
-        ) : null}
+      <div className="grid gap-1 rounded-lg border border-border bg-card p-1 text-card-foreground sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] sm:items-center">
+        <label className="flex min-w-0 items-center gap-2 px-3 focus-within:ring-2 focus-within:ring-primary">
+          <Search size={17} className="shrink-0 text-primary" />
+          <input
+            type="search"
+            placeholder={placeholder}
+            aria-label="Recherche intelligente QMAPS"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onKeyDown={(e) => { if (e.key === "Escape") setFocused(false); }}
+            className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none"
+          />
+        </label>
+        <label className="flex min-w-0 items-center gap-2 border-t border-border px-3 focus-within:ring-2 focus-within:ring-primary sm:border-l sm:border-t-0">
+          <MapPin size={17} className="shrink-0 text-muted-foreground" />
+          <input type="search" aria-label="Ville au Québec" placeholder="Ville au Québec"
+            value={city} onChange={(e) => { setCity(e.target.value); onCityChange?.(e.target.value); }}
+            onFocus={() => setFocused(false)}
+            className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none" />
+        </label>
+        <button type="submit" className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
+          Rechercher
+        </button>
       </div>
 
       {showSuggestions && (
@@ -109,10 +110,7 @@ const SearchBar = ({ initialValue = "", smart = false, onOpenAllCategories }: Se
               <li key={s.id}>
                 <button
                   type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    pickSuggestion(s.slug);
-                  }}
+                  onClick={() => pickSuggestion(s.slug)}
                   className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors flex items-center gap-3"
                 >
                   <span className="text-lg leading-none w-6 text-center">{s.icon ?? "🔎"}</span>
@@ -137,13 +135,12 @@ const SearchBar = ({ initialValue = "", smart = false, onOpenAllCategories }: Se
               className="flex-1 text-left px-4 py-2.5 text-xs font-semibold text-primary hover:bg-accent transition-colors flex items-center gap-2"
             >
               <Search size={12} />
-              Rechercher « {query.trim()} » partout dans QMAPS
+              Rechercher « {query.trim()} » {city.trim() ? `à ${city.trim()}` : "sur QMaps"}
             </button>
             {onOpenAllCategories && (
               <button
                 type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
+                onClick={() => {
                   setFocused(false);
                   onOpenAllCategories();
                 }}

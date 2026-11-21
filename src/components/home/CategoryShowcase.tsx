@@ -1,3 +1,4 @@
+import { searchUrl } from "@/lib/localSearch";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { categoryImages } from "@/lib/categoryImages";
@@ -25,7 +26,7 @@ const TILES: Tile[] = [
   { label: "Marketing & web", sub: "Studios, photo, design", q: "marketing", image: categoryImages.marketing },
 ];
 
-const CategoryShowcase = () => (
+const CategoryShowcase = ({ city }: { city: string }) => (
   <section className="space-y-6">
     <div className="flex items-end justify-between gap-4">
       <div>
@@ -49,7 +50,7 @@ const CategoryShowcase = () => (
       {TILES.map((tile, index) => (
         <Link
           key={tile.q}
-          to={`/search?q=${encodeURIComponent(tile.q)}`}
+          to={searchUrl(tile.q, city)}
           className={`group relative isolate overflow-hidden rounded-lg border border-border/70 transition-all duration-300 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
             tile.wide ? "qmaps-category-feature col-span-2" : "qmaps-category-tile"
           }`}

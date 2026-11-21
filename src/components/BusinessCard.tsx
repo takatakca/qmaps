@@ -25,7 +25,7 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <BookmarkButton businessId={business.id} source="business_card"
+        <BookmarkButton businessId={business.id} city={business.neighborhood} source="business_card"
           className="absolute z-10 top-3 right-3 w-9 h-9 bg-card/95 rounded-full flex items-center justify-center shadow-soft" />
         {business.isOpen && (
           <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-success text-success-foreground text-[11px] font-semibold rounded-full shadow-soft">
@@ -44,8 +44,7 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
         </div>
         <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
           <span>{business.category}</span>
-          <span>·</span>
-          <span>{business.priceLevel}</span>
+          {business.priceLevel && <><span>·</span><span>{business.priceLevel}</span></>}
           <span>·</span>
           <span>{business.neighborhood}</span>
           {business.distance && (

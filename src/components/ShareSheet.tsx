@@ -14,8 +14,13 @@ const ShareSheet = ({ open, onClose, title, text, url }: ShareSheetProps) => {
 
   if (!open) return null;
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(url);
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      toast({ title: "Impossible de copier le lien.", variant: "destructive" });
+      return;
+    }
     toast({ title: "Lien copié!" });
     onClose();
   };
