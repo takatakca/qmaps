@@ -40,12 +40,124 @@ assert.equal(
   owner.user_id,
 );
 assert.equal((await request("/v1/places?city=Montreal")).length, 2);
+await request(
+  "/v1/places",
+  "POST",
+  owner.token,
+  { name: "Refusé", city: "Laval", address: "Test" },
+  403,
+);
+for (const member of [owner, customer]) {
+  assert.equal(
+    (await request("/v1/me/publication-terms", "GET", member.token)).accepted,
+    false,
+  );
+  await request(
+    "/v1/me/publication-terms",
+    "PUT",
+    member.token,
+    { version: "ancienne" },
+    400,
+  );
+  assert.equal(
+    (
+      await request("/v1/me/publication-terms", "PUT", member.token, {
+        version: "2026-11-21",
+      })
+    ).accepted,
+    true,
+  );
+}
 const place = await request(
   "/v1/places",
   "POST",
   owner.token,
   { name: "QMAPS test", city: "Laval", address: "Adresse fictive" },
   201,
+);
+const safety = "/v1/places/" + place.id;
+await request(
+  safety + "/report",
+  "POST",
+  null,
+  { subject: "business", details: "Essai" },
+  401,
+);
+await request(
+  safety + "/report",
+  "POST",
+  owner.token,
+  { subject: "user", details: "Essai" },
+  404,
+);
+for (const subject of ["business", "user"]) {
+  await request(
+    safety + "/report",
+    "POST",
+    customer.token,
+    { subject, details: "Essai de modération" },
+    204,
+  );
+}
+await request(
+  safety + "/block-publisher",
+  "PUT",
+  customer.token,
+  undefined,
+  204,
+);
+await request(
+  safety + "/block-publisher",
+  "PUT",
+  customer.token,
+  undefined,
+  204,
+);
+assert.equal(
+  (await request("/v1/places?city=Laval", "GET", customer.token)).some(
+    (p) => p.id === place.id,
+  ),
+  false,
+);
+assert.equal(
+  (await request("/v1/places?city=Laval", "GET", owner.token)).some(
+    (p) => p.id === place.id,
+  ),
+  true,
+);
+await request(safety, "GET", customer.token, undefined, 404);
+await request(safety + "/posts", "GET", customer.token, undefined, 404);
+const blocks = await request(
+  "/v1/me/blocked-publishers",
+  "GET",
+  customer.token,
+);
+assert.equal(blocks.length, 1);
+await request(
+  "/v1/me/blocked-publishers/" + blocks[0].id,
+  "DELETE",
+  owner.token,
+  undefined,
+  204,
+);
+assert.equal(
+  (await request("/v1/me/blocked-publishers", "GET", customer.token)).length,
+  1,
+);
+await request(
+  "/v1/me/blocked-publishers/" + blocks[0].id,
+  "DELETE",
+  customer.token,
+  undefined,
+  204,
+);
+await request(safety, "GET", customer.token);
+await request(
+  "/v1/console/listing-reports",
+  "GET",
+  customer.token,
+  undefined,
+  403,
 );
 const closure = "/v1/me/closure";
 await request(closure, "GET", null, undefined, 401);

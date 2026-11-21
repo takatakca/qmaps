@@ -28,6 +28,7 @@ struct AccountView: View {
                     Button("Remplacer le mot de passe") { Task { await submit("recover") } }
                 }
             } else {
+                NavigationLink("Éditeurs bloqués") { BlockedPublisherView() }
                 Button("Se déconnecter") {
                     Task { do { let _: Empty = try await session.request("accounts/logout", method:"POST"); try session.apply(nil); issued = ""; message = "" }
                         catch { message = error.localizedDescription } }
@@ -52,9 +53,31 @@ struct AccountView: View {
     }
 }
 
+struct BlockedPublisherView: View {
+    @EnvironmentObject var session: Session
+    @State private var entries: [BlockedPublisher] = []
+    @State private var message = ""
+    var body: some View {
+        List {
+            if entries.isEmpty { Text("Aucun éditeur bloqué.") }
+            ForEach(entries) { row in
+                Button("Débloquer · " + row.label) { Task {
+                    do { let _:Empty = try await session.request("me/blocked-publishers/"+row.id,method:"DELETE"); await load() }
+                    catch {message=error.localizedDescription}
+                } }
+            }
+            if !message.isEmpty {Text(message)}
+        }.navigationTitle("Éditeurs bloqués").task {await load()}
+    }
+    @MainActor private func load() async {
+        do {entries = try await session.request("me/blocked-publishers")} catch {message=error.localizedDescription}
+    }
+}
+
 struct MerchantView: View {
     @EnvironmentObject var session: Session
     @State private var owned: [Place] = []
+    @State private var rules: PublisherTerms?
     @State private var name = ""
     @State private var city = ""
     @State private var address = ""
@@ -63,7 +86,15 @@ struct MerchantView: View {
     var body: some View {
         Form {
             if session.token == nil { Text("Connectez-vous dans Compte pour accéder à votre espace commerçant.") }
-            else {
+            else if let rules, !rules.accepted {
+                Link("Lire les conditions de publication", destination:URL(string:"https://qmaps.ca/terms")!)
+                Button("J’accepte les conditions de publication") { Task {
+                    do {
+                        let _:PublisherTerms = try await session.request("me/publication-terms",method:"PUT",body:["version":rules.version])
+                        await reload()
+                    } catch {message=error.localizedDescription}
+                } }
+            } else if rules?.accepted == true {
                 Section("Créer ma fiche") {
                     TextField("Nom du commerce",text:$name); TextField("Ville",text:$city); TextField("Adresse",text:$address)
                     Button("Créer ma fiche") { Task { await create() } }.disabled(working)
@@ -76,8 +107,8 @@ struct MerchantView: View {
         }.navigationTitle("Commerce").task(id:session.token) { await reload() }
     }
     @MainActor private func reload() async {
-        guard session.token != nil else { owned=[]; return }
-        do { owned = try await session.request("me/places") } catch { message=error.localizedDescription }
+        guard session.token != nil else {owned=[]; rules=nil; return}
+        do { rules = try await session.request("me/publication-terms"); owned = try await session.request("me/places") } catch { message=error.localizedDescription }
     }
     @MainActor private func create() async {
         working=true; defer {working=false}

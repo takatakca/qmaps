@@ -24,7 +24,8 @@ struct PlacesView: View {
             }
         }
         .navigationTitle(saved ? "Mes favoris" : "QMAPS")
-        .task(id: session.token) { await load() }
+        .onAppear { Task { await load() } }
+        .onChange(of: session.token) { _,_ in Task { await load() } }
         .refreshable { await load() }
     }
     @MainActor private func load() async {
@@ -45,6 +46,10 @@ struct PlaceView: View {
     @State private var settings: Settings?
     @State private var guest = ""
     @State private var party = 2
+    @State private var reportSubject = ""
+    @State private var reportDetails = ""
+    @State private var blockConfirmation = false
+    @Environment(\.dismiss) private var dismiss
     @State private var message = ""
     @State private var working = false
     var body: some View {
@@ -54,6 +59,21 @@ struct PlaceView: View {
                 if let address = detail?.address { Text(address) }
                 if let desc = detail?.description { Text(desc) }
                 Button("Enregistrer dans mes favoris") { Task { await change("bookmark", method: "PUT") } }.disabled(working)
+            }
+            Section("Signalement et blocage") {
+                Button("Signaler la fiche") { reportSubject = "business"; reportDetails = "" }
+                if detail?.can_block == true {
+                    Button("Signaler l’éditeur") { reportSubject = "user"; reportDetails = "" }
+                    Button("Bloquer cet éditeur", role: .destructive) { blockConfirmation = true }
+                }
+                if !reportSubject.isEmpty {
+                    TextField("Décrivez le problème", text:$reportDetails, axis:.vertical)
+                    Button("Envoyer le signalement") { Task {
+                        if await change("report", method:"POST", payload:["subject":reportSubject,"details":reportDetails]) {
+                            reportSubject = ""; reportDetails = ""
+                        }
+                    } }.disabled(working || reportDetails.trimmingCharacters(in:.whitespacesAndNewlines).count < 3)
+                }
             }
             if !stories.isEmpty {
                 Section("Actualités") { ForEach(stories) { s in VStack(alignment: .leading) { Text(s.title).font(.headline); Text(s.body) } } }
@@ -66,6 +86,10 @@ struct PlaceView: View {
                 }
             }
             if !message.isEmpty { Text(message).accessibilityLabel(message) }
+        }.confirmationDialog("Masquer les fiches de cet éditeur?", isPresented:$blockConfirmation) {
+            Button("Bloquer", role:.destructive) { Task {
+                if await change("block-publisher", method:"PUT") { dismiss() }
+            } }
         }.navigationTitle("Fiche du commerce").task {
             do {
                 detail = try await session.request("places/" + place.id)
@@ -74,12 +98,13 @@ struct PlaceView: View {
             } catch { message = error.localizedDescription }
         }
     }
-    @MainActor private func change(_ action: String, method: String, payload: [String:Any]? = nil) async {
-        guard session.token != nil else { message = "Connectez-vous dans Compte."; return }
+    @discardableResult @MainActor private func change(_ action: String, method: String, payload: [String:Any]? = nil) async -> Bool {
+        guard session.token != nil else { message = "Connectez-vous dans Compte."; return false }
         working = true; defer { working = false }
         do {
             let _: Empty = try await session.request("places/" + place.id + "/" + action, method: method, body: payload)
-            message = action == "bookmark" ? "Fiche enregistrée" : "Demande envoyée"
-        } catch { message = error.localizedDescription }
+            message = action == "bookmark" ? "Fiche enregistrée" : action == "report" ? "Signalement transmis à la modération" : "Demande envoyée"
+            return true
+        } catch { message = error.localizedDescription; return false }
     }
 }

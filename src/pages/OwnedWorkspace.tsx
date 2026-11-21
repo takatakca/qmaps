@@ -1,3 +1,7 @@
+import {
+  PublisherModeration,
+  PublicationTerms,
+} from "@/components/account/PublisherModeration";
 import { OwnedClosure, ClosureQueue } from "@/components/account/OwnedClosure";
 import PhotoModeration from "@/components/account/PhotoModeration";
 import OwnedGallery from "@/components/account/OwnedGallery";
@@ -62,6 +66,7 @@ function Console({ userId }: { userId: string }) {
         })}
       </div>
       <p>Base de données · {status.data.database}</p>
+      <PublisherModeration userId={userId} />
       <PhotoModeration userId={userId} />
       <ClosureQueue userId={userId} />
       {version.data && (
@@ -476,7 +481,10 @@ export default function OwnedWorkspace() {
             <p role="alert">Accès propriétaire requis.</p>
           )
         ) : (
-          <Marketplace user={user} />
+          <>
+            <PublicationTerms key={user.id} userId={user.id} />
+            <Marketplace user={user} />
+          </>
         )}
       </div>
     </main>

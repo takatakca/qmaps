@@ -123,6 +123,17 @@ class MainActivity : Activity() {
             content.addView(label(row.getString("name"),22f,true))
             content.addView(label(row.getString("city")+" · "+row.getString("address")))
             if(!row.isNull("description"))content.addView(label(row.getString("description")))
+            content.addView(action("Signaler la fiche") { report(id,"business") })
+            if (row.optBoolean("can_block")) {
+                content.addView(action("Signaler l’éditeur") { report(id,"user") })
+                content.addView(action("Bloquer cet éditeur") {
+                    if(vault.read()==null) show("Compte") else
+                        AlertDialog.Builder(this).setMessage("Masquer les fiches de cet éditeur?")
+                            .setNegativeButton("Annuler", null).setPositiveButton("Bloquer") { _,_ ->
+                                run({api.request("places/$id/block-publisher","PUT")}) { show("Découvrir") }
+                            }.show()
+                })
+            }
             content.addView(action("Enregistrer dans mes favoris"){
                 if(vault.read()==null)show("Compte") else run({api.request("places/$id/bookmark","PUT")}){status.text="Fiche enregistrée"}
             })
@@ -139,6 +150,28 @@ class MainActivity : Activity() {
             }
         }
     }
+    private fun report(id:String,subject:String) {
+        if (vault.read()==null) { show("Compte"); return }
+        val reason=EditText(this).apply {hint="Décrivez le problème (3 à 1 000 caractères)"}
+        AlertDialog.Builder(this).setTitle("Envoyer un signalement").setView(reason)
+            .setNegativeButton("Annuler",null).setPositiveButton("Envoyer"){_,_ ->
+                val data=JSONObject().put("subject",subject).put("details",reason.text.toString())
+                run({api.request("places/$id/report","POST",data)}) {status.text="Signalement transmis à la modération"}
+            }.show()
+    }
+    private fun blockedPublishers() {
+        shell("Éditeurs bloqués")
+        run({api.request("me/blocked-publishers")}) { result ->
+            val rows=result as JSONArray
+            if (rows.length()==0) content.addView(label("Aucun éditeur bloqué."))
+            for(i in 0 until rows.length()) {
+                val row=rows.getJSONObject(i)
+                content.addView(action("Débloquer · "+row.getString("label")) {
+                    run({api.request("me/blocked-publishers/"+row.getString("id"),"DELETE")}) {blockedPublishers()}
+                })
+            }
+        }
+    }
     private fun account() {
         content.addView(action("Supprimer mon compte QMAPS", availableWhileLoading=true) {
             val url = "https://qmaps.ca/compte/fermeture"
@@ -149,6 +182,7 @@ class MainActivity : Activity() {
             }
         })
         if(vault.read()!=null) {
+            content.addView(action("Éditeurs bloqués") {blockedPublishers()})
             content.addView(action("Se déconnecter"){
                 run({api.request("accounts/logout","POST")}){vault.save(null);show("Compte")}
             })
@@ -171,6 +205,20 @@ class MainActivity : Activity() {
         val recovery=input("Code de récupération",true);content.addView(action("Remplacer le mot de passe"){submit("recover",recovery.text.toString())})
     }
     private fun merchant() {
+        run({api.request("me/publication-terms")}) { result ->
+            val rules=result as JSONObject
+            if (rules.getBoolean("accepted")) merchantForm() else {
+                content.addView(label("Pour publier, vous devez accepter les conditions de QMAPS."))
+                content.addView(action("Lire les conditions de publication") {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://qmaps.ca/terms")))
+                })
+                content.addView(action("J’accepte les conditions de publication") {
+                    run({api.request("me/publication-terms","PUT",JSONObject().put("version",rules.getString("version")))}) {show("Commerce")}
+                })
+            }
+        }
+    }
+    private fun merchantForm() {
         val name=input("Nom du commerce");val city=input("Ville");val address=input("Adresse")
         content.addView(action("Créer ma fiche"){
             val data=JSONObject().put("name",name.text.toString()).put("city",city.text.toString()).put("address",address.text.toString())
