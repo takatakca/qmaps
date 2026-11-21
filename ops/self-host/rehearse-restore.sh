@@ -28,11 +28,11 @@ fi
 psql -XqAt -v ON_ERROR_STOP=1 -d "$trial" <<'QMAPSSQL'
 set role anon;
 select 'QMAPS_RESTORED_ANON_CATALOGUE '||count(*) from public.businesses;
-do $ begin
+do $qmaps$ begin
   if has_table_privilege(current_user,'public.business_mail','select') then
     raise exception 'The anonymous role has access to private merchant mail';
   end if;
-end $;
+end $qmaps$;
 select 'QMAPS_RESTORED_PRIVATE_MAIL_BLOCKED true';
 reset role;
 select 'QMAPS_RESTORED_MIGRATIONS '||count(*) from qmaps_ops.applied_migrations;
