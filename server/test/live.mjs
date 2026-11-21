@@ -152,9 +152,59 @@ const upload = await fetch(api + "/v1/places/" + place.id + "/photos", {
   body: png,
 });
 assert.equal(upload.status, 201);
-const image = await fetch(api + "/v1/photos/" + (await upload.json()).id);
+const visitorPhoto = (await upload.json()).id;
+const photoPath = "/v1/photos/" + visitorPhoto;
+const galleryPath = "/v1/places/" + place.id + "/photos";
+const image = await fetch(api + photoPath);
 assert.equal(image.status, 200);
 assert.deepEqual(Buffer.from(await image.arrayBuffer()), png);
+assert.equal((await request(galleryPath)).photos[0].mine, false);
+assert.equal(
+  (await request(galleryPath, "GET", customer.token)).photos[0].mine,
+  true,
+);
+await request(photoPath, "DELETE", owner.token, undefined, 404);
+await request(photoPath + "/cover", "PUT", owner.token, undefined, 403);
+await request(photoPath + "/report", "POST", owner.token, undefined, 204);
+await request(photoPath + "/report", "POST", owner.token, undefined, 204);
+await request("/v1/console/photo-reports", "GET", owner.token, undefined, 403);
+await request(
+  "/v1/console/photo-reports/" + visitorPhoto + "/remove",
+  "POST",
+  owner.token,
+  undefined,
+  403,
+);
+const ownerUpload = await fetch(api + galleryPath, {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer " + owner.token,
+    "Content-Type": "image/png",
+  },
+  body: png,
+});
+assert.equal(ownerUpload.status, 201);
+const ownerPhoto = (await ownerUpload.json()).id;
+await request(
+  "/v1/photos/" + ownerPhoto + "/cover",
+  "PUT",
+  owner.token,
+  undefined,
+  204,
+);
+const gallery = await request(galleryPath);
+assert.equal(gallery.photos[0].id, ownerPhoto);
+assert.equal(gallery.photos[0].cover, true);
+assert.equal(gallery.photos[0].merchant_photo, true);
+await request(photoPath, "DELETE", customer.token, undefined, 204);
+await request(
+  "/v1/photos/" + ownerPhoto,
+  "DELETE",
+  owner.token,
+  undefined,
+  204,
+);
+assert.deepEqual((await request(galleryPath)).photos, []);
 const recovery = await request("/v1/accounts/recover", "POST", null, {
   handle,
   password: password + "xx",

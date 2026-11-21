@@ -1,3 +1,5 @@
+2026-11-21 | Codex | codex/qmaps-galerie-autonome → tickets 8 et 17 | active | Galerie sur le stockage indépendant, séparation des photos du commerce et des visiteurs. Version mobile candidate publiée dans GitHub; sept fichiers retéléchargés et vérifiés. | Tester puis vérifier sur Coolify.
+
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-web-independant → ticket nº 17 | En cours | L’API autonome répond en production sur /api/v1/health et retrouve les deux fiches de Montréal sur /api/v1/places. Raccordement du compte web, de la console propriétaire et des parcours QMAPS à cette même API que les clients mobiles | Tester les cookies, les rôles et la confidentialité en CI et dans Chrome.
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-applications-natives → ticket nº 17 | En cours | Projets Android Kotlin et iOS Swift de QMAPS avec vues natives et API propriétaire sur /api/v1. Le site public et le backend de transition restent accessibles pendant cette livraison | Construire les fichiers installables et conserver les preuves avant soumission aux boutiques.
 
