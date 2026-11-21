@@ -1,3 +1,5 @@
+2026-11-21 | Codex — ChatGPT Work | codex/qmaps-migrations-deploiement → ticket 17 | En vérification | Application automatique des migrations sur le volume PostgreSQL existant avant le démarrage de la nouvelle API. | Vérifier la réexécution et le catalogue sur Coolify.
+
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-moderation-mobile → ticket 17 | En vérification | Signalement et blocage des éditeurs de fiches dans les applications natives, accord sur les règles avant publication. | Tester les deux rôles et la modération sur le service QMAPS.
 
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-parcours-publics → ticket 17 | En vérification | Suppression de compte depuis Android, iOS et le web, traitement par la console sur PostgreSQL et captures de trois parcours Android. Pages légales bilingues avec Pierre Lévesque, responsable désigné au ticket 17. Textes français et anglais dans le brouillon Amazon. | Exécuter les essais d’intégration et vérifier le déploiement ainsi que les reçus des boutiques.
