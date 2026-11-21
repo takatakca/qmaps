@@ -5,6 +5,11 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
+import android.os.Handler
+import android.os.Looper
+import android.view.PixelCopy
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import android.graphics.Bitmap
 import java.io.File
 import ca.qmaps.mobile.R
@@ -28,9 +33,9 @@ class JourneyInstrumentation : Instrumentation() {
             try {
                 val root = activity.window.decorView
                 awaitScreen("Catalogue chargé") {
-                    root.findViewById<View>(R.id.catalogue_place)?.isShown == true
+                    root.findViewById<View>(R.id.catalogue_place)?.isShown == true && root.findText("Chargement…") == null
                 }
-                capture("accueil")
+                capture(activity, "accueil")
                 onUi {
                     check(root.findText("Rechercher") != null)
                     check(root.findViewById<View>(R.id.catalogue_place).performClick())
@@ -39,13 +44,13 @@ class JourneyInstrumentation : Instrumentation() {
                     root.findText("Enregistrer dans mes favoris") != null &&
                         root.findText("Chargement…") == null
                 }
-                capture("fiche")
+                capture(activity, "fiche")
                 onUi { check(checkNotNull(root.findText("Compte")).performClick()) }
                 awaitScreen("Compte") {
                     root.findText("Se connecter") != null &&
                         root.findText("Supprimer mon compte QMAPS") != null
                 }
-                capture("compte")
+                capture(activity, "compte")
             } finally {
                 runOnMainSync { activity.finish() }
             }
@@ -75,9 +80,29 @@ class JourneyInstrumentation : Instrumentation() {
         error("Écran non chargé : $name")
     }
 
-    private fun capture(name: String) {
-        val shot = checkNotNull(uiAutomation.takeScreenshot()) { "Capture impossible : $name" }
+    private fun capture(activity: Activity, name: String) {
+        val window = activity.window
+        val root = window.decorView
+        val shot = onUi { Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888) }
+        val ready = CountDownLatch(1)
+        var result = PixelCopy.ERROR_UNKNOWN
+        val handler = Handler(Looper.getMainLooper())
         try {
+            // Read the QMAPS window after its new layout reaches the compositor.
+            // Device launcher dialogs and notifications belong to other windows.
+            onUi {
+                root.postOnAnimation {
+                    root.postOnAnimation {
+                        PixelCopy.request(window, shot, { outcome ->
+                            result = outcome
+                            ready.countDown()
+                        }, handler)
+                    }
+                }
+            }
+            check(ready.await(15, TimeUnit.SECONDS) && result == PixelCopy.SUCCESS) {
+                "Capture de la fenêtre QMAPS impossible : $name ($result)"
+            }
             File(targetContext.cacheDir, "qmaps-$name.png").outputStream().use {
                 check(shot.compress(Bitmap.CompressFormat.PNG, 100, it))
             }
