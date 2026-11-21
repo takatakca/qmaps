@@ -19,7 +19,7 @@ const uuid = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const placeRoute = new RegExp(
   "^/v1/places/(" +
     uuid +
-    ")(?:/(bookmark|guest-settings|waitlist|photos|posts))?$",
+    ")(?:/(bookmark|guest-settings|waitlist|photos|posts|reviews))?$",
   "i",
 );
 const photoRoute = new RegExp("^/v1/photos/(" + uuid + ")$", "i");
@@ -259,6 +259,16 @@ async function route(req, res) {
       ).rows,
     );
   }
+  const ownerReply = new RegExp("^/v1/places/(" + uuid + ")/reviews/(" + uuid + ")/reply$", "i").exec(path);
+  if (ownerReply && method === "PUT") {
+    requireUser(id);
+    const message = field(await body(req), "body", 2000);
+    const answer = await scoped(id, db => db.query(
+      "SELECT public.qmaps_publish_owner_reply($1,$2,$3) AS updated",
+      [ownerReply[1],ownerReply[2],message]));
+    if (!answer.rows[0].updated) throw new ApiError(404, "Avis introuvable");
+    return reply(res,204);
+  }
   const photo = photoRoute.exec(path);
   if (photo && method === "GET") {
     const value = first(
@@ -290,6 +300,39 @@ async function route(req, res) {
         ),
       ),
     );
+  if (action === "reviews" && method === "GET") {
+    const reviews = await scoped(id, db => db.query(
+      `SELECT r.id,r.rating,r.body,r.created_at,r.owner_reply,r.owner_replied_at,
+              COALESCE(p.display_name,'Membre QMAPS') AS author,
+              COALESCE(r.user_id=auth.uid(),false) AS mine
+       FROM public.reviews r JOIN public.businesses b ON b.id=r.business_id AND b.is_active
+       LEFT JOIN public.profiles p ON p.id=r.user_id
+       WHERE r.business_id=$1 AND r.moderation_status IN ('visible','trusted')
+       ORDER BY r.created_at DESC,r.id LIMIT 100`,[business]));
+    return reply(res,200,reviews.rows);
+  }
+  if (action === "reviews" && method === "PUT") {
+    requireUser(id);
+    const data = await body(req);
+    if (!Number.isInteger(data.rating) || data.rating < 1 || data.rating > 5)
+      throw new ApiError(400, "Note de 1 à 5 requise");
+    const message = field(data, "body", 4000);
+    const review = await scoped(id,async db => {
+      const place = first(await db.query(
+        "SELECT owner_user_id=$2 AS own FROM public.businesses WHERE id=$1 AND is_active",[business,id]));
+      if (place.own) throw new ApiError(403,"Un propriétaire ne peut pas évaluer son commerce");
+      return first(await db.query(
+        `INSERT INTO public.reviews(business_id,user_id,rating,body) VALUES ($1,$2,$3,$4)
+         ON CONFLICT(business_id,user_id) DO UPDATE SET rating=excluded.rating,body=excluded.body RETURNING id`,
+        [business,id,data.rating,message]));
+    });
+    return reply(res,200,review);
+  }
+  if (action === "reviews" && method === "DELETE") {
+    requireUser(id);
+    await scoped(id, db => db.query("DELETE FROM public.reviews WHERE business_id=$1 AND user_id=$2",[business,id]));
+    return reply(res,204);
+  }
   if (action === "posts" && method === "GET")
     return reply(
       res,

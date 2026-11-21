@@ -1,3 +1,4 @@
+import OwnedReviews from "@/components/account/OwnedReviews";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -176,6 +177,7 @@ function Marketplace({ user }: { user: QmapsUser }) {
             {selected.address ? " · " + selected.address : ""}
           </p>
           {selected.description && <p>{selected.description}</p>}
+          <OwnedReviews key={selected.id} place={selected.id} owner={tab === "merchant"} viewer={user.id} />
           {tab !== "merchant" && (
             <Button
               variant="outline"
