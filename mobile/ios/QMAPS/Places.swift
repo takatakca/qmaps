@@ -1,0 +1,85 @@
+import SwiftUI
+
+struct PlacesView: View {
+    @EnvironmentObject var session: Session
+    var saved = false
+    @State private var list: [Place] = []
+    @State private var search = ""
+    @State private var message = ""
+    @State private var busy = false
+    var body: some View {
+        List {
+            if !saved {
+                HStack {
+                    TextField("Nom du commerce", text: $search).onSubmit { Task { await load() } }
+                    Button("Chercher") { Task { await load() } }
+                }
+            }
+            if busy { ProgressView() }
+            if !message.isEmpty { Text(message).foregroundStyle(.secondary) }
+            ForEach(list) { place in
+                NavigationLink { PlaceView(place: place) } label: {
+                    VStack(alignment: .leading, spacing: 6) { Text(place.name).font(.headline); Text(place.city).foregroundStyle(.secondary) }
+                }
+            }
+        }
+        .navigationTitle(saved ? "Mes favoris" : "QMAPS")
+        .task(id: session.token) { await load() }
+        .refreshable { await load() }
+    }
+    @MainActor private func load() async {
+        if saved && session.token == nil { list = []; message = "Connectez-vous dans Compte pour voir vos favoris."; return }
+        busy = true; defer { busy = false }
+        do {
+            list = try await session.request(saved ? "me/bookmarks" : "places", query: saved ? [] : [.init(name: "q", value: search)])
+            message = list.isEmpty ? "Aucun commerce." : ""
+        } catch { list = []; message = error.localizedDescription }
+    }
+}
+
+struct PlaceView: View {
+    @EnvironmentObject var session: Session
+    let place: Place
+    @State private var detail: Place?
+    @State private var stories: [Story] = []
+    @State private var settings: Settings?
+    @State private var guest = ""
+    @State private var party = 2
+    @State private var message = ""
+    @State private var working = false
+    var body: some View {
+        Form {
+            Section {
+                Text(place.name).font(.title2.bold()); Text(place.city)
+                if let address = detail?.address { Text(address) }
+                if let desc = detail?.description { Text(desc) }
+                Button("Enregistrer dans mes favoris") { Task { await change("bookmark", method: "PUT") } }.disabled(working)
+            }
+            if !stories.isEmpty {
+                Section("Actualités") { ForEach(stories) { s in VStack(alignment: .leading) { Text(s.title).font(.headline); Text(s.body) } } }
+            }
+            if settings?.waitlist == true {
+                Section("Liste d’attente") {
+                    TextField("Nom pour l’accueil", text: $guest)
+                    Stepper("Personnes · " + String(party), value: $party, in: 1...30)
+                    Button("Joindre la liste d’attente") { Task { await change("waitlist", method: "POST", payload: ["name":guest,"party_size":party]) } }.disabled(working || guest.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+            if !message.isEmpty { Text(message).accessibilityLabel(message) }
+        }.navigationTitle("Fiche du commerce").task {
+            do {
+                detail = try await session.request("places/" + place.id)
+                stories = try await session.request("places/" + place.id + "/posts")
+                settings = try await session.request("places/" + place.id + "/guest-settings")
+            } catch { message = error.localizedDescription }
+        }
+    }
+    @MainActor private func change(_ action: String, method: String, payload: [String:Any]? = nil) async {
+        guard session.token != nil else { message = "Connectez-vous dans Compte."; return }
+        working = true; defer { working = false }
+        do {
+            let _: Empty = try await session.request("places/" + place.id + "/" + action, method: method, body: payload)
+            message = action == "bookmark" ? "Fiche enregistrée" : "Demande envoyée"
+        } catch { message = error.localizedDescription }
+    }
+}
