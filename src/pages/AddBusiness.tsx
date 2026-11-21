@@ -1,3 +1,4 @@
+import { businessWebsite } from "@/lib/businessWebsite";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, X, Search, Store, MapPin, User, Briefcase } from "lucide-react";
@@ -66,6 +67,11 @@ const AddBusiness = () => {
       toast({ title: "Nom, adresse et ville requis", variant: "destructive" });
       return;
     }
+    const website = businessWebsite(form.website);
+    if (form.website.trim() && !website) {
+      toast({ title: "Adresse de site web invalide", description: "Entrez le domaine du commerce ou son adresse HTTP ou HTTPS.", variant: "destructive" });
+      return;
+    }
     submitInFlight.current = true;
     setSubmitting(true);
     try {
@@ -75,7 +81,7 @@ const AddBusiness = () => {
         city: form.city.trim(),
         region: "QC",
         phone: form.phone.trim() || null,
-        website: form.website.trim() || null,
+        website,
         description: form.description.trim() || null,
         owner_user_id: relationship === "owner" ? user.id : null,
         is_claimed: false,

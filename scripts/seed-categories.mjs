@@ -14,7 +14,7 @@
  *
  * Usage:
  *   1. node scripts/seed-categories.mjs
- *   2. Paste /tmp/qmaps-categories-seed.sql into Lovable Cloud → SQL editor,
+ *   2. Paste /tmp/qmaps-categories-seed.sql into the QMAPS Studio SQL editor,
  *      or `psql "$DATABASE_URL" -f /tmp/qmaps-categories-seed.sql`.
  *
  * Safe to re-run: existing UUIDs are kept; only mutable fields (name, icon,
@@ -64,7 +64,7 @@ const esc = (s) => (s == null ? "NULL" : `'${String(s).replace(/'/g, "''")}'`);
 
 const chunks = [];
 chunks.push(`-- QMAPS Québec category seed (generated ${new Date().toISOString()})`);
-chunks.push(`-- Idempotent: ON CONFLICT (slug) DO UPDATE. Run in Lovable Cloud SQL editor as service_role.\n`);
+chunks.push(`-- Idempotent: ON CONFLICT (slug) DO UPDATE. Run in the QMAPS Studio SQL editor as the database operator.\n`);
 
 chunks.push(`BEGIN;\n`);
 

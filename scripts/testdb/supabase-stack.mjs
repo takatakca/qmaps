@@ -69,3 +69,20 @@ const photo = await fetch(new URL("/storage/v1/object/public/" + object, origin)
 assert.equal(photo.status, 200);
 assert.ok(file.equals(Buffer.from(await photo.arrayBuffer())), "Storage bytes changed");
 console.log("Passed authenticated Storage upload and public image download");
+
+const collections = table + "collections";
+const [list] = await request(collections, { method: "POST", session: customer, expected: 201,
+  body: { user_id: customer.user.id, name: "Mes adresses", is_public: false } });
+await request(table + "bookmarks", { method: "POST", session: customer, expected: 201,
+  body: { user_id: customer.user.id, business_id: business, list_name: "saved" } });
+await request(table + "collection_items", { method: "POST", session: customer, expected: 201,
+  body: { collection_id: list.id, business_id: business } });
+const collectionPath = collections + "?id=eq." + list.id;
+const summaryPath = collectionPath + "&select=id,collection_items(count),preview:collection_items(businesses(name))&preview.limit=1";
+assert.deepEqual(await request(summaryPath, { session: secondOwner }), []);
+assert.deepEqual(await request(summaryPath), []);
+assert.equal((await request(summaryPath, { session: customer }))[0].collection_items[0].count, 1);
+await request(collectionPath, { method: "PATCH", session: customer, body: { is_public: true } });
+assert.equal((await request(summaryPath))[0].preview[0].businesses.name, "Restaurant de test");
+assert.deepEqual(await request(table + "bookmarks?user_id=eq." + customer.user.id, { session: secondOwner }), []);
+console.log("Passed saved listing, private collection isolation, public preview and exact count");

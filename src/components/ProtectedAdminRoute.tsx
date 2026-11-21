@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
@@ -9,17 +9,18 @@ interface Props {
 const ProtectedAdminRoute = ({ children }: Props) => {
   const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      navigate("/auth");
+      navigate(pathname === "/console" ? "/auth?next=console" : "/auth", { replace: true });
       return;
     }
     if (!isAdmin) {
       navigate("/");
     }
-  }, [user, loading, isAdmin, navigate]);
+  }, [user, loading, isAdmin, navigate, pathname]);
 
   if (loading) {
     return (

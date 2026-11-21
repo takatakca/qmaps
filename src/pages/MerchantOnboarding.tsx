@@ -1,3 +1,4 @@
+import { businessWebsite } from "@/lib/businessWebsite";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -54,6 +55,7 @@ const MerchantOnboarding = () => {
   const [postalCode, setPostalCode] = useState("");
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
+  const normalizedWebsite = businessWebsite(website);
   const [hoursText, setHoursText] = useState("");
   const [country, setCountry] = useState("CA");
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -234,7 +236,7 @@ const MerchantOnboarding = () => {
         region,
         postal_code: postalCode || null,
         phone: phone || null,
-        website: website || null,
+        website: normalizedWebsite,
         hours: hoursText || null,
         country: country || "CA",
         latitude,
@@ -287,7 +289,7 @@ const MerchantOnboarding = () => {
         region,
         postal_code: postalCode.trim() || null,
         phone: phone.trim() || null,
-        website: website.trim() || null,
+        website: normalizedWebsite,
         hours: hoursText.trim() || null,
         country: country || "CA",
         latitude,
@@ -365,6 +367,10 @@ const MerchantOnboarding = () => {
   const goNext = async () => {
     if (!canNext() || loading) return;
     if (step === 4) {
+      if (website.trim() && !normalizedWebsite) {
+        toast({ title: "Adresse de site web invalide", description: "Entrez le domaine du commerce ou son adresse HTTP ou HTTPS.", variant: "destructive" });
+        return;
+      }
       setLoading(true);
       try {
         // Category persistence is retried for an existing draft as well.

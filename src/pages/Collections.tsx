@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
-import { Bookmark, Plus, LogIn, ChevronDown } from "lucide-react";
+import { Bookmark, Plus, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -25,7 +25,7 @@ const CollectionIndex = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { loading, bookmarkCount, bookmarkPreview, defaultCollection, customCollections, publicCollections, createCollection } = useCollections();
+  const { loading, failed, retry, bookmarkCount, bookmarkPreview, customCollections, publicCollections, createCollection } = useCollections();
   const { becauseYouLiked, recommended, loading: recLoading } = useRecommendedBusinesses({ limit: 4 });
   const [creating, setCreating] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -89,14 +89,16 @@ const CollectionIndex = () => {
             <p className="text-sm text-muted-foreground mb-4">Connectez-vous pour voir vos collections</p>
             <Button onClick={() => navigate("/auth")} className="rounded-full gap-2"><LogIn size={16} /> Se connecter</Button>
           </div>
+        ) : failed ? (
+          <Button variant="outline" onClick={() => void retry()}>Recharger les collections</Button>
         ) : loading ? (
           <p className="text-center text-muted-foreground py-8">Chargement...</p>
         ) : (
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-3">
-            {defaultCollection && (
+            {user && (
               <div className="min-w-[160px] flex-shrink-0">
                 <div className="relative">
-                  <img src={bookmarkPreview || defaultCollection.preview_image || "/placeholder.svg"} alt="Want to go" className="w-full h-36 rounded-xl object-cover" />
+                  <img src={bookmarkPreview || "/placeholder.svg"} alt="Mes favoris" className="w-full h-36 rounded-xl object-cover" />
                   <span className="absolute bottom-2 right-2 bg-card/90 backdrop-blur-sm text-foreground text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1">
                     <Bookmark size={12} className="fill-current" /> {bookmarkCount}
                   </span>
@@ -131,7 +133,9 @@ const CollectionIndex = () => {
 
       <div className="px-4 pt-4 pb-6">
         <h2 className="font-heading text-lg font-bold text-foreground mb-3">Collections publiques</h2>
-        {publicCollections.length === 0 ? (
+        {failed ? (
+          <p role="alert">Impossible de charger les collections publiques. <button className="underline" onClick={() => void retry()}>Réessayer</button></p>
+        ) : loading ? <p>Chargement…</p> : publicCollections.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-sm text-muted-foreground">Aucune collection publique à afficher.</p>
 

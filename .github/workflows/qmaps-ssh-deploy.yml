@@ -85,7 +85,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
-          VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY: ${{ secrets.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY }}
+          VITE_GOOGLE_MAPS_BROWSER_KEY: ${{ secrets.VITE_GOOGLE_MAPS_BROWSER_KEY }}
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           bun install --frozen-lockfile

@@ -47,7 +47,7 @@ const ReleaseNotes = () => {
           <p className="text-muted-foreground">
             QMAPS est en mode <strong className="text-foreground">release candidate</strong>.
             La plateforme est complète pour un premier lancement public, avec tous les
-            parcours consommateur, marchand et administrateur connectés à Lovable Cloud.
+            parcours consommateur, marchand et administrateur reliés aux services QMAPS.
           </p>
         </section>
 

@@ -1,3 +1,4 @@
+import { businessWebsite } from "@/lib/businessWebsite";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -37,12 +38,17 @@ const EditBasicInfoModal = ({ open, onClose, business, onSaved }: Props) => {
       toast({ title: "Nom requis", description: "Le nom de l'entreprise ne peut pas être vide.", variant: "destructive" });
       return;
     }
+    const address = businessWebsite(website);
+    if (website.trim() && !address) {
+      toast({ title: "Adresse de site web invalide", description: "Entrez le domaine du commerce ou son adresse HTTP ou HTTPS.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("businesses").update({
       name: name.trim(),
       phone: phone.trim() || null,
-      website: website.trim() || null,
-    }).eq("id", business.id);
+      website: address,
+    }).eq("id", business.id).select("id").single();
     setSaving(false);
 
     if (error) {

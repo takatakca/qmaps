@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Building2, Search, Info } from "lucide-react";
-import { lovable } from "@/integrations/lovable";
+
 
 type AuthMode = "login" | "signup" | "forgot";
 type AuthRole = "client" | "merchant";
@@ -15,7 +15,7 @@ type AuthRole = "client" | "merchant";
 const Auth = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const clientDestination = searchParams.get("next") === "review" ? "/add-review" : "/";
+  const clientDestination = searchParams.get("next") === "review" ? "/add-review" : searchParams.get("next") === "console" ? "/console" : "/";
   const isMerchantRoute = location.pathname.startsWith("/merchant") || searchParams.get("role") === "merchant";
 
   const [mode, setMode] = useState<AuthMode>("login");
@@ -243,8 +243,8 @@ const Auth = () => {
         )}
 
 
-        {/* Social login — Google (managed by Lovable Cloud) */}
-        {mode !== "forgot" && (
+        {/* Google is optional on a self-hosted Auth server. */}
+        {mode !== "forgot" && import.meta.env.VITE_QMAPS_GOOGLE_AUTH === "true" && (
           <div className="mt-6">
             <Button
               type="button"
@@ -253,8 +253,9 @@ const Auth = () => {
               disabled={loading}
               onClick={async () => {
                 setLoading(true);
-                const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: new URL(role === "client" ? clientDestination : "/", window.location.origin).href,
+                const result = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: { redirectTo: new URL(role === "client" ? clientDestination : "/merchant", window.location.origin).href },
                 });
                 if (result.error) {
                   toast({

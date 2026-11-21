@@ -18,6 +18,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 // Lazy: admin
+const PlatformConsole = lazy(() => import("./pages/admin/PlatformConsole"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminBusinesses = lazy(() => import("./pages/admin/AdminBusinesses"));
@@ -212,6 +213,7 @@ const App = () => (
               <Route path="/merchant/sponsored" element={<ProtectedMerchantRoute><MerchantSponsored /></ProtectedMerchantRoute>} />
 
               {/* Admin routes */}
+              <Route path="/console" element={<ProtectedAdminRoute><PlatformConsole /></ProtectedAdminRoute>} />
               <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
               <Route path="/admin/reports" element={<ProtectedAdminRoute><AdminReports /></ProtectedAdminRoute>} />
               <Route path="/admin/businesses" element={<ProtectedAdminRoute><AdminBusinesses /></ProtectedAdminRoute>} />

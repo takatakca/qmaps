@@ -118,7 +118,7 @@ lines.push("");
 lines.push(`## Rollback`);
 lines.push("");
 lines.push(
-  `Restore the previous published version from the Lovable project history. ` +
+  `Restore the previous successful QMAPS deployment in Coolify. ` +
     `Database state is **not** reverted automatically — review in-flight migrations ` +
     `with the Supabase linter before re-publishing. No service worker is registered, ` +
     `so clients pick up the rollback on next reload.`,

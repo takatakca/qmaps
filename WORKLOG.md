@@ -1,6 +1,12 @@
-2026-11-21 | Codex | codex/qmaps-portability-and-parity → PR #13 | En revue | Parcours client et commerçant intégrés aux livraisons #12 et #14. 472 tests locaux réussis. Essai automatisé de la pile entière ajouté | Vérifier la restauration de la source Lovable Cloud et les cinq migrations avant de publier les fonctions qui en dépendent
+2026-11-21 | Codex — ChatGPT Work | main · lancement autonome | en cours | Décision de Matthieu : QMAPS démarre sur une base neuve de démonstration dans Coolify. L’ancienne base Lovable n’est plus un prérequis. Les livraisons #12, #14, #15 et #16 sont fusionnées. Chaque intervenant signe ici ses modifications avec sa branche, ses vérifications et la prochaine étape | Installer le schéma et la console, vérifier les parcours avec des identités de test, puis basculer le site. Conserver le déploiement précédent pour un retour arrière
 
-2026-11-21 | Codex | codex/recherche-horaires-quebec → PR #14 | Déployé | QMAPS.ca sert efec629. Montréal affiche les fiches attendues et la sélection du filtre Livraison est confirmée dans Chrome. 464 tests réussis | Poursuivre la validation des parcours authentifiés dans la branche #13
+2026-11-21 | Codex — ChatGPT Work | codex/qmaps-portability-and-parity → PR #13 | active | Mandat du propriétaire : démarrer QMAPS sur une base de test neuve sous Coolify. Console, données de démonstration et migrations versionnées par QMAPS. Services Auth, Storage et API validés sur une pile reconstruite | Déployer et vérifier le nouveau service avant de basculer le client. Conserver les autres projets et leur facturation
+
+2026-11-21 | Codex | codex/collections-galerie → PR #16 | En revue | Collections personnelles et publiques, favoris et galerie de visiteurs sur le schéma existant | CI puis lecture en production. Les API publiques des collections et des photos répondent sur le schéma actuel
+
+2026-11-21 | Codex | codex/liens-commercants → PR #15 | Déployé | Validation des liens web sur les fiches et dans les formulaires commerçants. Livraisons #12 et #14 vérifiées en production | 474 tests réussis, CI verte. Manifeste public 0913ac9 confirmé
+
+2026-11-21 | Codex | codex/recherche-horaires-quebec | en revue | Recherche par services et horaires après minuit. La page Montréal de la PR #12 sert la version 11fd328 vérifiée en production avec Chez Schwartz et La Banquise | Vérifier la CI, le manifeste public et les filtres après déploiement
 
 2026-11-21 | Codex | codex/local-discovery-20261121 → PR #12 | done in source | Fixed Montréal/Montreal discovery, city + category search, distance, favorites, reviews, photos and project entry points after live comparison with Yelp Montréal | Check GitHub CI, production release SHA and Opera after reconnection
 
