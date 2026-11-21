@@ -9,7 +9,7 @@ vi.mock("@/integrations/supabase/client", async () => {
   const { createClient } = await import("@supabase/supabase-js");
   return { supabase: createClient("https://example.invalid", "test-key", {
     auth: { persistSession: false },
-    global: { fetch: async input => new Promise(resolve => requests.push({
+    global: { fetch: async input => new Promise<Response>(resolve => requests.push({
       url: new URL(String(input)),
       reply: rows => resolve(new Response(JSON.stringify(rows), { headers: { "Content-Type": "application/json" } })),
     })) },

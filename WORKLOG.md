@@ -1,4 +1,4 @@
-2026-11-21 | Codex | codex/local-discovery-20261121 | done in source | Fixed Montréal/Montreal discovery, city + category search, distance, favorites, reviews, photos and project entry points after live comparison with Yelp Montréal | Check GitHub CI, production release SHA and Opera after reconnection
+2026-11-21 | Codex | codex/local-discovery-20261121 → PR #12 | done in source | Fixed Montréal/Montreal discovery, city + category search, distance, favorites, reviews, photos and project entry points after live comparison with Yelp Montréal | Check GitHub CI, production release SHA and Opera after reconnection
 
 2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | code terminé, CI finale attendue | KLEAN/REVEW/SEO intégrés successivement; protections Stripe conservées, manifeste ajouté; 451 tests préliminaires passent | confirmer tests du manifeste et CI, publier cible existante seulement après sauvegarde et preuve SHA; Supabase reste séparé
 
