@@ -13,6 +13,7 @@ import BusinessAskTab from "@/components/business/BusinessAskTab";
 import BusinessInfoTab from "@/components/business/BusinessInfoTab";
 import BusinessReviewsTab from "@/components/business/BusinessReviewsTab";
 import BusinessVibeSection from "@/components/business/BusinessVibeSection";
+import ListingMedia from "@/components/media/ListingMedia";
 import BusinessNearbySection from "@/components/business/BusinessNearbySection";
 import BusinessTrustBadges from "@/components/business/BusinessTrustBadges";
 import ClaimBusinessModal from "@/components/business/ClaimBusinessModal";
@@ -305,6 +306,8 @@ const BusinessDetail = () => {
         </div>
       )}
 
+      <ListingMedia key={business.id} businessId={business.id} />
+
       {/* Similar businesses (Phase 9F) */}
       <SimilarBusinessesSection businessId={business.id} />
 
@@ -312,7 +315,7 @@ const BusinessDetail = () => {
       <BusinessNearbySection currentBusinessId={business.id} city={business.city} isClaimed={business.is_claimed} />
 
       {/* Report listing */}
-      <div className="px-4 mt-4 flex justify-center">
+      <div id="report-business" className="px-4 mt-4 flex justify-center">
         <ReportButton targetType="business" targetId={business.id} variant="ghost" />
       </div>
 

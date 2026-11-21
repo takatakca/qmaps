@@ -25,9 +25,8 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute right-3 top-3 z-10">
-          <BookmarkButton id={business.id} city={business.neighborhood} source="business_card" />
-        </div>
+        <BookmarkButton businessId={business.id} city={business.neighborhood} source="business_card"
+          className="absolute z-10 top-3 right-3 w-9 h-9 bg-card/95 rounded-full flex items-center justify-center shadow-soft" />
         {business.isOpen && (
           <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-success text-success-foreground text-[11px] font-semibold rounded-full shadow-soft">
             <span className="w-1.5 h-1.5 rounded-full bg-success-foreground/90" />
@@ -36,7 +35,7 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
         )}
       </div>
       <div className="p-3.5">
-        <h3 className="font-heading font-semibold text-foreground"><Link to={`/business/${business.id}`} className="after:absolute after:inset-0 focus-visible:underline">{business.name}</Link></h3>
+        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={`/business/${business.id}`}>{business.name}</Link></h3>
         <div className="flex items-center gap-2 mt-1">
           <StarRating rating={business.rating} />
           <span className="text-xs text-muted-foreground">
