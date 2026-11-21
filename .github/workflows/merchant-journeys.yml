@@ -54,7 +54,19 @@ jobs:
       - name: Apply the complete QMAPS migration history on an isolated stack
         run: |
           umask 077
-          supabase start --exclude realtime,imgproxy,studio,postgres-meta,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/qmaps-start.log"
-          supabase status -o json > "$RUNNER_TEMP/qmaps-ephemeral.json"
+          mkdir -p "$RUNNER_TEMP/qmaps-clean/supabase"
+          cp supabase/config.toml "$RUNNER_TEMP/qmaps-clean/supabase/config.toml"
+          supabase start --workdir "$RUNNER_TEMP/qmaps-clean" --exclude realtime,imgproxy,studio,postgres-meta,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/qmaps-start.log"
+          supabase status --workdir "$RUNNER_TEMP/qmaps-clean" -o json > "$RUNNER_TEMP/qmaps-ephemeral.json"
+      - name: Rebuild QMAPS and verify that a second installation keeps existing rows
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 54322
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          sh ops/self-host/install.sh
+          sh ops/self-host/install.sh
+          test "$(psql -XAtc "select count(*) from public.businesses where is_active and name like 'QMAPS Démo%'")" = 3
       - name: Exercise Auth, Data API and Storage
         run: node scripts/testdb/supabase-stack.mjs "$RUNNER_TEMP/qmaps-ephemeral.json"
