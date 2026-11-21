@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, PenSquare, MessageCircle } from "lucide-react";
+import { BusinessInbox } from "@/components/business/BusinessMailbox";
 import BottomNav from "@/components/BottomNav";
 import { useConversations } from "@/hooks/useConversations";
 import { formatRelativeTime, initialsFromName } from "@/lib/social";
@@ -65,6 +66,7 @@ const Messages = () => {
         </div>
       )}
 
+      <section className="p-4 space-y-3"><h2 className="font-semibold">Conversations avec les commerces</h2><BusinessInbox /></section>
       <BottomNav />
     </div>
   );

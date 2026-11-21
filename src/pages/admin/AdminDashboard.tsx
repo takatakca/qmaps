@@ -66,6 +66,7 @@ const AdminDashboard = () => {
     { label: "Avis", to: "/admin/reviews" },
     { label: "Journal d'audit", to: "/admin/audit-logs" },
     { label: "Commerces", to: "/admin/businesses" },
+    { label: "Console QMAPS", to: "/console" },
     { label: "Statut de lancement", to: "/admin/launch-status" },
   ];
 

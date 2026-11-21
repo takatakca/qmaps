@@ -75,7 +75,7 @@ declare global {
 }
 
 export const mapsBrowserKey: string | undefined =
-  import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
+  import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
 
 export const isMapsConfigured = () => !!mapsBrowserKey;
 
@@ -98,7 +98,7 @@ export function loadGoogleMaps(): Promise<GoogleNamespace> {
 
     window.__qmapsInitMaps = () => resolve(window.google);
 
-    const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID;
+    const channel = import.meta.env.VITE_GOOGLE_MAPS_TRACKING_ID;
     const script = document.createElement("script");
     script.src =
       `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(mapsBrowserKey)}` +

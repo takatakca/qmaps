@@ -3,6 +3,7 @@ import { ShieldCheck, Flag, Building2, MessageSquare, Image as ImageIcon, Users,
 import { cn } from "@/lib/utils";
 
 const NAV = [
+  { to: "/console", label: "Console QMAPS", icon: Rocket, end: true },
   { to: "/admin", label: "Tableau de bord", icon: ShieldCheck, end: true },
   { to: "/admin/reports", label: "Signalements", icon: Flag },
   { to: "/admin/claims", label: "Revendications", icon: ShieldAlert },

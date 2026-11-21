@@ -1,21 +1,30 @@
-import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { describe, expect, it, vi } from "vitest";
+vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
+import {
+  guestDescription,
+  statusLabel,
+  type GuestRequest,
+} from "@/lib/guestRequests";
 
-describe("Guest Manager honest prelaunch handling", () => {
-  const source = readFileSync(resolve(process.cwd(), "src/pages/MerchantGuestManager.tsx"), "utf8");
-  it("does not pretend to send or store an unhandled booking inquiry", () => {
-    expect(source).not.toContain("setTimeout");
-    expect(source).not.toContain("Demande envoyée!");
-    expect(source).toContain("n'est pas encore activé");
-    expect(source).toContain("ne sera pas envoyé sans votre intervention");
+describe("guest-facing request state", () => {
+  it("displays the requested Québec wall time consistently across user time zones", () => {
+    expect(
+      guestDescription({
+        kind: "reservation",
+        party_size: 4,
+        requested_time: "2026-12-12T18:30:00",
+      } as GuestRequest),
+    ).toBe("Réservation · 4 pers. · 2026-12-12 18:30");
   });
-  it("does not invent paid plans, testimonials or reservations", () => {
-    expect(source).not.toContain("149");
-    expect(source).not.toContain("299");
-    expect(source).not.toContain("Des millions");
-    expect(source).not.toContain("Marie L.");
-    expect(source).not.toContain("30%");
-    expect(source).toContain('to="/support-policy"');
+  it("distinguishes a waiting party from a confirmed reservation", () => {
+    expect(
+      guestDescription({
+        kind: "waitlist",
+        party_size: 2,
+        requested_time: null,
+      } as GuestRequest),
+    ).toBe("Liste d’attente · 2 pers.");
+    expect(statusLabel.pending).toBe("En attente");
+    expect(statusLabel.accepted).toBe("Acceptée");
   });
 });

@@ -1,6 +1,6 @@
 // Phase 9E — analyze-review-risk
 //
-// Deterministic-first review risk scorer. Optionally calls Lovable AI Gateway
+// Deterministic-first review risk scorer. Optionally calls an operator-configured review model
 // when AI_REVIEW_ANALYSIS_ENABLED=true. Never auto-deletes. Only auto-hides
 // when REVIEW_AUTO_HIDE_ENABLED=true AND risk_level=critical.
 //
@@ -10,7 +10,7 @@
 // Environment variables (all optional except SUPABASE_SERVICE_ROLE_KEY):
 //   AI_REVIEW_ANALYSIS_ENABLED  "true" to allow the optional AI layer.
 //                               Default "false" (deterministic rules only).
-//   LOVABLE_API_KEY             Auto-provisioned by Lovable AI gateway. If
+//   QMAPS_AI_URL, QMAPS_AI_MODEL, QMAPS_AI_API_KEY  Operator-supplied. If
 //                               missing the function returns rules-only,
 //                               never throwing or breaking review publishing.
 //   REVIEW_AUTO_HIDE_ENABLED    "true" to auto-hide critical-risk reviews.
@@ -40,7 +40,9 @@ const SERVICE_ROLE_KEY =
 
 const AI_ENABLED = (Deno.env.get("AI_REVIEW_ANALYSIS_ENABLED") ?? "false").toLowerCase() === "true";
 const AUTO_HIDE = (Deno.env.get("REVIEW_AUTO_HIDE_ENABLED") ?? "false").toLowerCase() === "true";
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+const AI_URL = Deno.env.get("QMAPS_AI_URL");
+const AI_MODEL = Deno.env.get("QMAPS_AI_MODEL");
+const AI_API_KEY = Deno.env.get("QMAPS_AI_API_KEY");
 
 // ---- Severity / weights (mirrors src/lib/reviewTrust.ts) ----
 type Severity = "low" | "medium" | "high" | "critical";
@@ -337,16 +339,16 @@ Deno.serve(async (req) => {
 
     // ---- Optional AI layer ----
     let aiUsed = false;
-    if (AI_ENABLED && LOVABLE_API_KEY && text.length > 0) {
+    if (AI_ENABLED && AI_URL && AI_MODEL && AI_API_KEY && text.length > 0) {
       try {
-        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiRes = await fetch(AI_URL, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            Authorization: `Bearer ${AI_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: AI_MODEL,
             messages: [
               {
                 role: "system",
@@ -375,7 +377,7 @@ Deno.serve(async (req) => {
               severity: sev,
               score: 0,
               explanation: String(parsed.reason ?? "Marqué par l'analyse IA.").slice(0, 400),
-              metadata: { ai_model: "google/gemini-2.5-flash" },
+              metadata: { ai_model: AI_MODEL },
             });
             aiUsed = true;
           }

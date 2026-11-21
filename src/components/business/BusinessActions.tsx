@@ -1,3 +1,4 @@
+import EndorseBusiness from "./EndorseBusiness";
 import { Star, ExternalLink, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackBusinessEvent } from "@/lib/analytics";
@@ -72,6 +73,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
         {phone && (
           <Button
             variant="outline"
+            aria-label="Appeler le commerce"
             size="icon"
             className="rounded-full shrink-0"
             onClick={handlePhone}
@@ -81,7 +83,7 @@ const BusinessActions = ({ businessId, priceLevel, categoryName, isOpen, hours, 
         )}
       </div>
 
-
+      {businessId && <EndorseBusiness businessId={businessId} />}
     </div>
   );
 };

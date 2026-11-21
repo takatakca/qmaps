@@ -25,11 +25,11 @@ describe("Phase 3 — vitrine edit modals", () => {
 
   it("EditHistoryModal does not silently drop merchant input", () => {
     const src = read("src/components/merchant/info/EditHistoryModal.tsx");
-    // Old version had a useState<text>(...) + handleSave that wrote nothing.
-    // The honest stub must NOT include a Textarea or year Input that pretends to save.
-    expect(src).not.toMatch(/Textarea/);
-    expect(src).not.toMatch(/setHistory/);
-    expect(src).toContain("Bientôt disponible");
+    expect(src).toMatch(/from\("businesses"\)\s*\.update\(/);
+    expect(src).toContain("founding_year:");
+    expect(src).toContain("business_history:");
+    expect(src).toMatch(/eq\("owner_user_id",\s*user.id\)/);
+    expect(src).toMatch(/select\("id"\)\s*\.single\(/);
   });
 
   it("MerchantMarketplace shows real business.hours instead of hardcoded 9:00 - 17:00", () => {

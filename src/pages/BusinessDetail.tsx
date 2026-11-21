@@ -6,6 +6,10 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
+import { highlights } from "@/lib/profileHighlights";
+import { publicContentUrl } from "@/lib/businessContent";
+import GuestRequests from "@/components/business/GuestRequests";
+import BusinessContentFeed from "@/components/business/BusinessContentFeed";
 import BusinessHero from "@/components/business/BusinessHero";
 import BusinessActions from "@/components/business/BusinessActions";
 import BusinessMenuTab from "@/components/business/BusinessMenuTab";
@@ -34,6 +38,12 @@ const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
 type Tab = typeof tabs[number];
 
 const BusinessDetail = () => {
+  const { id } = useParams();
+  const { user } = useAuth();
+  return <Listing key={id + (user?.id ?? "")} />;
+};
+
+const Listing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -201,6 +211,17 @@ const BusinessDetail = () => {
         }}
       />
 
+      {(business.logo_url || business.business_history || business.founding_year || business.profile_highlights?.length > 0) &&
+        <section className="mx-4 mt-4 space-y-2 rounded-xl border p-4">
+          <h2 className="font-heading font-semibold">Du propriétaire</h2>
+          {publicContentUrl(business.logo_url) && <img src={publicContentUrl(business.logo_url)} alt={`Logo de ${business.name}`} className="h-14 max-w-full object-contain" />}
+          {business.founding_year && <p>En activité depuis {business.founding_year}</p>}
+          {business.business_history && <p className="whitespace-pre-line break-words">{business.business_history}</p>}
+          {!!business.profile_highlights?.length && <ul className="flex flex-wrap gap-2">{business.profile_highlights.filter(id=>Object.prototype.hasOwnProperty.call(highlights,id)).map(id =>
+            <li className="rounded-full border px-2 py-1 text-xs" key={id}>{highlights[id]}</li>)}</ul>}
+        </section>}
+      <BusinessContentFeed key={business.id} businessId={business.id} />
+      <GuestRequests key={"guest-" + business.id} businessId={business.id} />
       <BusinessTrustBadges business={business} />
 
       {!business.is_claimed && (!user || business.owner_user_id !== user.id) && (
@@ -244,7 +265,7 @@ const BusinessDetail = () => {
       <div className="px-4 pt-4">
         {activeTab === "Menu" && <BusinessMenuTab businessId={business.id} />}
         {activeTab === "Demander" && (
-          <BusinessAskTab businessName={business.name} isClaimed={business.is_claimed} />
+          <BusinessAskTab businessName={business.name} businessId={business.id} merchantId={business.owner_user_id} />
         )}
         {activeTab === "Info" && (
           <BusinessInfoTab
@@ -287,12 +308,12 @@ const BusinessDetail = () => {
         <div id="business-photos"><BusinessVibeSection photos={business.photos || []} amenities={business.amenities} /></div>
       ) : (
         <div className="px-4 py-6 border-t border-border bg-secondary/30 text-center">
-          <p className="text-sm font-medium text-foreground">Aucune photo pour le moment</p>
+          <p className="text-sm font-medium text-foreground">Aucune photo du propriétaire pour le moment</p>
           {user && business.owner_user_id === user.id ? (
             <>
               <p className="text-xs text-muted-foreground mt-1">Mettez en valeur votre commerce avec quelques photos.</p>
               <button
-                onClick={() => navigate("/merchant/business-info")}
+                onClick={() => navigate("/merchant/photos")}
                 className="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
               >
                 Ajouter des photos

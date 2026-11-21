@@ -4,7 +4,7 @@ import {
   UserRound, Mail, Smartphone, LogOut, Briefcase, FolderKanban, Bookmark, Store, ShieldCheck, ChevronRight,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useLang } from "@/i18n/language";
@@ -28,14 +28,13 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
 
   const handleGoogle = async () => {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const result = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/profile" } });
     setLoading(false);
     if (result.error) {
       toast({ title: "Connexion Google impossible", description: "Réessayez ou utilisez votre courriel.", variant: "destructive" });
       return;
     }
-    if (result.redirected) return;
-    go("/profile");
+
   };
 
   const Item = ({ icon: Icon, label, sub, onClick }: { icon: typeof Mail; label: string; sub?: string; onClick: () => void }) => (
@@ -99,7 +98,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
             </>
           ) : (
             <>
-              <button
+              {import.meta.env.VITE_QMAPS_GOOGLE_AUTH === "true" && <button
                 onClick={handleGoogle}
                 disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-semibold text-foreground shadow-soft hover:border-primary/40 disabled:opacity-60"
@@ -111,7 +110,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
                   <path fill="#EA4335" d="M12 4.75c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.46 14.97.5 12 .5A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.29 9.14 4.75 12 4.75Z" />
                 </svg>
                 {loading ? t("connecting") : t("continueGoogle")}
-              </button>
+              </button>}
               <div className="mt-1.5">
                 <Item icon={Mail} label={t("continueEmail")} onClick={() => go("/auth")} />
                 <Item icon={Smartphone} label={t("smsVerify")} sub={t("smsVerifySub")} onClick={() => go("/auth?verify=sms")} />
