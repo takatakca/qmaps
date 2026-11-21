@@ -52,7 +52,10 @@ struct AccountView: View {
 struct MerchantView: View {
     @EnvironmentObject var session: Session
     @State private var owned: [Place] = []
-    @State private var name = "", city = "", address = "", message = ""
+    @State private var name = ""
+    @State private var city = ""
+    @State private var address = ""
+    @State private var message = ""
     @State private var working = false
     var body: some View {
         Form {
@@ -83,7 +86,9 @@ struct MerchantView: View {
 struct PublishView: View {
     @EnvironmentObject var session: Session
     let place: Place
-    @State private var title="", text="", message=""
+    @State private var title = ""
+    @State private var text = ""
+    @State private var message = ""
     @State private var working=false
     var body: some View {
         Form {
