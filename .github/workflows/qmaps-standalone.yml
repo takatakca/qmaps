@@ -22,6 +22,7 @@ jobs:
           compose() { docker compose -f compose.qmaps.yaml -f "$RUNNER_TEMP/qmaps-ci-compose.yml" "$@"; }
           trap 'compose down -v' EXIT
           compose up --build --wait --wait-timeout 180 || { compose logs --tail 25 qmaps-db qmaps-api; exit 1; }
+          compose run --rm --no-deps qmaps-migrate
           node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/closure.sql
           archive=$(compose exec -T qmaps-db sh /opt/qmaps/server/db/backup.sh)

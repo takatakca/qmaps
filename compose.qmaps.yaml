@@ -17,6 +17,20 @@ services:
       timeout: 4s
       retries: 20
     restart: unless-stopped
+  qmaps-migrate:
+    build:
+      context: .
+      dockerfile: server/Dockerfile.db
+    entrypoint: ["sh", "/opt/qmaps/server/db/apply-upgrades.sh"]
+    environment:
+      PGHOST: qmaps-db
+      PGUSER: postgres
+      PGDATABASE: qmaps
+      PGPASSWORD: ${SERVICE_PASSWORD_POSTGRES:?required}
+    depends_on:
+      qmaps-db:
+        condition: service_healthy
+    restart: "no"
   qmaps-api:
     build:
       context: .
@@ -28,8 +42,8 @@ services:
       PGPASSWORD: ${SERVICE_PASSWORD_GATEWAY:?required}
     expose: ["3000"]
     depends_on:
-      qmaps-db:
-        condition: service_healthy
+      qmaps-migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
     healthcheck:
       test: ["CMD","node","-e","fetch('http://127.0.0.1:3000/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
