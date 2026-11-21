@@ -12,8 +12,8 @@ Convient à un serveur **Apache/cPanel desservant un site React/Vite statique** 
 2. Créer les secrets suivants (valeurs privées non incluses dans ce dépôt) :
    - `QMAPS_DEPLOY_HOST`, `QMAPS_DEPLOY_PORT` (22 par défaut), `QMAPS_DEPLOY_USER`, `QMAPS_DEPLOY_WEB_ROOT`
    - `QMAPS_DEPLOY_SSH_PRIVATE_KEY`, `QMAPS_DEPLOY_KNOWN_HOSTS`, `QMAPS_PRODUCTION_URL` (URL HTTPS complète)
-   - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`
-   - `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` si la carte dépend encore de cet ancien nom d'intégration
+   - `QMAPS_SELFHOST_PUBLISHABLE_KEY` (clé publique de rôle `anon` de la pile QMAPS dans Coolify). Le workflow utilise `https://qmaps.ca/qmaps-api` et `qmaps-coolify`
+   - `VITE_GOOGLE_MAPS_BROWSER_KEY` pour activer la carte Google facultative
 3. La clé SSH doit être **dédiée au déploiement**, autorisée uniquement sur le répertoire cible. Vérifier manuellement la correspondance SSH host key avant de remplir KNOWN_HOSTS. Ne pas désactiver StrictHostKeyChecking.
 4. Confirmer que WEB_ROOT est le répertoire **du seul site QMAPS** et non `public_html` d'un autre domaine. Faire une sauvegarde des fichiers du site existant.
 5. Lancer `Actions → QMAPS SSH deploy → Run workflow` pour la première publication contrôlée. Les prochains succès du workflow `CI` sur `main` déclencheront les publications tant que la variable reste activée.

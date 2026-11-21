@@ -6,13 +6,13 @@ QMAPS est une application de recherche de commerces, de catégories et de servic
 **Dépôt source :** https://github.com/takatakca/qmaps  
 **Branche d'intégration :** `main`
 
-## État réel (14 octobre 2026)
+## Production vérifiée le 21 novembre 2026
 
-- Application React 18 + TypeScript, Vite 5, Tailwind, shadcn/ui, Supabase.
-- Quatre PRs précédemment ouvertes (#2–#5) intégrées à `main` ; les corrections de lint, le pont TAKATAK et le matching R2F sont en code.
-- Vérifications GitHub CI et contrat TAKATAK réussies après les fusions du 14 octobre 2026.
-- **Non vérifié :** hébergement actuel de qmaps.ca, DNS/SSL, migration Supabase du pont TAKATAK, secrets Edge Functions, appels signés en conditions réelles et publication effective sur qmaps.ca.
-- Les fonctions Stripe, Google Maps, authentification et Supabase historiques exigent une configuration réelle. Le projet contient encore des intégrations et documents hérités de Lovable ; GitHub est maintenant la source de code, mais la migration complète de toutes les dépendances n'est pas revendiquée.
+QMAPS.ca sert l’application de la branche `main`. La base PostgreSQL, les comptes, le stockage des photos et les fonctions serveur tournent dans le projet QMAPS du Coolify TAKATAK. La passerelle publique est `https://qmaps.ca/qmaps-api`. Le manifeste `/qmaps-release.json` identifie la révision du site. La console propriétaire s’ouvre sur `/console`.
+
+Les trois commerces marqués « QMAPS Démo » sont fictifs. Le contrôle exécuté sur le serveur a vérifié la connexion de trois comptes temporaires, la publication, la liste d’attente, l’isolation des collections et les photos. Les sauvegardes quotidiennes de la base et des objets sont conservées sur le serveur. Le courriel transactionnel et les services externes nécessitent leur propre configuration.
+
+Le [guide d’exploitation](ops/self-host/README.md) décrit l’installation reproductible, l’accès du propriétaire et les essais sur le serveur. Chaque intervenant signe son travail dans [WORKLOG.md](WORKLOG.md).
 
 ## Démarrer en local
 
@@ -26,7 +26,7 @@ bun install --frozen-lockfile
 bun run dev
 ```
 
-Renseigner `.env` localement (ne **jamais** le pousser). Configuration navigateur : `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` et, si la carte le nécessite, `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (ancien nom de la variable, pas une instruction de dépendre de Lovable).
+Renseigner `.env` localement (ne **jamais** le pousser). Configuration navigateur : `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` et, si la carte le nécessite, `VITE_GOOGLE_MAPS_BROWSER_KEY`.
 
 Les secrets serveur (Stripe, SUPABASE_SERVICE_ROLE_KEY, QMAPS_TAKATAK_INTEGRATION_SECRET, TAKATAK_QMAPS_MATCHING_SECRET) ne doivent jamais utiliser le préfixe `VITE_` ni apparaître dans les fichiers livrés au navigateur.
 

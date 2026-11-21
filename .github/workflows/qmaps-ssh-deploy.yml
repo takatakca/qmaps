@@ -64,9 +64,9 @@ jobs:
           PRIVATE_KEY: ${{ secrets.QMAPS_DEPLOY_SSH_PRIVATE_KEY }}
           KNOWN_HOSTS: ${{ secrets.QMAPS_DEPLOY_KNOWN_HOSTS }}
           PUBLIC_URL: ${{ secrets.QMAPS_PRODUCTION_URL }}
-          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          SUPABASE_URL: https://qmaps.ca/qmaps-api
+          SUPABASE_KEY: ${{ secrets.QMAPS_SELFHOST_PUBLISHABLE_KEY }}
+          SUPABASE_ID: qmaps-coolify
         run: |
           for key in HOST USER ROOT PRIVATE_KEY KNOWN_HOSTS PUBLIC_URL SUPABASE_URL SUPABASE_KEY SUPABASE_ID; do
             if [ -z "${!key}" ]; then echo "Missing configuration: $key" >&2; exit 1; fi
@@ -82,9 +82,9 @@ jobs:
           case "$PUBLIC_URL" in https://qmaps.ca|https://qmaps.ca/|https://www.qmaps.ca|https://www.qmaps.ca/) ;; *) echo 'Production URL must be qmaps.ca or www.qmaps.ca over HTTPS' >&2; exit 1;; esac
       - name: Build static frontend
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          VITE_SUPABASE_URL: https://qmaps.ca/qmaps-api
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.QMAPS_SELFHOST_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: qmaps-coolify
           VITE_GOOGLE_MAPS_BROWSER_KEY: ${{ secrets.VITE_GOOGLE_MAPS_BROWSER_KEY }}
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
