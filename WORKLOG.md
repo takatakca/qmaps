@@ -1,3 +1,5 @@
+2026-11-21 | Codex | codex/local-discovery-20261121 → PR #12 | done in source | Fixed Montréal/Montreal discovery, city + category search, distance, favorites, reviews, photos and project entry points after live comparison with Yelp Montréal | Check GitHub CI, production release SHA and Opera after reconnection
+
 2026-11-07 | Codex — ChatGPT Work | codex/sequential-release-20261107 | code terminé, CI finale attendue | KLEAN/REVEW/SEO intégrés successivement; protections Stripe conservées, manifeste ajouté; 451 tests préliminaires passent | confirmer tests du manifeste et CI, publier cible existante seulement après sauvegarde et preuve SHA; Supabase reste séparé
 
 2026-11-01 | REVEW | revew/review-api-handoff | DONE / source CI green / not deployed | Add explicit tenant-bound visibility checks for tracked review IDs; no QMAPS outbound review event producer found, so no automatic deletion-sync assumption. | Exact source 9a74033 passed https://github.com/takatakca/qmaps/actions/runs/41299114132 in51s: 442tests, typecheck, lint and productionbuild. Next: authorized Edge Function deployment and V1 exact-ID confirmation acceptance; no production changes — REVEW

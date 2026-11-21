@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,7 @@ const curatedSections = [
 
 const Projects = () => {
   const navigate = useNavigate();
+  const isNewProject = useLocation().pathname === "/projects/new";
   const { user } = useAuth();
   const { requests } = useProjectRequests();
   const { categories } = useProjectCategories();
@@ -158,7 +159,10 @@ const Projects = () => {
       </div>
 
       <BottomNav />
-      <StartProjectSheet open={startOpen} onOpenChange={setStartOpen} defaultCategoryId={presetCategoryId} />
+      <StartProjectSheet open={startOpen || isNewProject} onOpenChange={(open) => {
+        setStartOpen(open);
+        if (!open && isNewProject) navigate("/projects", { replace: true });
+      }} defaultCategoryId={presetCategoryId} />
     </div>
   );
 };

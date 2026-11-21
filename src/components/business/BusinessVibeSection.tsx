@@ -21,13 +21,11 @@ const BusinessVibeSection = ({ photos, amenities }: BusinessVibeSectionProps) =>
         <>
           <h3 className="font-heading text-lg font-bold text-foreground mb-3">L'ambiance</h3>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-            {photos.slice(0, 4).map((photo, i) => (
+            {photos.map((photo, i) => (
               <div key={i} className="shrink-0 w-40">
-                <img src={photo} alt={`Photo ${i + 1}`} className="w-40 h-28 object-cover rounded-xl" />
-                <p className="text-sm font-medium text-foreground mt-1.5">
-                  {i === 0 ? "Intérieur" : i === 1 ? "Extérieur" : `Photo ${i + 1}`}
-                </p>
-                <p className="text-xs text-muted-foreground">{Math.floor(Math.random() * 10 + 2)} photos</p>
+                <a href={photo} target="_blank" rel="noopener noreferrer">
+                  <img src={photo} alt={`Photo ${i + 1} du commerce`} loading="lazy" className="w-40 h-28 object-cover rounded-xl" />
+                </a>
               </div>
             ))}
           </div>

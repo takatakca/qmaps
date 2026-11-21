@@ -1,7 +1,7 @@
 import { getCategoryImage } from "@/lib/categoryImages";
 import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
@@ -39,32 +39,47 @@ const BusinessDetail = () => {
   const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
   const [reviews, setReviews] = useState<(Tables<"reviews"> & { profiles?: { display_name: string | null } })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bookmarked, setBookmarked] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>("Menu");
+  const [params] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(params.get("tab") === "reviews" ? "Avis" : "Menu");
   const [userName, setUserName] = useState<string | null>(null);
   const [claimOpen, setClaimOpen] = useState(false);
 
-  const fetchData = async () => {
-    if (!id) return;
-    const [{ data: biz }, revs] = await Promise.all([
-      supabase.from("businesses").select("*, business_categories(categories(name))").eq("id", id).maybeSingle(),
-      fetchReviewsWithAuthors(id),
-    ]);
-    setBusiness(biz);
-    setReviews((revs) || []);
-
-    if (user) {
-      const [{ data: bk }, { data: profile }] = await Promise.all([
-        supabase.from("bookmarks").select("id").eq("user_id", user.id).eq("business_id", id).maybeSingle(),
-        supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+  const request = useRef<symbol | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const fetchData = useCallback(async () => {
+    const current = Symbol();
+    request.current = current;
+    setLoadError(false);
+    try {
+      if (!id) return;
+      const [{ data: biz, error }, revs] = await Promise.all([
+        supabase.from("businesses").select("*, business_categories(categories(name))").eq("id", id).maybeSingle(),
+        fetchReviewsWithAuthors(id),
       ]);
-      setBookmarked(!!bk);
-      setUserName(profile?.display_name || null);
-    }
-    setLoading(false);
-  };
+      if (current !== request.current) return;
+      if (error) throw error;
+      setBusiness(biz);
+      setReviews((revs) || []);
 
-  useEffect(() => { fetchData(); }, [id, user]);
+      if (user) {
+        const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
+        if (current === request.current) setUserName(profile?.display_name || null);
+      }
+    } catch {
+      if (request.current === current) setLoadError(true);
+    } finally {
+      if (request.current === current) setLoading(false);
+    }
+  }, [id, user]);
+
+  useEffect(() => {
+    setLoading(true);
+    setUserName(null);
+    void fetchData();
+    return () => { request.current = null; };
+  }, [fetchData]);
+
+  useEffect(() => { setActiveTab(params.get("tab") === "reviews" ? "Avis" : "Menu"); }, [params, id]);
 
   // Track profile view once per business id
   useEffect(() => {
@@ -83,32 +98,7 @@ const BusinessDetail = () => {
     }
   }, [business?.id, business?.city]);
 
-  const handleBookmark = async () => {
-    if (!user) { navigate("/auth"); return; }
-    if (!id) return;
-    if (bookmarked) {
-      await supabase.from("bookmarks").delete().eq("user_id", user.id).eq("business_id", id);
-      setBookmarked(false);
-      trackRecommendationEvent({
-        business_id: id,
-        event_type: "bookmark_remove",
-        source: "business_detail",
-        city: business?.city ?? null,
-      });
-    } else {
-      await supabase.from("bookmarks").insert({ user_id: user.id, business_id: id });
-      setBookmarked(true);
-      trackBusinessEvent(id, "save_click", { source: "business_detail" });
-      trackRecommendationEvent({
-        business_id: id,
-        event_type: "bookmark_add",
-        source: "business_detail",
-        city: business?.city ?? null,
-      });
-    }
-  };
-
-  if (loading || !business) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background max-w-lg mx-auto">
         {/* Skeleton */}
@@ -121,6 +111,15 @@ const BusinessDetail = () => {
         <BottomNav />
       </div>
     );
+  }
+
+  if (loadError || !business) {
+    return <main className="mx-auto max-w-lg px-4 py-10">
+      <h1 className="mb-3 text-xl font-bold">{loadError ? "Impossible de charger la fiche" : "Commerce introuvable"}</h1>
+      {loadError && <Button onClick={fetchData}>Réessayer</Button>}
+      <Button variant="link" onClick={() => navigate("/search")}>Retour à la recherche</Button>
+      <BottomNav />
+    </main>;
   }
 
   const seoTitle = `${business.name}${business.city ? ` · ${business.city}` : ""} | QMaps`;
@@ -173,8 +172,8 @@ const BusinessDetail = () => {
         reviewsCount={business.reviews_count}
         isClaimed={business.is_claimed}
         photosCount={(business.photos || []).length}
-        bookmarked={bookmarked}
-        onBookmark={handleBookmark}
+        businessId={business.id}
+        city={business.city}
       />
       {/* hidden link kept for SSR-friendly category link */}
       {business.city && (
@@ -185,7 +184,7 @@ const BusinessDetail = () => {
       <BusinessActions
         businessId={business.id}
         priceLevel={business.price_level}
-        categoryName=""
+        categoryName={categoryNameFromEmbed(business, "Commerce")}
         isOpen={isBusinessOpenNow(business)}
         hours={business.hours}
         website={business.website}
@@ -282,7 +281,7 @@ const BusinessDetail = () => {
 
       {/* Vibe section or photo empty-state */}
       {(business.photos || []).length > 0 ? (
-        <BusinessVibeSection photos={business.photos || []} amenities={business.amenities} />
+        <div id="business-photos"><BusinessVibeSection photos={business.photos || []} amenities={business.amenities} /></div>
       ) : (
         <div className="px-4 py-6 border-t border-border bg-secondary/30 text-center">
           <p className="text-sm font-medium text-foreground">Aucune photo pour le moment</p>

@@ -1,5 +1,8 @@
-import { ArrowLeft, Bookmark, Share2, MoreVertical } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ShareSheet from "@/components/ShareSheet";
+import BookmarkButton from "./BookmarkButton";
 import StarRating from "@/components/StarRating";
 
 interface BusinessHeroProps {
@@ -9,12 +12,13 @@ interface BusinessHeroProps {
   reviewsCount: number;
   isClaimed: boolean;
   photosCount: number;
-  bookmarked: boolean;
-  onBookmark: () => void;
+  businessId: string;
+  city: string;
 }
 
-const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, photosCount, bookmarked, onBookmark }: BusinessHeroProps) => {
+const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, photosCount, businessId, city }: BusinessHeroProps) => {
   const navigate = useNavigate();
+  const [sharing, setSharing] = useState(false);
 
   return (
     <div className="relative">
@@ -25,21 +29,18 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
 
       {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 pt-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+        <button aria-label="Retour" onClick={() => navigate(-1)} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
           <ArrowLeft size={18} className="text-foreground" />
         </button>
         <div className="flex items-center gap-2">
-          <button onClick={onBookmark} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
-            <Bookmark size={16} className={bookmarked ? "text-primary fill-primary" : "text-foreground"} />
-          </button>
-          <button className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+          <BookmarkButton id={businessId} city={city} source="business_detail" />
+          <button aria-label="Partager la fiche" onClick={() => setSharing(true)} className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
             <Share2 size={16} className="text-foreground" />
-          </button>
-          <button className="w-9 h-9 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center">
-            <MoreVertical size={16} className="text-foreground" />
           </button>
         </div>
       </div>
+
+      <ShareSheet open={sharing} onClose={() => setSharing(false)} title="Partager la fiche" text={name} url={new URL("/business/" + businessId, window.location.origin).href} />
 
       {/* Bottom overlay content */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
@@ -54,9 +55,9 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
           <span className="text-sm text-white/80">({reviewsCount} avis)</span>
         </div>
         {photosCount > 0 && (
-          <button className="mt-2 w-full py-2 bg-card/20 backdrop-blur-sm border border-white/30 rounded-lg text-sm font-medium text-white text-center">
+          <a href="#business-photos" className="mt-2 block w-full py-2 bg-card/20 backdrop-blur-sm border border-white/30 rounded-lg text-sm font-medium text-white text-center">
             Voir les {photosCount} photos
-          </button>
+          </a>
         )}
       </div>
     </div>

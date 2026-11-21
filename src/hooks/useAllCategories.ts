@@ -21,14 +21,19 @@ const fetchAll = async (): Promise<CategoryLite[]> => {
   if (cache) return cache;
   if (inflight) return inflight;
   inflight = (async () => {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, slug, icon, parent_id, category_type")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true });
-    if (error) throw error;
-    cache = (data ?? []) as CategoryLite[];
+    const rows: CategoryLite[] = [];
+    const pageSize = 500;
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await supabase.from("categories")
+        .select("id, name, slug, icon, parent_id, category_type")
+        .eq("is_active", true)
+        .order("sort_order").order("name").order("id")
+        .range(offset, offset + pageSize - 1);
+      if (error) throw error;
+      rows.push(...(data ?? []));
+      if (!data || data.length < pageSize) break;
+    }
+    cache = rows;
     return cache;
   })();
   try {
@@ -43,8 +48,12 @@ export const useAllCategories = () => {
   const [categories, setCategories] = useState<CategoryLite[]>(cache ?? []);
   const [loading, setLoading] = useState(!cache);
 
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let cancelled = false;
+    setError(false);
+    setLoading(!cache);
     fetchAll()
       .then((rows) => {
         if (!cancelled) {
@@ -53,14 +62,14 @@ export const useAllCategories = () => {
         }
       })
       .catch(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) { setError(true); setLoading(false); }
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
-  return { categories, loading };
+  return { categories, loading, error, retry: () => setAttempt(value => value + 1) };
 };
 
 const norm = (s: string | null | undefined) =>

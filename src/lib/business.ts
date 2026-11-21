@@ -5,6 +5,7 @@ export const priceLabels = ["$", "$$", "$$$", "$$$$"];
 
 export type BusinessWithDistance = Tables<"businesses"> & {
   distance_meters?: number | null;
+  category_slug?: string | null;
   category_name?: string | null;
   business_categories?: {
     categories?: { name?: string | null; slug?: string | null } | null;
@@ -24,11 +25,11 @@ export const mapBusinessToCard = (business: BusinessWithDistance): Business => (
   category: business.category_name || categoryNameFromEmbed(business),
   rating: Number(business.avg_rating),
   reviewCount: business.reviews_count,
-  priceLevel: priceLabels[(business.price_level || 1) - 1] || "$",
+  priceLevel: priceLabels[(business.price_level ?? 0) - 1] || "",
   neighborhood: business.city,
   image: business.image_url || "/placeholder.svg",
   isOpen: business.is_open,
-  distance: business.distance_meters ? `${Math.round(business.distance_meters)} m` : undefined,
+  distance: business.distance_meters != null ? `${Math.round(business.distance_meters)} m` : undefined,
   address: business.address,
   phone: business.phone || "",
   hours: business.hours || "",

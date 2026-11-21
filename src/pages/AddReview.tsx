@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { ArrowLeft, X, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,7 +15,8 @@ import type { BusinessSearchHit } from "@/lib/business";
 
 const AddReview = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const searchRequest = useRef(0);
   const { toast } = useToast();
   const { submitReviewForScoring } = useReviewTrust();
   const [query, setQuery] = useState("");
@@ -27,9 +28,11 @@ const AddReview = () => {
   const [saving, setSaving] = useState(false);
 
   const search = async (q: string) => {
+    const request = ++searchRequest.current;
     setQuery(q);
     if (q.length < 2) { setResults([]); return; }
-    const { data } = await supabase.from("businesses").select("id, name, address, image_url").ilike("name", `%${q}%`).limit(10);
+    const { data } = await supabase.from("businesses").select("id, name, address, image_url").eq("is_active", true).ilike("name", `%${q}%`).limit(10);
+    if (request !== searchRequest.current) return;
     setResults(data || []);
   };
 
@@ -54,10 +57,8 @@ const AddReview = () => {
     setSaving(false);
   };
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  if (authLoading) return <p role="status" className="p-4">Chargement…</p>;
+  if (!user) return <Navigate replace to="/auth?next=review" />;
 
   const list = query.length >= 2 ? results : nearby;
 
@@ -101,7 +102,7 @@ const AddReview = () => {
           </div>
         ) : (
           <>
-            <NearbyBusinessPicker businesses={list} loading={nearbyLoading && query.length < 2} error={nearbyError} emptyLabel="Aucun commerce trouvé pour le moment." onSelect={setSelectedBusiness} onRefresh={refresh} />
+            <NearbyBusinessPicker businesses={list} loading={nearbyLoading && query.length < 2} error={query.length < 2 ? nearbyError : null} emptyLabel="Aucun commerce trouvé pour le moment." onSelect={setSelectedBusiness} onRefresh={refresh} />
             {list.length === 0 && query.length >= 2 && <p className="text-sm text-muted-foreground py-8 text-center">Aucun résultat</p>}
           </>
         )}
