@@ -1,3 +1,5 @@
+2026-11-22 | Codex — ChatGPT Work | codex/recherche-publique-postgresql → ticket 17 | active | Raccorder /search, les catégories et les pages de ville aux lectures paginées PostgreSQL de la PR #30. | Attendre la réponse de l’API existante en production et comparer les résultats avant bascule.
+
 2026-11-22 | Codex — ChatGPT Work | codex/read-directory → tickets 8 et 17 | active | Deux fiches à Montréal dans la recherche classique contre trois dans la base indépendante. Préparer les lectures publiques paginées avec catégories et visibilité pour la bascule du site. | Vérifier les filtres et le masquage avant de brancher les consommateurs.
 
 2026-11-22 | Codex — ChatGPT Work | main · PR #29 | Déployé et vérifié | Recherche par nom et ville dans /compte, Android et iOS. Quatre suites réussies, compilation 4 sur émulateur Android et simulateur iPhone. Chrome a vérifié la fiche du bistro et l’entrée commerçant, Firefox a ouvert Yelp for Business. | Captures et fichiers vérifiés https://github.com/takatakca/qmaps/releases/tag/mobile-1.0.0-rc.4 . Google Play et Amazon conservent leurs états distincts.
