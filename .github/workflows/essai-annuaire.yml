@@ -1,0 +1,40 @@
+name: Essai navigateur de la bascule PostgreSQL
+on:
+  push:
+    branches: [qa/essai-bascule-annuaire]
+permissions:
+  contents: read
+jobs:
+  annuaire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: bun install --frozen-lockfile && bun run build
+        env:
+          VITE_SUPABASE_URL: http://127.0.0.1:58999
+          VITE_SUPABASE_PUBLISHABLE_KEY: test-directory-local
+      - run: python -m pip install selenium==4.32.0
+      - name: Ouvrir les pages contre PostgreSQL et PostGIS
+        run: |
+          set -euo pipefail
+          export SERVICE_PASSWORD_POSTGRES="$(openssl rand -hex 32)"
+          export SERVICE_PASSWORD_GATEWAY="$(openssl rand -hex 32)"
+          cat > "$RUNNER_TEMP/preview.yaml" <<'YAML'
+          services:
+            qmaps-api:
+              ports: ["127.0.0.1:3102:3000"]
+          YAML
+          compose() { docker compose -f compose.qmaps.yaml -f "$RUNNER_TEMP/preview.yaml" "$@"; }
+          trap 'compose down -v' EXIT
+          compose up --build --wait --wait-timeout 180
+          python ops/essai-annuaire/navigation.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: QMAPS-annuaire-Chrome
+          path: observations/
