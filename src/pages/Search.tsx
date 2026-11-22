@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { directoryPages, type DirectoryPlace } from "@/lib/ownedDirectory";
 import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
 import SearchBar from "@/components/SearchBar";
@@ -9,7 +9,7 @@ import CategoryPickerDialog from "@/components/search/CategoryPickerDialog";
 import { SlidersHorizontal, X, LayoutGrid, FilePlus2, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { distanceMeters, getCurrentPosition, type Coordinates } from "@/lib/geo";
-import { cityFilter, cityLabelFor, textSearchFilter } from "@/lib/localSearch";
+import { cityLabelFor } from "@/lib/localSearch";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
@@ -23,7 +23,6 @@ import {
   normalizeSearchText,
 } from "@/lib/searchFilters";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
-import type { Tables } from "@/integrations/supabase/types";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,7 +34,7 @@ const Search = () => {
   }, [searchParams]);
   const selectedCategory = searchParams.get("category") || "";
 
-  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
+  const [businesses, setBusinesses] = useState<DirectoryPlace[]>([]);
   const [searchError, setSearchError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -59,6 +58,7 @@ const Search = () => {
 
   useEffect(() => {
     let current = true;
+    const controller = new AbortController();
     setLoading(true);
     setSearchError(false);
     setBusinesses([]);
@@ -72,34 +72,12 @@ const Search = () => {
         setLoading(false);
         return;
       }
-      const categoryIds = new Set(matched.map(c => c.id));
-      for (const child of categories) {
-        if (child.parent_id && matched.some(parent => parent.id === child.parent_id)) categoryIds.add(child.id);
-      }
-      // Empty embed filters matching categories without removing other display
-      // categories or relaxing the city, visibility, rating and price filters.
-      const rows: Tables<"businesses">[] = [];
-      const pageSize = 250;
-      for (let offset = 0; current; offset += pageSize) {
-        let request = supabase.from("businesses")
-          .select("*, business_categories(categories(name)), matched:business_categories()")
-          .eq("is_active", true)
-          .in("status", ["open", "temporarily_closed", "seasonal"]);
-        if (city) request = request.or(cityFilter(city));
-        if (minRating) request = request.gte("avg_rating", minRating);
-        if (selectedPrice.length) request = request.in("price_level", selectedPrice);
-        if (categoryIds.size) request = request.in("matched.category_id", [...categoryIds]);
-        if (selectedCategory) request = request.not("matched", "is", null);
-        if (query) {
-          const text = textSearchFilter(query);
-          request = request.or(!selectedCategory && categoryIds.size ? text + ",matched.not.is.null" : text);
-        }
-        const { data, error } = await request.order("id").range(offset, offset + pageSize - 1);
-        if (!current) return;
-        if (error) throw error;
-        rows.push(...(data || []));
-        if (!data || data.length < pageSize) break;
-      }
+      const filters = new URLSearchParams({ q: query, city });
+      if (selectedCategory) filters.set("category", selectedCategory);
+      else for (const category of matched) filters.append("match", category.id);
+      for (const price of selectedPrice) filters.append("price", String(price));
+      if (minRating) filters.set("rating", String(minRating));
+      const rows = await directoryPages<DirectoryPlace>("", filters, controller.signal);
       if (current) {
         setBusinesses(rows);
         setLoading(false);
@@ -108,7 +86,7 @@ const Search = () => {
     void load().catch(() => {
       if (current) { setSearchError(true); setLoading(false); }
     });
-    return () => { current = false; };
+    return () => { current = false; controller.abort(); };
   }, [query, city, selectedCategory, selectedPrice, minRating, categories, categoriesLoading, categoryError, attempt]);
 
   const results = useMemo(() => {
