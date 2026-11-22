@@ -5,15 +5,20 @@ struct PlacesView: View {
     var saved = false
     @State private var list: [Place] = []
     @State private var search = ""
+    @State private var city = ""
+    @State private var latestRequest = 0
     @State private var message = ""
     @State private var busy = false
     var body: some View {
         List {
             if !saved {
-                HStack {
-                    TextField("Nom du commerce", text: $search).onSubmit { Task { await load() } }
-                    Button("Chercher") { Task { await load() } }
+                Section {
+                    TextField("Nom du commerce", text: $search)
+                    TextField("Ville", text: $city)
+                        .textContentType(.addressCity)
+                    Button("Rechercher") { Task { await load() } }
                 }
+                .onSubmit { Task { await load() } }
             }
             if busy { ProgressView() }
             if !message.isEmpty { Text(message).foregroundStyle(.secondary) }
@@ -29,12 +34,31 @@ struct PlacesView: View {
         .refreshable { await load() }
     }
     @MainActor private func load() async {
-        if saved && session.token == nil { list = []; message = "Connectez-vous dans Compte pour voir vos favoris."; return }
-        busy = true; defer { busy = false }
+        latestRequest += 1
+        let requestID = latestRequest
+        let token = session.token
+        if saved && token == nil {
+            list = []
+            busy = false
+            message = "Connectez-vous dans Compte pour voir vos favoris."
+            return
+        }
+        busy = true
+        defer { if requestID == latestRequest { busy = false } }
+        let filters = [
+            URLQueryItem(name: "q", value: search.trimmingCharacters(in: .whitespacesAndNewlines)),
+            URLQueryItem(name: "city", value: city.trimmingCharacters(in: .whitespacesAndNewlines))
+        ]
         do {
-            list = try await session.request(saved ? "me/bookmarks" : "places", query: saved ? [] : [.init(name: "q", value: search)])
-            message = list.isEmpty ? "Aucun commerce." : ""
-        } catch { list = []; message = error.localizedDescription }
+            let results: [Place] = try await session.request(saved ? "me/bookmarks" : "places", query: saved ? [] : filters)
+            guard requestID == latestRequest, token == session.token else { return }
+            list = results
+            message = results.isEmpty ? "Aucun commerce." : ""
+        } catch {
+            guard requestID == latestRequest, token == session.token else { return }
+            list = []
+            message = error.localizedDescription
+        }
     }
 }
 

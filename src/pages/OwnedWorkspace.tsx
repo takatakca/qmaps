@@ -97,7 +97,8 @@ function Marketplace({ user }: { user: QmapsUser }) {
     "catalogue",
   );
   const [term, setTerm] = useState(""),
-    [search, setSearch] = useState(""),
+    [city, setCity] = useState(""),
+    [search, setSearch] = useState({ q: "", city: "" }),
     [selected, setSelected] = useState<QmapsPlace | null>(null);
   const [note, setNote] = useState(""),
     [busy, setBusy] = useState(false);
@@ -109,7 +110,7 @@ function Marketplace({ user }: { user: QmapsUser }) {
           ? "me/places"
           : tab === "saved"
             ? "me/bookmarks"
-            : "places?q=" + encodeURIComponent(search),
+            : "places?" + new URLSearchParams(search).toString(),
       ),
     retry: false,
   });
@@ -289,10 +290,10 @@ function Marketplace({ user }: { user: QmapsUser }) {
         <>
           {tab === "catalogue" && (
             <form
-              className="flex gap-2"
+              className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
               onSubmit={(e) => {
                 e.preventDefault();
-                setSearch(term);
+                setSearch({ q: term.trim(), city: city.trim() });
               }}
             >
               <Input
@@ -300,6 +301,13 @@ function Marketplace({ user }: { user: QmapsUser }) {
                 placeholder="Nom du commerce"
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
+              />
+              <Input
+                aria-label="Ville"
+                placeholder="Ville"
+                autoComplete="address-level2"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
               />
               <Button>Rechercher</Button>
             </form>
