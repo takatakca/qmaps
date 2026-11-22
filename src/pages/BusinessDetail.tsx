@@ -1,3 +1,4 @@
+import PublicOwnedListing from "@/components/business/PublicOwnedListing";
 import { businessWebsite } from "@/lib/businessWebsite";
 import { getCategoryImage } from "@/lib/categoryImages";
 import { fetchReviewsWithAuthors } from "@/lib/reviewsWithAuthors";
@@ -123,6 +124,10 @@ const Listing = () => {
         <BottomNav />
       </div>
     );
+  }
+
+  if (!business && id && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) {
+    return <PublicOwnedListing id={id} legacyUnavailable={loadError} retryLegacy={fetchData} />;
   }
 
   if (loadError || !business) {

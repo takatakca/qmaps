@@ -14,9 +14,11 @@ type Page = { photos: Photo[]; next: number | null };
 export default function OwnedGallery({
   place,
   viewer,
+  readOnly = false,
 }: {
   place: string;
   viewer: string;
+  readOnly?: boolean;
 }) {
   const path = "places/" + place + "/photos";
   const gallery = useInfiniteQuery({
@@ -58,7 +60,7 @@ export default function OwnedGallery({
   return (
     <section className="space-y-3">
       <h3 className="text-xl font-semibold">Photos</h3>
-      <form className="space-y-2" onSubmit={upload}>
+      {!readOnly && <form className="space-y-2" onSubmit={upload}>
         <label className="block">
           Ajouter une photo au format JPEG ou PNG (3 Mio maximum)
           <input
@@ -72,7 +74,7 @@ export default function OwnedGallery({
         <Button disabled={busy} variant="outline">
           Publier la photo
         </Button>
-      </form>
+      </form>}
       {gallery.isPending ? (
         <p>Chargement des photos…</p>
       ) : gallery.isError ? (
@@ -97,7 +99,7 @@ export default function OwnedGallery({
               {photo.merchant_photo ? "Commerce" : "Visiteur"}
               {photo.cover ? " · Couverture" : ""}
             </figcaption>
-            {photo.mine && photo.merchant_photo && !photo.cover && (
+            {!readOnly && photo.mine && photo.merchant_photo && !photo.cover && (
               <Button
                 disabled={busy}
                 variant="outline"
@@ -111,7 +113,7 @@ export default function OwnedGallery({
                 Choisir comme couverture
               </Button>
             )}
-            {photo.mine ? (
+            {!readOnly && (photo.mine ? (
               removal === photo.id ? (
                 <div className="flex gap-2">
                   <Button
@@ -151,7 +153,7 @@ export default function OwnedGallery({
               >
                 Signaler
               </Button>
-            )}
+            ))}
           </figure>
         ))}
       </div>
