@@ -92,14 +92,14 @@ function Console({ userId }: { userId: string }) {
   );
 }
 
-function Marketplace({ user }: { user: QmapsUser }) {
+function Marketplace({ user, initialPlace = null }: { user: QmapsUser; initialPlace?: QmapsPlace | null }) {
   const [tab, setTab] = useState<"catalogue" | "saved" | "merchant">(
     "catalogue",
   );
   const [term, setTerm] = useState(""),
     [city, setCity] = useState(""),
     [search, setSearch] = useState({ q: "", city: "" }),
-    [selected, setSelected] = useState<QmapsPlace | null>(null);
+    [selected, setSelected] = useState<QmapsPlace | null>(initialPlace);
   const [note, setNote] = useState(""),
     [busy, setBusy] = useState(false);
   const list = useQuery({
@@ -381,8 +381,27 @@ function Marketplace({ user }: { user: QmapsUser }) {
     </div>
   );
 }
+function LinkedMarketplace({ user, placeId }: { user: QmapsUser; placeId: string }) {
+  const place = useQuery({
+    queryKey: ["qmaps-linked-place", user.id, placeId],
+    queryFn: () => ownedApi<QmapsPlace>("places/" + placeId),
+    retry: false,
+  });
+  if (place.isPending) return <p>Chargement de la fiche…</p>;
+  if (place.isError) return (
+    <div role="alert" className="space-y-2">
+      <p>{place.error.message}</p>
+      <Button variant="outline" onClick={() => void place.refetch()}>Réessayer</Button>{" "}
+      <Link className="underline" to="/compte">Retour au catalogue</Link>
+    </div>
+  );
+  return <Marketplace user={user} initialPlace={place.data} />;
+}
+
 export default function OwnedWorkspace() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const linked = new URLSearchParams(search).get("fiche");
+  const placeId = linked && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(linked) ? linked : null;
   const consolePage = pathname === "/console";
   const closurePage = pathname === "/compte/fermeture";
   const [user, setUser] = useState<QmapsUser | null>(null),
@@ -491,7 +510,7 @@ export default function OwnedWorkspace() {
         ) : (
           <>
             <PublicationTerms key={user.id} userId={user.id} />
-            <Marketplace user={user} />
+            {placeId ? <LinkedMarketplace key={user.id + placeId} user={user} placeId={placeId} /> : <Marketplace key={user.id} user={user} />}
           </>
         )}
       </div>
