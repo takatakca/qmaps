@@ -15,6 +15,7 @@ import java.io.File
 import ca.qmaps.mobile.R
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import ca.qmaps.mobile.MainActivity
 
@@ -33,6 +34,24 @@ class JourneyInstrumentation : Instrumentation() {
             try {
                 val root = activity.window.decorView
                 awaitScreen("Catalogue chargé") {
+                    root.findViewById<View>(R.id.catalogue_place)?.isShown == true && root.findText("Chargement…") == null
+                }
+                fun searchCity(value: String) = onUi {
+                    val field = checkNotNull(root.findViewWithTag<EditText>("qmaps-city-search"))
+                    field.setText(value)
+                    check(checkNotNull(root.findText("Rechercher")).performClick())
+                }
+                searchCity("Qmaps-ville-inexistante-zz")
+                awaitScreen("Aucun commerce dans cette ville") {
+                    root.findText("Aucun commerce.") != null && root.findViewById<View>(R.id.catalogue_place) == null
+                }
+                searchCity("  Montreal  ")
+                awaitScreen("Résultats de Montréal") {
+                    val first = root.findViewById<View>(R.id.catalogue_place)
+                    first?.findText("Montréal") != null && root.findText("Chargement…") == null
+                }
+                searchCity("")
+                awaitScreen("Retour au catalogue") {
                     root.findViewById<View>(R.id.catalogue_place)?.isShown == true && root.findText("Chargement…") == null
                 }
                 capture(activity, "accueil")
