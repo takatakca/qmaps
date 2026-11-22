@@ -1,0 +1,52 @@
+name: Livraison QMAPS mobile de test 4
+on:
+  push:
+    branches: [release/qmaps-mobile-rc4]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: takatakca/qmaps
+      SOURCE_SHA: ea822e6d83a65657312c153900174fa1c9f1fc55
+      QA_SHA: 537d3bda8cc4625e1af4a9c5a6d91da615d76280
+    steps:
+      - name: Vérifier les exécutions et télécharger les fichiers
+        run: |
+          set -euo pipefail
+          for run in 44994484169 44994639039 44994484038 44994484096 44994484044; do
+            expected="$SOURCE_SHA"
+            if [[ "$run" == "44994639039" ]]; then expected="$QA_SHA"; fi
+            test "$(gh run view "$run" --json headSha --jq .headSha)" = "$expected"
+            while [[ "$(gh run view "$run" --json status --jq .status)" != completed ]]; do sleep 15; done
+            test "$(gh run view "$run" --json conclusion --jq .conclusion)" = success
+          done
+          gh run download 44994484169 -n QMAPS-Android-test-APK -D android
+          gh run download 44994484169 -n QMAPS-iOS-builds -D ios
+          gh run download 44994484169 -n QMAPS-Android-capture -D mobile
+          gh run download 44994639039 -n parcours-publics-QMAPS -D web
+          mkdir public
+          cp android/app-debug.apk public/QMAPS-Android-test-build-4.apk
+          cp ios/QMAPS-simulator.zip public/QMAPS-iOS-simulateur-build-4.zip
+          cp ios/QMAPS-iPhone-unsigned.zip public/QMAPS-iPhone-non-signe-build-4.zip
+          cp mobile/QMAPS-Android-*.png web/qmaps-*.png web/parcours.json public/
+          for file in public/QMAPS-Android-test-build-4.apk public/*.zip; do unzip -tq "$file"; done
+          (cd public && sha256sum -- * > SHA256SUMS)
+      - name: Publier les fichiers vérifiables
+        run: |
+          set -euo pipefail
+          tag=mobile-1.0.0-rc.4
+          if gh release view "$tag" >/dev/null 2>&1; then
+            mkdir existing
+            gh release download "$tag" -D existing
+            cmp existing/SHA256SUMS public/SHA256SUMS
+            (cd existing && sha256sum -c SHA256SUMS)
+          else
+            gh release create "$tag" public/* --target "$SOURCE_SHA" --prerelease --title "QMAPS 1.0.0 · compilation de test 4" --notes "Recherche par nom et ville sur Android, iOS et dans l’espace QMAPS. APK de test installable sur Android. L’archive pour simulateur iOS a été installée et lancée. L’archive pour appareil iOS attend sa signature. Les captures accompagnent les parcours publics et les essais sur Android. Le bundle signé de compilation 3 reste disponible dans la livraison RC3."
+          fi
+          gh release download "$tag" -D verification
+          (cd verification && sha256sum -c SHA256SUMS)
