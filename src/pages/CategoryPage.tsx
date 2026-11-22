@@ -145,7 +145,7 @@ const CategoryPage = () => {
           </div>
         ) : (
           businesses.map((b) => (
-            <BusinessCard
+            <BusinessCard ownedDirectory
               key={b.id}
               business={mapBusinessToCard({ ...b, category_name: category.name })}
             />
