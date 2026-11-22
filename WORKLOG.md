@@ -1,4 +1,4 @@
-2026-11-22 | Codex — ChatGPT Work | codex/read-directory → tickets 8 et 17 | active | Deux fiches à Montréal dans la recherche classique contre trois dans la base indépendante. Préparer les lectures publiques paginées avec catégories et visibilité pour la bascule du site. | Vérifier les filtres et le masquage avant de brancher les consommateurs.
+2026-11-22 | Codex — ChatGPT Work | main · PR #30, #31 et #33 · ticket 17 | Fiche publique vérifiée en production, annuaire validé en CI | L’URL d’une fiche indépendante auparavant introuvable affiche son nom, son adresse, sa galerie, ses avis et un lien qui conserve la fiche à la connexion. Les lectures paginées, les filtres par ville et catégorie, le classement et le blocage d’un éditeur passent sur PostgreSQL. | Déployer le backend existant dans Coolify et vérifier /api/v1/browser/directory avant la bascule web #32. Preuves https://github.com/takatakca/qmaps/issues/17#issuecomment-7075575487
 
 2026-11-22 | Codex — ChatGPT Work | main · PR #29 | Déployé et vérifié | Recherche par nom et ville dans /compte, Android et iOS. Quatre suites réussies, compilation 4 sur émulateur Android et simulateur iPhone. Chrome a vérifié la fiche du bistro et l’entrée commerçant, Firefox a ouvert Yelp for Business. | Captures et fichiers vérifiés https://github.com/takatakca/qmaps/releases/tag/mobile-1.0.0-rc.4 . Google Play et Amazon conservent leurs états distincts.
 
@@ -140,5 +140,3 @@ Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 - 2026-10-08 | claude (owner setup) | default branch | done | Added the work log rule, this log and the stop reminder | every agent follows AGENTS.md › Work log rule
 
 2026-11-21 | Codex — ChatGPT Work | ticket 17 · avis et réponses | Comptes, console, favoris et publications de l’API indépendante vérifiés en production. Ajout des avis et réponses des propriétaires au nouvel espace, avec test de la séparation des identités, des modifications et du retrait. La modération et les boutiques restent suivies dans le ticket de lancement.
-
-2026-11-22 | Codex — ChatGPT Work | codex/fiche-publique-independante → ticket 17 | active | Une fiche publiée dans l’API QMAPS affichait « Commerce introuvable » depuis son lien public. | Vérifier la fiche accessible sans compte et le lien vers ses actions après connexion.
