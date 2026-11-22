@@ -12,6 +12,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import android.graphics.Bitmap
 import java.io.File
+import java.text.Normalizer
 import ca.qmaps.mobile.R
 import android.view.View
 import android.view.ViewGroup
@@ -48,7 +49,15 @@ class JourneyInstrumentation : Instrumentation() {
                 searchCity("  Montreal  ")
                 awaitScreen("Résultats de Montréal") {
                     val first = root.findViewById<View>(R.id.catalogue_place)
-                    first?.findText("Montréal") != null && root.findText("Chargement…") == null
+                    val results = first?.parent as? ViewGroup ?: return@awaitScreen false
+                    val cards = (0 until results.childCount).map(results::getChildAt)
+                        .filter { it.id == R.id.catalogue_place }
+                    cards.isNotEmpty() && cards.all { card ->
+                        val label = (card as ViewGroup).getChildAt(1) as TextView
+                        val city = Normalizer.normalize(label.text, Normalizer.Form.NFD)
+                            .replace(Regex("\\p{M}+"), "")
+                        city.equals("Montreal", ignoreCase = true)
+                    } && root.findText("Chargement…") == null
                 }
                 searchCity("")
                 awaitScreen("Retour au catalogue") {
