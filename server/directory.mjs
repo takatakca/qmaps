@@ -52,6 +52,8 @@ export async function directoryDetail(db, id) {
 
 export async function directorySearch(db, params) {
   const size = limit(params);
+  const ranked = params.get("order") === "rating";
+  if (ranked && params.has("after")) throw new ApiError(400, "Curseur incompatible avec le classement");
   const name = (params.get("q") ?? "").trim();
   const city = (params.get("city") ?? "").trim();
   const category = (params.get("category") ?? "").trim();
@@ -82,8 +84,8 @@ export async function directorySearch(db, params) {
         OR ($5 = '' AND EXISTS (
           SELECT 1 FROM public.business_categories bc JOIN public.categories c ON c.id = bc.category_id AND c.is_active
           WHERE bc.business_id = b.id AND (c.id = ANY($7::uuid[]) OR c.parent_id = ANY($7::uuid[])))))
-    ORDER BY b.id LIMIT $8`,
+    ORDER BY CASE WHEN $9::boolean THEN b.avg_rating END DESC NULLS LAST, b.id LIMIT $8`,
     [city, cursor(params), prices.map(Number), rating === null ? null : Number(rating),
-      category, name, matches, size + 1]);
+      category, name, matches, ranked ? size : size + 1, ranked]);
   return page(rows, size);
 }
