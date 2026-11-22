@@ -138,3 +138,5 @@ Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 - 2026-10-08 | claude (owner setup) | default branch | done | Added the work log rule, this log and the stop reminder | every agent follows AGENTS.md › Work log rule
 
 2026-11-21 | Codex — ChatGPT Work | ticket 17 · avis et réponses | Comptes, console, favoris et publications de l’API indépendante vérifiés en production. Ajout des avis et réponses des propriétaires au nouvel espace, avec test de la séparation des identités, des modifications et du retrait. La modération et les boutiques restent suivies dans le ticket de lancement.
+
+2026-11-22 | Codex — ChatGPT Work | codex/fiche-publique-independante → ticket 17 | active | Une fiche publiée dans l’API QMAPS affichait « Commerce introuvable » depuis son lien public. | Vérifier la fiche accessible sans compte et le lien vers ses actions après connexion.
