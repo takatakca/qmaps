@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { directoryPages } from "@/lib/ownedDirectory";
 
 export interface CategoryLite {
   id: string;
@@ -21,18 +21,11 @@ const fetchAll = async (): Promise<CategoryLite[]> => {
   if (cache) return cache;
   if (inflight) return inflight;
   inflight = (async () => {
-    const rows: CategoryLite[] = [];
-    const pageSize = 500;
-    for (let offset = 0; ; offset += pageSize) {
-      const { data, error } = await supabase.from("categories")
-        .select("id, name, slug, icon, parent_id, category_type")
-        .eq("is_active", true)
-        .order("sort_order").order("name").order("id")
-        .range(offset, offset + pageSize - 1);
-      if (error) throw error;
-      rows.push(...(data ?? []));
-      if (!data || data.length < pageSize) break;
-    }
+    const rows = await directoryPages<CategoryLite & { sort_order: number | null }>("/categories", new URLSearchParams());
+    rows.sort((a, b) =>
+      (a.sort_order ?? Infinity) - (b.sort_order ?? Infinity) ||
+      a.name.localeCompare(b.name, "fr-CA") || a.id.localeCompare(b.id)
+    );
     cache = rows;
     return cache;
   })();
