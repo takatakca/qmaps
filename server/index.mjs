@@ -1,3 +1,4 @@
+import { directoryCategories, directoryDetail, directorySearch } from "./directory.mjs";
 import {
   blockPublisher,
   publishingTerms,
@@ -176,6 +177,13 @@ async function route(req, res) {
     return reply(res, 204);
   }
   const id = await userFor(pool, authorization);
+  if (method === "GET" && path === "/v1/directory")
+    return reply(res, 200, await scoped(id, db => directorySearch(db, url.searchParams)));
+  if (method === "GET" && path === "/v1/directory/categories")
+    return reply(res, 200, await scoped(id, db => directoryCategories(db, url.searchParams)));
+  const directoryPlace = new RegExp("^/v1/directory/(" + uuid + ")$", "i").exec(path);
+  if (method === "GET" && directoryPlace)
+    return reply(res, 200, await scoped(id, db => directoryDetail(db, directoryPlace[1])));
   const moderation = moderationRoute.exec(path);
   if (path === "/v1/me/publication-terms" && ["GET", "PUT"].includes(method)) {
     requireUser(id);
