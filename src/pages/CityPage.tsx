@@ -128,7 +128,7 @@ const CityPage = () => {
           </div>
         ) : (
           businesses.map((b) => (
-            <BusinessCard
+            <BusinessCard ownedDirectory
               key={b.id}
               business={mapBusinessToCard({ ...b, category_name: categoryNameFromEmbed(b) })}
             />
