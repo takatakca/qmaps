@@ -39,7 +39,7 @@ const MerchantOnboarding = () => {
   const { user, loading: authLoading, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { categories: allCats, loading: catsLoading } = useAllCategories();
+  const { categories: allCats, loading: catsLoading } = useAllCategories("transition");
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
