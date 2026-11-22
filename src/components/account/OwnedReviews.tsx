@@ -15,10 +15,12 @@ export default function OwnedReviews({
   place,
   owner,
   viewer,
+  readOnly = false,
 }: {
   place: string;
   owner: boolean;
   viewer: string;
+  readOnly?: boolean;
 }) {
   const path = "places/" + place + "/reviews";
   const reviews = useQuery({
@@ -100,7 +102,7 @@ export default function OwnedReviews({
               )}
             </article>
           ))}
-          {!owner && (
+          {!readOnly && !owner && (
             <form
               key={mine?.id ?? "new"}
               className="space-y-2"
