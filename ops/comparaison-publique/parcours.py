@@ -59,10 +59,12 @@ def qmaps():
             return False
         link = WebDriverWait(driver, 20).until(result)
         target = link.get_attribute("href")
+        business_name = link.text.strip()
+        assert business_name, "La fiche doit avoir un nom"
         WebDriverWait(driver, 12).until(lambda d: "résultat" in d.find_element(By.TAG_NAME, "body").text.lower())
         driver.save_screenshot(str(output / "qmaps-recherche.png"))
         link.click()
-        WebDriverWait(driver, 20).until(lambda d: d.current_url.split("?")[0] == target.split("?")[0] and any(h.text.strip() for h in d.find_elements(By.TAG_NAME,"h1")))
+        WebDriverWait(driver, 20).until(lambda d: d.current_url.split("?")[0] == target.split("?")[0] and any(h.text.strip() == business_name for h in d.find_elements(By.TAG_NAME,"h1")))
         heading = driver.find_element(By.TAG_NAME, "h1").text
         driver.save_screenshot(str(output / "qmaps-fiche.png"))
         visit(driver, "https://qmaps.ca/compte")
@@ -70,7 +72,10 @@ def qmaps():
         driver.save_screenshot(str(output / "qmaps-compte.png"))
         visit(driver, "https://qmaps.ca/console")
         WebDriverWait(driver, 20).until(lambda d: d.find_elements(By.CSS_SELECTOR,"input[type='password']"))
-        return {"city":"Montréal", "opened_business":target, "heading":heading, "account_login": True, "console_login": True}
+        visit(driver, "https://qmaps.ca/merchant")
+        WebDriverWait(driver, 20).until(lambda d: d.find_elements(By.CSS_SELECTOR,"input[type=\'password\']"))
+        driver.save_screenshot(str(output / "qmaps-commercant.png"))
+        return {"merchant_entry":driver.current_url, "city":"Montréal", "opened_business":target, "heading":heading, "account_login": True, "console_login": True}
 
 with ThreadPoolExecutor(max_workers=2) as pool:
     yelp_result = pool.submit(reference)
