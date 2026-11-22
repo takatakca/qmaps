@@ -98,7 +98,10 @@ class MainActivity : Activity() {
     }
     private fun catalogue() {
         val nameField = input("Nom du commerce").apply { setText(search) }
-        val cityField = input("Ville").apply { setText(searchCity) }
+        val cityField = input("Ville").apply {
+            tag = "qmaps-city-search"
+            setText(searchCity)
+        }
         content.addView(action("Rechercher", availableWhileLoading = true) {
             search = nameField.text.toString().trim()
             searchCity = cityField.text.toString().trim()
