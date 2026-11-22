@@ -49,7 +49,10 @@ final class Session: ObservableObject {
     func apply(_ next: String?) throws { try Vault.store(next); token = next }
     func request<T: Decodable>(_ path: String, method: String = "GET", query: [URLQueryItem] = [], body: [String: Any]? = nil) async throws -> T {
         var url = URLComponents(string: "https://qmaps.ca/api/v1/" + path)!
-        if !query.isEmpty { url.queryItems = query }
+        if !query.isEmpty {
+            url.queryItems = query
+            url.percentEncodedQuery = url.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        }
         var req = URLRequest(url: url.url!, timeoutInterval: 18)
         req.httpMethod = method
         if let token { req.setValue("Bearer " + token, forHTTPHeaderField: "Authorization") }
