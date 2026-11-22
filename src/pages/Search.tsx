@@ -266,7 +266,7 @@ const Search = () => {
                   });
                 }}
               >
-                <BusinessCard business={mapBusinessToCard({
+                <BusinessCard ownedDirectory business={mapBusinessToCard({
                   ...b,
                   category_name: categoryNameFromEmbed(b, selectedCategoryName || "Commerce"),
                 })} />
