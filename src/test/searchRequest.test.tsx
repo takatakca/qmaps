@@ -5,6 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 import Search from "@/pages/Search";
 
 const requests: { url: URL; signal?: AbortSignal | null; reply: (rows: object[]) => void }[] = [];
+vi.mock("@/integrations/supabase/client", async () => {
+  const { createClient } = await import("@supabase/supabase-js");
+  return { supabase: createClient("https://example.invalid", "test-key", {
+    auth: { persistSession: false },
+  }) };
+});
 vi.mock("@/hooks/useAllCategories", () => {
   const categories = [{ id: "23455678-0000-4000-a000-000000000001", slug: "restaurants", name: "Restaurants", parent_id: null }];
   return { useAllCategories: () => ({ categories, loading: false }), searchCategories: () => categories };
