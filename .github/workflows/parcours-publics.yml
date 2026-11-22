@@ -1,0 +1,22 @@
+name: Comparaison QMAPS et Yelp
+on:
+  push:
+    branches: [qa/parcours-deux-navigateurs]
+permissions:
+  contents: read
+jobs:
+  navigateurs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install selenium==4.32.0
+      - run: python ops/comparaison-publique/parcours.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parcours-publics-QMAPS
+          path: observations/
