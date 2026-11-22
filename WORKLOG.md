@@ -1,3 +1,5 @@
+2026-11-21 | Codex — ChatGPT Work | codex/decouverte-par-ville → tickets 8 et 17 | active | Relier les champs de recherche par nom et ville du web, d’Android et d’iOS au catalogue PostgreSQL. | Tester une ville accentuée, les résultats vides et le retour aux résultats.
+
 2026-11-21 | Codex — ChatGPT Work | main · PR #26 à #28 · ticket 17 | Livraison RC3 vérifiée | Onze pièces retéléchargées et contrôlées. Android signé, fermeture de compte et modération testées en production, deux cibles iOS compilées. Amazon examine la compilation 1 pour douze tablettes Fire. Google Play a enregistré le brouillon pour ca.qmaps.mobile. | Confirmer la réception de la compilation 3 dans Play, la signature Apple et la fin du déploiement Coolify de la PR #28. Preuves https://github.com/takatakca/qmaps/issues/17#issuecomment-7073586707
 
 2026-11-21 | Codex — ChatGPT Work | codex/qmaps-migrations-deploiement → ticket 17 | En vérification | Application automatique des migrations sur le volume PostgreSQL existant avant le démarrage de la nouvelle API. | Vérifier la réexécution et le catalogue sur Coolify.

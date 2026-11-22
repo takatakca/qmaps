@@ -26,6 +26,7 @@ class MainActivity : Activity() {
     private var epoch = 0
     private var pending = false
     private var search = ""
+    private var searchCity = ""
     private val navy = Color.rgb(19,40,69)
     private val blue = Color.rgb(26,89,172)
     private fun dp(v:Int) = (resources.displayMetrics.density*v).toInt()
@@ -96,9 +97,21 @@ class MainActivity : Activity() {
         content.addView(action("Ouvrir mon compte"){show("Compte")});return false
     }
     private fun catalogue() {
-        val term=input("Nom du commerce");term.setText(search)
-        content.addView(action("Rechercher"){search=term.text.toString();show("Découvrir")})
-        run({api.request("places?q="+Uri.encode(search))}){cards(it as JSONArray)}
+        val nameField = input("Nom du commerce").apply { setText(search) }
+        val cityField = input("Ville").apply {
+            tag = "qmaps-city-search"
+            setText(searchCity)
+        }
+        content.addView(action("Rechercher", availableWhileLoading = true) {
+            search = nameField.text.toString().trim()
+            searchCity = cityField.text.toString().trim()
+            show("Découvrir")
+        })
+        val path = Uri.Builder().path("places")
+            .appendQueryParameter("q", search)
+            .appendQueryParameter("city", searchCity)
+            .build().toString()
+        run({ api.request(path) }) { cards(it as JSONArray) }
     }
     private fun cards(rows:JSONArray) {
         if(rows.length()==0)content.addView(label("Aucun commerce."))
