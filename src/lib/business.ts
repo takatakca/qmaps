@@ -1,5 +1,5 @@
 import type { Tables } from "@/integrations/supabase/types";
-import { isBusinessOpenNow } from "@/lib/searchFilters";
+import { isBusinessOpenNow, type SearchableBusiness } from "@/lib/searchFilters";
 import type { Business } from "@/types";
 
 export const priceLabels = ["$", "$$", "$$$", "$$$$"];
@@ -20,7 +20,12 @@ export const categoryNameFromEmbed = (business: object, fallback = "Local"): str
   return embedded.business_categories?.[0]?.categories?.name || embedded.category_name || fallback;
 };
 
-export const mapBusinessToCard = (business: BusinessWithDistance): Business => ({
+export type BusinessCardSource = SearchableBusiness & Pick<BusinessWithDistance,
+  "id" | "name" | "city" | "address" | "avg_rating" | "reviews_count" | "price_level" |
+  "image_url" | "phone" | "hours" | "description" | "amenities" | "photos" | "category_name"
+>;
+
+export const mapBusinessToCard = (business: BusinessCardSource): Business => ({
   id: business.id,
   name: business.name,
   category: business.category_name || categoryNameFromEmbed(business),
