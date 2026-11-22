@@ -151,6 +151,10 @@ assert.equal((await request("/v1/directory?city=Laval", "GET", customer.token)).
 await request("/v1/directory/" + place.id, "GET", customer.token, undefined, 404);
 assert.equal((await request("/v1/directory/" + place.id, "GET", owner.token)).id, place.id);
 await request(safety + "/posts", "GET", customer.token, undefined, 404);
+const top = await request("/v1/directory?city=Montreal&limit=1&order=rating");
+assert.equal(top.items.length, 1);
+assert.equal(top.next, null);
+await request("/v1/directory?order=rating&after=" + place.id, "GET", null, undefined, 400);
 const blocks = await request(
   "/v1/me/blocked-publishers",
   "GET",
