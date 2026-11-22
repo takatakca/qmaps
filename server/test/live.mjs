@@ -75,6 +75,27 @@ const place = await request(
   { name: "QMAPS test", city: "Laval", address: "Adresse fictive" },
   201,
 );
+const montreal = await request("/v1/directory?city=Montreal");
+assert.equal(montreal.items.length, 2);
+assert.equal(montreal.next, null);
+const firstPage = await request("/v1/directory?city=Montr%C3%A9al&limit=1");
+const lastPage = await request("/v1/directory?city=Montreal&limit=1&after=" + firstPage.next);
+assert.deepEqual([...firstPage.items, ...lastPage.items], montreal.items);
+assert.equal(lastPage.next, null);
+const bistro = montreal.items.find(row => row.name.includes("Bistro"));
+const restaurant = bistro.business_categories.find(link => link.categories.slug === "restaurants").categories;
+assert.equal((await request("/v1/directory?category=restaurants&city=Laval")).items.length, 0);
+assert.equal((await request("/v1/directory?city=Montreal&price=2&category=restaurants")).items[0].id, bistro.id);
+assert.equal((await request("/v1/directory?q=tables&match=" + restaurant.id)).items.length, 2);
+assert.deepEqual((await request("/v1/directory?q=%25")).items, []);
+const catalogRow = await request("/v1/directory/" + place.id);
+assert.equal(catalogRow.name, place.name);
+assert.equal("owner_user_id" in catalogRow, false);
+const cats = await request("/v1/directory/categories?limit=1");
+assert.equal(cats.items.length, 1);
+assert.notEqual((await request("/v1/directory/categories?limit=1&after=" + cats.next)).items[0].id, cats.items[0].id);
+for (const bad of ["after=no", "match=no", "price=6", "rating=NaN", "limit=0", "limit=251"])
+  await request("/v1/directory?" + bad, "GET", null, undefined, 400);
 const safety = "/v1/places/" + place.id;
 await request(
   safety + "/report",
@@ -126,6 +147,9 @@ assert.equal(
   true,
 );
 await request(safety, "GET", customer.token, undefined, 404);
+assert.equal((await request("/v1/directory?city=Laval", "GET", customer.token)).items.some(row => row.id === place.id), false);
+await request("/v1/directory/" + place.id, "GET", customer.token, undefined, 404);
+assert.equal((await request("/v1/directory/" + place.id, "GET", owner.token)).id, place.id);
 await request(safety + "/posts", "GET", customer.token, undefined, 404);
 const blocks = await request(
   "/v1/me/blocked-publishers",
