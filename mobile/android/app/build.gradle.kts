@@ -8,7 +8,7 @@ android {
         testInstrumentationRunner = "ca.qmaps.mobile.test.JourneyInstrumentation"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
+        versionCode = 4
         versionName = "1.0.0"
     }
     val store = System.getenv("QMAPS_UPLOAD_STORE_FILE")
