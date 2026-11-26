@@ -1,5 +1,5 @@
 // Phase 7B — Stripe webhook handler. Source of truth for subscription state.
-// Signature is verified; idempotency enforced via merchant_billing_events.provider_event_id.
+// Deduplicate completed deliveries by provider event ID.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
@@ -53,32 +53,32 @@ Deno.serve(async (req) => {
   let event: Stripe.Event;
   try {
     event = await stripe.webhooks.constructEventAsync(rawBody, sig, webhookSecret);
-  } catch (err) {
-    console.error("Webhook signature verification failed", err);
+  } catch {
+    console.warn("Webhook signature verification failed");
     return new Response("Invalid signature", { status: 400, headers: corsHeaders });
   }
 
-  // Use service role for trusted server-side writes.
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
-
-  // Idempotency: skip if we've already processed this event id.
-  const { data: existingEvent } = await admin
-    .from("merchant_billing_events")
-    .select("id")
-    .eq("provider", "stripe")
-    .eq("provider_event_id", event.id)
-    .maybeSingle();
-  if (existingEvent) {
-    return new Response(JSON.stringify({ received: true, duplicate: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { data: existingEvent, error: lookupError } = await admin
+      .from("merchant_billing_events")
+      .select("id")
+      .eq("provider", "stripe")
+      .eq("provider_event_id", event.id)
+      .limit(1)
+      .maybeSingle();
+    if (lookupError) throw new Error("Unable to check the Stripe event receipt");
+    if (existingEvent) {
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let businessId: string | null = null;
     let userId: string | null = null;
     let plan: string | null = null;
@@ -107,9 +107,10 @@ Deno.serve(async (req) => {
         cancel_at_period_end: !!sub.cancel_at_period_end,
         updated_at: new Date().toISOString(),
       };
-      await admin
+      const { error } = await admin
         .from("merchant_subscriptions")
         .upsert(row, { onConflict: "business_id" });
+      if (error) throw new Error("Unable to save the Stripe subscription");
     };
 
     switch (event.type) {
@@ -170,7 +171,7 @@ Deno.serve(async (req) => {
     }
 
     if (businessId) {
-      await admin.from("merchant_billing_events").insert({
+      const { error } = await admin.from("merchant_billing_events").insert({
         business_id: businessId,
         user_id: userId,
         event_type: event.type,
@@ -178,6 +179,7 @@ Deno.serve(async (req) => {
         provider_event_id: event.id,
         metadata: safeMetadata as never,
       });
+      if (error) throw new Error("Unable to save the Stripe event receipt");
     } else {
       console.warn("Webhook event without business_id metadata", event.id, event.type);
     }

@@ -41,14 +41,14 @@ Deno.serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claims?.claims?.sub) {
+    const { data: auth, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !auth?.user) {
       return new Response(JSON.stringify({ error: "unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claims.claims.sub as string;
+    const userId = auth.user.id;
 
     const body = await req.json().catch(() => null);
     const businessId = typeof body?.business_id === "string" ? body.business_id : null;
@@ -71,11 +71,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: sub } = await supabase
+    const { data: sub, error: subscriptionError } = await supabase
       .from("merchant_subscriptions")
       .select("provider_customer_id")
       .eq("business_id", businessId)
       .maybeSingle();
+    if (subscriptionError) throw new Error("Unable to load the merchant subscription");
 
     if (!sub?.provider_customer_id) {
       return new Response(
