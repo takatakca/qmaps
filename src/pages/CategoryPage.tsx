@@ -10,7 +10,7 @@ import { mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityLabelFromSlug } from "@/lib/localSearch";
 import SearchBar from "@/components/SearchBar";
-import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 
 const CategoryPage = () => {
@@ -25,6 +25,7 @@ const CategoryPage = () => {
   const unavailable = catalogue.error || listError;
   const { recommended, loading: recLoading } = useRecommendedBusinesses({
     city: cityLabel,
+    category: categorySlug,
     limit: 4,
   });
 
@@ -140,10 +141,10 @@ const CategoryPage = () => {
 
       {category && (
         <div className="px-4 mt-6">
-          <RecommendedSection
+          <DirectoryRecommendations
             title={`Recommandé dans ${category.name}`}
-            subtitle="Sélectionné pour vous selon votre activité"
-            source="category_recommended"
+            subtitle="Commerces de l’annuaire QMAPS"
+
             items={recommended.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
             loading={recLoading}
           />

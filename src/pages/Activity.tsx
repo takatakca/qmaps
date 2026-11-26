@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
 import SuggestedUsersList from "@/components/social/SuggestedUsersList";
 import { formatRelativeTime } from "@/lib/social";
-import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import Seo from "@/components/Seo";
 
@@ -73,10 +73,10 @@ const Activity = () => {
             <MapPin size={40} className="text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground text-center">Aucune activité disponible pour cet onglet.</p>
           </div>
-          <RecommendedSection
+          <DirectoryRecommendations
             title="Tendances de la communauté"
             subtitle="Suggéré pour vous en attendant"
-            source="activity_empty_trending"
+
             items={trending.slice(0, 4).map((b) => ({ business: b, reasonCodes: ["popular"] }))}
             loading={recLoading}
           />

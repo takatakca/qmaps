@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useCollections } from "@/hooks/useCollections";
-import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import CollectionContents from "@/components/business/CollectionContents";
 import { useToast } from "@/hooks/use-toast";
@@ -157,10 +157,10 @@ const CollectionIndex = () => {
 
       {showRecs && recItems.length > 0 && (
         <div className="px-4 pb-6">
-          <RecommendedSection
+          <DirectoryRecommendations
             title="Vous pourriez aussi aimer"
             subtitle="Inspiré de vos commerces enregistrés"
-            source="collections_because_you_saved"
+
             items={recItems.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
             loading={recLoading}
           />

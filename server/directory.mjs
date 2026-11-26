@@ -89,3 +89,38 @@ export async function directorySearch(db, params) {
       category, name, matches, ranked ? size : size + 1, ranked]);
   return page(rows, size);
 }
+
+export async function directoryPreferences(db, userId) {
+  const { rows } = await db.query(`
+    WITH recent AS (
+      SELECT business_id FROM public.qmaps_directory_preferences
+      WHERE user_id = $1 AND NOT dismissed AND viewed_at IS NOT NULL
+      ORDER BY viewed_at DESC, business_id LIMIT 25
+    )
+    SELECT b.id, b.city, false AS dismissed, ARRAY(
+      SELECT c.id FROM public.business_categories bc
+      JOIN public.categories c ON c.id = bc.category_id AND c.is_active
+      WHERE bc.business_id = b.id ORDER BY c.id
+    ) AS category_ids
+    FROM recent JOIN public.businesses b ON b.id = recent.business_id WHERE ${visible}
+    UNION ALL
+    SELECT business_id, NULL, true, '{}'::uuid[]
+    FROM public.qmaps_directory_preferences WHERE user_id = $1 AND dismissed`, [userId]);
+  return rows;
+}
+
+export async function saveDirectoryPreference(db, userId, businessId, action) {
+  if (!["view", "dismiss"].includes(action)) throw new ApiError(400, "Action invalide");
+  const result = await db.query(`
+    INSERT INTO public.qmaps_directory_preferences (user_id, business_id, viewed_at, dismissed)
+    SELECT $1, b.id, CASE WHEN $3 = 'view' THEN now() END, $3 = 'dismiss'
+    FROM public.businesses b WHERE b.id = $2 AND ${visible}
+    ON CONFLICT (user_id, business_id) DO UPDATE SET
+      viewed_at = coalesce(excluded.viewed_at, qmaps_directory_preferences.viewed_at),
+      dismissed = excluded.dismissed OR qmaps_directory_preferences.dismissed
+    WHERE excluded.dismissed OR NOT qmaps_directory_preferences.dismissed`, [userId, businessId, action]);
+  if (!result.rowCount) {
+    // A dismissed listing stays dismissed when visited again.
+    await directoryDetail(db, businessId);
+  }
+}
