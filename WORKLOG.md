@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-billing-retry | correctif testé | corriger l’authentification Checkout et les accusés de réception du webhook | valider la CI puis déployer les trois fonctions en préproduction Stripe Sandbox
+
 2026-11-26 | Codex | codex/owned-recommendations | PR en validation | raccorder les recommandations au PostgreSQL QMAPS | CI PostgreSQL et publication API + frontend
 
 2026-11-26 | Codex | codex/qmaps-directory-tracking | correctif testé localement | vérifier la bascule publique et corriger les événements envoyés à la mauvaise base | CI et vérification du manifeste en production
