@@ -1,5 +1,9 @@
 import DirectoryBookmark from "./business/DirectoryBookmark";
 import BookmarkButton from "./business/BookmarkButton";
+import { useQueryClient } from "@tanstack/react-query";
+import { directoryAccountKey } from "@/hooks/useDirectoryAccount";
+import { directoryPreferenceKey } from "@/hooks/useRecommendedBusinesses";
+import { ownedApi } from "@/lib/ownedApi";
 import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
 import { getCategoryImage } from "@/lib/categoryImages";
@@ -11,6 +15,14 @@ interface BusinessCardProps {
 }
 
 const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) => {
+  const cache = useQueryClient();
+  function recordVisit() {
+    const accountId = cache.getQueryData<string | null>(directoryAccountKey);
+    if (!ownedDirectory || !accountId) return;
+    void ownedApi("me/directory-preferences/" + business.id, "PUT", { action: "view", accountId })
+      .then(() => cache.invalidateQueries({ queryKey: [...directoryPreferenceKey, accountId] }))
+      .catch(() => { /* A recommendation signal must not interrupt navigation. */ });
+  }
   const bookmarkClass = "absolute z-10 top-3 right-3 w-9 h-9 bg-card/95 rounded-full flex items-center justify-center shadow-soft";
   const hasPhoto = Boolean(business.image) && business.image !== "/placeholder.svg";
   const image = hasPhoto ? business.image : getCategoryImage(business.category, business.name);
@@ -38,7 +50,7 @@ const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) =
         )}
       </div>
       <div className="p-3.5">
-        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={`/business/${business.id}`}>{business.name}</Link></h3>
+        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={`/business/${business.id}`} onClick={recordVisit}>{business.name}</Link></h3>
         <div className="flex items-center gap-2 mt-1">
           <StarRating rating={business.rating} />
           <span className="text-xs text-muted-foreground">

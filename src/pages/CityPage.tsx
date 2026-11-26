@@ -7,9 +7,9 @@ import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
-import { cityLabelFor, cityLabelFromSlug } from "@/lib/localSearch";
+import { cityLabelFromSlug } from "@/lib/localSearch";
 import SearchBar from "@/components/SearchBar";
-import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -122,11 +122,11 @@ const CityPage = () => {
       </section>
 
       <div className="px-4 mt-6">
-        <RecommendedSection
+        <DirectoryRecommendations
           title={`Recommandé à ${cityLabel}`}
-          subtitle="Sélectionné pour vous selon votre activité"
-          source="city_recommended"
-          items={recommended.filter(r => cityLabelFor(r.business.city || "") === cityLabel).map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
+          subtitle="Commerces de l’annuaire QMAPS"
+
+          items={recommended.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
           loading={recLoading}
         />
       </div>

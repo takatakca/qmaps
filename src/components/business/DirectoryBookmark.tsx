@@ -3,24 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ownedApi, QmapsRequestError, type QmapsPlace, type QmapsUser } from "@/lib/ownedApi";
-
-const sessionKey = ["qmaps-bookmark-account"] as const;
-
-async function currentAccount() {
-  try { return (await ownedApi<QmapsUser>("me")).id; }
-  catch (error) {
-    if (error instanceof QmapsRequestError && error.status === 401) return null;
-    throw error;
-  }
-}
+import { ownedApi, type QmapsPlace } from "@/lib/ownedApi";
+import { currentDirectoryAccount, directoryAccountKey, useDirectoryAccount } from "@/hooks/useDirectoryAccount";
 
 export default function DirectoryBookmark({ id, className }: { id: string; className: string }) {
   const cache = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
   const lock = useRef(false);
-  const account = useQuery({ queryKey: sessionKey, queryFn: currentAccount, retry: false, staleTime: 15000 });
+  const account = useDirectoryAccount();
   const key = ["qmaps-public-bookmarks", account.data] as const;
   const saved = useQuery({
     queryKey: key,
@@ -32,9 +23,9 @@ export default function DirectoryBookmark({ id, className }: { id: string; class
   const selected = saved.data?.some(place => place.id === id) ?? false;
   const write = useMutation({
     mutationFn: async () => {
-      const current = await currentAccount();
+      const current = await currentDirectoryAccount();
       if (current !== account.data || !current) {
-        cache.setQueryData(sessionKey, current);
+        cache.setQueryData(directoryAccountKey, current);
         if (!current) navigate("/compte?fiche=" + id);
         return;
       }

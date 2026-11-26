@@ -91,6 +91,25 @@ assert.deepEqual((await request("/v1/directory?q=%25")).items, []);
 const catalogRow = await request("/v1/directory/" + place.id);
 assert.equal(catalogRow.name, place.name);
 assert.equal("owner_user_id" in catalogRow, false);
+const preferencePath = "/v1/me/directory-preferences";
+const preference = preferencePath + "/" + bistro.id;
+const signal = { action: "view", accountId: customer.user_id };
+await request(preference, "PUT", null, signal, 401);
+await request(preference, "PUT", owner.token, signal, 409);
+await request(preference, "PUT", customer.token, { ...signal, action: "unsupported" }, 400);
+await request(preferencePath + "/" + randomUUID(), "PUT", customer.token, signal, 404);
+await request(preference, "PUT", customer.token, signal, 204);
+const history = await request(preferencePath, "GET", customer.token);
+assert.equal(history[0].id, bistro.id);
+assert.equal(history[0].dismissed, false);
+assert.ok(history[0].category_ids.includes(restaurant.id));
+assert.deepEqual(await request(preferencePath, "GET", owner.token), []);
+await request(preferencePath + "?account=" + customer.user_id, "GET", owner.token, undefined, 409);
+await request(preference, "PUT", customer.token, { ...signal, action: "dismiss" }, 204);
+await request(preference, "PUT", customer.token, signal, 204);
+assert.deepEqual(await request(preferencePath, "GET", customer.token), [
+  { id: bistro.id, city: null, dismissed: true, category_ids: [] },
+]);
 const cats = await request("/v1/directory/categories?limit=1");
 assert.equal(cats.items.length, 1);
 assert.notEqual((await request("/v1/directory/categories?limit=1&after=" + cats.next)).items[0].id, cats.items[0].id);

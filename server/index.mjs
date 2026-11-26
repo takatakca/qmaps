@@ -1,4 +1,4 @@
-import { directoryCategories, directoryDetail, directorySearch } from "./directory.mjs";
+import { directoryCategories, directoryDetail, directorySearch, directoryPreferences, saveDirectoryPreference } from "./directory.mjs";
 import {
   blockPublisher,
   publishingTerms,
@@ -181,6 +181,20 @@ async function route(req, res) {
     return reply(res, 200, await scoped(id, db => directorySearch(db, url.searchParams)));
   if (method === "GET" && path === "/v1/directory/categories")
     return reply(res, 200, await scoped(id, db => directoryCategories(db, url.searchParams)));
+  if (path === "/v1/me/directory-preferences" && method === "GET") {
+    requireUser(id);
+    const expectedAccount = url.searchParams.get("account");
+    if (expectedAccount !== null && expectedAccount !== id) throw new ApiError(409, "Session modifiée");
+    return reply(res, 200, await scoped(id, db => directoryPreferences(db, id)));
+  }
+  const preferencePlace = new RegExp("^/v1/me/directory-preferences/(" + uuid + ")$", "i").exec(path);
+  if (preferencePlace && method === "PUT") {
+    requireUser(id);
+    const { action, accountId } = await body(req);
+    if (accountId !== id) throw new ApiError(409, "Session modifiée");
+    await scoped(id, db => saveDirectoryPreference(db, id, preferencePlace[1], action));
+    return reply(res, 204);
+  }
   const directoryPlace = new RegExp("^/v1/directory/(" + uuid + ")$", "i").exec(path);
   if (method === "GET" && directoryPlace)
     return reply(res, 200, await scoped(id, db => directoryDetail(db, directoryPlace[1])));

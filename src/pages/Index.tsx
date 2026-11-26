@@ -7,7 +7,7 @@ import BusinessListingRow from "@/components/home/BusinessListingRow";
 import StartProjectCTA from "@/components/home/StartProjectCTA";
 import MerchantBanner from "@/components/home/MerchantBanner";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
-import RecommendedSection from "@/components/recommendations/RecommendedSection";
+import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
 import { useHomeListings } from "@/hooks/useHomeListings";
@@ -171,17 +171,17 @@ const Index = () => {
 
         {/* Personalized real-data feed */}
         <div className="space-y-8">
-          <RecommendedSection
+          <DirectoryRecommendations
             title="Recommandé pour vous"
-            subtitle="Basé sur ce que vous consultez et enregistrez"
-            source="home_for_you"
+            subtitle="Découvrez des commerces de l’annuaire QMAPS"
+
             loading={recLoading}
             items={recommended.map((r) => ({ business: r.business, reasonCodes: r.reasonCodes }))}
           />
-          <RecommendedSection
+          <DirectoryRecommendations
             title="Tendance près de vous"
             subtitle="Les commerces dont on parle en ce moment"
-            source="home_trending"
+
             loading={recLoading}
             showReasonChips={false}
             items={trending.slice(0, 4).map((b) => ({ business: b }))}
