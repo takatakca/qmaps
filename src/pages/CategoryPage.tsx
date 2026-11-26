@@ -1,26 +1,29 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { topPlaces, type DirectoryPlace } from "@/lib/ownedDirectory";
+import { useAllCategories } from "@/hooks/useAllCategories";
 import BottomNav from "@/components/BottomNav";
 import BusinessCard from "@/components/BusinessCard";
 import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
-import { cityFilter, cityLabelFromSlug } from "@/lib/localSearch";
+import { cityLabelFromSlug } from "@/lib/localSearch";
 import SearchBar from "@/components/SearchBar";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
 import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
-import type { Tables } from "@/integrations/supabase/types";
 
 const CategoryPage = () => {
   const { categorySlug = "", citySlug } = useParams();
   const cityLabel = citySlug ? cityLabelFromSlug(citySlug) : null;
 
-  const [category, setCategory] = useState<Tables<"categories"> | null>(null);
-  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
+  const catalogue = useAllCategories();
+  const category = catalogue.categories.find(item => item.slug === categorySlug);
+  const [businesses, setBusinesses] = useState<DirectoryPlace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [listError, setListError] = useState(false);
+  const unavailable = catalogue.error || listError;
   const { recommended, loading: recLoading } = useRecommendedBusinesses({
     city: cityLabel,
     limit: 4,
@@ -41,40 +44,22 @@ const CategoryPage = () => {
   }, [businesses[0]?.id, category?.id, cityLabel]);
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      setLoading(true);
-      const { data: cat } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("slug", categorySlug)
-        .maybeSingle();
-      if (cancelled) return;
-      setCategory(cat);
-
-      if (!cat) {
-        setBusinesses([]);
-        setLoading(false);
-        return;
-      }
-
-      let query = supabase
-        .from("businesses")
-        .select("*, business_categories!inner(category_id)")
-        .eq("business_categories.category_id", cat.id)
-        .eq("is_active", true)
-        .order("avg_rating", { ascending: false })
-        .limit(30);
-      if (cityLabel) query = query.or(cityFilter(cityLabel));
-      const { data: biz } = await query;
-      if (cancelled) return;
-      setBusinesses(biz || []);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [categorySlug, cityLabel]);
+    const controller = new AbortController();
+    setBusinesses([]);
+    setListError(false);
+    if (!category) {
+      setLoading(catalogue.loading);
+      return;
+    }
+    setLoading(true);
+    const filters = new URLSearchParams({ category: category.slug });
+    if (cityLabel) filters.set("city", cityLabel);
+    topPlaces(filters, 30, controller.signal)
+      .then(rows => { if (!controller.signal.aborted) setBusinesses(rows); })
+      .catch(() => { if (!controller.signal.aborted) setListError(true); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [category, catalogue.loading, cityLabel]);
 
   const heading = category?.name || categorySlug;
   const title = cityLabel
@@ -92,7 +77,7 @@ const CategoryPage = () => {
         description={category ? description : `Cette catégorie n'existe pas sur QMaps.`}
         canonicalPath={canonical}
         image={businesses[0]?.image_url || undefined}
-        noindex={!loading && (!category || businesses.length === 0)}
+        noindex={!loading && !unavailable && (!category || businesses.length === 0)}
         jsonLdId="category"
         jsonLd={category ? {
           "@context": "https://schema.org",
@@ -138,6 +123,8 @@ const CategoryPage = () => {
             <Skeleton className="h-56 w-full" />
             <Skeleton className="h-56 w-full" />
           </div>
+        ) : unavailable ? (
+          <p role="alert">Impossible de charger cette catégorie pour le moment.</p>
         ) : !category ? (
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <p className="text-sm font-medium">Catégorie introuvable</p>
@@ -158,7 +145,7 @@ const CategoryPage = () => {
           </div>
         ) : (
           businesses.map((b) => (
-            <BusinessCard
+            <BusinessCard ownedDirectory
               key={b.id}
               business={mapBusinessToCard({ ...b, category_name: category.name })}
             />

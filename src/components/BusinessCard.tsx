@@ -1,3 +1,4 @@
+import DirectoryBookmark from "./business/DirectoryBookmark";
 import BookmarkButton from "./business/BookmarkButton";
 import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
@@ -6,9 +7,11 @@ import type { Business } from "@/types";
 
 interface BusinessCardProps {
   business: Business;
+  ownedDirectory?: boolean;
 }
 
-const BusinessCard = ({ business }: BusinessCardProps) => {
+const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) => {
+  const bookmarkClass = "absolute z-10 top-3 right-3 w-9 h-9 bg-card/95 rounded-full flex items-center justify-center shadow-soft";
   const hasPhoto = Boolean(business.image) && business.image !== "/placeholder.svg";
   const image = hasPhoto ? business.image : getCategoryImage(business.category, business.name);
 
@@ -25,8 +28,8 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <BookmarkButton businessId={business.id} city={business.neighborhood} source="business_card"
-          className="absolute z-10 top-3 right-3 w-9 h-9 bg-card/95 rounded-full flex items-center justify-center shadow-soft" />
+        {ownedDirectory ? <DirectoryBookmark id={business.id} className={bookmarkClass} /> :
+          <BookmarkButton businessId={business.id} city={business.neighborhood} source="business_card" className={bookmarkClass} />}
         {business.isOpen && (
           <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-success text-success-foreground text-[11px] font-semibold rounded-full shadow-soft">
             <span className="w-1.5 h-1.5 rounded-full bg-success-foreground/90" />

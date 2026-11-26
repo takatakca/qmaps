@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { directoryPages } from "@/lib/ownedDirectory";
 
 export interface CategoryLite {
   id: string;
@@ -14,13 +15,12 @@ export interface CategoryWithParent extends CategoryLite {
   parent_name: string | null;
 }
 
-let cache: CategoryLite[] | null = null;
-let inflight: Promise<CategoryLite[]> | null = null;
+type CategorySource = "directory" | "transition";
+const cache = new Map<CategorySource, CategoryLite[]>();
+const inflight = new Map<CategorySource, Promise<CategoryLite[]>>();
 
-const fetchAll = async (): Promise<CategoryLite[]> => {
-  if (cache) return cache;
-  if (inflight) return inflight;
-  inflight = (async () => {
+async function readCategories(source: CategorySource): Promise<CategoryLite[]> {
+  if (source === "transition") {
     const rows: CategoryLite[] = [];
     const pageSize = 500;
     for (let offset = 0; ; offset += pageSize) {
@@ -33,28 +33,40 @@ const fetchAll = async (): Promise<CategoryLite[]> => {
       rows.push(...(data ?? []));
       if (!data || data.length < pageSize) break;
     }
-    cache = rows;
-    return cache;
-  })();
-  try {
-    return await inflight;
-  } finally {
-    inflight = null;
+    return rows;
   }
-};
+  const rows = await directoryPages<CategoryLite & { sort_order: number | null }>("/categories", new URLSearchParams());
+  return rows.sort((a, b) =>
+    (a.sort_order ?? Infinity) - (b.sort_order ?? Infinity) ||
+    a.name.localeCompare(b.name, "fr-CA") || a.id.localeCompare(b.id)
+  );
+}
 
-/** Shared, cached loader for ALL active categories (1,000+). */
-export const useAllCategories = () => {
-  const [categories, setCategories] = useState<CategoryLite[]>(cache ?? []);
-  const [loading, setLoading] = useState(!cache);
+function fetchAll(source: CategorySource): Promise<CategoryLite[]> {
+  const available = cache.get(source);
+  if (available) return Promise.resolve(available);
+  const running = inflight.get(source);
+  if (running) return running;
+  const request = readCategories(source)
+    .then(rows => { cache.set(source, rows); return rows; })
+    .finally(() => inflight.delete(source));
+  inflight.set(source, request);
+  return request;
+}
+
+/** Merchant writes still require the category IDs from the database receiving the listing. */
+export const useAllCategories = (source: CategorySource = "directory") => {
+  const [categories, setCategories] = useState<CategoryLite[]>(cache.get(source) ?? []);
+  const [loading, setLoading] = useState(!cache.has(source));
 
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let cancelled = false;
     setError(false);
-    setLoading(!cache);
-    fetchAll()
+    setLoading(!cache.has(source));
+    setCategories(cache.get(source) ?? []);
+    fetchAll(source)
       .then((rows) => {
         if (!cancelled) {
           setCategories(rows);
@@ -67,7 +79,7 @@ export const useAllCategories = () => {
     return () => {
       cancelled = true;
     };
-  }, [attempt]);
+  }, [attempt, source]);
 
   return { categories, loading, error, retry: () => setAttempt(value => value + 1) };
 };

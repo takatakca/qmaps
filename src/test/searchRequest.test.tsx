@@ -4,19 +4,15 @@ import { MemoryRouter, useNavigate, type NavigateFunction } from "react-router-d
 import { describe, expect, it, vi } from "vitest";
 import Search from "@/pages/Search";
 
-const requests = vi.hoisted(() => [] as { url: URL; reply: (rows: object[]) => void }[]);
+const requests: { url: URL; signal?: AbortSignal | null; reply: (rows: object[]) => void }[] = [];
 vi.mock("@/integrations/supabase/client", async () => {
   const { createClient } = await import("@supabase/supabase-js");
   return { supabase: createClient("https://example.invalid", "test-key", {
     auth: { persistSession: false },
-    global: { fetch: async input => new Promise<Response>(resolve => requests.push({
-      url: new URL(String(input)),
-      reply: rows => resolve(new Response(JSON.stringify(rows), { headers: { "Content-Type": "application/json" } })),
-    })) },
   }) };
 });
 vi.mock("@/hooks/useAllCategories", () => {
-  const categories = [{ id: "cat-1", slug: "restaurants", name: "Restaurants", parent_id: null }];
+  const categories = [{ id: "23455678-0000-4000-a000-000000000001", slug: "restaurants", name: "Restaurants", parent_id: null }];
   return { useAllCategories: () => ({ categories, loading: false }), searchCategories: () => categories };
 });
 vi.mock("@/components/BusinessCard", () => ({ default: ({ business }: { business: { name: string } }) => <p>{business.name}</p> }));
@@ -27,6 +23,14 @@ vi.mock("@/components/search/SearchFiltersSheet", () => ({ default: () => null }
 describe("directory search requests", () => {
   it("keeps the city on category matches and ignores late results after navigation", async () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) =>
+      new Promise<Response>(resolve => requests.push({
+        url: new URL(String(input), "https://qmaps.ca"),
+        signal: init?.signal,
+        reply: items => resolve(new Response(JSON.stringify({ items, next: null }), {
+          headers: { "Content-Type": "application/json" },
+        })),
+      })));
     const host = document.createElement("div");
     document.body.append(host);
     const root = createRoot(host);
@@ -37,15 +41,15 @@ describe("directory search requests", () => {
         <Page />
       </MemoryRouter>));
       const first = requests[0];
-      expect(first.url.searchParams.get("is_active")).toBe("eq.true");
-      expect(first.url.searchParams.getAll("or")).toEqual([
-        '(city.ilike."Montréal",city.ilike."Montreal")',
-        '(name.ilike."%restaurants%",city.ilike."%restaurants%",description.ilike."%restaurants%",matched.not.is.null)',
-      ]);
+      expect(first.url.pathname).toBe("/api/v1/browser/directory");
+      expect(first.url.searchParams.get("city")).toBe("Montréal");
+      expect(first.url.searchParams.get("q")).toBe("restaurants");
+      expect(first.url.searchParams.getAll("match")).toEqual(["23455678-0000-4000-a000-000000000001"]);
       await act(async () => navigate("/search?category=restaurants&city=Laval"));
       const next = requests[1];
-      expect(next.url.searchParams.get("matched")).toBe("not.is.null");
-      expect(next.url.searchParams.get("or")).toContain('city.ilike."Laval"');
+      expect(first.signal?.aborted).toBe(true);
+      expect(next.url.searchParams.get("category")).toBe("restaurants");
+      expect(next.url.searchParams.get("city")).toBe("Laval");
       await act(async () => next.reply([{ id: "new", name: "Laval result", city: "Laval" }]));
       await act(async () => first.reply([{ id: "old", name: "Stale result", city: "Montréal" }]));
       expect(host).toHaveTextContent("Laval result");

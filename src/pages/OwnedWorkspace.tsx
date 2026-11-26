@@ -8,7 +8,7 @@ import OwnedGallery from "@/components/account/OwnedGallery";
 import OwnedReviews from "@/components/account/OwnedReviews";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Bookmark, Building2, Database, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -399,6 +399,7 @@ function LinkedMarketplace({ user, placeId }: { user: QmapsUser; placeId: string
 }
 
 export default function OwnedWorkspace() {
+  const cache = useQueryClient();
   const { pathname, search } = useLocation();
   const linked = new URLSearchParams(search).get("fiche");
   const placeId = linked && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(linked) ? linked : null;
@@ -411,9 +412,12 @@ export default function OwnedWorkspace() {
     setReady(false);
     setError("");
     try {
-      setUser(await ownedApi<QmapsUser>("me"));
+      const current = await ownedApi<QmapsUser>("me");
+      cache.setQueryData(["qmaps-bookmark-account"], current.id);
+      setUser(current);
     } catch (e) {
       setUser(null);
+      if (e instanceof QmapsRequestError && e.status === 401) cache.setQueryData(["qmaps-bookmark-account"], null);
       if (!(e instanceof QmapsRequestError && e.status === 401))
         setError(e instanceof Error ? e.message : "Service indisponible");
     } finally {
@@ -426,6 +430,8 @@ export default function OwnedWorkspace() {
   async function signOut() {
     try {
       await ownedApi("accounts/logout", "POST");
+      cache.setQueryData(["qmaps-bookmark-account"], null);
+      cache.removeQueries({ queryKey: ["qmaps-public-bookmarks"] });
       setUser(null);
       setError("");
     } catch (e) {

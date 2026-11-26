@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { topPlaces, type DirectoryPlace } from "@/lib/ownedDirectory";
 import BottomNav from "@/components/BottomNav";
 import BusinessCard from "@/components/BusinessCard";
 import Seo from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
-import { cityFilter, cityLabelFor, cityLabelFromSlug } from "@/lib/localSearch";
+import { cityLabelFor, cityLabelFromSlug } from "@/lib/localSearch";
 import SearchBar from "@/components/SearchBar";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
@@ -17,7 +17,7 @@ import type { Tables } from "@/integrations/supabase/types";
 const CityPage = () => {
   const { citySlug = "" } = useParams();
   const cityLabel = cityLabelFromSlug(citySlug);
-  const [businesses, setBusinesses] = useState<Tables<"businesses">[]>([]);
+  const [businesses, setBusinesses] = useState<DirectoryPlace[]>([]);
   const [categories, setCategories] = useState<Pick<Tables<"categories">, "id" | "name" | "slug">[]>([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -38,29 +38,27 @@ const CityPage = () => {
   }, [businesses[0]?.id, cityLabel]);
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      setLoading(true);
-      setError(false);
-      const { data: biz, error } = await supabase
-        .from("businesses")
-        .select("*, business_categories(categories(id, name, slug))")
-        .or(cityFilter(cityLabel))
-        .eq("is_active", true)
-        .in("status", ["open", "temporarily_closed", "seasonal"])
-        .order("avg_rating", { ascending: false, nullsFirst: false })
-        .order("id").limit(20);
-      if (cancelled) return;
-      setError(!!error);
-      setBusinesses(biz || []);
-      const localCategories = new Map((biz ?? []).flatMap(row =>
-        row.business_categories.flatMap(({ categories: cat }) => cat ? [[cat.id, cat] as const] : [])));
-      setCategories([...localCategories.values()].slice(0, 12));
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
+    const controller = new AbortController();
+    setLoading(true);
+    setError(false);
+    setBusinesses([]);
+    setCategories([]);
+    topPlaces(new URLSearchParams({ city: cityLabel }), 20, controller.signal)
+      .then(rows => {
+        if (controller.signal.aborted) return;
+        setBusinesses(rows);
+        const localCategories = new Map(rows.flatMap(row => row.business_categories.map(
+          ({ categories: category }) => [category.id, category] as const
+        )));
+        setCategories([...localCategories.values()].slice(0, 12));
+        setLoading(false);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
   }, [cityLabel]);
 
   const title = `Meilleures entreprises à ${cityLabel} | QMaps`;
@@ -130,7 +128,7 @@ const CityPage = () => {
           </div>
         ) : (
           businesses.map((b) => (
-            <BusinessCard
+            <BusinessCard ownedDirectory
               key={b.id}
               business={mapBusinessToCard({ ...b, category_name: categoryNameFromEmbed(b) })}
             />
