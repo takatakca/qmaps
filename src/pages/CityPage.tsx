@@ -11,7 +11,6 @@ import { cityLabelFor, cityLabelFromSlug } from "@/lib/localSearch";
 import SearchBar from "@/components/SearchBar";
 import RecommendedSection from "@/components/recommendations/RecommendedSection";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
-import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import type { Tables } from "@/integrations/supabase/types";
 
 const CityPage = () => {
@@ -22,20 +21,6 @@ const CityPage = () => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const { recommended, loading: recLoading } = useRecommendedBusinesses({ city: cityLabel, limit: 4 });
-
-  // Phase 9E — fire one deduped city_view event tied to the first listed business
-  // (helper-level dedupe ensures we only send once per city per session).
-  useEffect(() => {
-    const first = businesses[0];
-    if (!first || !cityLabel) return;
-    trackRecommendationEvent({
-      business_id: first.id,
-      event_type: "city_view",
-      source: "city_page",
-      city: cityLabel,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businesses[0]?.id, cityLabel]);
 
   useEffect(() => {
     const controller = new AbortController();

@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { distanceMeters, getCurrentPosition, type Coordinates } from "@/lib/geo";
 import { cityLabelFor } from "@/lib/localSearch";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
-import { trackRecommendationEvent } from "@/hooks/useRecommendationEvents";
 import Seo from "@/components/Seo";
 import {
   sortBusinesses,
@@ -253,24 +252,10 @@ const Search = () => {
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((b) => (
-              <div
-                key={b.id}
-                onClick={(event) => {
-                  if (!(event.target instanceof Element) || !event.target.closest("a")) return;
-                  trackRecommendationEvent({
-                    business_id: b.id,
-                    event_type: "search_click",
-                    source: "search_results",
-                    city: b.city ?? null,
-                    metadata: { query, category: selectedCategory || null, sort: sortBy },
-                  });
-                }}
-              >
-                <BusinessCard ownedDirectory business={mapBusinessToCard({
-                  ...b,
-                  category_name: categoryNameFromEmbed(b, selectedCategoryName || "Commerce"),
-                })} />
-              </div>
+              <BusinessCard key={b.id} ownedDirectory business={mapBusinessToCard({
+                ...b,
+                category_name: categoryNameFromEmbed(b, selectedCategoryName || "Commerce"),
+              })} />
             ))}
 
             {searchError && <div role="alert" className="col-span-full rounded-xl border p-4">
