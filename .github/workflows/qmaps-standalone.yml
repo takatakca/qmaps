@@ -25,6 +25,7 @@ jobs:
           compose run --rm --no-deps qmaps-migrate
           node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/closure.sql
+          compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/billing-receipts.sql
           archive=$(compose exec -T qmaps-db sh /opt/qmaps/server/db/backup.sh)
           compose exec -T qmaps-db sh /opt/qmaps/server/db/verify-backup.sh "$archive"
           compose exec -T qmaps-signing qmaps-upload-key init

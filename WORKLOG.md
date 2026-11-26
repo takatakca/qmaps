@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-stripe-receipts | correctif testé | réserver au serveur les reçus de paiement Stripe | valider la CI puis appliquer la migration à la préproduction de facturation
+
 2026-11-26 | Codex | codex/qmaps-billing-retry | correctif testé | corriger l’authentification Checkout et les accusés de réception du webhook | valider la CI puis déployer les trois fonctions en préproduction Stripe Sandbox
 
 2026-11-26 | Codex | codex/owned-recommendations | PR en validation | raccorder les recommandations au PostgreSQL QMAPS | CI PostgreSQL et publication API + frontend
