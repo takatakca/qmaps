@@ -15,7 +15,7 @@ export default function DirectoryBookmark({ id, className }: { id: string; class
   const key = ["qmaps-public-bookmarks", account.data] as const;
   const saved = useQuery({
     queryKey: key,
-    queryFn: () => ownedApi<QmapsPlace[]>("me/bookmarks"),
+    queryFn: () => ownedApi<QmapsPlace[]>("me/bookmarks?account=" + account.data),
     enabled: !!account.data,
     retry: false,
     staleTime: 15000,

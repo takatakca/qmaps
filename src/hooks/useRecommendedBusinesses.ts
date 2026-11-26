@@ -6,6 +6,7 @@ import { normalizeCity, rankRecommendations } from "@/lib/recommendations";
 
 type Preference = { id: string; city: string | null; dismissed: boolean; category_ids: string[] };
 
+export const directoryCandidateKey = ["qmaps-recommendation-candidates"] as const;
 export const directoryPreferenceKey = ["qmaps-directory-preferences"] as const;
 
 function mostFrequent(values: string[], limit: number) {
@@ -21,14 +22,14 @@ export function useRecommendedBusinesses({ city, category, limit = 8 }: {
 } = {}) {
   const account = useDirectoryAccount();
   const candidates = useQuery({
-    queryKey: ["qmaps-recommendation-candidates", city || "", category || ""],
+    queryKey: [...directoryCandidateKey, account.data, city || "", category || ""],
     queryFn: ({ signal }) => {
-      const filters = new URLSearchParams();
+      const filters = new URLSearchParams({ account: account.data ?? "" });
       if (city) filters.set("city", city);
       if (category) filters.set("category", category);
       return topPlaces(filters, 80, signal);
     },
-    staleTime: 60000,
+    enabled: account.isSuccess,
     retry: false,
   });
   const preferences = useQuery({
@@ -39,7 +40,7 @@ export function useRecommendedBusinesses({ city, category, limit = 8 }: {
   });
   const bookmarks = useQuery({
     queryKey: ["qmaps-public-bookmarks", account.data],
-    queryFn: () => ownedApi<QmapsPlace[]>("me/bookmarks"),
+    queryFn: () => ownedApi<QmapsPlace[]>("me/bookmarks?account=" + account.data),
     enabled: !!account.data,
     retry: false,
     staleTime: 15000,
@@ -68,6 +69,6 @@ export function useRecommendedBusinesses({ city, category, limit = 8 }: {
       businesses.filter(item => item.category_ids.some(id => topCategoryIds.includes(id))), context, limit),
     trending: businesses.filter(item => item.reviews_count >= 5)
       .sort((a, b) => b.reviews_count - a.reviews_count).slice(0, limit),
-    loading: candidates.isPending || account.isPending || (!!account.data && preferences.isPending),
+    loading: account.isPending || (account.isSuccess && candidates.isPending) || (!!account.data && preferences.isPending),
   };
 }

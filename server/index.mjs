@@ -77,6 +77,10 @@ function requireUser(id) {
   if (!id) throw new ApiError(401, "Connexion requise");
   return id;
 }
+function checkExpectedAccount(params, id) {
+  if (params.has("account") && params.get("account") !== (id ?? ""))
+    throw new ApiError(409, "Session modifiée");
+}
 function first(result) {
   if (!result.rowCount) throw new ApiError(404, "Introuvable");
   return result.rows[0];
@@ -177,14 +181,15 @@ async function route(req, res) {
     return reply(res, 204);
   }
   const id = await userFor(pool, authorization);
-  if (method === "GET" && path === "/v1/directory")
+  if (method === "GET" && path === "/v1/directory") {
+    checkExpectedAccount(url.searchParams, id);
     return reply(res, 200, await scoped(id, db => directorySearch(db, url.searchParams)));
+  }
   if (method === "GET" && path === "/v1/directory/categories")
     return reply(res, 200, await scoped(id, db => directoryCategories(db, url.searchParams)));
   if (path === "/v1/me/directory-preferences" && method === "GET") {
     requireUser(id);
-    const expectedAccount = url.searchParams.get("account");
-    if (expectedAccount !== null && expectedAccount !== id) throw new ApiError(409, "Session modifiée");
+    checkExpectedAccount(url.searchParams, id);
     return reply(res, 200, await scoped(id, db => directoryPreferences(db, id)));
   }
   const preferencePlace = new RegExp("^/v1/me/directory-preferences/(" + uuid + ")$", "i").exec(path);
@@ -452,6 +457,7 @@ async function route(req, res) {
   }
   if (path === "/v1/me/bookmarks" && method === "GET") {
     requireUser(id);
+    checkExpectedAccount(url.searchParams, id);
     return reply(
       res,
       200,

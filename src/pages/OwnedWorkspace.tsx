@@ -1,4 +1,4 @@
-import { directoryPreferenceKey } from "@/hooks/useRecommendedBusinesses";
+import { directoryCandidateKey, directoryPreferenceKey } from "@/hooks/useRecommendedBusinesses";
 import {
   PublisherModeration,
   PublicationTerms,
@@ -434,6 +434,7 @@ export default function OwnedWorkspace() {
       cache.setQueryData(["qmaps-bookmark-account"], null);
       cache.removeQueries({ queryKey: ["qmaps-public-bookmarks"] });
       cache.removeQueries({ queryKey: directoryPreferenceKey });
+      cache.removeQueries({ queryKey: directoryCandidateKey });
       setUser(null);
       setError("");
     } catch (e) {

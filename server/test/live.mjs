@@ -166,7 +166,11 @@ assert.equal(
   true,
 );
 await request(safety, "GET", customer.token, undefined, 404);
-assert.equal((await request("/v1/directory?city=Laval", "GET", customer.token)).items.some(row => row.id === place.id), false);
+const accountDirectory = "/v1/directory?city=Laval&account=" + customer.user_id;
+assert.equal((await request(accountDirectory, "GET", customer.token)).items.some(row => row.id === place.id), false);
+await request(accountDirectory, "GET", owner.token, undefined, 409);
+await request("/v1/directory?account=", "GET", customer.token, undefined, 409);
+await request("/v1/me/bookmarks?account=" + customer.user_id, "GET", owner.token, undefined, 409);
 await request("/v1/directory/" + place.id, "GET", customer.token, undefined, 404);
 assert.equal((await request("/v1/directory/" + place.id, "GET", owner.token)).id, place.id);
 await request(safety + "/posts", "GET", customer.token, undefined, 404);
