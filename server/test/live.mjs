@@ -421,6 +421,24 @@ console.log(
 const origin = "https://qmaps.ca";
 const browserHandle = "web-" + handle;
 const browserPath = api + "/v1/browser";
+const anonymousLogout = (originHeader) =>
+  fetch(browserPath + "/accounts/logout", {
+    method: "POST",
+    headers: originHeader ? { Origin: originHeader } : {},
+  });
+for (const host of [origin, "https://www.qmaps.ca", "https://qmaps.takatak.ca"]) {
+  const accepted = await anonymousLogout(host);
+  assert.equal(accepted.status, 204, host);
+  const expired = accepted.headers.get("set-cookie") ?? "";
+  assert.match(expired, /^__Host-qmaps_session=;/);
+  assert.match(expired, /; Max-Age=0$/);
+  assert.doesNotMatch(expired, /;\s*Domain=/i);
+}
+for (const host of [undefined, "https://takatak.ca", "https://qmaps.takatak.ca.example.invalid"]) {
+  const refused = await anonymousLogout(host);
+  assert.equal(refused.status, 403, host);
+  assert.equal(refused.headers.get("set-cookie"), null);
+}
 const attempt = (originHeader) =>
   fetch(browserPath + "/accounts/register", {
     method: "POST",

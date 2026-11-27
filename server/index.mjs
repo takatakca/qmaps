@@ -130,7 +130,8 @@ async function route(req, res) {
     browser &&
     !["GET", "HEAD"].includes(method) &&
     req.headers.origin !== "https://qmaps.ca" &&
-    req.headers.origin !== "https://www.qmaps.ca"
+    req.headers.origin !== "https://www.qmaps.ca" &&
+    req.headers.origin !== "https://qmaps.takatak.ca"
   )
     throw new ApiError(403, "Origine non autorisée");
   const cookie = (req.headers.cookie || "")
