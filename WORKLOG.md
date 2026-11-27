@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-coolify-launch-guide | documenté et testé | remplacer les consignes Lovable et Stripe Live par la procédure Coolify et la recette Sandbox | valider la CI, puis appliquer le guide lorsque l’accès Coolify est disponible
+
 2026-11-27 | Codex | codex/qmaps-verify-montreal-pilot | contrôle en lecture seule du lot exact et du reçu privé | prouver la visibilité ou l’absence de chaque fiche sur les deux domaines | tester le contrôle avant la publication autorisée
 
 2026-11-27 | Codex | codex/qmaps-flexs-source-receipt | reçu privé par famille et refus de l’import incomplet | attacher le lot montréalais au dernier chargement ouvert confirmé sans empêcher les retraits | vérifier la recette réelle avant mise à disposition de l’opérateur

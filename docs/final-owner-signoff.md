@@ -1,26 +1,23 @@
-> **Note du 2026-11-26 — Taktak** : Domaine hérité de l'ancienne version Lovable — la production est qmaps.ca depuis le rebuild ; adresses officielles en @qmaps.ca.
-
 # QMAPS — Final Owner Sign-Off
 
-_Last reviewed: 2026-04-25_
+_Last reviewed: 2026-11-27_
 
-This is the **final human gate** before publishing QMAPS to production.
-The automated Go / No-Go must be green (see
-[`docs/final-launch-handoff.md`](./final-launch-handoff.md)) **and** every
-section below must be checked and signed by the owner.
+Use this form for the final launch decision, not as an additional approval
+for an already authorized deployment. Review the automated results and
+production evidence separately. See the [launch handoff](final-launch-handoff.md).
 
 ---
 
 ## 1. Owner approval checklist
 
 - [ ] Reviewed [`docs/final-launch-handoff.md`](./final-launch-handoff.md)
-- [ ] Reviewed [`docs/release-candidate-checklist.md`](./release-candidate-checklist.md)
+- [ ] Reviewed the [Coolify deployment procedure](DEPLOYMENT.md)
 - [ ] Reviewed [`docs/release-notes.md`](./release-notes.md)
 - [ ] Reviewed latest [`docs/go-no-go-report.generated.json`](./go-no-go-report.generated.json) (decision = `GO`)
 - [ ] Reviewed [`docs/release-status.generated.md`](./release-status.generated.md)
 - [ ] Reviewed [`docs/production-verification-log.md`](./production-verification-log.md) and the verification companions:
-  - [`docs/production-verification-sql.md`](./production-verification-sql.md)
-  - [`docs/production-verification-stripe.md`](./production-verification-stripe.md)
+  - [`docs/verification-authentifiee-qmaps.md`](./verification-authentifiee-qmaps.md)
+  - [`docs/preproduction-verification-stripe-sandbox.md`](./preproduction-verification-stripe-sandbox.md)
   - [`docs/production-verification-mobile.md`](./production-verification-mobile.md)
   - [`docs/production-verification-email-tests.md`](./production-verification-email-tests.md)
 
@@ -34,37 +31,32 @@ section below must be checked and signed by the owner.
 - [ ] All five legal routes load unauthenticated
 - [ ] `/release-notes` and `/sitemap.xml` resolve
 
-## 3. Stripe live confirmation
+## 3. Stripe Sandbox verification
 
-- [ ] Stripe dashboard is in **Live** mode
-- [ ] `STRIPE_SECRET_KEY` (live) set in Lovable Cloud
-- [ ] `STRIPE_WEBHOOK_SECRET` (live) set in Lovable Cloud
-- [ ] Webhook endpoint registered → `https://<project>.functions.supabase.co/stripe-webhook`
-- [ ] One end-to-end live checkout + customer portal session verified
-- [ ] Price IDs in `src/lib/billing.ts` match live Stripe prices
+- [ ] Isolated QMAPS staging and its authorized Stripe Sandbox match.
+- [ ] Checkout, customer portal and signed webhook pass in Sandbox, including persistence and duplicate delivery.
+- [ ] No real payment was made during verification. Any future Live activation or payment needs separate authorization.
 
 ## 4. Domain / DNS / SSL confirmation
 
-- [ ] Custom domain `qmaps.app` connected in Lovable
-- [ ] DNS records propagated (A / CNAME as documented)
-- [ ] SSL certificate status = **Active**
-- [ ] `https://qmaps.app` redirects from `http://` automatically
-- [ ] Canonical URLs in `<Seo>` reflect the live domain
+- [ ] `qmaps.ca` and `www.qmaps.ca` serve the expected web revision over HTTPS.
+- [ ] API image revision confirmed independently on the API host and the web routes.
+- [ ] Canonical URLs in `<Seo>` reflect the live domain.
 
 ## 5. Support mailbox confirmation
 
 Daily monitoring confirmed for:
 
-- [ ] `support@qmaps.app`
-- [ ] `privacy@qmaps.app`
-- [ ] `abuse@qmaps.app`
-- [ ] `business@qmaps.app`
+- [ ] `support@qmaps.ca`
+- [ ] `privacy@qmaps.ca`
+- [ ] `abuse@qmaps.ca`
+- [ ] `business@qmaps.ca`
 
 ## 6. Rollback readiness
 
-- [ ] Previous published version recorded for one-click rollback
+- [ ] Previous successful web and API deployments recorded separately.
 - [ ] On-call contact agreed for first 72h post-launch
-- [ ] Database migration freeze window agreed (no schema changes during launch)
+- [ ] The responsible operator has checked the rollback plan against the schema in place.
 
 ---
 

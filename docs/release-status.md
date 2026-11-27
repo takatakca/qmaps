@@ -1,8 +1,6 @@
-> **Note du 2026-11-26 — Taktak** : Domaine hérité de l'ancienne version Lovable — la production est qmaps.ca depuis le rebuild ; adresses officielles en @qmaps.ca.
-
 # QMAPS — Release Status (stakeholder-facing)
 
-_Last reviewed: 2026-04-25_
+_Last reviewed: 2026-11-27_
 
 This document is the **single page to share with non-technical
 stakeholders** (founders, ops, partners) when reporting where the
@@ -14,10 +12,11 @@ to refresh it).
 
 ## 1. Current release-candidate status
 
-QMAPS is in **release-candidate** mode. All Phase 7–13 deliverables are
-merged. Remaining work before public launch is operational
-(Stripe live keys, DNS, support mailbox monitoring, real-device QA
-sign-off).
+The QMAPS site is live. The site, PostgreSQL API, directory publication,
+authenticated roles, billing and native applications each require their own
+evidence. Follow [issue #17](https://github.com/takatakca/qmaps/issues/17)
+for the latest verified status. A passing local or GitHub report does
+not confirm that any component has been deployed.
 
 ## 2. Latest verification results
 
@@ -42,10 +41,10 @@ For the launch owner handoff pack and final sign-off form, see:
 
 ## 3. Manual launch blockers
 
-- [ ] Stripe in **Live** mode + `STRIPE_WEBHOOK_SECRET` set
-- [ ] Custom domain `qmaps.app` connected, SSL **Active**
-- [ ] Support mailboxes monitored daily:
-      `support@`, `privacy@`, `abuse@`, `business@qmaps.app`
+- [ ] Confirm the deployed web and API SHA separately and verify pagination on the [existing Coolify deployment](DEPLOYMENT.md).
+- [ ] Exercise the [authorized customer, merchant and admin accounts](verification-authentifiee-qmaps.md).
+- [ ] Confirm Checkout and webhook behavior in [Stripe Sandbox in staging](preproduction-verification-stripe-sandbox.md). No real payment.
+- [ ] Confirm receipt and monitoring of the support, privacy, abuse and business mailboxes at `qmaps.ca`.
 - [ ] `docs/mobile-qa-checklist.md` walked on real iOS + Android
 - [ ] Owner sign-off in `docs/app-store-readiness.md`
 
@@ -76,8 +75,8 @@ For the launch owner handoff pack and final sign-off form, see:
 - First 72 hours monitoring — [`docs/admin/first-72-hours-monitoring.md`](./admin/first-72-hours-monitoring.md)
 - Production verification log — [`docs/production-verification-log.md`](./production-verification-log.md)
 - Production verification companions:
-  - [`docs/production-verification-sql.md`](./production-verification-sql.md) (read-only SQL)
-  - [`docs/production-verification-stripe.md`](./production-verification-stripe.md)
+  - [`docs/verification-authentifiee-qmaps.md`](./verification-authentifiee-qmaps.md) (PostgreSQL API)
+  - [`docs/preproduction-verification-stripe-sandbox.md`](./preproduction-verification-stripe-sandbox.md)
   - [`docs/production-verification-mobile.md`](./production-verification-mobile.md)
   - [`docs/production-verification-email-tests.md`](./production-verification-email-tests.md)
 - Post-launch issue tracker — [`docs/post-launch-issue-tracker.md`](./post-launch-issue-tracker.md)
@@ -86,12 +85,6 @@ For the launch owner handoff pack and final sign-off form, see:
 
 ## 6. Rollback plan
 
-If a regression is detected after publish:
-
-1. Restore the previous published version from the Lovable project
-   history (one-click rollback).
-2. Database state is **not** reverted automatically. Review any
-   in-flight migrations with `supabase--linter` before re-publishing.
-3. No service worker is registered, so clients pick up the rollback on
-   their next reload.
-4. Notify the on-call contact and post status in the support mailbox.
+Restore only the affected web or API resource according to the [Coolify
+rollback procedure](DEPLOYMENT.md#retour-arrière). A deployment rollback
+does not revert PostgreSQL or withdraw a published directory batch.
