@@ -63,8 +63,10 @@ describe("homepage listing rows use the owned directory", () => {
     expect(fetchDirectory).toHaveBeenCalledExactlyOnceWith("/api/v1/browser/directory?limit=60&order=rating",
       expect.objectContaining({ credentials: "same-origin" }));
     expect(legacy).not.toHaveBeenCalled();
-    expect(cards("popular").map(card => card.getAttribute("href"))).toEqual(["/business/older-listing", "/business/owned-qa-listing"]);
-    expect(cards("recent")[0]?.getAttribute("href")).toBe("/business/owned-qa-listing");
+    expect(cards("popular").map(card => card.getAttribute("href"))).toEqual([
+      "/business/older-listing?annuaire=qmaps", "/business/owned-qa-listing?annuaire=qmaps",
+    ]);
+    expect(cards("recent")[0]?.getAttribute("href")).toBe("/business/owned-qa-listing?annuaire=qmaps");
     expect(cards("services")[1]?.textContent).toContain("Services locaux");
     expect(cards("services")[1]?.textContent).toContain("Vérifié");
   });

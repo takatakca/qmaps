@@ -25,10 +25,10 @@ function municipalReference(attributes: unknown): string | null {
     : null;
 }
 
-export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy }: {
+export default function PublicOwnedListing({ id, legacyUnavailable = false, retryLegacy }: {
   id: string;
-  legacyUnavailable: boolean;
-  retryLegacy: () => Promise<void>;
+  legacyUnavailable?: boolean;
+  retryLegacy?: () => Promise<void>;
 }) {
   const [result, setResult] = useState<Result | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -50,7 +50,7 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
       <h1 className="text-xl font-bold">{unavailable ? "Impossible de charger la fiche" : "Commerce introuvable"}</h1>
       {unavailable && <Button onClick={() => {
         setAttempt(value => value + 1);
-        if (legacyUnavailable) void retryLegacy();
+        if (legacyUnavailable) void retryLegacy?.();
       }}>Réessayer</Button>}
       <Link className="block underline" to="/search">Retour à la recherche</Link>
       <BottomNav />

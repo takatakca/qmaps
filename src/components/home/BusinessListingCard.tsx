@@ -4,6 +4,7 @@ import { getListingImage } from "@/lib/listingVisuals";
 import { getCategoryImage } from "@/lib/categoryImages";
 import { exampleListingTitle } from "@/lib/exampleListing";
 import { parseWeeklyHours } from "@/lib/businessHours";
+import { ownedListingUrl } from "@/lib/ownedRoutes";
 import type { HomeListing } from "@/hooks/useHomeListings";
 
 interface Props {
@@ -26,7 +27,7 @@ const BusinessListingCard = ({ business, variant = "row" }: Props) => {
 
   return (
     <Link
-      to={`/business/${business.id}`}
+      to={ownedListingUrl(business.id)}
       className={`group relative block shrink-0 overflow-hidden rounded-3xl border border-border/70 bg-card shadow-premium transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-premium-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
         variant === "row" ? "w-[268px] sm:w-[292px]" : "w-full"
       }`}
