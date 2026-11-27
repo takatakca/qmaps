@@ -38,9 +38,14 @@ SQL
 }
 
 fingerprint() {
+  category_row='to_jsonb(t)'
+  if [ "${1-}" = cleanup ]; then
+    # Only fixture setup restores is_active. PostgreSQL also refreshes its timestamp.
+    category_row="case when slug = 'restaurants' then to_jsonb(t) - 'updated_at' else to_jsonb(t) end"
+  fi
   query "select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by id), '')) from public.businesses t;
     select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by business_id, category_id), '')) from public.business_categories t;
-    select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by id), '')) from public.categories t;
+    select md5(coalesce(string_agg(($category_row)::text, E'\n' order by id), '')) from public.categories t;
     select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by flexs_id), '')) from qmaps_ops.flexs_directory_stage t;"
 }
 
@@ -58,7 +63,7 @@ fi
 [ "$(query "select count(*) from qmaps_ops.flexs_directory_stage where left(flexs_id::text, 9) = 'ca000059-'")" = 0 ]
 refused 'No Montréal food snapshot is staged'
 
-baseline=$(fingerprint)
+baseline=$(fingerprint cleanup)
 cleanup() {
   query "delete from qmaps_ops.flexs_directory_stage where left(flexs_id::text, 9) = 'ca000059-';
     delete from public.businesses where left(id::text, 9) = 'ca000059-';
@@ -142,5 +147,5 @@ verify_report "$fixtures/empty.json" "
 
 cleanup
 trap - EXIT HUP INT TERM
-[ "$(fingerprint)" = "$baseline" ]
+[ "$(fingerprint cleanup)" = "$baseline" ] || { echo 'Preview fixture cleanup changed the database baseline.' >&2; exit 1; }
 echo 'FLEXS preview verified: latest snapshot, collisions, bounded read-only sample and fail-closed guards'
