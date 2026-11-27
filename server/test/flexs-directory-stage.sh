@@ -29,6 +29,7 @@ open='78a51b78-9fd5-55fa-bb19-e66ec342463f,mtl_food,alpha,Café Stage,,Montréal
 osm='d1223df3-da15-5a0d-901d-b9c76f411a58,osm,bravo,Cafe Stage,,Montreal,,QC,Restaurant,restaurants,claimed'
 printf '%s\n%s\n' "$header" "$open" >"$fixtures/open.csv"
 printf '%s\n%s\n' "$header" "$osm" >"$fixtures/osm.csv"
+sh "$(dirname -- "$0")/flexs-restaurant-preview.sh"
 baseline=$(query 'select count(*) from public.businesses')
 
 stage open "$fixtures/open.csv" || { cat "$fixtures/stage.log" >&2; exit 1; }
