@@ -111,12 +111,19 @@ Detailed steps: [`production-verification-stripe.md`](./production-verification-
 
 Test templates: [`production-verification-email-tests.md`](./production-verification-email-tests.md).
 
+Keep receipt and reply unverified until the mail owner confirms the destination
+and an authorized external test is observed in the intended inbox. The published
+links and the MX record do not count as receipt evidence. Only log references
+that are safe to share. Mark the Premium alias **N/A** with an explanation if it
+is not published.
+
 | Mailbox | Test email received | Replied | Date | Verifier | Evidence link / screenshot | Notes |
 |---------|---------------------|---------|------|----------|----------------------------|-------|
-| `support@qmaps.app` |  |  |  |  |  |  |
-| `privacy@qmaps.app` |  |  |  |  |  |  |
-| `abuse@qmaps.app` |  |  |  |  |  |  |
-| `business@qmaps.app` |  |  |  |  |  |  |
+| `support@qmaps.ca` |  |  |  |  |  |  |
+| `privacy@qmaps.ca` |  |  |  |  |  |  |
+| `abuse@qmaps.ca` |  |  |  |  |  |  |
+| `business@qmaps.ca` |  |  |  |  |  |  |
+| `hello@qmaps.ca` |  |  |  |  |  | Premium contact if published |
 
 ## 9. Mobile / PWA install
 

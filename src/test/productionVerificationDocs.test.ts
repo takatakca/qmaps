@@ -40,4 +40,15 @@ describe('Phase 14E — production verification docs', () => {
     expect(content).toMatch(/Owner action required/);
     expect(content).toMatch(/How to complete this log/);
   });
+
+  it('uses the same published qmaps.ca verification targets in the mailbox guide and log', () => {
+    const guide = read('docs/production-verification-email-tests.md');
+    const log = read('docs/production-verification-log.md');
+    const mailSection = log.split('## 8. Support mailboxes')[1]?.split(/^## /m)[0] ?? '';
+    const recipients = (text: string) => [...text.matchAll(/^\| `([^`]+)` \|/gm)].map((match) => match[1]);
+    const expected = ['support', 'privacy', 'abuse', 'business', 'hello'].map((name) => `${name}@qmaps.ca`);
+    expect(recipients(guide)).toEqual(expected);
+    expect(recipients(mailSection)).toEqual(expected);
+    expect(`${guide}\n${mailSection}`).not.toMatch(/@qmaps\.app/i);
+  });
 });
