@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Store, TrendingUp } from "lucide-react";
 import merchantImg from "@/assets/cat-pro.jpg";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 
 const MerchantBanner = () => (
   <section className="relative isolate overflow-hidden rounded-3xl border border-border/60 shadow-premium">
@@ -23,16 +24,16 @@ const MerchantBanner = () => (
           Faites découvrir votre entreprise à tout le Québec
         </h2>
         <p className="mt-2 text-[14px] leading-relaxed text-white/70">
-          Créez votre fiche QMaps, recevez des demandes de projets et gérez vos avis — gratuitement.
+          Créez gratuitement votre fiche dans l’annuaire QMAPS et gérez ses photos et ses avis.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] text-white/60">
           <span className="inline-flex items-center gap-1.5"><TrendingUp size={12} /> Visibilité locale</span>
-          <span>Fiche vérifiée</span>
-          <span>Demandes qualifiées</span>
+          <span>Fiche publique</span>
+          <span>Photos et avis</span>
         </div>
       </div>
       <Link
-        to="/merchant/onboarding"
+        to={ownedMerchantUrl}
         className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-bold text-[hsl(216_100%_25%)] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] transition-transform hover:-translate-y-0.5"
       >
         Enregistrer mon entreprise <ArrowUpRight size={15} />

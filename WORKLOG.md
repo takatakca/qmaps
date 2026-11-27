@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-owned-merchant-entry | parcours vérifié sur base jetable | ouvrir le formulaire marchand du PostgreSQL utilisé par la recherche | valider la CI et vérifier les boutons publiés sur les domaines QMAPS
+
 2026-11-27 | Codex | codex/qmaps-public-detail-expired-session | correctif vérifié localement | maintenir la fiche publique, la galerie et les avis après expiration de session | valider la CI et le parcours sur les domaines de production
 
 2026-11-27 | Codex | codex/qmaps-on2go-directory | correctif web et import testés sur base jetable | retirer Démo des trois titres d’exemple et préparer les 32 fiches ON2GO de Montréal | valider la CI et le site publié, puis appliquer l’import dans le PostgreSQL QMAPS autorisé

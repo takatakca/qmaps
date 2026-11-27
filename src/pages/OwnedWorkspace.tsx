@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import OwnedLogin from "@/components/account/OwnedLogin";
 import { exampleListingTitle } from "@/lib/exampleListing";
+import { wantsOwnedMerchantTab } from "@/lib/ownedRoutes";
 import {
   ownedApi,
   QmapsRequestError,
@@ -94,10 +95,14 @@ function Console({ userId }: { userId: string }) {
   );
 }
 
-function Marketplace({ user, initialPlace = null }: { user: QmapsUser; initialPlace?: QmapsPlace | null }) {
-  const [tab, setTab] = useState<"catalogue" | "saved" | "merchant">(
-    "catalogue",
-  );
+type MarketplaceTab = "catalogue" | "saved" | "merchant";
+
+function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
+  user: QmapsUser;
+  initialPlace?: QmapsPlace | null;
+  initialTab?: MarketplaceTab;
+}) {
+  const [tab, setTab] = useState<MarketplaceTab>(initialTab);
   const [term, setTerm] = useState(""),
     [city, setCity] = useState(""),
     [search, setSearch] = useState({ q: "", city: "" }),
@@ -169,6 +174,7 @@ function Marketplace({ user, initialPlace = null }: { user: QmapsUser; initialPl
           <Button
             key={value}
             variant={tab === value ? "default" : "outline"}
+            aria-pressed={tab === value}
             onClick={() => go(value)}
           >
             {text}
@@ -408,8 +414,11 @@ function LinkedMarketplace({ user, placeId }: { user: QmapsUser; placeId: string
 export default function OwnedWorkspace() {
   const cache = useQueryClient();
   const { pathname, search } = useLocation();
-  const linked = new URLSearchParams(search).get("fiche");
+  const params = new URLSearchParams(search);
+  const linked = params.get("fiche");
   const placeId = linked && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(linked) ? linked : null;
+  const merchantEntry = pathname === "/compte" && !placeId && wantsOwnedMerchantTab(params);
+  const initialTab = merchantEntry ? "merchant" : "catalogue";
   const consolePage = pathname === "/console";
   const closurePage = pathname === "/compte/fermeture";
   const [user, setUser] = useState<QmapsUser | null>(null),
@@ -513,7 +522,10 @@ export default function OwnedWorkspace() {
             </button>
           </div>
         ) : !user ? (
-          <OwnedLogin onReady={() => void refresh()} />
+          <>
+            {merchantEntry && <p>Connectez-vous ou créez un compte QMAPS pour ajouter votre entreprise à l’annuaire.</p>}
+            <OwnedLogin onReady={() => void refresh()} />
+          </>
         ) : closurePage ? (
           <OwnedClosure key={user.id} userId={user.id} />
         ) : consolePage ? (
@@ -525,7 +537,9 @@ export default function OwnedWorkspace() {
         ) : (
           <>
             <PublicationTerms key={user.id} userId={user.id} />
-            {placeId ? <LinkedMarketplace key={user.id + placeId} user={user} placeId={placeId} /> : <Marketplace key={user.id} user={user} />}
+            {placeId
+              ? <LinkedMarketplace key={user.id + placeId} user={user} placeId={placeId} />
+              : <Marketplace key={user.id + "-" + initialTab} user={user} initialTab={initialTab} />}
           </>
         )}
       </div>
