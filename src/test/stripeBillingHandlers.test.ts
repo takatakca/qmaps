@@ -205,19 +205,17 @@ const checkoutSession = {
   subscription: "sub_mock", client_reference_id: businessId, metadata: { user_id: userId, plan: "pro" },
 };
 
-function webhookFixture(failure?: "lookup" | "subscription" | "audit" | "retrieve", existing = false) {
+function webhookFixture(failure?: "lookup" | "transaction" | "retrieve", existing = false) {
   const error = { code: "XX000", message: "Mock storage failure" };
   const lookup = vi.fn().mockResolvedValue({
     data: existing ? { id: "existing-billing-event" } : null,
     error: failure === "lookup" ? error : null,
   });
-  const upsert = vi.fn().mockResolvedValue({ error: failure === "subscription" ? error : null });
-  const insert = vi.fn().mockResolvedValue({ error: failure === "audit" ? error : null });
+  const rpc = vi.fn().mockResolvedValue({ data: failure === "transaction" ? null : true, error: failure === "transaction" ? error : null });
   const auditSelect = { eq: () => ({ eq: () => ({ limit: () => ({ maybeSingle: lookup }) }) }) };
   const supabase = {
-    from: (table: string) => table === "merchant_subscriptions"
-      ? { upsert }
-      : { select: () => auditSelect, insert },
+    from: () => ({ select: () => auditSelect }),
+    rpc,
   };
   const retrieve = vi.fn().mockResolvedValue(subscription());
   if (failure === "retrieve") retrieve.mockRejectedValue(new Error("Mock provider read failure"));
@@ -233,93 +231,117 @@ function webhookFixture(failure?: "lookup" | "subscription" | "audit" | "retriev
     constructEventAsync.mockResolvedValueOnce({ id, type, data: { object } });
     return handler(request());
   };
-  return { deliver, retrieve, upsert, insert };
+  return { deliver, retrieve, rpc };
 }
 
 describe("Stripe webhook acknowledgement", () => {
-  it.each(["lookup", "subscription", "audit"] as const)(
+  it.each(["lookup", "transaction"] as const)(
     "returns a retryable response after a %s failure",
     async (failure) => {
-      const { deliver, upsert, insert } = webhookFixture(failure);
+      const { deliver, retrieve, rpc } = webhookFixture(failure);
       const response = await deliver();
 
       expect(response.status).toBe(500);
-      if (failure === "lookup") expect(upsert).not.toHaveBeenCalled();
-      if (failure !== "audit") expect(insert).not.toHaveBeenCalled();
+      if (failure === "lookup") {
+        expect(retrieve).not.toHaveBeenCalled();
+        expect(rpc).not.toHaveBeenCalled();
+      } else {
+        expect(rpc).toHaveBeenCalledOnce();
+      }
     },
   );
 
-  it("acknowledges after persisting both subscription and audit event", async () => {
-    const { deliver, upsert, insert } = webhookFixture();
+  it("persists subscription and receipt through one transaction", async () => {
+    const { deliver, rpc } = webhookFixture();
     const response = await deliver();
 
     expect(response.status).toBe(200);
-    expect(upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ business_id: businessId, provider_subscription_id: "sub_mock" }),
-      { onConflict: "business_id" },
-    );
-    expect(insert).toHaveBeenCalledWith(expect.objectContaining({
-      business_id: businessId,
-      provider_event_id: "evt_mock",
+    expect(rpc).toHaveBeenCalledExactlyOnceWith("qmaps_apply_stripe_billing_event", expect.objectContaining({
+      p_business_id: businessId,
+      p_user_id: userId,
+      p_event_id: "evt_mock",
+      p_subscription: expect.objectContaining({ provider_subscription_id: "sub_mock", status: "active" }),
     }));
   });
 
   it("acknowledges an already recorded event without writing it again", async () => {
-    const { deliver, retrieve, upsert, insert } = webhookFixture(undefined, true);
+    const { deliver, retrieve, rpc } = webhookFixture(undefined, true);
     const response = await deliver();
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: true, duplicate: true });
     expect(retrieve).not.toHaveBeenCalled();
-    expect(upsert).not.toHaveBeenCalled();
-    expect(insert).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("acknowledges a duplicate reported by the database after the initial lookup", async () => {
+    const { deliver, rpc } = webhookFixture();
+    rpc.mockResolvedValueOnce({ data: false, error: null });
+    const response = await deliver();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ received: true, duplicate: true });
+    expect(rpc).toHaveBeenCalledOnce();
   });
 
   it("keeps a canceled subscription canceled when an older active delivery arrives", async () => {
-    const { deliver, retrieve, upsert, insert } = webhookFixture();
+    const { deliver, retrieve, rpc } = webhookFixture();
     retrieve.mockResolvedValueOnce(subscription("canceled"));
 
     expect((await deliver("customer.subscription.deleted", subscription("canceled"), "evt_cancel")).status).toBe(200);
     expect((await deliver("customer.subscription.updated", subscription("active"), "evt_older")).status).toBe(200);
 
-    expect(upsert.mock.calls.map(([row]) => row.status)).toEqual(["canceled", "canceled"]);
+    expect(rpc.mock.calls.map(([, { p_subscription }]) => p_subscription.status)).toEqual(["canceled", "canceled"]);
     expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_mock");
-    expect(insert.mock.calls.map(([row]) => row.provider_event_id)).toEqual(["evt_cancel", "evt_older"]);
+    expect(rpc.mock.calls.map(([, { p_event_id }]) => p_event_id)).toEqual(["evt_cancel", "evt_older"]);
   });
 
   it.each([
     ["customer.subscription.updated", subscription()],
     ["checkout.session.completed", checkoutSession],
   ] as const)("retries %s when Stripe cannot confirm the subscription state", async (type, object) => {
-    const { deliver, upsert, insert } = webhookFixture("retrieve");
+    const { deliver, rpc } = webhookFixture("retrieve");
 
     expect((await deliver(type, object)).status).toBe(500);
-    expect(upsert).not.toHaveBeenCalled();
-    expect(insert).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("does not accept a current subscription attached to another business", async () => {
-    const { deliver, retrieve, upsert, insert } = webhookFixture();
+    const { deliver, retrieve, rpc } = webhookFixture();
     retrieve.mockResolvedValueOnce({
       ...subscription(), metadata: { ...subscription().metadata, business_id: "different-business" },
     });
 
     expect((await deliver()).status).toBe(500);
-    expect(upsert).not.toHaveBeenCalled();
-    expect(insert).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
   });
 
-  it("records Checkout only after loading and writing its Stripe subscription", async () => {
-    const { deliver, retrieve, upsert, insert } = webhookFixture();
+  it("loads its Stripe subscription before the Checkout event transaction", async () => {
+    const { deliver, retrieve, rpc } = webhookFixture();
 
     const response = await deliver("checkout.session.completed", checkoutSession);
 
     expect(response.status).toBe(200);
     expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_mock");
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ status: "active", business_id: businessId }),
-      { onConflict: "business_id" });
-    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ event_type: "checkout.session.completed" }));
-    expect(retrieve.mock.invocationCallOrder[0]).toBeLessThan(upsert.mock.invocationCallOrder[0]);
-    expect(upsert.mock.invocationCallOrder[0]).toBeLessThan(insert.mock.invocationCallOrder[0]);
+    expect(rpc).toHaveBeenCalledExactlyOnceWith("qmaps_apply_stripe_billing_event", expect.objectContaining({
+      p_business_id: businessId,
+      p_event_type: "checkout.session.completed",
+      p_subscription: expect.objectContaining({ status: "active" }),
+    }));
+    expect(retrieve.mock.invocationCallOrder[0]).toBeLessThan(rpc.mock.invocationCallOrder[0]);
+  });
+
+  it("stores an invoice receipt without changing the subscription", async () => {
+    const { deliver, retrieve, rpc } = webhookFixture();
+    const response = await deliver("invoice.payment_succeeded", {
+      subscription_details: { metadata: subscription().metadata }, amount_due: 4900, amount_paid: 4900, currency: "cad",
+    });
+    expect(response.status).toBe(200);
+    expect(retrieve).not.toHaveBeenCalled();
+    expect(rpc).toHaveBeenCalledExactlyOnceWith("qmaps_apply_stripe_billing_event", expect.objectContaining({
+      p_event_type: "invoice.payment_succeeded",
+      p_subscription: null,
+      p_metadata: expect.objectContaining({ amount_paid: 4900, currency: "cad" }),
+    }));
   });
 });

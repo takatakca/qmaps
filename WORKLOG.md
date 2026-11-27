@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-stripe-atomic-receipts | concurrence et reprise vérifiées sur PostgreSQL jetable | rendre atomiques le reçu Stripe et la mise à jour d’abonnement | valider la CI et appliquer la migration uniquement à la préproduction autorisée
+
 2026-11-26 | Codex | codex/qmaps-billing-canceled-display | interface testée | distinguer une annulation effective d’une période encore en cours | valider la CI et confirmer l’annulation dans la recette Stripe Sandbox
 
 2026-11-26 | Codex | codex/qmaps-stripe-existing-subscription | régression et correctif vérifiés | éviter un nouveau Checkout pour un abonnement Stripe en cours | valider la CI puis tester le Checkout et le portail dans Stripe Sandbox
