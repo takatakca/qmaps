@@ -11,6 +11,10 @@ Build / version: ______________________
 
 ## Public routes
 
+Run `node scripts/verify-live-routing.mjs` from the repository. The command verifies the
+JSON health, directory and anonymous account routes independently on `qmaps.ca`
+and `www.qmaps.ca`. A redirect or a successful HTML fallback fails the check.
+
 | # | Route | Expected | Result |
 |---|-------|----------|--------|
 | 1 | `/` | Home renders, no console errors | NOT CHECKED |

@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-live-routing-check | contrôle testé | vérifier les réponses JSON en production sur les deux domaines | valider la CI puis lancer la recette après réparation du routage
+
 2026-11-26 | Codex | codex/qmaps-stripe-receipts | correctif testé | réserver au serveur les reçus de paiement Stripe | valider la CI puis appliquer la migration à la préproduction de facturation
 
 2026-11-26 | Codex | codex/qmaps-billing-retry | correctif testé | corriger l’authentification Checkout et les accusés de réception du webhook | valider la CI puis déployer les trois fonctions en préproduction Stripe Sandbox
