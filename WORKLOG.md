@@ -1,3 +1,7 @@
+2026-11-26 | Codex | codex/qmaps-authenticated-qa | procédure prête | documenter la recette Stripe Sandbox QMAPS | confirmer la préproduction et valider Checkout et webhook avec les accès de test
+
+2026-11-26 | Codex | codex/qmaps-authenticated-qa | validé sur base jetable | préparer une recette authentifiée sur les trois domaines | tester sur PostgreSQL jetable puis utiliser les comptes de recette autorisés
+
 2026-11-26 | Taktak | main · PR #39 · ticket 17 | Déployé et vérifié | Origine https://qmaps.takatak.ca autorisée pour les écritures du navigateur : PR #39 fusionnée (7b7dca344f51, CI 4/4 verte), API redéployée dans Coolify (gpzh7f08) ; déconnexion 204 avec la nouvelle origine (avant 403), 204 inchangés pour qmaps.ca/www, origine inconnue toujours 403, connexion refusée aux identifiants (401) et non à l’origine ; script de vérification porté à 12 contrôles, 12/12 OK en direct ; manifeste 7b7dca3 sur les trois domaines. Détail : ticket 17, commentaire 7208666137. | Recette authentifiée de production (comptes de test à créer) et Stripe Sandbox (503 provider_not_configured) inchangés.
 
 2026-11-26 | Codex | taktak/qmaps-takatak-ca-origin → PR #39 | tests complétés | vérifier les trois domaines et la garde d’origine pour les écritures de session | confirmer la CI, le déploiement API et les réponses en production

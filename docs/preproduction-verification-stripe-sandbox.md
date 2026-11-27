@@ -1,0 +1,49 @@
+# QMAPS — Recette Stripe en préproduction
+
+Cette recette valide un abonnement marchand de test, son suivi par webhook et sa gestion dans le portail Stripe. Utiliser exclusivement un [Stripe Sandbox](https://docs.stripe.com/sandboxes) dédié à QMAPS et un environnement de préproduction isolé.
+
+## Confirmer les accès et le périmètre
+
+- Identifier dans le Dashboard Stripe le compte QMAPS et le Sandbox autorisé. Confirmer que les tarifs et la destination du webhook appartiennent à ce même Sandbox.
+- Confirmer l’origine HTTPS de préproduction, le projet Supabase qui alimente son interface de facturation, et le commit QMAPS déployé. Utiliser un marchand de recette rattaché à une seule fiche de test et sans abonnement préexistant dans ce projet.
+- À défaut de confirmation de l’un de ces éléments, consigner « Bloqué » avec l’accès manquant. Arrêter avant de déployer une fonction, de créer une session Checkout ou de déclencher un webhook. Garder le Dashboard en mode Sandbox pendant toute la recette et utiliser uniquement des moyens de paiement publics de test. [Cartes de test Stripe](https://docs.stripe.com/testing#cards)
+
+## Configurer la préproduction
+
+Déployer dans le projet Supabase de préproduction les fonctions `create-merchant-checkout-session`, `create-merchant-billing-portal-session` et `stripe-webhook` depuis le même commit. Appliquer la migration [qui réserve les reçus Stripe au service](../supabase/migrations/20261126080026_protect_stripe_billing_receipts.sql) à cette base. Le frontend doit pointer sur ce projet via `VITE_SUPABASE_URL` et sa clé publique `VITE_SUPABASE_PUBLISHABLE_KEY`.
+
+| Variable serveur | Valeur attendue en préproduction |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Clé API du Sandbox QMAPS identifié. |
+| `STRIPE_WEBHOOK_SECRET` | Secret de signature de la destination Sandbox qui pointe vers cette fonction. |
+| `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`, `STRIPE_PREMIUM_PRICE_ID` | Identifiants des tarifs récurrents actifs de ce Sandbox, associés à leurs plans respectifs. |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Variables fournies à l’exécution par le projet Supabase de préproduction. Les deux fonctions de session utilisent la clé anonyme avec le jeton du marchand. Le webhook utilise la clé de service. |
+| `QMAPS_ALLOWED_RETURN_ORIGINS` | Origine HTTPS exacte de la préproduction, sans chemin. Si plusieurs origines autorisées sont nécessaires, les séparer par des virgules. |
+
+Déposer les valeurs sensibles dans les secrets serveur de préproduction. Dans les tickets, captures et journaux, noter uniquement si chaque variable est configurée. Écarter les clés, secrets de signature, jetons, cookies, en-têtes d’autorisation, URL de sessions Stripe et données de carte.
+
+Dans Stripe Sandbox, configurer une destination webhook vers `/functions/v1/stripe-webhook` sur l’hôte du projet de préproduction et activer le portail client du Sandbox. La configuration QMAPS définit `verify_jwt = false` pour ce webhook, qui vérifie la signature Stripe. Les fonctions Checkout et portail exigent une session Supabase valide et vérifient la propriété de la fiche. [Configuration des fonctions](../supabase/config.toml)
+
+Configurer la version d’API de la destination pour correspondre à celle utilisée par les fonctions (`2024-06-20`). Abonner la destination aux événements consommés par le code.
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+- `invoice.payment_succeeded`
+- `invoice.payment_failed`
+
+## Exécuter la recette
+
+1. **Annulation Checkout.** Se connecter comme marchand de recette et ouvrir `/merchant/billing/plans` en préproduction. Choisir un plan et vérifier que Stripe affiche le Sandbox attendu ainsi que le tarif et la périodicité configurés. Quitter Checkout avec son lien de retour. Vérifier le retour sur l’origine de préproduction, à `/merchant/billing/plans?checkout=cancel`, et confirmer que le plan gratuit est inchangé.
+2. **Abonnement.** Relancer Checkout depuis la même fiche et terminer le parcours avec une carte de test. Vérifier le retour sur cette même origine à `/merchant/billing?checkout=success`. Recharger la facturation après la livraison du webhook et vérifier le plan choisi. Un retour sur un domaine de production signale une configuration d’origine à corriger.
+3. **Persistance et preuve Stripe.** Dans Stripe Sandbox, ouvrir la livraison de `checkout.session.completed` issue de l’abonnement et vérifier son code 2xx. Dans la base de préproduction, vérifier le plan et le statut dans `merchant_subscriptions`, puis le reçu portant le même identifiant d’événement et la même fiche dans `merchant_billing_events`. Utiliser les extraits SQL existants en filtrant sur la fiche ou l’événement de recette. Un 2xx seul ne prouve pas que le reçu existe. Une livraison générique qui ne porte pas les métadonnées QMAPS ne remplace pas celle créée par Checkout. [Requêtes de vérification](production-verification-sql.md)
+4. **Rediffusion.** Une fois le reçu confirmé, renvoyer ce même événement depuis Stripe Sandbox. Confirmer la réponse 200 avec `duplicate: true`, un seul reçu pour cet identifiant et un abonnement inchangé. Cette vérification couvre une rediffusion après enregistrement. Une garantie lors de livraisons simultanées demanderait un contrôle transactionnel et un test dédiés. Le test automatisé couvre les erreurs de lecture et d’écriture qui doivent produire un 500 afin que Stripe retente la livraison. Utiliser ce test pour la validation des erreurs sans perturber la préproduction. [Tests du webhook](../src/test/stripeBillingHandlers.test.ts) · [Livraison des webhooks Stripe](https://docs.stripe.com/webhooks)
+5. **Portail et annulation.** Depuis `/merchant/billing`, ouvrir « Gérer l’abonnement » et vérifier que le portail Sandbox présente le même abonnement. L’annuler suivant la configuration du portail. Après livraison du webhook de souscription, vérifier `cancel_at_period_end` ou `status = canceled`, selon le mode d’annulation, dans Supabase et dans l’interface QMAPS.
+6. **Isolation.** Depuis une autre session marchande de test, vérifier que les données de facturation de la première fiche sont inaccessibles. Les tests SQL du dépôt vérifient que les rôles applicatifs ne peuvent pas créer de reçus Stripe et que les écritures manuelles autorisées restent possibles. [Tests des droits sur les reçus](../server/test/billing-receipts.sql)
+
+## Consigner les résultats et nettoyer
+
+Pour chaque contrôle, consigner « Réussi », « Échec » ou « Bloqué », l’heure, le commit, le nom du Sandbox, l’origine de préproduction et la preuve correspondante. Pour le webhook, noter le type d’événement, le code HTTP et le résultat des lectures SQL en limitant les données à la fiche de test. Les identifiants de corrélation complets restent dans le journal privé de recette.
+
+Après la recette, annuler les abonnements actifs créés par cet essai dans le Sandbox et confirmer les livraisons d’annulation avant de retirer les accès temporaires. Inventorier les fixtures créées pour cet essai dans le journal et les retirer selon la politique de rétention du projet de préproduction. Conserver les reçus et preuves nécessaires au suivi.
