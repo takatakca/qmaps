@@ -84,6 +84,8 @@ describe("business detail catalogue routing", () => {
       method: "GET", credentials: "same-origin",
     }));
     expect(host.querySelector("h1")).toHaveTextContent("Vrai établissement QMAPS");
+    expect(document.head.querySelector("link[rel='canonical']")?.getAttribute("href")).toBe("https://qmaps.ca" + ownedListingUrl(first));
+    expect(document.head.querySelector("meta[name='robots']")?.getAttribute("content")).toBe("index,follow");
     expect(legacy.from).not.toHaveBeenCalled();
     expect(legacy.reviews).not.toHaveBeenCalled();
     expect(legacy.profileView).not.toHaveBeenCalled();
@@ -94,6 +96,7 @@ describe("business detail catalogue routing", () => {
     vi.stubGlobal("fetch", request);
     await mount(ownedListingUrl(first));
     expect(host.querySelector("h1")).toHaveTextContent("Commerce introuvable");
+    expect(document.head.querySelector("meta[name='robots']")?.getAttribute("content")).toBe("noindex,follow");
     expect(request).toHaveBeenCalledTimes(1);
     expect(legacy.from).not.toHaveBeenCalled();
     expect(legacy.reviews).not.toHaveBeenCalled();
@@ -110,6 +113,7 @@ describe("business detail catalogue routing", () => {
     expect(retry).toBeDefined();
     await act(async () => retry!.click());
     expect(host.querySelector("h1")).toHaveTextContent("Fiche QMAPS de retour");
+    expect(document.head.querySelector("meta[name='robots']")?.getAttribute("content")).toBe("index,follow");
     expect(request.mock.calls.map(([url]) => url)).toEqual([endpoint(first), endpoint(first)]);
     expect(legacy.from).not.toHaveBeenCalled();
   });

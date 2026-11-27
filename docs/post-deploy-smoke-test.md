@@ -29,6 +29,12 @@ the direct API with the API reached through each public web domain. The static
 `/qmaps-release.json` records the web revision only. Check it separately when web
 and API deployments advance at different times.
 
+### Sitemap de l’annuaire public
+
+Le déploiement web copie `public/sitemap.xml` sans requête réseau pendant la construction. Pour actualiser les fiches après une publication ou un retrait, exécuter `npm run sitemap:generate -- --publish-static`, vérifier le diff du XML et le publier via le déploiement web normal. Sans `--publish-static`, la commande prépare seulement les fichiers dans `dist` pour inspection. Elle lit l’annuaire PostgreSQL anonyme déjà en ligne. Elle soumet les fiches publiques ON2GO et celles du lot municipal CC BY 4.0 avec une référence valable, en excluant les exemples et les sources non approuvées. Aucune donnée de la zone privée FLEXS, aucun contact et aucune date de modification supposée ne sont exportés. Une réponse ou un curseur invalide laisse le dernier sitemap intact.
+
+Vérifier le HTTP 200 XML de `/sitemap.xml` et ouvrir une fiche publiée. Son lien canonique doit être sur `qmaps.ca` et conserver `?annuaire=qmaps`, sans repli vers le catalogue historique. Une fiche définitivement retirée répond 404 sur l’API QMAPS et la page de détail demande `noindex` jusqu’à son retrait du sitemap au prochain déploiement. Le fichier soumet des URL aux moteurs de recherche. Il ne prouve pas que ceux-ci les ont indexées.
+
 | # | Route | Expected | Result |
 |---|-------|----------|--------|
 | 1 | `/` | Home renders, no console errors | NOT CHECKED |

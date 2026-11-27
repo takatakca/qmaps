@@ -7,7 +7,7 @@ import OwnedReviews from "@/components/account/OwnedReviews";
 import { Button } from "@/components/ui/button";
 import { loadPublicPlace, QmapsRequestError } from "@/lib/ownedApi";
 import { exampleListingTitle } from "@/lib/exampleListing";
-import { ownedListingReviewUrl } from "@/lib/ownedRoutes";
+import { ownedListingReviewUrl, ownedListingUrl } from "@/lib/ownedRoutes";
 
 type Result = Awaited<ReturnType<typeof loadPublicPlace>> | { missing: boolean };
 const municipalSource = "https://www.donneesquebec.ca/recherche/dataset/vmtl-etablissements-alimentaires";
@@ -47,6 +47,7 @@ export default function PublicOwnedListing({ id, legacyUnavailable = false, retr
   if ("missing" in result) {
     const unavailable = legacyUnavailable || !result.missing;
     return <main className="mx-auto max-w-lg space-y-3 p-5">
+      {!unavailable && <Seo title="Commerce introuvable | QMAPS" canonicalPath={ownedListingUrl(id)} noindex />}
       <h1 className="text-xl font-bold">{unavailable ? "Impossible de charger la fiche" : "Commerce introuvable"}</h1>
       {unavailable && <Button onClick={() => {
         setAttempt(value => value + 1);
@@ -61,7 +62,7 @@ export default function PublicOwnedListing({ id, legacyUnavailable = false, retr
   const name = exampleTitle ?? place.name;
   const reference = exampleTitle ? null : municipalReference(place.attributes);
   return <main className="mx-auto max-w-2xl space-y-6 px-5 py-6 pb-24">
-    <Seo title={name + " · " + place.city + " | QMAPS"} description={place.description || name + " à " + place.city} canonicalPath={"/business/" + id} />
+    <Seo title={name + " · " + place.city + " | QMAPS"} description={place.description || name + " à " + place.city} canonicalPath={ownedListingUrl(id)} noindex={Boolean(exampleTitle)} />
     <Link className="text-sm underline" to={"/search?" + new URLSearchParams({ city: place.city })}>Retour à la recherche</Link>
     <header className="space-y-2">
       <h1 className="font-heading text-3xl font-bold">{name}</h1>

@@ -101,7 +101,6 @@ const DeleteAccount = lazy(() => import("./pages/settings/DeleteAccount"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const Services = lazy(() => import("./pages/Services"));
-const Sitemap = lazy(() => import("./pages/Sitemap"));
 const Privacy = lazy(() => import("./pages/legal/Privacy"));
 const Terms = lazy(() => import("./pages/legal/Terms"));
 const AccountDeletionPolicy = lazy(() => import("./pages/legal/AccountDeletionPolicy"));
@@ -140,7 +139,6 @@ const App = () => (
               <Route path="/c/:categorySlug" element={<CategoryPage />} />
               <Route path="/city/:citySlug" element={<CityPage />} />
               <Route path="/city/:citySlug/:categorySlug" element={<CategoryPage />} />
-              <Route path="/sitemap.xml" element={<Sitemap />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/account-deletion-policy" element={<AccountDeletionPolicy />} />

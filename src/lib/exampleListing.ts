@@ -1,8 +1,6 @@
-const exampleTitles = new Map([
-  ["a9bf0001-0000-4000-8000-000000000001", "Bistro de nuit"],
-  ["a9bf0001-0000-4000-8000-000000000002", "Café du quartier"],
-  ["a9bf0001-0000-4000-8000-000000000003", "Atelier de services"],
-]);
+import { exampleListings } from "./ownedListingIdentity.mjs";
+
+const exampleTitles = new Map<string, string>(Object.entries(exampleListings));
 
 // The public app still reads some legacy rows. Match both the known ID and
 // the seeded title so a real listing, even one named « Démo », is not changed.
