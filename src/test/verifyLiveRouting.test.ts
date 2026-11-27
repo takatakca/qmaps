@@ -13,13 +13,15 @@ describe("QMAPS live routing smoke", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it("accepts healthy JSON routes and anonymous 401 responses on both domains", async () => {
+  it("accepts healthy JSON routes and anonymous 401 responses on all three domains", async () => {
     const request = vi.fn(async (url: string) => apiResponse(url));
     const results = await verifyLiveRouting(request);
 
-    expect(results).toHaveLength(8);
+    expect(results).toHaveLength(12);
     expect(results.every(result => result.error === null)).toBe(true);
+    expect(request.mock.calls.filter(([url]) => url.startsWith("https://qmaps.ca/"))).toHaveLength(4);
     expect(request.mock.calls.filter(([url]) => url.startsWith("https://www.qmaps.ca/"))).toHaveLength(4);
+    expect(request.mock.calls.filter(([url]) => url.startsWith("https://qmaps.takatak.ca/"))).toHaveLength(4);
   });
 
   it("reports a successful SPA fallback and a redirect without following either", async () => {
@@ -50,7 +52,7 @@ describe("QMAPS live routing smoke", () => {
     };
 
     const results = await verifyLiveRouting(request);
-    expect(results).toHaveLength(8);
+    expect(results).toHaveLength(12);
     expect(results.filter(result => result.error)).toHaveLength(2);
   });
 });
