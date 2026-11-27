@@ -15,6 +15,14 @@ Run `node scripts/verify-live-routing.mjs` from the repository. The command veri
 JSON health, directory and anonymous account routes independently on `qmaps.ca`
 and `www.qmaps.ca`. A redirect or a successful HTML fallback fails the check.
 
+After deploying the paginated directory API, run
+`node scripts/verify-live-routing.mjs --directory-pages`. This adds a read-only check of
+two Montréal result pages on the three web domains and the direct API. It checks
+both the browser route and the route used by Android and iOS. A legacy response,
+an absent continuation, duplicate listings or a cursor that does not advance does
+not prove the new API is ready. The default command still verifies the existing
+public service without requiring pagination.
+
 | # | Route | Expected | Result |
 |---|-------|----------|--------|
 | 1 | `/` | Home renders, no console errors | NOT CHECKED |
