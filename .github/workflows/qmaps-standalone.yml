@@ -16,6 +16,8 @@ jobs:
           export SERVICE_PASSWORD_GATEWAY="$(openssl rand -hex 32)"
           cat > "$RUNNER_TEMP/qmaps-ci-compose.yml" <<'YAML'
           services:
+            qmaps-db:
+              volumes: ["./server/test:/opt/qmaps/server/test:ro"]
             qmaps-api:
               ports: ["127.0.0.1:3102:3000"]
           YAML
@@ -23,6 +25,14 @@ jobs:
           trap 'compose down -v' EXIT
           compose up --build --wait --wait-timeout 180 || { compose logs --tail 25 qmaps-db qmaps-api; exit 1; }
           compose run --rm --no-deps qmaps-migrate
+          # Clone the initialized schema without requiring active API connections to close.
+          compose exec -T qmaps-db sh -ec '
+            archive=$(mktemp)
+            trap '\''rm -f "$archive"; dropdb -U postgres --if-exists qmaps_flexs_stage_test'\'' EXIT
+            createdb -U postgres qmaps_flexs_stage_test
+            pg_dump -U postgres --format=custom -f "$archive" qmaps
+            pg_restore -U postgres --exit-on-error -d qmaps_flexs_stage_test "$archive"
+            PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-directory-stage.sh'
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/directory-results.sql
           node --test server/test/directory-result-filters.mjs
           QMAPS_TEST_RESULTS_FIXTURE=1 node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
