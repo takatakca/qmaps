@@ -96,7 +96,18 @@ describe("merchant Stripe sessions", () => {
   });
 });
 
-function webhookFixture(failure?: "lookup" | "subscription" | "audit", existing = false) {
+const subscription = (status = "active") => ({
+  id: "sub_mock",
+  customer: "cus_mock",
+  status,
+  metadata: { business_id: businessId, user_id: userId, plan: "pro" },
+});
+
+const checkoutSession = {
+  subscription: "sub_mock", client_reference_id: businessId, metadata: { user_id: userId, plan: "pro" },
+};
+
+function webhookFixture(failure?: "lookup" | "subscription" | "audit" | "retrieve", existing = false) {
   const error = { code: "XX000", message: "Mock storage failure" };
   const lookup = vi.fn().mockResolvedValue({
     data: existing ? { id: "existing-billing-event" } : null,
@@ -110,29 +121,21 @@ function webhookFixture(failure?: "lookup" | "subscription" | "audit", existing 
       ? { upsert }
       : { select: () => auditSelect, insert },
   };
-  const stripe = {
-    webhooks: {
-      constructEventAsync: vi.fn().mockResolvedValue({
-        id: "evt_mock",
-        type: "customer.subscription.updated",
-        data: {
-          object: {
-            id: "sub_mock",
-            customer: "cus_mock",
-            status: "active",
-            metadata: { business_id: businessId, user_id: userId, plan: "pro" },
-          },
-        },
-      }),
-    },
-  };
+  const retrieve = vi.fn().mockResolvedValue(subscription());
+  if (failure === "retrieve") retrieve.mockRejectedValue(new Error("Mock provider read failure"));
+  const constructEventAsync = vi.fn();
+  const stripe = { webhooks: { constructEventAsync }, subscriptions: { retrieve } };
   const handler = loadHandler("stripe-webhook", supabase, stripe);
   const request = () => new Request("https://qmaps.ca/stripe-webhook", {
     method: "POST",
     headers: { "stripe-signature": "local-test-signature" },
     body: "{}",
   });
-  return { deliver: () => handler(request()), upsert, insert };
+  const deliver = (type = "customer.subscription.updated", object: object = subscription(), id = "evt_mock") => {
+    constructEventAsync.mockResolvedValueOnce({ id, type, data: { object } });
+    return handler(request());
+  };
+  return { deliver, retrieve, upsert, insert };
 }
 
 describe("Stripe webhook acknowledgement", () => {
@@ -164,12 +167,61 @@ describe("Stripe webhook acknowledgement", () => {
   });
 
   it("acknowledges an already recorded event without writing it again", async () => {
-    const { deliver, upsert, insert } = webhookFixture(undefined, true);
+    const { deliver, retrieve, upsert, insert } = webhookFixture(undefined, true);
     const response = await deliver();
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: true, duplicate: true });
+    expect(retrieve).not.toHaveBeenCalled();
     expect(upsert).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("keeps a canceled subscription canceled when an older active delivery arrives", async () => {
+    const { deliver, retrieve, upsert, insert } = webhookFixture();
+    retrieve.mockResolvedValueOnce(subscription("canceled"));
+
+    expect((await deliver("customer.subscription.deleted", subscription("canceled"), "evt_cancel")).status).toBe(200);
+    expect((await deliver("customer.subscription.updated", subscription("active"), "evt_older")).status).toBe(200);
+
+    expect(upsert.mock.calls.map(([row]) => row.status)).toEqual(["canceled", "canceled"]);
+    expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_mock");
+    expect(insert.mock.calls.map(([row]) => row.provider_event_id)).toEqual(["evt_cancel", "evt_older"]);
+  });
+
+  it.each([
+    ["customer.subscription.updated", subscription()],
+    ["checkout.session.completed", checkoutSession],
+  ] as const)("retries %s when Stripe cannot confirm the subscription state", async (type, object) => {
+    const { deliver, upsert, insert } = webhookFixture("retrieve");
+
+    expect((await deliver(type, object)).status).toBe(500);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("does not accept a current subscription attached to another business", async () => {
+    const { deliver, retrieve, upsert, insert } = webhookFixture();
+    retrieve.mockResolvedValueOnce({
+      ...subscription(), metadata: { ...subscription().metadata, business_id: "different-business" },
+    });
+
+    expect((await deliver()).status).toBe(500);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("records Checkout only after loading and writing its Stripe subscription", async () => {
+    const { deliver, retrieve, upsert, insert } = webhookFixture();
+
+    const response = await deliver("checkout.session.completed", checkoutSession);
+
+    expect(response.status).toBe(200);
+    expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_mock");
+    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ status: "active", business_id: businessId }),
+      { onConflict: "business_id" });
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ event_type: "checkout.session.completed" }));
+    expect(retrieve.mock.invocationCallOrder[0]).toBeLessThan(upsert.mock.invocationCallOrder[0]);
+    expect(upsert.mock.invocationCallOrder[0]).toBeLessThan(insert.mock.invocationCallOrder[0]);
   });
 });

@@ -83,6 +83,14 @@ Deno.serve(async (req) => {
     let userId: string | null = null;
     let plan: string | null = null;
 
+    const retrieveSubscription = async (id: string) => {
+      try {
+        return await stripe.subscriptions.retrieve(id);
+      } catch {
+        throw new Error("Unable to read the current Stripe subscription");
+      }
+    };
+
     const upsertSubscription = async (
       sub: Stripe.Subscription,
       bId: string,
@@ -127,7 +135,7 @@ Deno.serve(async (req) => {
             typeof session.subscription === "string"
               ? session.subscription
               : session.subscription.id;
-          const sub = await stripe.subscriptions.retrieve(subId);
+          const sub = await retrieveSubscription(subId);
           await upsertSubscription(sub, businessId, userId, plan);
         }
         break;
@@ -135,12 +143,23 @@ Deno.serve(async (req) => {
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        businessId = (sub.metadata?.business_id as string) || null;
-        userId = (sub.metadata?.user_id as string) || null;
-        plan = (sub.metadata?.plan as string) || null;
+        const snapshot = event.data.object as Stripe.Subscription;
+        businessId = snapshot.metadata?.business_id || null;
+        userId = snapshot.metadata?.user_id || null;
+        plan = snapshot.metadata?.plan || null;
         if (businessId && userId && plan) {
-          await upsertSubscription(sub, businessId, userId, plan);
+          // Stripe can deliver an earlier active snapshot after cancellation.
+          // Deletion is terminal; creation and updates must use current state.
+          const sub = event.type === "customer.subscription.deleted"
+            ? snapshot
+            : await retrieveSubscription(snapshot.id);
+          const currentPlan = sub.metadata?.plan;
+          if (sub.id !== snapshot.id || sub.metadata?.business_id !== businessId ||
+              sub.metadata?.user_id !== userId || !currentPlan) {
+            throw new Error("Stripe subscription no longer matches the event target");
+          }
+          plan = currentPlan;
+          await upsertSubscription(sub, businessId, userId, currentPlan);
         }
         break;
       }
