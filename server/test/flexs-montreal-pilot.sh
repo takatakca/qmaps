@@ -42,7 +42,17 @@ fingerprint() {
     select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by business_id, category_id), ''))
     from public.business_categories t ${2:-};
     select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by flexs_id), ''))
-    from qmaps_ops.flexs_directory_stage t;"
+    from qmaps_ops.flexs_directory_stage t;
+    select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by source_family), ''))
+    from qmaps_ops.flexs_directory_snapshots t;"
+}
+
+record_open_receipt() {
+  query "insert into qmaps_ops.flexs_directory_snapshots (source_family, staged_at, source_counts)
+    select 'open', '2099-02-01T12:00:00Z'::timestamptz, jsonb_object_agg(source, quantity)
+    from (select source, count(*) as quantity from qmaps_ops.flexs_directory_stage
+      where staged_at = '2099-02-01T12:00:00Z' and source <> 'osm' group by source) present
+    on conflict (source_family) do update set staged_at=excluded.staged_at, source_counts=excluded.source_counts;" >/dev/null
 }
 
 ledger_fingerprint() {
@@ -84,6 +94,7 @@ stale=${prefix}000000000007
 
 [ "$(query "select count(*) from public.businesses where id::text like '$prefix%'")" = 0 ]
 [ "$(query "select count(*) from qmaps_ops.flexs_directory_stage where flexs_id::text like '$prefix%'")" = 0 ]
+[ "$(query "select count(*) from qmaps_ops.flexs_directory_snapshots where source_family='open'")" = 0 ]
 
 # Seed a fresh snapshot directly in the disposable staging table. Keep a
 # genuinely older source row, an unrelated existing listing sharing a UUID,
@@ -102,6 +113,15 @@ from (values
   ('960006', '000000000006', 'QA café inactif', '2099-02-01T12:00:00Z'),
   ('960007', '000000000007', 'QA restaurant ancien', '2099-01-01T12:00:00Z')
 ) seed(reference, suffix, nom, staged_at);
+
+insert into qmaps_ops.flexs_directory_stage
+  (source, source_ref, flexs_id, licence, name, other_name, city, staged_at) values
+  ('mtl_shops', '960101', 'fa000060-0000-5000-8000-000000000101', 'CC-BY-4.0', 'QA ancien alias', 'qa restaurant alpha', 'Verdun', '2099-01-01T12:00:00Z'),
+  ('mtl_shops', '960102', 'fa000060-0000-5000-8000-000000000102', 'CC-BY-4.0', 'QA magasin pilote', null, 'Québec', '2099-02-01T12:00:00Z'),
+  ('rbq', '960103', 'fa000060-0000-5000-8000-000000000103', 'CC-BY-4.0', 'QA RBQ pilote', null, 'Québec', '2099-02-01T12:00:00Z'),
+  ('opc', '960104', 'fa000060-0000-5000-8000-000000000104', 'CC-BY-4.0', 'QA OPC pilote', null, 'Québec', '2099-02-01T12:00:00Z'),
+  ('sit', '960105', 'fa000060-0000-5000-8000-000000000105', 'CC-BY-4.0', 'QA SIT pilote', null, 'Québec', '2099-02-01T12:00:00Z'),
+  ('shb', '960106', 'fa000060-0000-5000-8000-000000000106', 'CC0-1.0', 'QA SHB pilote', null, 'Sherbrooke', '2099-02-01T12:00:00Z');
 
 insert into public.businesses (id, name, address, city, is_active, status) values
   ('fa000060-0000-5000-8000-000000000005', 'QA fiche sans lien', 'Adresse existante', 'Québec', true, 'open'),
@@ -134,9 +154,20 @@ entry "$conflict_uuid" 960005 'QA restaurant ID' '105 rue Recette' >>"$fixtures/
 cp "$fixtures/renew.csv" "$fixtures/inactive-conflict.csv"
 entry "$conflict_inactive" 960006 'QA café inactif' '106 rue Recette' >>"$fixtures/inactive-conflict.csv"
 
+# The same raw rows are not eligible until the complete open receipt exists.
+refused 'No complete open FLEXS snapshot is staged' publish "$pilot" "$fixtures/pilot.csv"
+record_open_receipt
+query "update qmaps_ops.flexs_directory_snapshots set source_counts =
+  jsonb_set(source_counts, '{sit}', to_jsonb((source_counts->>'sit')::integer + 1))
+  where source_family='open'" >/dev/null
+refused 'Staged rows do not match the complete open FLEXS snapshot receipt' publish "$pilot" "$fixtures/pilot.csv"
+record_open_receipt
+
 for invalid in bad-name unknown-reference stale; do
   refused 'not in the latest staged Montréal restaurant cohort' publish "$pilot" "$fixtures/$invalid.csv"
 done
+[ "$(query "select count(*) from qmaps_ops.flexs_directory_stage where flexs_id='$stale'
+  and staged_at='2099-01-01T12:00:00Z'")" = 1 ]
 refused 'Invalid Montréal pilot row' publish "$pilot" "$fixtures/bad-licence.csv"
 for invalid in id-conflict inactive-conflict; do
   refused 'collides with an existing QMAPS' publish "$pilot" "$fixtures/$invalid.csv"
@@ -170,6 +201,11 @@ report publish "$pilot" "$fixtures/pilot.csv" already_published 0 0 0 3
 refused 'does not match this batch receipt' publish "$pilot" "$fixtures/renew.csv"
 refused 'does not match this batch receipt' withdraw "$pilot" "$fixtures/renew.csv"
 
+# A source receipt is needed only for a new publication. A stored batch
+# must still be withdrawable (including protected rows) without any receipt.
+query "delete from qmaps_ops.flexs_directory_snapshots where source_family='open'" >/dev/null
+report publish "$pilot" "$fixtures/pilot.csv" already_published 0 0 0 3
+
 # Ratings do not block withdrawal of an otherwise unchanged listing. A real
 # title edit or a claim must protect the affected listing and all its links.
 query "update public.businesses set reviews_count = 4, avg_rating = 4.75 where id = '$alpha';
@@ -190,6 +226,7 @@ report withdraw "$pilot" "$fixtures/pilot.csv" already_withdrawn 0 0 2 3
 report publish "$pilot" "$fixtures/pilot.csv" already_withdrawn 0 0 2 3
 [ "$(fingerprint '')" = "$terminal" ]
 [ "$(ledger_fingerprint)" = "$terminal_ledger" ]
+record_open_receipt
 refused 'already belongs to a Montréal pilot receipt' publish "$renew" "$fixtures/pilot.csv"
 
 report publish "$renew" "$fixtures/renew.csv" published 1 0 0 1

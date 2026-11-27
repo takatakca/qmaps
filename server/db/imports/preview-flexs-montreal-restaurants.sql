@@ -6,6 +6,10 @@ set local statement_timeout = '30s';
 set local search_path = pg_catalog, public;
 
 do $guard$
+declare
+  loaded_at timestamptz;
+  expected_counts jsonb;
+  actual_counts jsonb;
 begin
   if to_regclass('qmaps_ops.flexs_directory_stage') is null
      or to_regclass('qmaps_private.accounts') is null then
@@ -16,19 +20,28 @@ begin
   ) then
     raise exception 'The preview requires an active restaurants category';
   end if;
-  if not exists (
-    select 1 from qmaps_ops.flexs_directory_stage
-    where source = 'mtl_food' and licence = 'CC-BY-4.0'
-  ) then
-    raise exception 'No Montréal food snapshot is staged';
+  if to_regclass('qmaps_ops.flexs_directory_snapshots') is null then
+    raise exception 'No complete open FLEXS snapshot is staged';
+  end if;
+  select s.staged_at, s.source_counts into loaded_at, expected_counts
+  from qmaps_ops.flexs_directory_snapshots s where s.source_family = 'open';
+  if loaded_at is null then
+    raise exception 'No complete open FLEXS snapshot is staged';
+  end if;
+  select jsonb_object_agg(t.source, t.quantity) into actual_counts from (
+    select source, count(*) as quantity from qmaps_ops.flexs_directory_stage
+    where staged_at = loaded_at and licence in ('CC-BY-4.0', 'CC0-1.0') group by source
+  ) t;
+  if actual_counts is distinct from expected_counts then
+    raise exception 'Staged rows do not match the complete open FLEXS snapshot receipt';
   end if;
 end;
 $guard$;
 
 with
 latest as (
-  select max(staged_at) as loaded_at from qmaps_ops.flexs_directory_stage
-  where source = 'mtl_food' and licence = 'CC-BY-4.0'
+  select staged_at as loaded_at, source_counts from qmaps_ops.flexs_directory_snapshots
+  where source_family = 'open'
 ),
 -- Include Montréal boroughs in collision checks only. They are not merged
 -- into the candidate scope and never rewrite a staged municipality.
@@ -53,6 +66,7 @@ scope as (
 staged_name_keys as (
   select keys.name_key
   from qmaps_ops.flexs_directory_stage s
+  join latest on s.staged_at = latest.loaded_at
   join collision_municipalities municipalities
     on regexp_replace(lower(unaccent(s.city)), '[^[:alnum:]]+', '', 'g') = municipalities.name_key
   cross join lateral (
@@ -60,7 +74,6 @@ staged_name_keys as (
            (regexp_replace(lower(unaccent(s.other_name)), '[^[:alnum:]]+', '', 'g'))
   ) as keys(name_key)
   where s.licence in ('CC-BY-4.0', 'CC0-1.0') and keys.name_key <> ''
-    and (s.source <> 'mtl_food' or s.staged_at = (select loaded_at from latest))
   group by keys.name_key
   having count(distinct s.flexs_id) > 1
 ),
@@ -100,6 +113,7 @@ select jsonb_build_object(
   'dataset_url', 'https://www.donneesquebec.ca/recherche/dataset/vmtl-etablissements-alimentaires',
   'licence_url', 'https://creativecommons.org/licenses/by/4.0/',
   'snapshot_at', (select loaded_at from latest),
+  'snapshot_source_counts', (select source_counts from latest),
   'scope_rows', (select count(*) from classified),
   'counts', coalesce((select jsonb_object_agg(reason, quantity) from counts), '{}'::jsonb),
   'sample', coalesce((select jsonb_agg(to_jsonb(sample) order by flexs_id) from sample), '[]'::jsonb)

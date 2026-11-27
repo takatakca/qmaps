@@ -1,5 +1,8 @@
 -- Run only through the operator wrapper in one PostgreSQL transaction.
 \set ON_ERROR_STOP on
+-- The receipt is read after the staging advisory lock, so see commits made
+-- by a loader that held the lock first, even with custom connection defaults.
+set transaction isolation level read committed;
 set local lock_timeout = '5s';
 set local statement_timeout = '30s';
 set local search_path = pg_catalog, public, pg_temp;

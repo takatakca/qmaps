@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-flexs-source-receipt | reçu privé par famille et refus de l’import incomplet | attacher le lot montréalais au dernier chargement ouvert confirmé sans empêcher les retraits | vérifier la recette réelle avant mise à disposition de l’opérateur
+
 2026-11-27 | Codex | codex/qmaps-owned-account-entry | entrées Moi et Créer un compte reliées à l’espace QMAPS | distinguer inscription par identifiant et accès historiques explicites | vérifier les deux parcours invités après déploiement sans créer de compte
 
 2026-11-27 | Codex | codex/qmaps-public-local-actions | bascule des liens d’ajout des pages locales vers Mon commerce QMAPS | éviter d’envoyer les commerçants vers l’ancien annuaire depuis une recherche vide | vérifier les trois parcours publics, sans créer de compte ni de fiche
