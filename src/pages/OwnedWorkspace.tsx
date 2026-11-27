@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import OwnedLogin from "@/components/account/OwnedLogin";
+import { exampleListingTitle } from "@/lib/exampleListing";
 import {
   ownedApi,
   QmapsRequestError,
@@ -154,6 +155,7 @@ function Marketplace({ user, initialPlace = null }: { user: QmapsUser; initialPl
     event.preventDefault();
     return new FormData(event.currentTarget);
   };
+  const selectedExampleTitle = selected && exampleListingTitle(selected);
   return (
     <div className="space-y-5">
       <nav className="flex flex-wrap gap-2" aria-label="Espace QMAPS">
@@ -183,7 +185,8 @@ function Marketplace({ user, initialPlace = null }: { user: QmapsUser; initialPl
             <ArrowLeft size={16} />
             Retour aux fiches
           </button>
-          <h2 className="text-2xl font-bold">{selected.name}</h2>
+          <h2 className="text-2xl font-bold">{selectedExampleTitle || selected.name}</h2>
+          {selectedExampleTitle && <p className="text-sm text-muted-foreground">Fiche d’exemple</p>}
           <p>
             {selected.city}
             {selected.address ? " · " + selected.address : ""}
@@ -360,21 +363,24 @@ function Marketplace({ user, initialPlace = null }: { user: QmapsUser; initialPl
             <p>Aucune fiche dans cette liste.</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {list.data.map((p) => (
-                <button
-                  className="rounded-lg border bg-card p-4 text-left hover:border-primary focus-visible:ring-2"
-                  key={p.id}
-                  onClick={() => {
-                    setSelected(p);
-                    setNote("");
-                  }}
-                >
-                  <span className="block font-semibold">{p.name}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {p.city}
-                  </span>
-                </button>
-              ))}
+              {list.data.map((p) => {
+                const exampleTitle = exampleListingTitle(p);
+                return (
+                  <button
+                    className="rounded-lg border bg-card p-4 text-left hover:border-primary focus-visible:ring-2"
+                    key={p.id}
+                    onClick={() => {
+                      setSelected(p);
+                      setNote("");
+                    }}
+                  >
+                    <span className="block font-semibold">{exampleTitle ?? p.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {p.city}{exampleTitle ? " · Fiche d’exemple" : ""}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </>

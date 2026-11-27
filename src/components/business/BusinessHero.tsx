@@ -7,6 +7,7 @@ import StarRating from "@/components/StarRating";
 
 interface BusinessHeroProps {
   name: string;
+  example?: boolean;
   imageUrl: string;
   avgRating: number;
   reviewsCount: number;
@@ -16,7 +17,7 @@ interface BusinessHeroProps {
   city: string;
 }
 
-const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, photosCount, businessId, city }: BusinessHeroProps) => {
+const BusinessHero = ({ name, example, imageUrl, avgRating, reviewsCount, isClaimed, photosCount, businessId, city }: BusinessHeroProps) => {
   const navigate = useNavigate();
   const [sharing, setSharing] = useState(false);
 
@@ -58,9 +59,9 @@ const BusinessHero = ({ name, imageUrl, avgRating, reviewsCount, isClaimed, phot
 
       {/* Bottom overlay content */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
-        {!isClaimed && (
+        {(example || !isClaimed) && (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-card/80 backdrop-blur-sm text-foreground text-xs font-medium rounded-full mb-2">
-            ⚠ Non revendiqué
+            {example ? "Fiche d’exemple" : "⚠ Non revendiqué"}
           </span>
         )}
         <h1 className="font-heading text-2xl font-bold text-white leading-tight">{name}</h1>

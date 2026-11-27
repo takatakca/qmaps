@@ -33,6 +33,7 @@ import { slugify } from "@/lib/seo";
 import { isBusinessOpenNow } from "@/lib/searchFilters";
 import { readBusinessStatus } from "@/lib/businessStatus";
 import { categoryNameFromEmbed } from "@/lib/business";
+import { exampleListingTitle } from "@/lib/exampleListing";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
@@ -49,7 +50,9 @@ const Listing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [business, setBusiness] = useState<Tables<"businesses"> | null>(null);
+  const [record, setBusiness] = useState<Tables<"businesses"> | null>(null);
+  const exampleTitle = record ? exampleListingTitle(record) : undefined;
+  const business = record && exampleTitle ? { ...record, name: exampleTitle } : record;
   const [reviews, setReviews] = useState<(Tables<"reviews"> & { profiles?: { display_name: string | null } })[]>([]);
   const [loading, setLoading] = useState(true);
   const [params] = useSearchParams();
@@ -180,11 +183,12 @@ const Listing = () => {
         image={business.image_url || undefined}
         type="profile"
         jsonLdId="local-business"
-        jsonLd={localBusinessJsonLd}
+        jsonLd={exampleTitle ? undefined : localBusinessJsonLd}
       />
       {/* Hero */}
       <BusinessHero
         name={business.name}
+        example={Boolean(exampleTitle)}
         imageUrl={business.image_url || getCategoryImage(categoryNameFromEmbed(business, ""), business.name)}
         avgRating={Number(business.avg_rating)}
         reviewsCount={business.reviews_count}

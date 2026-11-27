@@ -6,6 +6,7 @@ import OwnedGallery from "@/components/account/OwnedGallery";
 import OwnedReviews from "@/components/account/OwnedReviews";
 import { Button } from "@/components/ui/button";
 import { ownedApi, QmapsRequestError, type QmapsPlace } from "@/lib/ownedApi";
+import { exampleListingTitle } from "@/lib/exampleListing";
 
 type Result = { place: QmapsPlace } | { missing: boolean };
 
@@ -40,11 +41,14 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
     </main>;
   }
   const place = result.place;
+  const exampleTitle = exampleListingTitle(place);
+  const name = exampleTitle ?? place.name;
   return <main className="mx-auto max-w-2xl space-y-6 px-5 py-6 pb-24">
-    <Seo title={place.name + " · " + place.city + " | QMAPS"} description={place.description || place.name + " à " + place.city} canonicalPath={"/business/" + id} />
+    <Seo title={name + " · " + place.city + " | QMAPS"} description={place.description || name + " à " + place.city} canonicalPath={"/business/" + id} />
     <Link className="text-sm underline" to={"/search?" + new URLSearchParams({ city: place.city })}>Retour à la recherche</Link>
     <header className="space-y-2">
-      <h1 className="font-heading text-3xl font-bold">{place.name}</h1>
+      <h1 className="font-heading text-3xl font-bold">{name}</h1>
+      {exampleTitle && <p className="text-sm text-muted-foreground">Fiche d’exemple</p>}
       <p>{[place.address, place.city].filter(Boolean).join(" · ")}</p>
       {place.description && <p>{place.description}</p>}
     </header>

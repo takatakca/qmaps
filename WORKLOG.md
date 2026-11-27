@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-on2go-directory | correctif web et import testés sur base jetable | retirer Démo des trois titres d’exemple et préparer les 32 fiches ON2GO de Montréal | valider la CI et le site publié, puis appliquer l’import dans le PostgreSQL QMAPS autorisé
+
 2026-11-26 | Codex | codex/qmaps-mailbox-receipt-guide | guide et grille concordants | préparer la preuve de réception sur les adresses publiées qmaps.ca | valider les boîtes et leur réception avec le responsable autorisé
 
 2026-11-26 | Codex | codex/qmaps-directory-expired-session | validé avec une session révoquée sur base jetable | maintenir la consultation publique de l’annuaire après expiration de session | valider la CI puis vérifier les parcours publics sur les trois domaines

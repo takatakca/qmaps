@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { Star, MapPin, BadgeCheck, ArrowUpRight } from "lucide-react";
 import { getListingImage } from "@/lib/listingVisuals";
 import { getCategoryImage } from "@/lib/categoryImages";
+import { exampleListingTitle } from "@/lib/exampleListing";
+import { parseWeeklyHours } from "@/lib/businessHours";
 import type { HomeListing } from "@/hooks/useHomeListings";
 
 interface Props {
@@ -13,9 +15,13 @@ const priceLabels = ["$", "$$", "$$$", "$$$$"];
 
 const BusinessListingCard = ({ business, variant = "row" }: Props) => {
   const uploaded = getListingImage(business);
-  const image = uploaded ?? getCategoryImage(business.category_name, business.category_slug, business.name);
+  const exampleTitle = exampleListingTitle(business);
+  const displayName = exampleTitle ?? business.name;
+  const image = uploaded ?? getCategoryImage(business.category_name, business.category_slug, displayName);
   const rating = Number(business.avg_rating || 0);
   const isOpen = business.status === "open" && business.is_open;
+  const hasHours = Boolean(business.hours?.trim() || parseWeeklyHours(business.hours_json));
+  const hoursLabel = isOpen ? "Ouvert" : business.status !== "open" || hasHours ? "Fermé" : null;
   const price = business.price_level ? priceLabels[business.price_level - 1] : null;
 
   return (
@@ -28,7 +34,7 @@ const BusinessListingCard = ({ business, variant = "row" }: Props) => {
       <div className="relative h-40 overflow-hidden sm:h-44">
         <img
           src={image}
-          alt={business.name}
+          alt={displayName}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.12]"
         />
@@ -45,15 +51,15 @@ const BusinessListingCard = ({ business, variant = "row" }: Props) => {
         )}
         <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
           <h3 className="line-clamp-2 font-heading text-[16px] font-bold leading-tight text-white drop-shadow">
-            {business.name}
+            {displayName}
           </h3>
-          <span
+          {(exampleTitle || hoursLabel) && <span
             className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
-              isOpen ? "bg-success/90 text-success-foreground" : "bg-white/15 text-white/80"
+              isOpen && !exampleTitle ? "bg-success/90 text-success-foreground" : "bg-white/15 text-white/80"
             }`}
           >
-            {isOpen ? "Ouvert" : "Fermé"}
-          </span>
+            {exampleTitle ? "Fiche d’exemple" : hoursLabel}
+          </span>}
         </div>
       </div>
 
