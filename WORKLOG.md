@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-owned-listing-entry | Chromium 390 et 1 366 px validé avec PostgreSQL jetable | ouvrir directement les fiches QMAPS depuis les cartes et respecter leur retrait | vérifier le déploiement web sur les trois domaines
+
 2026-11-27 | Codex | codex/qmaps-flexs-restaurant-pilot | 15 fiches activées puis retirées sur PostgreSQL jetable | afficher le crédit municipal et préserver avis, favoris et médias au retrait | confirmer la pagination et le crédit sur l’hébergement autorisé avant publication
 
 2026-11-27 | Codex | codex/qmaps-flexs-restaurant-preview | aperçu privé validé sur 5 249 lignes, 15 candidats corroborés | préparer le premier lot Montréal sans écrire en production | revoir les fiches à partir du registre municipal puis valider l’affichage avant import
