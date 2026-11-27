@@ -41,6 +41,7 @@ async function open(path: string) {
       <Routes>
         <Route path="/merchant" element={<MerchantDashboard />} />
         <Route path="/merchant/billing" element={<MerchantBilling />} />
+        <Route path="/merchant/billing/plans" element={<h1>Plans QMAPS</h1>} />
       </Routes>
     </MemoryRouter>);
   });
@@ -66,6 +67,11 @@ describe("merchant subscription cancellation display", () => {
     expect(host.textContent).not.toContain("Période en cours");
     expect(host.textContent).toContain("Gérer l'abonnement");
     expect(host.textContent).toContain("customer.subscription.deleted");
+    const plans = Array.from(host.querySelectorAll("button"))
+      .find(item => item.textContent === "Voir les plans");
+    expect(plans).toBeDefined();
+    await act(async () => { plans?.click(); });
+    expect(host.querySelector("h1")?.textContent).toBe("Plans QMAPS");
   });
 
   it("keeps the current period visible when cancellation is only scheduled", async () => {

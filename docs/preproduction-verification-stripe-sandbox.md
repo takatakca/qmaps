@@ -46,7 +46,7 @@ Le test automatisé simule aussi une première livraison active reçue après l�
 
 La vérification Checkout protège un abonnement Stripe déjà enregistré dans QMAPS. Elle ne remplace pas une protection contre deux premiers Checkouts simultanés, avant que le webhook soit traité.
 
-Pour distinguer les deux états d’annulation dans QMAPS, vérifier que l’annulation programmée laisse « Plan actuel » et « annulation prévue ». Quand le statut enregistré passe à `canceled`, le tableau marchand indique « Abonnement inactif » et la facturation indique « Dernier abonnement », sans période en cours. L’historique et le portail de l’abonnement restent accessibles.
+Pour distinguer les deux états d’annulation dans QMAPS, vérifier que l’annulation programmée laisse « Plan actuel » et « annulation prévue ». Quand le statut enregistré passe à `canceled`, le tableau marchand indique « Abonnement inactif » et la facturation indique « Dernier abonnement », sans période en cours. Vérifier l’historique et le lien « Voir les plans ». Si le client Stripe est enregistré, vérifier que le bouton du portail est toujours visible et ouvre le portail Sandbox configuré.
 
 ## Consigner les résultats et nettoyer
 

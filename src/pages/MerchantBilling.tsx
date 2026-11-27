@@ -126,7 +126,7 @@ const MerchantBilling = () => {
                     Vous êtes sur le plan gratuit. Découvrez ce que les plans payants offrent.
                   </p>
                 )}
-                {subscription?.provider_customer_id ? (
+                {subscription?.provider_customer_id && (
                   <Button
                     className="w-full justify-between rounded-full"
                     disabled={portalLoading}
@@ -179,7 +179,8 @@ const MerchantBilling = () => {
                     <span>{portalLoading ? "Ouverture..." : "Gérer l'abonnement"}</span>
                     {portalLoading ? <Loader2 size={16} className="animate-spin" /> : <ChevronRight size={16} />}
                   </Button>
-                ) : (
+                )}
+                {(!subscription?.provider_customer_id || subscriptionInactive) && (
                   <Button
                     variant="outline"
                     className="w-full justify-between rounded-full"
