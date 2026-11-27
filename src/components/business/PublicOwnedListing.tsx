@@ -7,6 +7,7 @@ import OwnedReviews from "@/components/account/OwnedReviews";
 import { Button } from "@/components/ui/button";
 import { loadPublicPlace, QmapsRequestError } from "@/lib/ownedApi";
 import { exampleListingTitle } from "@/lib/exampleListing";
+import { ownedListingReviewUrl } from "@/lib/ownedRoutes";
 
 type Result = Awaited<ReturnType<typeof loadPublicPlace>> | { missing: boolean };
 
@@ -53,7 +54,10 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
       <p>{[place.address, place.city].filter(Boolean).join(" · ")}</p>
       {place.description && <p>{place.description}</p>}
     </header>
-    <Button asChild><Link to={"/compte?fiche=" + id}>Ouvrir cette fiche dans mon compte</Link></Button>
+    <div className="flex flex-wrap gap-2">
+      {!exampleTitle && <Button asChild><Link to={ownedListingReviewUrl(id)}>Écrire un avis</Link></Button>}
+      <Button asChild variant={exampleTitle ? "default" : "outline"}><Link to={"/compte?fiche=" + id}>Ouvrir cette fiche dans mon compte</Link></Button>
+    </div>
     <OwnedGallery place={id} viewer={preview} publicCredentials={result.credentials} readOnly />
     <OwnedReviews place={id} viewer={preview} publicCredentials={result.credentials} owner={false} readOnly />
     <BottomNav />

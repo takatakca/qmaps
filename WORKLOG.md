@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-owned-review-entry | parcours testé sur base jetable | raccorder la publication d’avis à l’annuaire QMAPS | valider la CI et les liens d’avis sur les domaines de production
+
 2026-11-27 | Codex | codex/qmaps-owned-merchant-entry | parcours vérifié sur base jetable | ouvrir le formulaire marchand du PostgreSQL utilisé par la recherche | valider la CI et vérifier les boutons publiés sur les domaines QMAPS
 
 2026-11-27 | Codex | codex/qmaps-public-detail-expired-session | correctif vérifié localement | maintenir la fiche publique, la galerie et les avis après expiration de session | valider la CI et le parcours sur les domaines de production
