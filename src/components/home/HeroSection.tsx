@@ -1,4 +1,5 @@
 import { searchUrl } from "@/lib/localSearch";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 import { Link } from "react-router-dom";
 import { ChevronDown, MapPin, Search, ShieldCheck, Star } from "lucide-react";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
@@ -53,7 +54,7 @@ const HeroSection = ({ city, onCityChange }: { city: string; onCityChange: (valu
           <div className="mr-2 hidden items-center gap-5 text-sm font-medium qmaps-scene-muted md:flex">
             <Link to="/search" className="inline-flex items-center gap-1.5 hover:opacity-80"><Search size={14} /> Rechercher</Link>
             <Link to="/services" className="hover:opacity-80">Services</Link>
-            <Link to="/merchant/onboarding" className="qmaps-scene-control rounded-md px-3 py-2">
+            <Link to={ownedMerchantUrl} className="qmaps-scene-control rounded-md px-3 py-2">
               Enregistrer mon entreprise
             </Link>
           </div>

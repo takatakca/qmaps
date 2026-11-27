@@ -4,6 +4,7 @@ import BusinessListingCard from "./BusinessListingCard";
 import HorizontalShortcutRow, { type Shortcut } from "./HorizontalShortcutRow";
 import PremiumEmptyState from "./PremiumEmptyState";
 import type { HomeListing } from "@/hooks/useHomeListings";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 
 interface Props {
   title: string;
@@ -82,7 +83,7 @@ const BusinessListingRow = ({
           message={emptyMessage}
           image={fallbackImage}
           actions={[
-            { label: "Enregistrer votre entreprise", to: "/merchant/onboarding" },
+            { label: "Enregistrer votre entreprise", to: ownedMerchantUrl },
             { label: "Voir tous les services", to: "/services", variant: "ghost" },
           ]}
         />

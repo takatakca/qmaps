@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useLang } from "@/i18n/language";
 import { headerTriggerClass } from "@/components/home/LanguageSwitcher";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 
 /**
  * TAKATAK Auth-style account popover. Only shows providers that work today:
@@ -87,7 +88,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
               {isMerchant ? (
                 <Item icon={Store} label={t("merchantPortal")} sub={t("merchantPortalSub")} onClick={() => go("/merchant/home")} />
               ) : (
-                <Item icon={Briefcase} label={t("becomePro")} sub={t("becomeProSub")} onClick={() => go("/merchant/onboarding")} />
+                <Item icon={Briefcase} label={t("becomePro")} sub={t("becomeProSub")} onClick={() => go(ownedMerchantUrl)} />
               )}
               {isAdmin && <Item icon={ShieldCheck} label={t("admin")} onClick={() => go("/admin")} />}
               <button
@@ -115,7 +116,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
               <div className="mt-1.5">
                 <Item icon={Mail} label={t("continueEmail")} onClick={() => go("/auth")} />
                 <Item icon={Smartphone} label={t("smsVerify")} sub={t("smsVerifySub")} onClick={() => go("/auth?verify=sms")} />
-                <Item icon={Briefcase} label={t("proSpace")} sub={t("proSpaceSub")} onClick={() => go("/auth?role=merchant")} />
+                <Item icon={Briefcase} label={t("proSpace")} sub={t("proSpaceSub")} onClick={() => go(ownedMerchantUrl)} />
               </div>
               <button
                 onClick={() => go("/auth?mode=signup")}

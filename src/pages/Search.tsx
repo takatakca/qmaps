@@ -10,6 +10,7 @@ import { SlidersHorizontal, X, LayoutGrid, FilePlus2, Store } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { distanceMeters, getCurrentPosition, type Coordinates } from "@/lib/geo";
 import { cityLabelFor } from "@/lib/localSearch";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import Seo from "@/components/Seo";
 import {
@@ -317,7 +318,7 @@ const Search = () => {
                     </div>
                   </Link>
                   <Link
-                    to="/merchant/onboarding"
+                    to={ownedMerchantUrl}
                     className="rounded-xl border border-border p-3 hover:border-primary/40 hover:bg-accent transition-colors flex items-start gap-2"
                   >
                     <Store size={18} className="text-primary mt-0.5" />
