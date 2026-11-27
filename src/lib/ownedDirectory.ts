@@ -10,7 +10,10 @@ export type DirectoryPlace = BusinessCardSource & {
 };
 type NearbyPlace = DirectoryPlace & { distance_meters: number };
 type Page<T> = { items: T[]; next: string | null };
-class DirectorySessionRejected extends Error {}
+export class DirectoryReadError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
+}
+export class DirectorySessionRejected extends DirectoryReadError {}
 
 async function readWithBrowserSession<T>(
   signal: AbortSignal | undefined,
@@ -26,7 +29,7 @@ async function readWithBrowserSession<T>(
 }
 
 async function page<T>(
-  path: "" | "/categories" | "/nearby",
+  path: "" | "/categories" | "/nearby" | "/results",
   filters: URLSearchParams,
   credentials: BrowserReadCredentials,
   signal?: AbortSignal,
@@ -40,9 +43,9 @@ async function page<T>(
     const message = "L’annuaire QMAPS est indisponible.";
     if (credentials === "same-origin" && filters.getAll("account").every(account => account === "") &&
         await isRejectedBrowserSession(response)) {
-      throw new DirectorySessionRejected(message);
+      throw new DirectorySessionRejected(response.status, message);
     }
-    throw new Error(message);
+    throw new DirectoryReadError(response.status, message);
   }
   const value: Page<T> = await response.json();
   if (!Array.isArray(value.items) || !(value.next === null || typeof value.next === "string"))
@@ -89,4 +92,22 @@ export async function nearbyPlaces(position: Coordinates, size: number, signal: 
       throw new Error("Réponse de proximité invalide.");
     return result.items;
   });
+}
+
+export type SearchContinuation = { after: string; credentials: BrowserReadCredentials };
+
+export async function directoryResults(filters: string, signal: AbortSignal, continuation?: SearchContinuation) {
+  const params = new URLSearchParams(filters);
+  params.set("limit", "24");
+  params.delete("after");
+  if (continuation) params.set("after", continuation.after);
+  const read = async (credentials: BrowserReadCredentials) => {
+    const { items, next } = await page<DirectoryPlace>("/results", params, credentials, signal);
+    if (items.length > 24 || next === "")
+      throw new Error("Page de résultats invalide.");
+    return { items, next: next === null ? null : { after: next, credentials } };
+  };
+  // Never append anonymous results to a list read with a session. A rejected
+  // continuation is handled by restarting the search from the first page.
+  return continuation ? read(continuation.credentials) : readWithBrowserSession(signal, read);
 }
