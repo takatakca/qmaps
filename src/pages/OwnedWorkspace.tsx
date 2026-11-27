@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import OwnedLogin from "@/components/account/OwnedLogin";
+import { ownedAccountRedirect } from "@/lib/ownedAccountOrigin";
 import {
   ownedApi,
   QmapsRequestError,
@@ -400,6 +401,22 @@ function LinkedMarketplace({ user, placeId }: { user: QmapsUser; placeId: string
 }
 
 export default function OwnedWorkspace() {
+  const location = useLocation();
+  const redirect = ownedAccountRedirect(window.location.origin, location);
+  useEffect(() => {
+    if (redirect) window.location.replace(redirect);
+  }, [redirect]);
+  if (redirect) {
+    return (
+      <main className="mx-auto max-w-lg p-5 sm:p-8">
+        <a className="underline" href={redirect}>Continuer vers mon espace QMAPS</a>
+      </main>
+    );
+  }
+  return <Workspace />;
+}
+
+function Workspace() {
   const cache = useQueryClient();
   const { pathname, search } = useLocation();
   const linked = new URLSearchParams(search).get("fiche");
