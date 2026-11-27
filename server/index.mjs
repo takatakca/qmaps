@@ -11,6 +11,7 @@ import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { listPhotos, changePhoto } from "./gallery.mjs";
+import { readReleaseSha } from "./release.mjs";
 import {
   account,
   ApiError,
@@ -25,6 +26,7 @@ const pool = new pg.Pool({
   statement_timeout: 8000,
 });
 pool.on("error", () => console.error("QMAPS database connection closed"));
+const release = { service: "QMAPS", component: "api", sha: readReleaseSha() };
 const uuid = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const placeRoute = new RegExp(
   "^/v1/places/(" +
@@ -129,6 +131,8 @@ async function route(req, res) {
       ? url.pathname.replace("/v1/browser/", "/v1/")
       : url.pathname,
     method = req.method;
+  if (method === "GET" && path === "/v1/release")
+    return reply(res, release.sha === null ? 503 : 200, release);
   const cookieName = "__Host-qmaps_session";
   const writeCookie = (value, age) =>
     res.setHeader(

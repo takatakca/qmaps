@@ -14,16 +14,26 @@ jobs:
         run: |
           export SERVICE_PASSWORD_POSTGRES="$(openssl rand -hex 32)"
           export SERVICE_PASSWORD_GATEWAY="$(openssl rand -hex 32)"
+          export SOURCE_COMMIT="$(git rev-parse HEAD)"
           cat > "$RUNNER_TEMP/qmaps-ci-compose.yml" <<'YAML'
           services:
             qmaps-db:
               volumes: ["./server/test:/opt/qmaps/server/test:ro"]
             qmaps-api:
               ports: ["127.0.0.1:3102:3000"]
+              # The running container must report the revision burned into its image.
+              environment:
+                SOURCE_COMMIT: "1111111111111111111111111111111111111111"
+                QMAPS_BUILD_REVISION: "2222222222222222222222222222222222222222"
           YAML
           compose() { docker compose -f compose.qmaps.yaml -f "$RUNNER_TEMP/qmaps-ci-compose.yml" "$@"; }
           trap 'compose down -v' EXIT
           compose up --build --wait --wait-timeout 180 || { compose logs --tail 25 qmaps-db qmaps-api; exit 1; }
+          compose exec -T qmaps-api node -e '
+            const assert = require("node:assert/strict");
+            assert.equal(process.env.SOURCE_COMMIT, "1".repeat(40));
+            assert.equal(process.env.QMAPS_BUILD_REVISION, "2".repeat(40));'
+          node server/test/live-release.mjs
           compose run --rm --no-deps qmaps-migrate
           # Clone the initialized schema without requiring active API connections to close.
           compose exec -T qmaps-db sh -ec '
@@ -35,7 +45,7 @@ jobs:
             PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-directory-stage.sh
             PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-montreal-pilot.sh'
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/directory-results.sql
-          node --test server/test/directory-result-filters.mjs
+          node --test server/test/directory-result-filters.mjs server/test/release.mjs
           QMAPS_TEST_RESULTS_FIXTURE=1 node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/closure.sql
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/billing-receipts.sql
