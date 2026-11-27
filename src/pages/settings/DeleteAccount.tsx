@@ -150,7 +150,7 @@ const DeleteAccount = () => {
             </p>
             <p className="text-xs text-muted-foreground">
               Pour annuler ou modifier votre demande, contactez le support à{" "}
-              <span className="font-mono">support@qmaps.app</span>. Aucune nouvelle demande ne peut être créée tant que celle-ci est active.
+              <span className="font-mono">support@qmaps.ca</span>. Aucune nouvelle demande ne peut être créée tant que celle-ci est active.
             </p>
           </div>
         ) : (

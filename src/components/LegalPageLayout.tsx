@@ -123,8 +123,8 @@ const LegalPageLayout = ({
         <div className="pt-4 border-t border-border text-xs text-muted-foreground">
           <p>
             {t.contact}{" "}
-            <a href="mailto:support@qmaps.app" className="text-primary underline">
-              support@qmaps.app
+            <a href="mailto:support@qmaps.ca" className="text-primary underline">
+              support@qmaps.ca
             </a>
             .
           </p>

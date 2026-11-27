@@ -23,7 +23,7 @@ export default function QmapsHost() {
           QMAPS, vous pouvez préparer un courriel.
         </p>
         <Button asChild variant="outline">
-          <a href="mailto:business@qmaps.app?subject=Accueil%20t%C3%A9l%C3%A9phonique%20QMAPS">
+          <a href="mailto:business@qmaps.ca?subject=Accueil%20t%C3%A9l%C3%A9phonique%20QMAPS">
             Préparer un courriel
           </a>
         </Button>

@@ -1,3 +1,5 @@
+> **Note du 2026-11-26 — Taktak** : Domaine hérité de l'ancienne version Lovable — la production est qmaps.ca depuis le rebuild ; adresses officielles en @qmaps.ca.
+
 # QMAPS — App Store / Install Readiness (Phase 10B)
 
 This document tracks what is required to ship QMAPS as an installable mobile
