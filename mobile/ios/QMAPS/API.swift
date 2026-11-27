@@ -6,11 +6,6 @@ enum APIError: LocalizedError {
     case failed(String)
     var errorDescription: String? { if case .failed(let message) = self { return message }; return nil }
 }
-struct Place: Identifiable, Decodable {
-    let id, name, city: String
-    let address, description: String?
-    let can_block: Bool?
-}
 struct PublisherTerms: Decodable { let accepted: Bool; let version: String }
 struct BlockedPublisher: Identifiable, Decodable { let id, label: String }
 struct Story: Identifiable, Decodable { let id, title, body: String }

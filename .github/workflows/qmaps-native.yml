@@ -90,6 +90,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Verify the municipal attribution model
+        working-directory: mobile/ios
+        run: |
+          swiftc -swift-version 5 QMAPS/Place.swift Tests/MunicipalCreditCheck.swift -o "$RUNNER_TEMP/qmaps-municipal-credit"
+          "$RUNNER_TEMP/qmaps-municipal-credit"
       - name: Compile the SwiftUI app for simulator and iPhone
         working-directory: mobile/ios
         run: |

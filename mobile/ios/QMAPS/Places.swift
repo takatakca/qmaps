@@ -84,6 +84,15 @@ struct PlaceView: View {
                 if let desc = detail?.description { Text(desc) }
                 Button("Enregistrer dans mes favoris") { Task { await change("bookmark", method: "PUT") } }.disabled(working)
             }
+            if let reference = detail?.attributes?.reference {
+                Section("Fiche de source municipale") {
+                    Link("Ville de Montréal, « Établissements alimentaires »", destination: MunicipalListingCredit.sourceURL)
+                    Text("Référence municipale \(reference)")
+                    Link("CC BY 4.0", destination: MunicipalListingCredit.licenceURL)
+                    Text("Adaptation par FLEXS et QMAPS. Les horaires et l’exploitant actuel ne sont pas confirmés.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
             Section("Signalement et blocage") {
                 Button("Signaler la fiche") { reportSubject = "business"; reportDetails = "" }
                 if detail?.can_block == true {
