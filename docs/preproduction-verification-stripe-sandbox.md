@@ -46,6 +46,8 @@ Le test automatisé simule aussi une première livraison active reçue après l�
 
 La vérification Checkout protège un abonnement Stripe déjà enregistré dans QMAPS. Elle ne remplace pas une protection contre deux premiers Checkouts simultanés, avant que le webhook soit traité.
 
+Pour distinguer les deux états d’annulation dans QMAPS, vérifier que l’annulation programmée laisse « Plan actuel » et « annulation prévue ». Quand le statut enregistré passe à `canceled`, le tableau marchand indique « Abonnement inactif » et la facturation indique « Dernier abonnement », sans période en cours. Vérifier l’historique et le lien « Voir les plans ». Si le client Stripe est enregistré, vérifier que le bouton du portail est toujours visible et ouvre le portail Sandbox configuré.
+
 ## Consigner les résultats et nettoyer
 
 Pour chaque contrôle, consigner « Réussi », « Échec » ou « Bloqué », l’heure, le commit, le nom du Sandbox, l’origine de préproduction et la preuve correspondante. Pour le webhook, noter le type d’événement, le code HTTP et le résultat des lectures SQL en limitant les données à la fiche de test. Les identifiants de corrélation complets restent dans le journal privé de recette.
