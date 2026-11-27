@@ -2,32 +2,40 @@
 
 # QMAPS — Production verification email tests
 
-_Last reviewed: 2026-04-26_
+_Last reviewed: 2026-11-26_
 
 Use these templates to confirm that every public-facing QMAPS mailbox is
-actively monitored. Send each test from a personal inbox **outside** the
-QMAPS domain, then record the result in section **8. Support mailboxes**
+actively monitored. First have the mail owner confirm the destination inbox
+or alias, the responsible team and the authorized external test sender.
+Mark any unconfirmed destination **BLOCKED**. Once authorized, send each test
+from the approved inbox **outside** the QMAPS domain, then record the result
+in section **8. Support mailboxes**
 of [`production-verification-log.md`](./production-verification-log.md).
 
 Target SLA for first reply during launch week:
 
 | Mailbox | First-reply SLA |
 |---------|-----------------|
-| `support@qmaps.app` | within 1 business day |
-| `privacy@qmaps.app` | within 2 business days |
-| `abuse@qmaps.app` | within 1 business day |
-| `business@qmaps.app` | within 2 business days |
+| `support@qmaps.ca` | within 1 business day |
+| `privacy@qmaps.ca` | within 2 business days |
+| `abuse@qmaps.ca` | within 1 business day |
+| `business@qmaps.ca` | within 2 business days |
+| `hello@qmaps.ca` | confirm with the owner if the Premium contact link is used |
 
 For every test, expect:
 
-1. A non-bounce delivery (no `mailer-daemon` reply).
-2. A human acknowledgement within the SLA above.
-3. A row added to the relevant playbook tracker (reviews, billing,
-   account deletion, etc.) if the test triggers a real workflow.
+1. The responsible team confirms that the exact test message reached its intended inbox.
+2. That team replies within the agreed time.
+3. Record both observations and their timestamps. DNS, the link on the site,
+   and the absence of a bounce are not evidence of receipt or monitoring.
+
+Use a unique test reference in the subject and no customer data, credentials,
+payment details or attachments. Record only the verification result and a
+redacted evidence link in the shared log.
 
 ---
 
-## 1. `support@qmaps.app` — general help
+## 1. `support@qmaps.ca` — general help
 
 ```
 Subject: [TEST] QMAPS support inbox check
@@ -45,9 +53,9 @@ Thanks,
 
 - Owner: support team.
 - Expected response: simple acknowledgement.
-- Log row: section 8, row `support@qmaps.app`.
+- Log row: section 8, row `support@qmaps.ca`.
 
-## 2. `privacy@qmaps.app` — privacy / data requests
+## 2. `privacy@qmaps.ca` — privacy / data requests
 
 ```
 Subject: [TEST] QMAPS privacy inbox check
@@ -66,9 +74,9 @@ Thanks,
 - Owner: privacy / DPO contact.
 - If a real DSAR or deletion request arrives during launch week, route
   it through [`account-deletion-support-workflow.md`](./account-deletion-support-workflow.md).
-- Log row: section 8, row `privacy@qmaps.app`.
+- Log row: section 8, row `privacy@qmaps.ca`.
 
-## 3. `abuse@qmaps.app` — abuse / safety reports
+## 3. `abuse@qmaps.ca` — abuse / safety reports
 
 ```
 Subject: [TEST] QMAPS abuse inbox check
@@ -87,9 +95,9 @@ Thanks,
 - Owner: trust & safety lead.
 - Real reports go to `/admin/reports` after triage; see
   [`admin/reviews-playbook.md`](./admin/reviews-playbook.md).
-- Log row: section 8, row `abuse@qmaps.app`.
+- Log row: section 8, row `abuse@qmaps.ca`.
 
-## 4. `business@qmaps.app` — merchant questions
+## 4. `business@qmaps.ca` — merchant questions
 
 ```
 Subject: [TEST] QMAPS business inbox check
@@ -110,13 +118,33 @@ Thanks,
   [`admin/business-claims-playbook.md`](./admin/business-claims-playbook.md).
 - Real billing questions go through
   [`admin/billing-playbook.md`](./admin/billing-playbook.md).
-- Log row: section 8, row `business@qmaps.app`.
+- Log row: section 8, row `business@qmaps.ca`.
 
 ---
 
-## After all four mailbox tests
+## 5. `hello@qmaps.ca` — Premium contact
 
-- Mark each row in the log as PASS / FAIL / BLOCKED.
-- If any mailbox bounced or was silent past the SLA, flip the row to
-  **BLOCKED** and add it to the **Owner action required** section of
-  the log.
+Before using this test, confirm that the Premium contact link is published,
+that the inbox or alias reaches the intended team, and its reply target. If
+the product does not publish this address, record **N/A** with the reason.
+
+```
+Subject: [TEST] QMAPS Premium contact inbox check
+
+Hello,
+
+This is a launch verification test for the Premium contact inbox.
+Please reply "received". No purchase or sales follow-up is requested.
+
+Thanks,
+QMAPS verification team
+```
+
+Log row: section 8, row `hello@qmaps.ca`.
+
+## Record the mailbox tests
+
+- Mark **PASS** only after confirmed receipt and a human reply within the target.
+- Mark **FAIL** for a bounce, delivery to the wrong inbox, or no reply within the target.
+- Mark **BLOCKED** when provisioning, the responsible team or test authorization is unconfirmed.
+- Add failed and blocked checks to **Owner action required** in the log.
