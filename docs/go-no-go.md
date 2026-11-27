@@ -2,11 +2,11 @@
 
 ## Purpose
 
-The `go:no-go` command is the **final pre-launch gate**. It runs every
-automated verification step in sequence and gives a single binary answer:
+The `go:no-go` command checks the repository. It does not inspect Coolify,
+check published revisions, authenticate test accounts or run Stripe Checkout.
 
-- **GO 🚀** — everything passed; the build is ready to ship.
-- **NO-GO 🛑** — one or more steps failed; fix the issues before publishing.
+- **GO 🚀** — every executed repository check passed. Deployment and release verification are separate.
+- **NO-GO 🛑** — one or more steps failed. Fix them before publishing.
 
 ## When to run it
 
@@ -47,7 +47,7 @@ Final decision: NO-GO 🛑
 
 | Code | Meaning |
 |------|---------|
-| `0` | All four steps passed — safe to proceed. |
+| `0` | The executed repository checks passed. Production is not verified. |
 | `1` | At least one step failed — investigate and re-run. |
 
 CI pipelines (including the GitHub Actions workflow) can rely on this code
@@ -57,7 +57,7 @@ to block merges when the gate is red.
 
 1. Review `docs/release-status.generated.md` for the latest snapshot.
 2. Walk the manual blockers in `docs/release-status.md`.
-3. Publish from the Lovable dashboard.
+3. Follow the [Coolify deployment procedure](DEPLOYMENT.md) and record what is proven for the exact deployed web and API revisions.
 
 ## After a NO-GO
 

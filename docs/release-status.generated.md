@@ -1,8 +1,10 @@
 # QMAPS Release Status
 
-_Generated: 2026-05-11T07:16:38.904Z_
+_Generated: 2026-11-27T23:05:35.603Z_
 
 **Project:** `vite_react_shadcn_ts` · **Version:** `0.0.0`
+
+This report checks local repository files only. For deployed revisions and operational evidence, see [issue #17](https://github.com/takatakca/qmaps/issues/17).
 
 ## Launch checks
 
@@ -39,12 +41,13 @@ _Generated: 2026-05-11T07:16:38.904Z_
 
 ## Manual launch blockers
 
-- Stripe in **Live** mode + webhook secret set
-- Custom domain DNS + SSL active (`qmaps.app`)
-- Support mailboxes monitored daily
+- [Verify the web SHA and PostgreSQL API SHA separately in Coolify](DEPLOYMENT.md).
+- [Verify authorized customer, merchant and administrator journeys](verification-authentifiee-qmaps.md).
+- [Verify Checkout and webhook delivery in isolated Stripe Sandbox](preproduction-verification-stripe-sandbox.md). No live payment.
+- Confirm receipt and monitoring for the QMAPS mailboxes at `qmaps.ca`.
 - Real-device mobile QA walk completed
 - Owner sign-off on `docs/app-store-readiness.md`
 
 ## Rollback
 
-Restore the previous published version from the Lovable project history. Database state is **not** reverted automatically — review in-flight migrations with the Supabase linter before re-publishing. No service worker is registered, so clients pick up the rollback on next reload.
+Follow the [Coolify rollback procedure](DEPLOYMENT.md#retour-arrière) for the affected web or API resource. Check schema compatibility before reverting the API. A deployment rollback does not revert PostgreSQL or withdraw a published directory batch.

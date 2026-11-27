@@ -76,6 +76,8 @@ lines.push(`_Generated: ${now}_`);
 lines.push("");
 lines.push(`**Project:** \`${pkgName}\` · **Version:** \`${pkgVersion}\``);
 lines.push("");
+lines.push(`This report checks local repository files only. For deployed revisions and operational evidence, see [issue #17](https://github.com/takatakca/qmaps/issues/17).`);
+lines.push("");
 
 lines.push(`## Launch checks`);
 lines.push("");
@@ -108,9 +110,10 @@ lines.push("");
 
 lines.push(`## Manual launch blockers`);
 lines.push("");
-lines.push(`- Stripe in **Live** mode + webhook secret set`);
-lines.push(`- Custom domain DNS + SSL active (\`qmaps.ca\`)`);
-lines.push(`- Support mailboxes monitored daily`);
+lines.push(`- [Verify the web SHA and PostgreSQL API SHA separately in Coolify](DEPLOYMENT.md).`);
+lines.push(`- [Verify authorized customer, merchant and administrator journeys](verification-authentifiee-qmaps.md).`);
+lines.push(`- [Verify Checkout and webhook delivery in isolated Stripe Sandbox](preproduction-verification-stripe-sandbox.md). No live payment.`);
+lines.push(`- Confirm receipt and monitoring for the QMAPS mailboxes at \`qmaps.ca\`.`);
 lines.push(`- Real-device mobile QA walk completed`);
 lines.push(`- Owner sign-off on \`docs/app-store-readiness.md\``);
 lines.push("");
@@ -118,10 +121,8 @@ lines.push("");
 lines.push(`## Rollback`);
 lines.push("");
 lines.push(
-  `Restore the previous successful QMAPS deployment in Coolify. ` +
-    `Database state is **not** reverted automatically — review in-flight migrations ` +
-    `with the Supabase linter before re-publishing. No service worker is registered, ` +
-    `so clients pick up the rollback on next reload.`,
+  `Follow the [Coolify rollback procedure](DEPLOYMENT.md#retour-arrière) for the affected web or API resource. ` +
+    `Check schema compatibility before reverting the API. A deployment rollback does not revert PostgreSQL or withdraw a published directory batch.`,
 );
 lines.push("");
 

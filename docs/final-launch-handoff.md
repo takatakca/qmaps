@@ -1,8 +1,6 @@
-> **Note du 2026-11-26 — Taktak** : Domaine hérité de l'ancienne version Lovable — la production est qmaps.ca depuis le rebuild ; adresses officielles en @qmaps.ca.
-
 # QMAPS — Final Launch Handoff Pack
 
-_Last reviewed: 2026-04-25_
+_Last reviewed: 2026-11-27_
 
 This is the **single document to hand to the launch owner** when QMAPS is
 ready to publish. It bundles the automated GO status, the manual checks
@@ -12,11 +10,9 @@ that still need a human, and the rollback plan.
 
 ## 1. Current automated status
 
-- **Go / No-Go decision:** **GO 🚀** (4/4 steps passing)
-- **Launch checks:** 16/16 passing
-- **Tests:** all green (`bunx vitest run`)
-- **Build:** clean (`bun run build`)
-- **JSON report:** [`docs/go-no-go-report.generated.json`](./go-no-go-report.generated.json)
+- The automated GO/NO-GO report covers repository checks only. It does not confirm a deployment, a working production account or a charge.
+- Read the [latest evidence in issue #17](https://github.com/takatakca/qmaps/issues/17) and confirm green CI for the exact candidate SHA.
+- Use the [Coolify deployment procedure](DEPLOYMENT.md#procédure-actuelle--coolify) to confirm the deployed web and API revisions independently.
 
 Refresh anytime with:
 
@@ -29,7 +25,7 @@ bun run go:no-go:report   # writes JSON to docs/go-no-go-report.generated.json
 
 | Purpose | Path |
 |---------|------|
-| Release candidate checklist | [`docs/release-candidate-checklist.md`](./release-candidate-checklist.md) |
+| Current deployment and rollback | [`docs/DEPLOYMENT.md`](./DEPLOYMENT.md#procédure-actuelle--coolify) |
 | Go / No-Go command guide | [`docs/go-no-go.md`](./go-no-go.md) |
 | Release status (stakeholder) | [`docs/release-status.md`](./release-status.md) |
 | Generated release status snapshot | [`docs/release-status.generated.md`](./release-status.generated.md) |
@@ -38,8 +34,8 @@ bun run go:no-go:report   # writes JSON to docs/go-no-go-report.generated.json
 | Post-launch checklist (T+0 → T+72h) | [`docs/post-launch-checklist.md`](./post-launch-checklist.md) |
 | First 72 hours monitoring | [`docs/admin/first-72-hours-monitoring.md`](./admin/first-72-hours-monitoring.md) |
 | Production verification log | [`docs/production-verification-log.md`](./production-verification-log.md) |
-| Production verification — SQL | [`docs/production-verification-sql.md`](./production-verification-sql.md) |
-| Production verification — Stripe | [`docs/production-verification-stripe.md`](./production-verification-stripe.md) |
+| Authenticated PostgreSQL routes | [`docs/verification-authentifiee-qmaps.md`](./verification-authentifiee-qmaps.md) |
+| Staging billing verification | [`docs/preproduction-verification-stripe-sandbox.md`](./preproduction-verification-stripe-sandbox.md) |
 | Production verification — Mobile / PWA | [`docs/production-verification-mobile.md`](./production-verification-mobile.md) |
 | Production verification — Email tests | [`docs/production-verification-email-tests.md`](./production-verification-email-tests.md) |
 | Post-launch issue tracker | [`docs/post-launch-issue-tracker.md`](./post-launch-issue-tracker.md) |
@@ -72,24 +68,17 @@ See [`docs/admin/README.md`](./admin/README.md) for the index. Direct links:
 
 ## 5. Manual blockers still requiring human verification
 
-- [ ] Stripe in **Live** mode + `STRIPE_WEBHOOK_SECRET` set in Lovable Cloud
-- [ ] Custom domain `qmaps.app` connected, SSL **Active**
-- [ ] Support mailboxes monitored daily:
-      `support@`, `privacy@`, `abuse@`, `business@qmaps.app`
+- [ ] The expected web revision is served over HTTPS on `qmaps.ca` and `www.qmaps.ca`. Verify the `qmaps.takatak.ca` alias too.
+- [ ] The PostgreSQL API revision, pagination and anonymous `401` are confirmed. The web manifest alone does not satisfy this check.
+- [ ] [Customer, merchant and administrator checks](verification-authentifiee-qmaps.md) use authorized test accounts.
+- [ ] [Stripe Sandbox](preproduction-verification-stripe-sandbox.md) confirms Checkout, the signed webhook and persistence in isolated staging. No live payment for this verification.
+- [ ] Support, privacy, abuse and business mailboxes at `qmaps.ca` receive messages and have a confirmed operator. See [issue #41](https://github.com/takatakca/qmaps/issues/41).
 - [ ] `docs/mobile-qa-checklist.md` walked on real iOS + Android
 - [ ] Owner signature recorded in [`docs/final-owner-signoff.md`](./final-owner-signoff.md)
 
 ## 6. Rollback plan
 
-If a regression is detected after publish:
-
-1. Restore the previous published version from the Lovable project
-   history (one-click rollback).
-2. Database state is **not** reverted automatically. Review any
-   in-flight migrations with `supabase--linter` before re-publishing.
-3. No service worker is registered, so clients pick up the rollback on
-   their next reload.
-4. Notify the on-call contact and post status in the support mailbox.
+If a regression is detected, follow the [Coolify rollback procedure](DEPLOYMENT.md#retour-arrière). Restore only the affected web or API resource after checking schema compatibility. Database changes and a published directory batch require separate handling. Record the restored revision and results in issue #17.
 
 ## 7. Post-launch on-call (first 72h)
 

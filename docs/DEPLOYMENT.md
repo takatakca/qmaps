@@ -1,5 +1,30 @@
 # QMAPS — Déploiement
 
+## Procédure actuelle — Coolify
+
+Le site web et l’API PostgreSQL sont deux ressources distinctes. Utiliser l’hébergement QMAPS existant et le [suivi de lancement #17](https://github.com/takatakca/qmaps/issues/17) pour la dernière preuve de production. Une CI réussie, le manifeste du site et une réponse de santé API ne prouvent pas la même chose.
+
+1. **Avant de déployer l’API.** Confirmer le SHA exact de `main` et ses workflows réussis, ainsi que la ressource `qmaps-api-postgresql` et sa cible PostgreSQL. Relever le déploiement API et la version web actuellement en service. Avant d’appliquer une migration ou un import, vérifier la sauvegarde et les changements à appliquer. Pour la construction de l’image et la vérification d’une sauvegarde en base temporaire, suivre le [guide serveur](../server/README.md).
+2. **Déployer et contrôler l’API.** Sur la ressource Compose déjà en place, faire fournir le commit source par Coolify au build. Contrôler le résultat de `qmaps-migrate`, puis la santé et le SHA de l’image sur l’API directe et les domaines web. Le contrôle ci-dessous exige aussi deux pages distinctes et le `401` JSON des préférences sans session.
+
+   ```sh
+   node scripts/verify-live-routing.mjs --api-sha "$QMAPS_APPROVED_API_SHA" --directory-pages
+   ```
+
+   Remplacer la variable par le SHA complet approuvé pour l’API ou la renseigner dans le shell. Ce n’est pas un secret. Un `404` sur la pagination ne confirme pas un annuaire vide et bloque sa bascule.
+3. **Vérifier le web séparément.** Lire `/qmaps-release.json` sur [qmaps.ca](https://qmaps.ca/qmaps-release.json), [www.qmaps.ca](https://www.qmaps.ca/qmaps-release.json) et [qmaps.takatak.ca](https://qmaps.takatak.ca/qmaps-release.json) et comparer avec la révision web attendue. Vérifier la recherche dans le site. Garder la bascule paginée [#60](https://github.com/takatakca/qmaps/pull/60) en brouillon tant que le backend ne passe pas les contrôles.
+4. **Procéder seulement dans le périmètre autorisé.** Suivre la [recette du lot pilote](quebec-directory-expansion.md#activer-ou-retirer-le-lot-après-la-recette) pour toute publication de fiches, la [recette par rôle](verification-authentifiee-qmaps.md) pour client, commerçant et administrateur, et la [recette Stripe Sandbox](preproduction-verification-stripe-sandbox.md) en préproduction isolée. Ne pas déclencher de paiement réel dans le cadre de la recette. Consigner les résultats et les deux SHA dans le ticket #17.
+
+### Retour arrière
+
+- Stopper la bascule ou la publication concernée. Identifier si la régression vient du web, de l’API ou des fiches. Utiliser le dernier déploiement vérifié de la ressource **concernée** dans Coolify. Avant de restaurer une ancienne image API, vérifier qu’elle accepte le schéma effectivement en place et que le redéploiement ne lance pas de migration incompatible. Ne pas recréer les volumes ni restaurer la base de production pour revenir à un build précédent. Si le schéma est incompatible, le responsable de la base choisit un correctif ou une restauration testée séparément.
+- Vérifier le SHA du composant rétabli, la santé, le catalogue et le refus des routes privées sans session. Pour une image qui précède le manifeste API, utiliser le SHA du déploiement enregistré dans Coolify et vérifier ses parcours publics attendus. Ne pas prendre un `404` sur le manifeste ou sur la pagination pour une preuve de succès de ces fonctions.
+- Le déploiement d’une image n’enlève pas les fiches déjà chargées. Pour retirer le lot, appliquer uniquement son [retrait ciblé](quebec-directory-expansion.md#activer-ou-retirer-le-lot-après-la-recette) avec le même manifeste privé et relire le reçu. Documenter séparément les fiches préservées et confirmer l’état public sur les deux domaines.
+
+## Archives — procédures antérieures au déploiement API PostgreSQL
+
+Les sections suivantes conservent les décisions historiques. Elles ne sont pas des instructions de publication pour la pile actuelle.
+
 ## Livraison séquentielle — Codex, 2026-11-07 UTC
 
 Source de départ : main `6e73f0f68c1791a3c34c34971b3c6c66f9b0a3cc`. Intégrations successives : PR #7 KLEAN (note historique), REVEW `0fd418b8ac6ed6bedc77520ce8c288b72bdeae68` (API avis), puis SEO `63ef0b53800b0e7857fd0cd9d150dd7ad5a716d0`. Le WORKLOG conserve les notes des agents; aucun squash ni réécriture de leur historique.
