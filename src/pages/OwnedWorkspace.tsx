@@ -69,8 +69,14 @@ function Console({ userId }: { userId: string }) {
         })}
       </div>
       <p>Base de données · {status.data.database}</p>
-      <PublisherModeration userId={userId} />
-      <PhotoModeration userId={userId} />
+      <Button asChild variant="outline">
+        <a href="#moderation">Signalements et modération</a>
+      </Button>
+      <section id="moderation" aria-labelledby="moderation-title" tabIndex={-1} className="scroll-mt-4 space-y-5">
+        <h2 id="moderation-title" className="text-2xl font-bold">Modération de l’annuaire QMAPS</h2>
+        <PublisherModeration userId={userId} />
+        <PhotoModeration userId={userId} />
+      </section>
       <ClosureQueue userId={userId} />
       {version.data && (
         <p>
@@ -83,14 +89,9 @@ function Console({ userId }: { userId: string }) {
           </a>
         </p>
       )}
-      <div className="flex flex-wrap gap-3">
-        <Button onClick={() => void status.refetch()} variant="outline">
-          Actualiser
-        </Button>
-        <Button asChild variant="outline">
-          <Link to="/admin">Gestion des fiches et modération</Link>
-        </Button>
-      </div>
+      <Button onClick={() => void status.refetch()} variant="outline">
+        Actualiser
+      </Button>
     </section>
   );
 }

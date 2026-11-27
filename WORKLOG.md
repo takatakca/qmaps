@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-owned-console-moderation | testé | ouvrir les signalements de fiches et de photos dans la console PostgreSQL sans passer par l’ancienne connexion | vérifier la CI et le SHA web après fusion
+
 2026-11-27 | Codex | codex/qmaps-coolify-launch-guide | documenté et testé | remplacer les consignes Lovable et Stripe Live par la procédure Coolify et la recette Sandbox | valider la CI, puis appliquer le guide lorsque l’accès Coolify est disponible
 
 2026-11-27 | Codex | codex/qmaps-verify-montreal-pilot | contrôle en lecture seule du lot exact et du reçu privé | prouver la visibilité ou l’absence de chaque fiche sur les deux domaines | tester le contrôle avant la publication autorisée
