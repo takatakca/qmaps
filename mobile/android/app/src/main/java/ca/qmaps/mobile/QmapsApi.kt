@@ -38,16 +38,30 @@ class SessionVault(context: Context) {
         values.edit().putString("session", packed).apply()
     }
 }
-class ApiFailure(val status: Int, message: String) : Exception(message)
+class ApiFailure(val status: Int, message: String, val json: Boolean = false) : Exception(message)
+
+fun decodeApiFailure(status: Int, contentType: String?, body: String): ApiFailure {
+    val jsonMime = contentType?.substringBefore(';')?.trim()?.equals("application/json", ignoreCase = true) == true
+    val message = runCatching {
+        val document = JSONTokener(body)
+        val error = (document.nextValue() as? JSONObject)?.opt("error") as? String
+        error?.takeIf { document.nextClean() == '\u0000' }
+    }.getOrNull()
+    return ApiFailure(status, message ?: "Service indisponible", jsonMime && message != null)
+}
+
 class QmapsApi(private val vault: SessionVault) {
-    fun request(path: String, method: String = "GET", payload: JSONObject? = null): Any {
+    fun request(path: String, method: String = "GET", payload: JSONObject? = null): Any =
+        requestForViewer(path, vault.read(), method, payload)
+
+    fun requestForViewer(path: String, viewer: String?, method: String = "GET", payload: JSONObject? = null): Any {
         val conn = URL("https://qmaps.ca/api/v1/$path").openConnection() as HttpURLConnection
         try {
             conn.requestMethod = method
             conn.instanceFollowRedirects = false
             conn.connectTimeout = 12000
             conn.readTimeout = 16000
-            vault.read()?.let { conn.setRequestProperty("Authorization","Bearer $it") }
+            viewer?.let { conn.setRequestProperty("Authorization","Bearer $it") }
             if (payload != null) {
                 conn.doOutput = true
                 conn.setRequestProperty("Content-Type","application/json")
@@ -56,7 +70,7 @@ class QmapsApi(private val vault: SessionVault) {
             val status = conn.responseCode
             if (status !in 200..299) {
                 val error = conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
-                throw ApiFailure(status, runCatching { JSONObject(error).getString("error") }.getOrDefault("Service indisponible"))
+                throw decodeApiFailure(status, conn.contentType, error)
             }
             if (status == 204) return Unit
             return JSONTokener(conn.inputStream.bufferedReader().use { it.readText() }).nextValue()

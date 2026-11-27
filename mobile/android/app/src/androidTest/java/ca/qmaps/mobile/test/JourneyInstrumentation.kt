@@ -30,6 +30,7 @@ class JourneyInstrumentation : Instrumentation() {
     override fun onStart() {
         val result = runCatching {
             verifyMunicipalCredit()
+            verifyDirectoryPages()
             val launch = Intent(targetContext, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             val activity = startActivitySync(launch)

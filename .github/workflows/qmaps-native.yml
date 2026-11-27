@@ -95,6 +95,11 @@ jobs:
         run: |
           swiftc -swift-version 5 QMAPS/Place.swift Tests/MunicipalCreditCheck.swift -o "$RUNNER_TEMP/qmaps-municipal-credit"
           "$RUNNER_TEMP/qmaps-municipal-credit"
+      - name: Verify directory pagination
+        working-directory: mobile/ios
+        run: |
+          swiftc -swift-version 5 QMAPS/Place.swift Tests/DirectoryPagesCheck.swift -o "$RUNNER_TEMP/qmaps-directory-pages"
+          "$RUNNER_TEMP/qmaps-directory-pages"
       - name: Compile the SwiftUI app for simulator and iPhone
         working-directory: mobile/ios
         run: |

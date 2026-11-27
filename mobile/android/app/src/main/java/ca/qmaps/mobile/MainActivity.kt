@@ -69,14 +69,14 @@ class MainActivity : Activity() {
         setContentView(root)
     }
     private fun run(call:()->Any, done:(Any)->Unit) {
-        val ticket=epoch;pending=true;status.text="Chargement…"
+        val ticket=epoch;val viewer=vault.read();pending=true;status.text="Chargement…"
         worker.submit {
             val result=runCatching(call)
             runOnUiThread {
                 if(isDestroyed||ticket!=epoch)return@runOnUiThread
                 pending=false;status.text=""
                 result.onSuccess(done).onFailure { error ->
-                    if(error is ApiFailure&&error.status==401&&vault.read()!=null) vault.save(null)
+                    if(error is ApiFailure&&error.status==401&&viewer!=null&&vault.read()==viewer) vault.save(null)
                     status.text=error.message ?: "Connexion impossible"
                 }
             }
@@ -103,31 +103,88 @@ class MainActivity : Activity() {
             setText(searchCity)
         }
         content.addView(action("Rechercher", availableWhileLoading = true) {
-            search = nameField.text.toString().trim()
-            searchCity = cityField.text.toString().trim()
+            val filters = DirectoryFilters(nameField.text.toString(), cityField.text.toString())
+            search = filters.name
+            searchCity = filters.city
             show("Découvrir")
         })
-        val path = Uri.Builder().path("places")
-            .appendQueryParameter("q", search)
-            .appendQueryParameter("city", searchCity)
-            .build().toString()
-        run({ api.request(path) }) { cards(it as JSONArray) }
+        val listings = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val footer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        content.addView(listings)
+        content.addView(footer)
+        val pages = DirectoryPages(DirectoryFilters(search, searchCity), vault.read())
+        val ticket = epoch
+
+        fun render(load: () -> Unit) {
+            if (listings.childCount > pages.listings.size) listings.removeAllViews()
+            for (index in listings.childCount until pages.listings.size) {
+                addCard(listings, pages.listings[index])
+            }
+            footer.removeAllViews()
+            when {
+                pages.loading -> footer.addView(label("Chargement…"))
+                pages.restart -> {
+                    pages.message?.let { footer.addView(label(it)) }
+                    footer.addView(action("Relancer la recherche") { show("Découvrir") })
+                }
+                pages.message != null -> {
+                    footer.addView(label(checkNotNull(pages.message)))
+                    footer.addView(action("Réessayer", fn = load))
+                }
+                pages.next != null -> footer.addView(action("Voir plus", fn = load))
+                pages.legacyLimited -> footer.addView(label(
+                    "Les 100 premiers résultats sont affichés. Affinez la recherche pour trouver un commerce précis."
+                ))
+                pages.loaded && pages.listings.isEmpty() -> footer.addView(label("Aucun commerce."))
+            }
+        }
+
+        fun load() {
+            val viewer = vault.read()
+            if (!pages.belongsTo(viewer)) { show("Découvrir"); return }
+            val request = pages.begin(viewer) ?: return
+            pending = true
+            render(::load)
+            worker.submit {
+                val result = runCatching { pages.requestPage(request) { path, token -> api.requestForViewer(path, token) } }
+                runOnUiThread {
+                    if (isDestroyed || ticket != epoch) return@runOnUiThread
+                    pending = false
+                    val currentViewer = vault.read()
+                    if (!pages.belongsTo(currentViewer)) { show("Découvrir"); return@runOnUiThread }
+                    result.fold(
+                        onSuccess = { pages.complete(request, currentViewer, it) },
+                        onFailure = { error ->
+                            pages.fail(request, currentViewer, error)
+                            if (error is ApiFailure && error.status == 401 && currentViewer != null && vault.read() == viewer) {
+                                vault.save(null)
+                            }
+                        }
+                    )
+                    render(::load)
+                }
+            }
+        }
+        load()
     }
     private fun cards(rows:JSONArray) {
         if(rows.length()==0)content.addView(label("Aucun commerce."))
         for(i in 0 until rows.length()) {
             val row=rows.getJSONObject(i)
-            val card=LinearLayout(this).apply {
-                id=R.id.catalogue_place
-                orientation=LinearLayout.VERTICAL;setPadding(dp(12),dp(8),dp(12),dp(8))
-                background=GradientDrawable().apply{setColor(Color.WHITE);cornerRadius=dp(10).toFloat();setStroke(dp(1),Color.LTGRAY)}
-                addView(label(row.getString("name"),18f,true));addView(label(row.optString("city"),14f))
-                setOnClickListener { detail(row.getString("id")) }
-                isFocusable=true
-            }
-            val params=LinearLayout.LayoutParams(-1,-2).apply{bottomMargin=dp(8)}
-            content.addView(card,params)
+            addCard(content, DirectoryListing(row.getString("id"), row.getString("name"), row.optString("city")))
         }
+    }
+    private fun addCard(target: LinearLayout, listing: DirectoryListing) {
+        val card=LinearLayout(this).apply {
+            id=R.id.catalogue_place
+            orientation=LinearLayout.VERTICAL;setPadding(dp(12),dp(8),dp(12),dp(8))
+            background=GradientDrawable().apply{setColor(Color.WHITE);cornerRadius=dp(10).toFloat();setStroke(dp(1),Color.LTGRAY)}
+            addView(label(listing.name,18f,true));addView(label(listing.city,14f))
+            setOnClickListener { detail(listing.id) }
+            isFocusable=true
+        }
+        val params=LinearLayout.LayoutParams(-1,-2).apply{bottomMargin=dp(8)}
+        target.addView(card,params)
     }
     private fun detail(id:String) {
         screen="Fiche";shell("Fiche du commerce")

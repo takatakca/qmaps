@@ -24,6 +24,10 @@ Déployer l’API en premier. Vérifier un HTTP 200 JSON sur la route `/api/v1/b
 
 Transmettre `next` tel quel dans `after` avec les mêmes filtres, le même tri et la même session. Un curseur invalide renvoie HTTP 400. Un curseur employé avec d’autres filtres, un autre tri ou un autre compte renvoie HTTP 409 et la recherche doit repartir de la première page. Seul `next: null` signifie que la liste est épuisée. Avec les filtres de service ou d’ouverture, une page peut être vide et contenir un curseur de continuation. Les données et l’ouverture sont évaluées à chaque requête, ce qui peut faire évoluer les résultats entre deux pages.
 
+Les applications natives demandent 24 fiches et utilisent le classement recommandé. Elles demandent la page suivante seulement après un appui sur « Voir plus ». Tant que la route n’existe pas sur l’hébergement, un premier HTTP 404 JSON « Introuvable » permet d’utiliser la recherche historique, dont la réponse est limitée à 100. Cette limite est signalée au plafond. Les erreurs et les continuations ne basculent pas vers le catalogue historique. Les favoris et le détail gardent leurs routes existantes.
+
+Après déploiement, le contrôle en lecture seule `node scripts/verify-live-routing.mjs --directory-pages` confirme deux pages distinctes de Montréal sur les routes web et natives. Le repli historique des applications ne constitue pas une preuve de déploiement de la pagination.
+
 ## Sauvegarde et récupération
 
 La tâche quotidienne Coolify exécute `sh /opt/qmaps/server/db/backup.sh` dans
