@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-native-municipal-credit | recettes de décodage Swift et Kotlin réussies, ressources et sources Android compilées avec le SDK 36 | afficher la provenance et la licence des fiches municipales sur Android et iOS | confirmer l’assemblage et les parcours sur émulateur Android et simulateur iOS dans la CI native
+
 2026-11-27 | Codex | codex/qmaps-owned-listing-entry | Chromium 390 et 1 366 px validé avec PostgreSQL jetable | ouvrir directement les fiches QMAPS depuis les cartes et respecter leur retrait | vérifier le déploiement web sur les trois domaines
 
 2026-11-27 | Codex | codex/qmaps-flexs-restaurant-pilot | 15 fiches activées puis retirées sur PostgreSQL jetable | afficher le crédit municipal et préserver avis, favoris et médias au retrait | confirmer la pagination et le crédit sur l’hébergement autorisé avant publication

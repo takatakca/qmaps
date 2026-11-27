@@ -136,6 +136,13 @@ class MainActivity : Activity() {
             content.addView(label(row.getString("name"),22f,true))
             content.addView(label(row.getString("city")+" · "+row.getString("address")))
             if(!row.isNull("description"))content.addView(label(row.getString("description")))
+            MunicipalCredit.reference(row)?.let { reference ->
+                content.addView(label("Fiche de source municipale", 16f, true))
+                content.addView(creditLink("Ville de Montréal, « Établissements alimentaires »", MunicipalCredit.sourceUrl))
+                content.addView(label("Référence municipale $reference"))
+                content.addView(creditLink("CC BY 4.0", MunicipalCredit.licenceUrl))
+                content.addView(label("Adaptation par FLEXS et QMAPS. Les horaires et l’exploitant actuel ne sont pas confirmés.", 14f))
+            }
             content.addView(action("Signaler la fiche") { report(id,"business") })
             if (row.optBoolean("can_block")) {
                 content.addView(action("Signaler l’éditeur") { report(id,"user") })
@@ -161,6 +168,13 @@ class MainActivity : Activity() {
                     })
                 }
             }
+        }
+    }
+    private fun creditLink(title: String, url: String) = action(title, availableWhileLoading = true) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: ActivityNotFoundException) {
+            status.text = "Ouvrez $url dans un navigateur."
         }
     }
     private fun report(id:String,subject:String) {

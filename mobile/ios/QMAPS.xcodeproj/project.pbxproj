@@ -4,6 +4,8 @@
 7437357BE3692EEA89266CF2 = { isa = PBXBuildFile; fileRef = 5A7F563707935082D731E3E9; };
 7D8CFA98D8D3943FEE0BEE98 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 664F0C774A5FC9264AB04BD2 = { isa = PBXBuildFile; fileRef = 7D8CFA98D8D3943FEE0BEE98; };
+DE7825021FB4499C95741456 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+335E01D22D243FA59B0D7646 = { isa = PBXBuildFile; fileRef = DE7825021FB4499C95741456; };
 9E17CA2B00999FB02DD9328D = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Places.swift; sourceTree = "<group>"; };
 9B2C81CFB65E8A3C557825DA = { isa = PBXBuildFile; fileRef = 9E17CA2B00999FB02DD9328D; };
 35EA9B9113D279D8580424AC = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -11,11 +13,11 @@
 795A02A63DC9C1E86758E98F = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 070048F437A415A8B24F192B = { isa = PBXBuildFile; fileRef = 795A02A63DC9C1E86758E98F; };
 A172CEDCAE47474B615C54D5 = { isa = PBXFileReference; explicitFileType = wrapper.application; path = QMAPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-878A52FC5FF6A57D50B7B870 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (7437357BE3692EEA89266CF2,664F0C774A5FC9264AB04BD2,9B2C81CFB65E8A3C557825DA,974B4A2A30C7470354BCE6B5,); runOnlyForDeploymentPostprocessing = 0; };
+878A52FC5FF6A57D50B7B870 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (7437357BE3692EEA89266CF2,664F0C774A5FC9264AB04BD2,335E01D22D243FA59B0D7646,9B2C81CFB65E8A3C557825DA,974B4A2A30C7470354BCE6B5,); runOnlyForDeploymentPostprocessing = 0; };
 41D311A605520FC7B8B9A980 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (070048F437A415A8B24F192B,); runOnlyForDeploymentPostprocessing = 0; };
 E2AA269EB967A8853A258BFA = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 B92ABFAC95CFF2B9F275BD24 = { isa = PBXGroup; children = (D0C480A8B8900B7B3130FBB7,0A3E27B8CA818264D75C8D81,); sourceTree = "<group>"; };
-D0C480A8B8900B7B3130FBB7 = { isa = PBXGroup; children = (5A7F563707935082D731E3E9,7D8CFA98D8D3943FEE0BEE98,9E17CA2B00999FB02DD9328D,35EA9B9113D279D8580424AC,795A02A63DC9C1E86758E98F,); path = QMAPS; sourceTree = "<group>"; };
+D0C480A8B8900B7B3130FBB7 = { isa = PBXGroup; children = (5A7F563707935082D731E3E9,7D8CFA98D8D3943FEE0BEE98,DE7825021FB4499C95741456,9E17CA2B00999FB02DD9328D,35EA9B9113D279D8580424AC,795A02A63DC9C1E86758E98F,); path = QMAPS; sourceTree = "<group>"; };
 0A3E27B8CA818264D75C8D81 = { isa = PBXGroup; children = (A172CEDCAE47474B615C54D5,); name = Products; sourceTree = "<group>"; };
 73EBF6644258C120893E685D = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; ENABLE_TESTABILITY = YES; }; name = Debug; };
 0B0C687DF8B6B8DC790B519C = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; SWIFT_COMPILATION_MODE = wholemodule; }; name = Release; };
