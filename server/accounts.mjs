@@ -16,10 +16,10 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
-export async function transaction(pool, fn) {
+export async function transaction(pool, fn, { readOnly = false } = {}) {
   const db = await pool.connect();
   try {
-    await db.query("BEGIN");
+    await db.query(readOnly ? "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY" : "BEGIN");
     const result = await fn(db);
     await db.query("COMMIT");
     return result;

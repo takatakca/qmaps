@@ -16,6 +16,14 @@ Les routes `/v1/browser/` utilisent un cookie de session Secure, HttpOnly et Sam
 
 Déployer l’API en premier. Vérifier un HTTP 200 JSON sur la route `/api/v1/browser/directory/nearby` de chacun des domaines QMAPS avec les coordonnées et la limite ci-dessus. Basculer ensuite la rangée web « À proximité ». Une route 404 ne constitue pas un catalogue vide et ne valide pas la bascule.
 
+### Résultats de recherche paginés
+
+`GET /v1/directory/results` et `GET /v1/browser/directory/results` renvoient `{items, next}`. Les résultats sont classés sur l’ensemble de la recherche avant pagination, avec l’identifiant comme départage. `limit` accepte 1 à 48 fiches et vaut 24 par défaut. Le paramètre `sort` accepte `recommended`, `rating`, `reviews`, `newest` et `distance`. Les filtres `q`, `city`, `category`, `match`, `price` et `rating` conservent les règles de l’annuaire. Les paramètres `service` sont répétables et exigent que tous les services soient offerts. `open=1` évalue l’ouverture à l’heure du Québec (`America/Toronto`) et tient compte des horaires spéciaux et de ceux qui dépassent minuit.
+
+`lat` et `lng` sont nécessaires pour le tri par distance et pour appliquer un rayon de 1, 3, 5, 10, 25 ou 50 km. Quand les deux sont fournis, la réponse donne aussi une distance arrondie au mètre, ou `null` pour une fiche sans position. Sans rayon, ces fiches arrivent après les fiches géolocalisées dans le tri par distance.
+
+Transmettre `next` tel quel dans `after` avec les mêmes filtres, le même tri et la même session. Un curseur invalide renvoie HTTP 400. Un curseur employé avec d’autres filtres, un autre tri ou un autre compte renvoie HTTP 409 et la recherche doit repartir de la première page. Seul `next: null` signifie que la liste est épuisée. Avec les filtres de service ou d’ouverture, une page peut être vide et contenir un curseur de continuation. Les données et l’ouverture sont évaluées à chaque requête, ce qui peut faire évoluer les résultats entre deux pages.
+
 ## Sauvegarde et récupération
 
 La tâche quotidienne Coolify exécute `sh /opt/qmaps/server/db/backup.sh` dans

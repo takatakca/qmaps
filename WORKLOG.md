@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-directory-results-api | API validée sur PostgreSQL/PostGIS jetable, non déployée | servir la recherche Québec par pages ordonnées sans modifier les routes existantes | tests HTTP des cinq tris, filtres, curseurs, visibilité et alias navigateur réussis, avec cinq tests unitaires d’horaires et services. Étape suivante : confirmer la charge réelle et le HTTP 200 sur les domaines QMAPS avant la bascule web et l’import public.
+
 2026-11-27 | Codex | codex/qmaps-quebec-directory-stage | 155 634 fiches chargées en privé sur base jetable | retrouver le catalogue FLEXS et préparer l’import Québec avec licences distinctes | vérifier la pagination et la charge avant publication
 
 2026-11-27 | Codex | codex/qmaps-home-nearby-directory | Chromium et API validés sur base jetable | lire la proximité de l’accueil depuis PostgreSQL QMAPS | garder le brouillon jusqu’au HTTP 200 de la route Coolify
