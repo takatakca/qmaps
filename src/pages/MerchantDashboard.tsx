@@ -48,7 +48,8 @@ const MerchantDashboard = () => {
       setTab(deepLinkedTab);
     }
   }, [deepLinkedTab]);
-  const { plan, isFree } = useMerchantSubscription(selectedBiz?.id ?? null);
+  const { plan, isFree, status } = useMerchantSubscription(selectedBiz?.id ?? null);
+  const subscriptionInactive = status === "canceled";
 
   useEffect(() => {
     if (user && selectedBiz && businessesOwnerId === user.id) {
@@ -236,16 +237,18 @@ const MerchantDashboard = () => {
 
             {selectedBiz && (
               <button
-                onClick={() => navigate("/merchant/billing/plans")}
+                onClick={() => navigate(subscriptionInactive ? "/merchant/billing" : "/merchant/billing/plans")}
                 className="w-full flex items-center justify-between gap-2 mb-4 px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
               >
                 <div className="flex items-center gap-2 text-sm">
                   <Sparkles size={14} className="text-primary" />
                   <span className="text-muted-foreground">Plan :</span>
-                  <Badge variant={isFree ? "secondary" : "default"}>{planLabel(plan)}</Badge>
+                  <Badge variant={isFree || subscriptionInactive ? "secondary" : "default"}>
+                    {subscriptionInactive ? "Abonnement inactif" : planLabel(plan)}
+                  </Badge>
                 </div>
                 <span className="text-xs text-primary font-semibold">
-                  {isFree ? "Améliorer" : "Gérer"}
+                  {subscriptionInactive ? "Facturation" : isFree ? "Améliorer" : "Gérer"}
                 </span>
               </button>
             )}

@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-billing-canceled-display | interface testée | distinguer une annulation effective d’une période encore en cours | valider la CI et confirmer l’annulation dans la recette Stripe Sandbox
+
 2026-11-26 | Codex | codex/qmaps-stripe-existing-subscription | régression et correctif vérifiés | éviter un nouveau Checkout pour un abonnement Stripe en cours | valider la CI puis tester le Checkout et le portail dans Stripe Sandbox
 
 2026-11-26 | Codex | codex/qmaps-stripe-webhook-order | régression et correctif vérifiés | conserver l’état Stripe actuel lors des livraisons hors ordre | valider la CI puis déployer le webhook en préproduction Sandbox autorisée

@@ -85,6 +85,7 @@ const MerchantBilling = () => {
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("fr-CA")
     : null;
+  const subscriptionInactive = status === "canceled";
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto">
@@ -96,7 +97,8 @@ const MerchantBilling = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center gap-2">
-              Plan actuel <Sparkles size={16} className="text-primary" />
+              {subscriptionInactive ? "Dernier abonnement" : "Plan actuel"}
+              <Sparkles size={16} className="text-primary" />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -111,9 +113,9 @@ const MerchantBilling = () => {
               <>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-semibold text-foreground">{planLabel(plan)}</span>
-                  <Badge variant={isFree ? "secondary" : "default"}>{statusLabel(status)}</Badge>
+                  <Badge variant={isFree || subscriptionInactive ? "secondary" : "default"}>{statusLabel(status)}</Badge>
                 </div>
-                {periodEnd && (
+                {!subscriptionInactive && periodEnd && (
                   <p className="text-xs text-muted-foreground">
                     Période en cours jusqu'au {periodEnd}
                     {subscription?.cancel_at_period_end ? " — annulation prévue" : ""}
