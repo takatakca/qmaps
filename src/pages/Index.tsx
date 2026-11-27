@@ -91,7 +91,7 @@ const Index = () => {
       <main className="mx-auto w-full max-w-6xl space-y-12 px-5 pt-10 sm:px-8 md:space-y-16 md:pt-14">
         <CategoryShowcase city={city} />
 
-        {/* Real listings — every card below is backed by public.businesses */}
+        {/* The nearby row uses its own bounded geographic query. */}
         <BusinessListingRow
           eyebrow="Autour de vous"
           title={t("nearby")}

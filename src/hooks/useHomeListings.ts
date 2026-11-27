@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import { topPlaces, type DirectoryPlace } from "@/lib/ownedDirectory";
 
 /**
- * Homepage listings — REAL data only.
- *
- * Reads `public.businesses` (RLS-protected, public read of active rows) plus the
- * `business_categories -> categories` join for a display category. Nothing on the
- * homepage is mocked: if a section has no rows, the UI shows an honest empty state.
- *
- * Fields consumed (see docs/takatak-integration.md):
- *   id, name, city, address, avg_rating, reviews_count, price_level, status,
- *   is_open, is_active, is_claimed, image_url, photos, created_at, updated_at
+ * Public homepage rows use the same catalogue as browser search. Keep the
+ * candidate window bounded and the category display separate from the API shape.
  */
-export type HomeListing = Tables<"businesses"> & {
+export type HomeListing = Pick<DirectoryPlace,
+  "id" | "name" | "city" | "avg_rating" | "reviews_count" | "price_level" | "status" |
+  "is_open" | "is_claimed" | "image_url" | "photos" | "created_at"
+> & {
   category_name?: string | null;
   category_slug?: string | null;
 };
@@ -33,9 +28,8 @@ const FOOD = /restaur|poutin|bistro|caf[eé]|traiteur|pizz|sushi|burger|brasseri
 const SERVICE = /nettoy|[eé]lectric|plomb|construc|r[eé]nov|auto|garage|m[eé]canic|beaut|salon|coiff|sant|clinique|avocat|notaire|comptab|imp[oô]t|marketing|web|design|d[eé]m[eé]nag|paysag|toiture|service/i;
 const ESSENTIAL = /[eé]picer|d[eé]panneur|march[eé]|alimentation|pharmac|boucher|fruiterie|quincaill/i;
 
-const VISIBLE_STATUSES = ["open", "temporarily_closed", "seasonal"];
-
 const score = (b: HomeListing) => Number(b.avg_rating || 0) * 10 + Math.min(b.reviews_count || 0, 100) / 10;
+const createdAt = (b: HomeListing) => Date.parse(b.created_at ?? "") || 0;
 
 export const useHomeListings = (perSection = 10): HomeListings => {
   const [rows, setRows] = useState<HomeListing[]>([]);
@@ -43,38 +37,26 @@ export const useHomeListings = (perSection = 10): HomeListings => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     const run = async () => {
-      const { data, error: queryError } = await supabase
-        .from("businesses")
-        .select("*, business_categories(categories(name, slug))")
-        .eq("is_active", true)
-        .in("status", VISIBLE_STATUSES)
-        .order("avg_rating", { ascending: false })
-        .limit(60);
-
-      if (cancelled) return;
-      if (queryError) {
+      try {
+        const places = await topPlaces(new URLSearchParams(), 60, controller.signal);
+        if (controller.signal.aborted) return;
+        setRows(places.map(place => {
+          const category = place.business_categories?.[0]?.categories;
+          return { ...place, category_name: category?.name ?? null, category_slug: category?.slug ?? null };
+        }));
+        setError(null);
+      } catch {
+        if (controller.signal.aborted) return;
         setError("Impossible de charger les entreprises pour le moment.");
         setRows([]);
-      } else {
-        setRows(
-          ((data ?? []) as unknown as Array<Tables<"businesses"> & {
-            business_categories?: { categories?: { name?: string | null; slug?: string | null } | null }[] | null;
-          }>).map((row) => {
-            const cat = row.business_categories?.[0]?.categories;
-            const { business_categories: _drop, ...business } = row;
-            return { ...business, category_name: cat?.name ?? null, category_slug: cat?.slug ?? null };
-          }),
-        );
-        setError(null);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-      setLoading(false);
     };
     void run();
-    return () => {
-      cancelled = true;
-    };
+    return () => controller.abort();
   }, []);
 
   const text = (b: HomeListing) => `${b.category_name ?? ""} ${b.category_slug ?? ""} ${b.name}`;
@@ -84,7 +66,7 @@ export const useHomeListings = (perSection = 10): HomeListings => {
     popular: [...rows].sort((a, b) => score(b) - score(a)).slice(0, perSection),
     services: rows.filter((b) => SERVICE.test(text(b)) && !FOOD.test(text(b))).sort((a, b) => score(b) - score(a)).slice(0, perSection),
     recent: [...rows]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .sort((a, b) => createdAt(b) - createdAt(a))
       .slice(0, perSection),
     essentials: rows.filter((b) => ESSENTIAL.test(text(b))).slice(0, perSection),
     loading,
