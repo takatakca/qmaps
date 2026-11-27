@@ -35,6 +35,8 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
+      args:
+        QMAPS_BUILD_REVISION: ${SOURCE_COMMIT:-}
     environment:
       PGHOST: qmaps-db
       PGDATABASE: qmaps

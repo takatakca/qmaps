@@ -23,6 +23,12 @@ an absent continuation, duplicate listings or a cursor that does not advance doe
 not prove the new API is ready. The default command still verifies the existing
 public service without requiring pagination.
 
+To prove the API image revision, run `node scripts/verify-live-routing.mjs --api-sha SHA`
+with the full lowercase Git SHA selected for the API deployment. This compares
+the direct API with the API reached through each public web domain. The static
+`/qmaps-release.json` records the web revision only. Check it separately when web
+and API deployments advance at different times.
+
 | # | Route | Expected | Result |
 |---|-------|----------|--------|
 | 1 | `/` | Home renders, no console errors | NOT CHECKED |

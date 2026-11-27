@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { verifyDirectoryPages, verifyLiveRouting } from "../../scripts/verify-live-routing.mjs";
+import { verifyApiRelease, verifyDirectoryPages, verifyLiveRouting } from "../../scripts/verify-live-routing.mjs";
 
 function apiResponse(url: string) {
   if (url.endsWith("/health")) return Response.json({ service: "QMAPS", database: "PostgreSQL" });
@@ -54,6 +54,59 @@ describe("QMAPS live routing smoke", () => {
     const results = await verifyLiveRouting(request);
     expect(results).toHaveLength(12);
     expect(results.filter(result => result.error)).toHaveLength(2);
+  });
+
+  describe("opt-in API revision proof", () => {
+    const sha = "1234567890abcdef1234567890abcdef12345678";
+    const release = { service: "QMAPS", component: "api", sha };
+
+    it("checks the API independently of the web manifest on all four origins", async () => {
+      const request = vi.fn(async (url: string, options: RequestInit) => {
+        expect(new Headers(options.headers).has("Authorization")).toBe(false);
+        expect(options.redirect).toBe("manual");
+        expect(url).toMatch(/\/v1\/release$/);
+        return Response.json(release, { headers: { "Cache-Control": "private, no-store" } });
+      });
+      const result = await verifyApiRelease(sha, request);
+      expect(request).toHaveBeenCalledTimes(4);
+      expect(result).toEqual([
+        { url: "https://qmaps.ca/api/v1/release", error: null },
+        { url: "https://www.qmaps.ca/api/v1/release", error: null },
+        { url: "https://qmaps.takatak.ca/api/v1/release", error: null },
+        { url: "https://api.qmaps.ca/v1/release", error: null },
+      ]);
+    });
+
+    it("detects an old or unstamped API and rejects a web manifest or HTML", async () => {
+      const stale = "a".repeat(40);
+      const request = vi.fn(async (url: string) => {
+        const host = new URL(url).hostname;
+        if (host === "qmaps.ca") return Response.json({ ...release, sha: stale }, {
+          headers: { "Cache-Control": "no-store" },
+        });
+        if (host === "www.qmaps.ca") return Response.json({ ...release, sha: null }, { status: 503 });
+        if (host === "qmaps.takatak.ca") return Response.json({ sha });
+        return new Response("<html>QMAPS</html>", { headers: { "content-type": "text/html" } });
+      });
+      const result = await verifyApiRelease(sha, request);
+      expect(result.map(check => check.error)).toEqual([
+        expect.stringContaining(stale),
+        expect.stringContaining("503"),
+        expect.stringContaining("image API"),
+        expect.stringContaining("text/html"),
+      ]);
+    });
+
+    it("requires a complete known SHA before contacting the API", async () => {
+      const request = vi.fn();
+      await expect(verifyApiRelease("54d5eaf", request)).rejects.toThrow("40 caractères");
+      expect(request).not.toHaveBeenCalled();
+    });
+
+    it("does not accept a cacheable API manifest even with the expected SHA", async () => {
+      const request = async () => Response.json(release, { headers: { "Cache-Control": "public, max-age=60" } });
+      expect((await verifyApiRelease(sha, request)).every(check => check.error?.includes("mise en cache"))).toBe(true);
+    });
   });
 
   describe("opt-in directory pagination", () => {

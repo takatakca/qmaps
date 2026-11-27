@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-api-release-proof | contrôle API distinct du web, 589 tests et 16 points de lancement réussis | mesurer le SHA inscrit dans l’image Coolify | valider la CI Compose puis contrôler le prochain déploiement API avec SOURCE_COMMIT disponible au build
+
 2026-11-27 | Codex | codex/qmaps-native-directory-pages | contrat vérifié sur 58 pages PostgreSQL et compatibilité préparée | charger par pages de 24 sur Android et iOS et contrôler deux pages sur les domaines | vérifier la CI native et garder le repli jusqu’au déploiement API
 
 2026-11-27 | Codex | codex/qmaps-native-municipal-credit | recettes de décodage Swift et Kotlin réussies, ressources et sources Android compilées avec le SDK 36 | afficher la provenance et la licence des fiches municipales sur Android et iOS | confirmer l’assemblage et les parcours sur émulateur Android et simulateur iOS dans la CI native

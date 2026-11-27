@@ -10,6 +10,14 @@ Pour déployer, choisir **Docker Compose** depuis le dépôt QMAPS dans Coolify,
 
 Les routes `/v1/browser/` utilisent un cookie de session Secure, HttpOnly et SameSite=Strict. Une écriture par navigateur nécessite l’origine HTTPS QMAPS. Les comptes web et mobiles appartiennent au même répertoire. La console lit `/v1/browser/console`, réservé aux administrateurs. Pour le premier propriétaire, vérifier son identifiant auprès de lui, relever son UUID dans PostgreSQL et appliquer `server/db/grant-owner.sql` avec `psql -X -d qmaps -v owner_id=UUID -f grant-owner.sql`. Aucun privilège ne découle de l’inscription.
 
+### Révision de l’image API
+
+Sur la ressource Git Docker Compose de l’API QMAPS dans Coolify, vérifier **Advanced → Build → Source commit availability → Available during build**. Le Compose transmet alors le `SOURCE_COMMIT` sélectionné par Coolify à l’argument de construction `QMAPS_BUILD_REVISION`. Ne pas saisir de SHA manuel comme variable d’exécution. Pour une construction locale depuis un dépôt Git propre, utiliser `SOURCE_COMMIT="$(git rev-parse HEAD)" docker compose -f compose.qmaps.yaml build qmaps-api`. [Documentation Coolify](https://coolify.io/docs/applications/configuration/advanced#source-commit-availability)
+
+`GET /v1/release` et son alias navigateur renvoient le SHA complet inscrit dans l’image. Sans SHA valide, le service répond HTTP 503 avec un SHA nul sur cette route seulement. La santé PostgreSQL n’est pas modifiée. Le fichier ne prouve que la révision fournie à la construction par l’hébergement autorisé. Vérifier aussi les fonctionnalités attendues après le déploiement.
+
+Exécuter `node scripts/verify-live-routing.mjs --api-sha SHA` avec le SHA approuvé dans Coolify. Le contrôle exige la même révision sur l’API directe et via les trois domaines publics. Un SHA servi à `/qmaps-release.json` décrit le web et ne prouve jamais la version de l’API.
+
 ### Fiches à proximité
 
 `GET /v1/directory/nearby?lat=45.509&lng=-73.554&limit=6` et sa route navigateur utilisent les mêmes règles de visibilité que l’annuaire. Ils renvoient les fiches géolocalisées à 10 km ou moins, classées par distance en mètres, puis par identifiant. La limite par défaut est 6 et le maximum est 24. La réponse contient `items`, un `distance_meters` pour chaque fiche et `next: null`. Le filtre spatial s’appuie sur l’index PostGIS existant. Aucune migration de schéma n’est nécessaire.
