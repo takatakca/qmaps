@@ -42,6 +42,16 @@ const photoRoute = new RegExp(
 );
 const catalogue =
   "id,name,city,address,description,latitude,longitude,price_level,avg_rating,reviews_count,hours_json";
+function publicMunicipalImport(marker) {
+  if (marker?.source !== "mtl_food" || marker.licence !== "CC-BY-4.0" ||
+      typeof marker.external_id !== "string" || !/^[1-9][0-9]{0,19}$/.test(marker.external_id))
+    return null;
+  const cohort = typeof marker.cohort === "string" &&
+    /^mtl-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9][a-z0-9-]{0,31}$/.test(marker.cohort)
+    ? marker.cohort : null;
+  return { source: "mtl_food", licence: "CC-BY-4.0", external_id: marker.external_id,
+    ...(cohort ? { cohort } : {}) };
+}
 function reply(res, status, value) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(value === undefined ? undefined : JSON.stringify(value));
@@ -561,19 +571,17 @@ async function route(req, res) {
         ),
       ),
     );
-  if (!action && method === "GET")
-    return reply(
-      res,
-      200,
-      first(
-        await scoped(id, (db) =>
-          db.query(
-            `SELECT ${catalogue}, owner_user_id IS NOT NULL AND owner_user_id IS DISTINCT FROM auth.uid() AS can_block FROM public.businesses WHERE id=$1 AND is_active AND public.qmaps_can_see_publisher(owner_user_id)`,
-            [business],
-          ),
-        ),
-      ),
-    );
+  if (!action && method === "GET") {
+    const { municipal_import, ...place } = first(await scoped(id, (db) => db.query(
+      `SELECT ${catalogue}, owner_user_id IS NOT NULL AND owner_user_id IS DISTINCT FROM auth.uid() AS can_block,
+          attributes->'qmaps_directory_import' AS municipal_import
+      FROM public.businesses WHERE id=$1 AND is_active AND public.qmaps_can_see_publisher(owner_user_id)`,
+      [business],
+    )));
+    const provenance = publicMunicipalImport(municipal_import);
+    return reply(res, 200, provenance
+      ? { ...place, attributes: { qmaps_directory_import: provenance } } : place);
+  }
   if (action === "photos" && method === "GET")
     return reply(
       res,
