@@ -49,6 +49,7 @@ describe("public QMAPS detail", () => {
     expect(host.textContent).toContain("Fiche d’exemple");
     expect(host.querySelector('a[href*="onglet=avis"]')).toBeNull();
     expect(document.title).not.toContain("Démo");
+    expect(document.head.querySelector("meta[name='robots']")?.getAttribute("content")).toBe("noindex,follow");
     expect(fetchPlace).toHaveBeenCalledWith("/api/v1/browser/places/" + id, expect.objectContaining({ method: "GET" }));
   });
 

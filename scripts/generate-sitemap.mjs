@@ -1,13 +1,17 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, mkdtemp, readdir, rename, rm, writeFile } from "node:fs/promises";
+import { resolve, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { exampleListings, ownedListingPermalink } from "../src/lib/ownedListingIdentity.mjs";
 
 export const SITE_ORIGIN = "https://qmaps.ca";
-export const CITY_MINIMUM_LISTINGS = 3;
 export const SITEMAP_URL_LIMIT = 50_000;
-const PAGE_SIZE = 1_000;
-
-const STATIC_PATHS = ["/", "/services", "/release-notes", "/privacy", "/terms", "/cookies", "/support-policy", "/account-deletion-policy"];
+const SITEMAP_BYTE_LIMIT = 50 * 1024 * 1024;
+const PAGE_SIZE = 250;
+const MAX_PAGES = 2_000;
+const staticPaths = ["/", "/services", "/city/montreal", "/release-notes", "/privacy", "/terms", "/cookies", "/support-policy", "/account-deletion-policy"];
+const allowedStatuses = new Set(["open", "temporarily_closed", "seasonal"]);
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const namespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
 export function escapeXml(value) {
   return String(value)
@@ -18,153 +22,123 @@ export function escapeXml(value) {
     .replace(/'/g, "&apos;");
 }
 
-const toCitySlug = (city) =>
-  city
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-export function buildSitemapEntries(businesses, origin = SITE_ORIGIN) {
-  const entries = STATIC_PATHS.map((path) => ({ loc: new URL(path, origin).href }));
-  const cities = new Map();
-
-  for (const business of businesses) {
-    if (!business || typeof business.id !== "string" || !business.id.trim()) continue;
-
-    const entry = {
-      loc: new URL(`/business/${encodeURIComponent(business.id)}`, origin).href,
-      lastmod: business.updated_at,
-    };
-    entries.push(entry);
-
-    if (typeof business.city !== "string" || !business.city.trim()) continue;
-    const slug = toCitySlug(business.city);
-    if (!slug) continue;
-
-    const city = cities.get(slug) || { name: business.city.trim(), count: 0, lastmod: "" };
-    city.count += 1;
-    if (business.updated_at && business.updated_at > city.lastmod) {
-      city.lastmod = business.updated_at;
-    }
-    cities.set(slug, city);
-  }
-
-  for (const [slug, city] of cities) {
-    if (city.count < CITY_MINIMUM_LISTINGS) continue;
-    entries.push({
-      loc: new URL(`/city/${slug}`, origin).href,
-      lastmod: city.lastmod,
-    });
-  }
-
-  return [...new Map(entries.map((entry) => [entry.loc, entry])).values()];
+function hasReviewedProvenance(listing) {
+  if (Object.hasOwn(exampleListings, listing.id)) return false;
+  const marker = listing.attributes?.qmaps_directory_import;
+  // Only import lanes already reviewed for QMAPS publication. No labels,
+  // contacts, source URLs or other row fields are copied into the sitemap.
+  if (typeof marker?.external_id !== "string") return false;
+  return (marker.source === "on2go.ca" && /^[a-z0-9-]{1,100}@[a-z0-9-]{1,40}$/.test(marker.external_id)) ||
+    (marker.source === "mtl_food" && marker.licence === "CC-BY-4.0" && /^[1-9][0-9]{0,19}$/.test(marker.external_id));
 }
 
-const validLastmod = (value) => {
-  if (!value) return "";
-  const date = new Date(value);
-  return Number.isNaN(date.valueOf()) ? "" : `\n    <lastmod>${date.toISOString()}</lastmod>`;
-};
-
-export function buildUrlSet(entries) {
-  const urls = entries
-    .map(
-      ({ loc, lastmod }) =>
-        `  <url>\n    <loc>${escapeXml(loc)}</loc>${validLastmod(lastmod)}\n  </url>`,
-    )
-    .join("\n");
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+export function buildSitemapEntries(listings) {
+  const listingPaths = [...new Set(listings.filter(row =>
+    row && typeof row.id === "string" && uuid.test(row.id) &&
+    allowedStatuses.has(row.status) && hasReviewedProvenance(row),
+  ).map(row => row.id))].sort().map(ownedListingPermalink);
+  return [...staticPaths, ...listingPaths].map(path => ({ loc: new URL(path, SITE_ORIGIN).href }));
 }
 
-export function buildSitemapFiles(entries, origin = SITE_ORIGIN) {
-  if (entries.length <= SITEMAP_URL_LIMIT) {
-    return new Map([["sitemap.xml", buildUrlSet(entries)]]);
-  }
+function xmlDocument(tag, children) {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<${tag} xmlns="${namespace}">\n${children.join("\n")}\n</${tag}>\n`;
+  if (Buffer.byteLength(xml) > SITEMAP_BYTE_LIMIT) throw new Error("Sitemap exceeds the uncompressed XML size limit.");
+  return xml;
+}
 
+const xmlEntries = (tag, locations) => locations.map(loc => `  <${tag}><loc>${escapeXml(loc)}</loc></${tag}>`);
+
+export function buildSitemapFiles(entries) {
   const files = new Map();
-  const chunkCount = Math.ceil(entries.length / SITEMAP_URL_LIMIT);
-  const index = [];
-  for (let chunk = 0; chunk < chunkCount; chunk += 1) {
-    const name = `sitemap-${chunk + 1}.xml`;
-    const chunkEntries = entries.slice(
-      chunk * SITEMAP_URL_LIMIT,
-      (chunk + 1) * SITEMAP_URL_LIMIT,
-    );
-    files.set(name, buildUrlSet(chunkEntries));
-    index.push(new URL(`/${name}`, origin).href);
+  if (entries.length <= SITEMAP_URL_LIMIT) {
+    files.set("sitemap.xml", xmlDocument("urlset", xmlEntries("url", entries.map(({ loc }) => loc))));
+    return files;
   }
-
-  const sitemaps = index
-    .map((loc) => `  <sitemap>\n    <loc>${escapeXml(loc)}</loc>\n  </sitemap>`)
-    .join("\n");
-  files.set(
-    "sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemaps}\n</sitemapindex>\n`,
-  );
+  const index = [];
+  for (let offset = 0; offset < entries.length; offset += SITEMAP_URL_LIMIT) {
+    const name = `sitemap-${index.length + 1}.xml`;
+    const locations = entries.slice(offset, offset + SITEMAP_URL_LIMIT).map(({ loc }) => loc);
+    files.set(name, xmlDocument("urlset", xmlEntries("url", locations)));
+    index.push(new URL(`/${name}`, SITE_ORIGIN).href);
+  }
+  files.set("sitemap.xml", xmlDocument("sitemapindex", xmlEntries("sitemap", index)));
   return files;
 }
 
-export async function fetchActiveBusinesses(supabaseUrl, publishableKey) {
-  const endpoint = new URL("rest/v1/businesses", supabaseUrl.replace(/\/?$/, "/"));
-  endpoint.searchParams.set("select", "id,city,updated_at");
-  endpoint.searchParams.set("is_active", "eq.true");
-  endpoint.searchParams.set("order", "updated_at.desc,id.asc");
-
-  const businesses = [];
-  for (let offset = 0; ; offset += PAGE_SIZE) {
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: publishableKey,
-        Authorization: `Bearer ${publishableKey}`,
-        Range: `${offset}-${offset + PAGE_SIZE - 1}`,
-      },
+export async function fetchPublicDirectory({ request = fetch, pageSize = PAGE_SIZE } = {}) {
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > PAGE_SIZE) throw new TypeError("Invalid directory page size.");
+  const endpoint = new URL("/api/v1/browser/directory", SITE_ORIGIN);
+  endpoint.searchParams.set("limit", String(pageSize));
+  const listings = [];
+  let previous = "";
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const response = await request(new URL(endpoint), {
+      headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+      credentials: "omit",
+      redirect: "error",
+      signal: AbortSignal.timeout(10_000),
     });
-    if (!response.ok) {
-      throw new Error(`Sitemap business query failed with HTTP ${response.status}.`);
+    if (response.status !== 200 || response.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !== "application/json")
+      throw new Error(`QMAPS public directory returned HTTP ${response.status} or a non-JSON response.`);
+    const payload = await response.json();
+    if (!Array.isArray(payload?.items) || payload.items.length > pageSize)
+      throw new Error("QMAPS public directory returned an invalid page.");
+    for (const row of payload.items) {
+      if (typeof row?.id !== "string" || !uuid.test(row.id) || row.id <= previous || !allowedStatuses.has(row.status))
+        throw new Error("QMAPS public directory returned an invalid or out-of-order listing.");
+      previous = row.id;
+      if (hasReviewedProvenance(row)) {
+        listings.push({
+          id: row.id,
+          status: row.status,
+          attributes: { qmaps_directory_import: {
+            source: row.attributes.qmaps_directory_import.source,
+            external_id: row.attributes.qmaps_directory_import.external_id,
+            licence: row.attributes.qmaps_directory_import.licence,
+          } },
+        });
+      }
     }
-
-    const page = await response.json();
-    if (!Array.isArray(page)) {
-      throw new Error("Sitemap business query returned an invalid response.");
-    }
-    businesses.push(...page);
-    if (page.length < PAGE_SIZE) return businesses;
+    if (payload.next === null) return listings;
+    if (payload.items.length !== pageSize || payload.next !== previous)
+      throw new Error("QMAPS public directory returned an invalid continuation.");
+    endpoint.searchParams.set("after", previous);
   }
+  throw new Error("QMAPS public directory exceeded the safe limit of pages.");
 }
 
-export async function generateSitemap({ env = process.env, cwd = process.cwd() } = {}) {
-  const { loadEnv } = await import("vite");
-  const fileEnv = loadEnv("production", cwd, "VITE_");
-  const supabaseUrl = env.VITE_SUPABASE_URL || fileEnv.VITE_SUPABASE_URL;
-  const publishableKey =
-    env.VITE_SUPABASE_PUBLISHABLE_KEY || fileEnv.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!supabaseUrl || !publishableKey) {
-    throw new Error(
-      "Sitemap generation requires VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.",
-    );
-  }
-
-  const businesses = await fetchActiveBusinesses(supabaseUrl, publishableKey);
-  const entries = buildSitemapEntries(businesses);
+export async function generateSitemap({ request = fetch, cwd = process.cwd(), publishStatic = false } = {}) {
+  // Build the complete output before replacing any checked-in XML. The standard
+  // web build uses those static files and does not call this network command.
+  const listings = await fetchPublicDirectory({ request });
+  const entries = buildSitemapEntries(listings);
   const files = buildSitemapFiles(entries);
-  const outputDirectory = resolve(cwd, "dist");
+  const outputDirectory = resolve(cwd, publishStatic ? "public" : "dist");
   await mkdir(outputDirectory, { recursive: true });
-  await Promise.all(
-    [...files].map(([name, content]) => writeFile(resolve(outputDirectory, name), content)),
-  );
-
-  const cityCount = entries.filter((entry) => entry.loc.includes("/city/")).length;
-  console.log(
-    `Generated sitemap for ${businesses.length} active businesses and ${cityCount} qualifying cities.`,
-  );
+  const prepared = await mkdtemp(join(outputDirectory, ".qmaps-sitemap-"));
+  try {
+    await Promise.all([...files].map(([name, content]) => writeFile(join(prepared, name), content)));
+    // The index is written last so it cannot refer to a shard not yet present.
+    for (const name of files.keys()) await rename(join(prepared, name), join(outputDirectory, name));
+    for (const name of await readdir(outputDirectory)) {
+      if (/^sitemap-[1-9][0-9]*\.xml$/.test(name) && !files.has(name))
+        await rm(join(outputDirectory, name));
+    }
+  } finally {
+    await rm(prepared, { recursive: true, force: true });
+  }
+  console.log(`Generated sitemap for ${listings.length} source-reviewed public QMAPS listings.`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  generateSitemap().catch((error) => {
-    console.error(error instanceof Error ? error.message : "Sitemap generation failed.");
-    process.exitCode = 1;
-  });
+  const args = process.argv.slice(2);
+  if (args.length > 1 || (args.length && args[0] !== "--publish-static")) {
+    console.error("Usage: node scripts/generate-sitemap.mjs [--publish-static]");
+    process.exitCode = 2;
+  } else {
+    generateSitemap({ publishStatic: args[0] === "--publish-static" }).catch(error => {
+      console.error(error instanceof Error ? error.message : "Sitemap generation failed.");
+      process.exitCode = 1;
+    });
+  }
 }

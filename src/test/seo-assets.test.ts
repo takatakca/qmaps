@@ -49,6 +49,16 @@ describe("seo: sitemap.xml", () => {
     expect(sitemap).not.toContain("https://qmaps.ca/search");
     expect(sitemap).toContain("https://qmaps.ca/services");
   });
+
+  it("includes published owned listings as canonical visitor URLs and no examples", () => {
+    const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+    expect(new Set(locs).size).toBe(locs.length);
+    for (const loc of locs) {
+      expect(new URL(loc).origin).toBe("https://qmaps.ca");
+      if (new URL(loc).pathname.startsWith("/business/")) expect(new URL(loc).search).toBe("?annuaire=qmaps");
+    }
+    expect(sitemap).not.toContain("a9bf0001-0000-4000-8000-00000000000");
+  });
 });
 
 describe("pwa: manifest.webmanifest", () => {

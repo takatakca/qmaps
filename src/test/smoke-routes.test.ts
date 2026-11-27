@@ -30,7 +30,6 @@ const SMOKE_ROUTES = [
   "/c/:categorySlug",
   "/city/:citySlug",
   "/city/:citySlug/:categorySlug",
-  "/sitemap.xml",
   "/privacy",
   "/terms",
   "/account-deletion-policy",

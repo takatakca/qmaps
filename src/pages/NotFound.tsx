@@ -29,9 +29,9 @@ const NotFound = () => {
           <Link to="/search" className="rounded-lg border px-4 py-2 text-foreground font-medium">
             Rechercher un commerce
           </Link>
-          <Link to="/sitemap.xml" className="text-sm text-muted-foreground underline">
+          <a href="/sitemap.xml" className="text-sm text-muted-foreground underline">
             Voir le plan du site
-          </Link>
+          </a>
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-owned-sitemap | sitemap de 32 fiches ON2GO publiques avec liens canoniques QMAPS | remplacer le générateur historique et conserver un build sans réseau | vérifier le XML et une fiche après publication du site
+
 2026-11-27 | Codex | codex/qmaps-directory-default-index | index du tri recommandé validé sur 155 634 fiches FLEXS et catalogue jetable | réduire le temps des premières pages sans changer ordre, curseurs ou visibilité | comparer la CI puis confirmer le déploiement Coolify avant la bascule web et le lot pilote
 
 2026-11-27 | Codex | codex/qmaps-api-release-proof | contrôle API distinct du web, 589 tests et 16 points de lancement réussis | mesurer le SHA inscrit dans l’image Coolify | valider la CI Compose puis contrôler le prochain déploiement API avec SOURCE_COMMIT disponible au build

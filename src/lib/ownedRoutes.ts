@@ -1,6 +1,7 @@
+import { directorySource, ownedListingPermalink } from "./ownedListingIdentity.mjs";
+
 const merchantTab = "commerces";
 const reviewIntent = "avis";
-const directorySource = "qmaps";
 
 export const ownedMerchantUrl = "/compte?onglet=" + merchantTab;
 export const ownedReviewUrl = "/compte?onglet=" + reviewIntent;
@@ -10,7 +11,7 @@ export function ownedListingReviewUrl(id: string) {
 }
 
 export function ownedListingUrl(id: string) {
-  return "/business/" + encodeURIComponent(id) + "?" + new URLSearchParams({ annuaire: directorySource });
+  return ownedListingPermalink(id);
 }
 
 export function wantsOwnedListing(params: URLSearchParams) {

@@ -34,7 +34,7 @@ The test fails if any route in `SMOKE_ROUTES` (below) is missing from
 | 4 | `/c/:categorySlug` | Category page lists businesses, SEO `<title>` matches category |
 | 5 | `/city/:citySlug` | City page lists businesses |
 | 6 | `/city/:citySlug/:categorySlug` | Combined city+category filters work |
-| 7 | `/sitemap.xml` | XML output served, contains city + category URLs |
+| 7 | `/sitemap.xml` (static asset) | HTTP 200 XML with canonical public pages and reviewed directory fiches |
 | 8 | `/projects` | Project request directory loads (read-only) |
 | 9 | Sponsored slot on `/` | At most N approved active campaigns shown, "Sponsorisé" badge visible |
 | 10 | Click sponsored card | Navigates to `/business/:id`, click event recorded |
@@ -102,7 +102,7 @@ Pre-req: signed in as admin (`user_roles.role = 'admin'`).
 | 1 | `/c/:slug` | `<title>` + meta description from `Seo` component, matches category |
 | 2 | `/city/:slug` | Title contains city name, canonical points to public URL |
 | 3 | `/business/:id` | Title = business name; JSON-LD present (LocalBusiness) |
-| 4 | `/sitemap.xml` | `Content-Type` ≈ XML; lists categories + cities; lazy 200 |
+| 4 | `/sitemap.xml` | HTTP 200 and XML `Content-Type`; no private routes, examples, or legacy fiche links |
 
 ---
 
