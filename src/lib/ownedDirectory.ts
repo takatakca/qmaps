@@ -1,4 +1,5 @@
 import type { BusinessCardSource } from "@/lib/business";
+import { isRejectedBrowserSession, type BrowserReadCredentials } from "@/lib/browserSession";
 
 type CategoryLink = { categories: { id: string; name: string; slug: string } };
 export type DirectoryPlace = BusinessCardSource & {
@@ -7,23 +8,11 @@ export type DirectoryPlace = BusinessCardSource & {
   business_categories: CategoryLink[];
 };
 type Page<T> = { items: T[]; next: string | null };
-type DirectoryCredentials = "same-origin" | "omit";
 class DirectorySessionRejected extends Error {}
-
-async function rejectedSession(response: Response): Promise<boolean> {
-  if (response.status !== 401 || response.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !== "application/json")
-    return false;
-  try {
-    const body = await response.json();
-    return body?.error === "Session invalide" || body?.error === "Session expirée";
-  } catch {
-    return false;
-  }
-}
 
 async function readWithBrowserSession<T>(
   signal: AbortSignal | undefined,
-  read: (credentials: DirectoryCredentials) => Promise<T>,
+  read: (credentials: BrowserReadCredentials) => Promise<T>,
 ): Promise<T> {
   try {
     return await read("same-origin");
@@ -37,7 +26,7 @@ async function readWithBrowserSession<T>(
 async function page<T>(
   path: "" | "/categories",
   filters: URLSearchParams,
-  credentials: DirectoryCredentials,
+  credentials: BrowserReadCredentials,
   signal?: AbortSignal,
 ): Promise<Page<T>> {
   const response = await fetch("/api/v1/browser/directory" + path + "?" + filters, {
@@ -48,7 +37,7 @@ async function page<T>(
   if (!response.ok) {
     const message = "L’annuaire QMAPS est indisponible.";
     if (credentials === "same-origin" && filters.getAll("account").every(account => account === "") &&
-        await rejectedSession(response)) {
+        await isRejectedBrowserSession(response)) {
       throw new DirectorySessionRejected(message);
     }
     throw new Error(message);
