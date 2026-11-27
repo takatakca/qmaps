@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-role-qa | modes ciblés vérifiés sur PostgreSQL jetable | vérifier commerçant et administrateur séparément sans rejouer le client | exécuter chaque mode lorsque son accès de recette est lié
+
 2026-11-26 | Codex | codex/qmaps-stripe-atomic-receipts | concurrence et reprise vérifiées sur PostgreSQL jetable | rendre atomiques le reçu Stripe et la mise à jour d’abonnement | valider la CI et appliquer la migration uniquement à la préproduction autorisée
 
 2026-11-26 | Codex | codex/qmaps-billing-canceled-display | interface testée | distinguer une annulation effective d’une période encore en cours | valider la CI et confirmer l’annulation dans la recette Stripe Sandbox
