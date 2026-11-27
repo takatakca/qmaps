@@ -45,7 +45,7 @@ jobs:
             PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-directory-stage.sh
             PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-montreal-pilot.sh'
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/directory-results.sql
-          node --test server/test/directory-result-filters.mjs server/test/release.mjs
+          node --test server/test/directory-result-filters.mjs server/test/directory-recommended-index.mjs server/test/release.mjs
           QMAPS_TEST_RESULTS_FIXTURE=1 node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/closure.sql
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/billing-receipts.sql

@@ -1,5 +1,16 @@
 \set ON_ERROR_STOP on
 begin;
+do $$
+begin
+  if not exists (
+    select 1 from pg_index where indexrelid = to_regclass('public.qmaps_directory_recommended_rank_idx')
+      and indrelid = 'public.businesses'::regclass and indisvalid and indisready
+  ) then
+    raise exception 'The recommended directory index must be usable after standalone migration';
+  end if;
+end;
+$$;
+
 -- Synthetic visibility, ordering, sparse-cursor and service fixtures for the
 -- disposable standalone CI database. Never load them on a live deployment.
 insert into public.businesses(

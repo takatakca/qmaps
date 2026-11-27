@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-directory-default-index | index du tri recommandé validé sur 155 634 fiches FLEXS et catalogue jetable | réduire le temps des premières pages sans changer ordre, curseurs ou visibilité | comparer la CI puis confirmer le déploiement Coolify avant la bascule web et le lot pilote
+
 2026-11-27 | Codex | codex/qmaps-api-release-proof | contrôle API distinct du web, 589 tests et 16 points de lancement réussis | mesurer le SHA inscrit dans l’image Coolify | valider la CI Compose puis contrôler le prochain déploiement API avec SOURCE_COMMIT disponible au build
 
 2026-11-27 | Codex | codex/qmaps-native-directory-pages | contrat vérifié sur 58 pages PostgreSQL et compatibilité préparée | charger par pages de 24 sur Android et iOS et contrôler deux pages sur les domaines | vérifier la CI native et garder le repli jusqu’au déploiement API

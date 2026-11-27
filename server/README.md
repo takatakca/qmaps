@@ -36,6 +36,8 @@ Les applications natives demandent 24 fiches et utilisent le classement recomman
 
 Après déploiement, le contrôle en lecture seule `node scripts/verify-live-routing.mjs --directory-pages` confirme deux pages distinctes de Montréal sur les routes web et natives. Le repli historique des applications ne constitue pas une preuve de déploiement de la pagination.
 
+Le service `qmaps-migrate` applique `006-directory-recommended-index.sql` avant de démarrer l’API. Cet index partiel accélère le tri recommandé avec l’identifiant comme départage. Il ne change ni les filtres, ni le format du curseur, ni la visibilité par compte. Appliquer cette migration avant d’élargir le catalogue. La construction transactionnelle laisse les lectures continuer, mais bloque les écritures pendant sa durée. Si un verrou empêche le démarrage pendant cinq secondes, la migration échoue sans index partiel à nettoyer et peut être relancée.
+
 ## Sauvegarde et récupération
 
 La tâche quotidienne Coolify exécute `sh /opt/qmaps/server/db/backup.sh` dans
