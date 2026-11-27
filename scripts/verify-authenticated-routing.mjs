@@ -1,7 +1,11 @@
 import { pathToFileURL } from "node:url";
 
 const origins = ["https://qmaps.ca", "https://www.qmaps.ca", "https://qmaps.takatak.ca"];
-const roles = ["CLIENT", "OBSERVER", "MERCHANT", "ADMIN"];
+const scopes = {
+  full: ["CLIENT", "OBSERVER", "MERCHANT", "ADMIN"],
+  merchant: ["MERCHANT"],
+  admin: ["ADMIN"],
+};
 const preferences = "/me/directory-preferences";
 const uuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 
@@ -9,7 +13,9 @@ function must(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-export function readQaFixture(env) {
+export function readQaFixture(env, scope = "full") {
+  must(Object.hasOwn(scopes, scope), "Mode de recette inconnu.");
+  const roles = scopes[scope];
   const accounts = Object.fromEntries(roles.map(role => {
     const key = `QMAPS_QA_${role}`;
     const handle = env[`${key}_HANDLE`];
@@ -21,12 +27,17 @@ export function readQaFixture(env) {
   }));
   must(new Set(Object.values(accounts).map(account => account.handle)).size === roles.length,
     "Quatre comptes de test distincts sont requis.");
-  must(uuid.test(env.QMAPS_QA_PLACE_ID ?? ""), "QMAPS_QA_PLACE_ID doit désigner la fiche du commerçant de test.");
-  return { accounts, placeId: env.QMAPS_QA_PLACE_ID.toLowerCase() };
+  let placeId;
+  if (roles.includes("MERCHANT")) {
+    must(uuid.test(env.QMAPS_QA_PLACE_ID ?? ""), "QMAPS_QA_PLACE_ID doit désigner la fiche du commerçant de test.");
+    placeId = env.QMAPS_QA_PLACE_ID.toLowerCase();
+  }
+  return { accounts, placeId };
 }
 
-export async function verifyAuthenticatedRouting(env, request = fetch, report = console.log) {
-  const { accounts, placeId } = readQaFixture(env);
+export async function verifyAuthenticatedRouting(env, request = fetch, report = console.log, scope = "full") {
+  const { accounts, placeId } = readQaFixture(env, scope);
+  const roles = Object.keys(accounts);
   const opened = [];
 
   async function call(origin, path, status, { method = "GET", cookie, body } = {}) {
@@ -86,41 +97,56 @@ export async function verifyAuthenticatedRouting(env, request = fetch, report = 
 
   let completed = false;
   try {
+    const anonymousPath = scope === "admin" ? "/console" : scope === "merchant" ? "/me/places" : preferences;
     const sessions = [];
     for (const origin of origins) {
-      const anon = await json(await call(origin, preferences, 401));
+      const anon = await json(await call(origin, anonymousPath, 401));
       must(anon?.error === "Connexion requise", `${origin} — l’API anonyme ne confirme pas l’absence de session.`);
-      const current = [];
-      for (const role of roles) current.push(await signIn(origin, role));
-      const [client, observer, merchant, admin] = current;
-      must(new Set([client.id, observer.id, merchant.id, admin.id]).size === roles.length,
+      const current = {};
+      for (const role of roles) current[role] = await signIn(origin, role);
+      const { CLIENT: client, MERCHANT: merchant, ADMIN: admin } = current;
+      must(new Set(roles.map(role => current[role].id)).size === roles.length,
         `${origin} — comptes de recette non distincts.`);
-      must((await list(merchant, "/me/places")).some(item => item?.id === placeId),
-        `${origin} — le commerçant de test ne possède pas la fiche configurée.`);
-      must(!(await list(client, "/me/places")).some(item => item?.id === placeId),
-        `${origin} — la fiche commerçant apparaît dans les fiches du client.`);
-      const adminConsole = await get(admin, "/console");
-      must(adminConsole?.api === "QMAPS", `${origin} — console QMAPS inattendue.`);
-      for (const user of [client, merchant]) await call(origin, "/console", 403, { cookie: user.cookie });
-      must((await get(client, `/directory/${placeId}`))?.id === placeId,
-        `${origin} — la fiche de recette n’est pas accessible au client.`);
+      if (merchant) {
+        must((await list(merchant, "/me/places")).some(item => item?.id === placeId),
+          `${origin} — le commerçant de test ne possède pas la fiche configurée.`);
+        await call(origin, "/console", 403, { cookie: merchant.cookie });
+      }
+      if (admin) {
+        const adminConsole = await get(admin, "/console");
+        must(adminConsole?.api === "QMAPS", `${origin} — console QMAPS inattendue.`);
+      }
+      if (client) {
+        must(!(await list(client, "/me/places")).some(item => item?.id === placeId),
+          `${origin} — la fiche commerçant apparaît dans les fiches du client.`);
+        await call(origin, "/console", 403, { cookie: client.cookie });
+        must((await get(client, `/directory/${placeId}`))?.id === placeId,
+          `${origin} — la fiche de recette n’est pas accessible au client.`);
+      }
       const canonical = sessions[0];
-      must(!canonical || current.every((session, i) => session.id === canonical[i].id),
+      must(!canonical || roles.every(role => current[role].id === canonical[role].id),
         `${origin} — comptes différents du domaine principal.`);
       sessions.push(current);
-      report(`OK ${origin} — sessions, fiche du commerçant et accès console.`);
+      const result = scope === "admin" ? "accès administrateur à la console" :
+        scope === "merchant" ? "fiche du commerçant et console refusée" : "sessions, fiche du commerçant et accès console";
+      report(`OK ${origin} — ${result}.`);
     }
 
-    for (const [client, observer] of sessions) {
+    if (scope !== "full") {
+      completed = true;
+      return;
+    }
+
+    for (const { CLIENT: client, OBSERVER: observer } of sessions) {
       must(!(await preference(client)) && !(await preference(observer)),
         "La fiche est déjà dans les préférences de recette. Choisir une nouvelle fiche de test.");
     }
-    const [client, observer] = sessions[0];
+    const { CLIENT: client, OBSERVER: observer } = sessions[0];
     await write(client, "view");
     must((await preference(client))?.dismissed === false && !(await preference(observer)),
       "Consultation non enregistrée ou non isolée.");
     await write(client, "dismiss");
-    for (const [reader, control] of sessions) {
+    for (const { CLIENT: reader, OBSERVER: control } of sessions) {
       must((await preference(reader))?.dismissed === true && !(await preference(control)),
         `${reader.origin} — le retrait n’est pas persistant ou isolé.`);
       report(`OK ${reader.origin} — retrait conservé et isolé du deuxième compte.`);
@@ -140,9 +166,12 @@ export async function verifyAuthenticatedRouting(env, request = fetch, report = 
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    must(process.argv.length === 3 && process.argv[2] === "--live-qa",
-      "Utiliser --live-qa uniquement avec les comptes et la fiche de recette autorisés.");
-    await verifyAuthenticatedRouting(process.env);
+    const roleFlag = process.argv[3];
+    must(process.argv.length <= 4 && process.argv[2] === "--live-qa" &&
+      (roleFlag === undefined || roleFlag === "--merchant-only" || roleFlag === "--admin-only"),
+      "Utiliser --live-qa [--merchant-only | --admin-only] uniquement avec les accès de recette autorisés.");
+    const scope = roleFlag === "--merchant-only" ? "merchant" : roleFlag === "--admin-only" ? "admin" : "full";
+    await verifyAuthenticatedRouting(process.env, fetch, console.log, scope);
   } catch (error) {
     console.error(`ÉCHEC — ${error.message}`);
     process.exitCode = 1;

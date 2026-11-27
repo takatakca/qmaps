@@ -2,6 +2,20 @@
 
 Le contrôle public `node scripts/verify-live-routing.mjs` ne connecte aucun compte. La recette ci-dessous teste l’API PostgreSQL par le chemin navigateur des trois domaines et complète le parcours visuel du formulaire. Elle n’utilise ni compte réel ni facturation.
 
+## Vérifier un rôle séparément
+
+Le parcours client en production est [déjà documenté](https://github.com/takatakca/qmaps/issues/6#issuecomment-7208896100). Les deux modes ci-dessous peuvent être exécutés indépendamment sans reprendre ce parcours. Ils ne font aucune écriture métier. Ils ouvrent et ferment seulement les sessions du compte dédié.
+
+- **Commerçant** — lier uniquement `QMAPS_QA_MERCHANT_HANDLE`, `QMAPS_QA_MERCHANT_PASSWORD` et `QMAPS_QA_PLACE_ID`. Le mode vérifie que le commerçant retrouve sa fiche dans son espace et que la console admin lui est refusée. La fiche n’a pas besoin d’être publique.
+- **Admin** — lier uniquement `QMAPS_QA_ADMIN_HANDLE` et `QMAPS_QA_ADMIN_PASSWORD`. Le mode vérifie l’accès à la console depuis les trois domaines, sans changer une fiche ni un rôle.
+
+```sh
+node scripts/verify-authenticated-routing.mjs --live-qa --merchant-only
+node scripts/verify-authenticated-routing.mjs --live-qa --admin-only
+```
+
+Les mêmes règles de compte dédié `qa-…` et de liaison confidentielle s’appliquent. Ces modes ne prouvent ni une publication de fiche, ni une opération de modération, ni Stripe Checkout.
+
 ## Préparer les accès de recette
 
 Faire préparer quatre comptes dédiés par le responsable QMAPS, tous avec un identifiant `qa-…`. Aucun compte personnel ni administrateur d’exploitation.
