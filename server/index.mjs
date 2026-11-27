@@ -1,6 +1,6 @@
 import {
   directoryCategories, directoryDetail, directoryNearby, directoryPreferences,
-  directorySearch, saveDirectoryPreference,
+  directoryResults, directorySearch, saveDirectoryPreference,
 } from "./directory.mjs";
 import {
   blockPublisher,
@@ -88,12 +88,12 @@ function first(result) {
   if (!result.rowCount) throw new ApiError(404, "Introuvable");
   return result.rows[0];
 }
-function scoped(id, fn) {
+function scoped(id, fn, options) {
   return transaction(pool, async (db) => {
     await db.query(id ? "SET LOCAL ROLE authenticated" : "SET LOCAL ROLE anon");
     await db.query("SELECT set_config('qmaps.user_id',$1,true)", [id || ""]);
     return fn(db);
-  });
+  }, options);
 }
 function imageType(buf) {
   if (
@@ -192,6 +192,12 @@ async function route(req, res) {
   if (method === "GET" && path === "/v1/directory/nearby") {
     checkExpectedAccount(url.searchParams, id);
     return reply(res, 200, await scoped(id, db => directoryNearby(db, url.searchParams)));
+  }
+  if (method === "GET" && path === "/v1/directory/results") {
+    res.setHeader("Cache-Control", "private, no-store");
+    checkExpectedAccount(url.searchParams, id);
+    return reply(res, 200, await scoped(id,
+      db => directoryResults(db, url.searchParams, id), { readOnly: true }));
   }
   if (method === "GET" && path === "/v1/directory/categories")
     return reply(res, 200, await scoped(id, db => directoryCategories(db, url.searchParams)));

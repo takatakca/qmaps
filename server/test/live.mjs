@@ -8,7 +8,10 @@ if (!["localhost", "127.0.0.1"].includes(new URL(api).hostname))
   throw Error("A disposable local database is required");
 async function request(path, method = "GET", token, body, status = 200) {
   const headers = {};
-  if (token) headers.Authorization = "Bearer " + token;
+  if (token) {
+    if (path.startsWith("/v1/browser/")) headers.Cookie = "__Host-qmaps_session=" + token;
+    else headers.Authorization = "Bearer " + token;
+  }
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const r = await fetch(api + path, {
     method,
@@ -112,6 +115,10 @@ for (const invalid of [
   nearPoint + "&lat=45", nearPoint + "&limit=0", nearPoint + "&limit=25",
   nearPoint + "&limit=1.5", nearPoint + "&limit=2&limit=3",
 ]) await request("/v1/directory/nearby?" + invalid, "GET", null, undefined, 400);
+if (process.env.QMAPS_TEST_RESULTS_FIXTURE === "1") {
+  const { verifyDirectoryResults } = await import("./directory-results-live.mjs");
+  await verifyDirectoryResults(request, owner, customer);
+}
 const preferencePath = "/v1/me/directory-preferences";
 const preference = preferencePath + "/" + bistro.id;
 const signal = { action: "view", accountId: customer.user_id };
@@ -190,6 +197,10 @@ await request(safety, "GET", customer.token, undefined, 404);
 const accountDirectory = "/v1/directory?city=Laval&account=" + customer.user_id;
 assert.equal((await request(accountDirectory, "GET", customer.token)).items.some(row => row.id === place.id), false);
 await request(accountDirectory, "GET", owner.token, undefined, 409);
+const resultsLaval = "/v1/directory/results?city=Laval&account=";
+assert.equal((await request(resultsLaval + customer.user_id, "GET", customer.token)).items.some(row => row.id === place.id), false);
+assert.equal((await request(resultsLaval + owner.user_id, "GET", owner.token)).items.some(row => row.id === place.id), true);
+await request(resultsLaval + owner.user_id, "GET", customer.token, undefined, 409);
 await request("/v1/directory?account=", "GET", customer.token, undefined, 409);
 await request("/v1/me/bookmarks?account=" + customer.user_id, "GET", owner.token, undefined, 409);
 await request("/v1/directory/" + place.id, "GET", customer.token, undefined, 404);

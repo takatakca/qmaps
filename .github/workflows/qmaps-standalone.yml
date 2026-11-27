@@ -23,7 +23,9 @@ jobs:
           trap 'compose down -v' EXIT
           compose up --build --wait --wait-timeout 180 || { compose logs --tail 25 qmaps-db qmaps-api; exit 1; }
           compose run --rm --no-deps qmaps-migrate
-          node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
+          compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/directory-results.sql
+          node --test server/test/directory-result-filters.mjs
+          QMAPS_TEST_RESULTS_FIXTURE=1 node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/closure.sql
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/billing-receipts.sql
           archive=$(compose exec -T qmaps-db sh /opt/qmaps/server/db/backup.sh)
