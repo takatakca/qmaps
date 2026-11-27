@@ -22,6 +22,18 @@ function planToPriceId(plan: Plan): string | null {
   return map[plan] ?? null;
 }
 
+function subscriptionConflict(error: string, message: string) {
+  return new Response(JSON.stringify({ error, message }), {
+    status: 409,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function unverifiedSubscription() {
+  return subscriptionConflict("subscription_unverified",
+    "Impossible de confirmer votre abonnement Stripe. Aucun paiement n’a été lancé.");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -98,15 +110,38 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Look for an existing customer id on the subscription row
+    // A different plan must not create a parallel Stripe subscription.
     const { data: existingSub, error: subscriptionError } = await supabase
       .from("merchant_subscriptions")
-      .select("provider_customer_id")
+      .select("provider, provider_customer_id, provider_subscription_id")
       .eq("business_id", businessId)
       .maybeSingle();
     if (subscriptionError) throw new Error("Unable to load the merchant subscription");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
+    const subscriptionId = existingSub?.provider_subscription_id;
+    const storedCustomer = existingSub?.provider_customer_id;
+    const stripeRecord = existingSub?.provider === "stripe" ||
+      (!existingSub?.provider && (subscriptionId?.startsWith("sub_") || storedCustomer?.startsWith("cus_")));
+    let customer: string | undefined;
+
+    if (stripeRecord) {
+      if (!subscriptionId) return unverifiedSubscription();
+      const current = await stripe.subscriptions.retrieve(subscriptionId).catch(() => {
+        throw new Error("Unable to verify the existing Stripe subscription");
+      });
+      const currentCustomer = typeof current.customer === "string" ? current.customer : current.customer.id;
+      if (current.id !== subscriptionId || !currentCustomer || (storedCustomer && currentCustomer !== storedCustomer)) {
+        throw new Error("Stripe subscription does not match the billing record");
+      }
+      if (current.status !== "canceled" && current.status !== "incomplete_expired") {
+        // The billing page needs a recorded customer ID to open the portal.
+        if (!storedCustomer) return unverifiedSubscription();
+        return subscriptionConflict("subscription_exists",
+          "Un abonnement Stripe est déjà associé à cette entreprise. Gérez-le depuis la facturation.");
+      }
+      customer = currentCustomer;
+    }
 
     const origin = resolveCheckoutReturnOrigin(
       req.headers.get("origin"),
@@ -118,7 +153,7 @@ Deno.serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/merchant/billing?checkout=success`,
       cancel_url: `${origin}/merchant/billing/plans?checkout=cancel`,
-      customer: existingSub?.provider_customer_id || undefined,
+      customer,
       client_reference_id: businessId,
       metadata: {
         business_id: businessId,
