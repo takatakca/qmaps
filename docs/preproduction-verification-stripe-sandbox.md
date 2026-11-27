@@ -42,6 +42,8 @@ Configurer la version d’API de la destination pour correspondre à celle utili
 5. **Portail et annulation.** Depuis `/merchant/billing`, ouvrir « Gérer l’abonnement » et vérifier que le portail Sandbox présente le même abonnement. L’annuler suivant la configuration du portail. Après livraison du webhook de souscription, vérifier `cancel_at_period_end` ou `status = canceled`, selon le mode d’annulation, dans Supabase et dans l’interface QMAPS.
 6. **Isolation.** Depuis une autre session marchande de test, vérifier que les données de facturation de la première fiche sont inaccessibles. Les tests SQL du dépôt vérifient que les rôles applicatifs ne peuvent pas créer de reçus Stripe et que les écritures manuelles autorisées restent possibles. [Tests des droits sur les reçus](../server/test/billing-receipts.sql)
 
+Le test automatisé simule aussi une première livraison active reçue après l’annulation du même abonnement. Le webhook relit l’état actuel chez Stripe et l’abonnement reste annulé. Si cette lecture échoue, le webhook renvoie 500 sans enregistrer de reçu, pour permettre une nouvelle livraison. Une clé Sandbox restreinte doit autoriser la lecture des abonnements. Ce contrôle ne couvre ni les événements simultanés ni le remplacement par un autre abonnement. [Tests du webhook](../src/test/stripeBillingHandlers.test.ts)
+
 ## Consigner les résultats et nettoyer
 
 Pour chaque contrôle, consigner « Réussi », « Échec » ou « Bloqué », l’heure, le commit, le nom du Sandbox, l’origine de préproduction et la preuve correspondante. Pour le webhook, noter le type d’événement, le code HTTP et le résultat des lectures SQL en limitant les données à la fiche de test. Les identifiants de corrélation complets restent dans le journal privé de recette.

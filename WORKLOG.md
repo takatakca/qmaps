@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-stripe-webhook-order | régression et correctif vérifiés | conserver l’état Stripe actuel lors des livraisons hors ordre | valider la CI puis déployer le webhook en préproduction Sandbox autorisée
+
 2026-11-26 | Codex | codex/qmaps-authenticated-qa | procédure prête | documenter la recette Stripe Sandbox QMAPS | confirmer la préproduction et valider Checkout et webhook avec les accès de test
 
 2026-11-26 | Codex | codex/qmaps-authenticated-qa | validé sur base jetable | préparer une recette authentifiée sur les trois domaines | tester sur PostgreSQL jetable puis utiliser les comptes de recette autorisés
