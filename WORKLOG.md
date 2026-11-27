@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-verify-montreal-pilot | contrôle en lecture seule du lot exact et du reçu privé | prouver la visibilité ou l’absence de chaque fiche sur les deux domaines | tester le contrôle avant la publication autorisée
+
 2026-11-27 | Codex | codex/qmaps-flexs-source-receipt | reçu privé par famille et refus de l’import incomplet | attacher le lot montréalais au dernier chargement ouvert confirmé sans empêcher les retraits | vérifier la recette réelle avant mise à disposition de l’opérateur
 
 2026-11-27 | Codex | codex/qmaps-owned-account-entry | entrées Moi et Créer un compte reliées à l’espace QMAPS | distinguer inscription par identifiant et accès historiques explicites | vérifier les deux parcours invités après déploiement sans créer de compte

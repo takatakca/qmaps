@@ -36,6 +36,37 @@ SQL
   [ "$matched" = 1 ] || { cat "$fixtures/result.json" >&2; exit 1; }
 )
 
+audit() {
+  psql -X -Atq -v ON_ERROR_STOP=1 -v pilot_batch="$1" -f "$import_dir/audit-flexs-montreal-pilot.sql"
+}
+
+audit_expected() (
+  result=$(audit "$1")
+  [ "$(psql -X -Atq -v ON_ERROR_STOP=1 -v result="$result" -v batch="$1" \
+    -v members="$2" -v visible="$3" -v credited="$4" -v withdrawn="$5" -v preserved="$6" <<'SQL'
+select 1 from (select :'result'::jsonb as report) p
+where report->>'batch' = :'batch' and report->>'manifest_hash' ~ '^[0-9a-f]{64}$'
+  and report->>'manifest_hash_kind' like '%not raw CSV'
+  and report->>'published_at' is not null
+  and report->'receipt_member_count' = :'members'::jsonb
+  and report->'persisted_member_count' = :'members'::jsonb
+  and report->'current_listing_count' = :'members'::jsonb
+  and report->'current_visible_count' = :'visible'::jsonb
+  and report->'current_visible_credited_count' = :'credited'::jsonb
+  and report->'withdrawn_count' = :'withdrawn'::jsonb
+  and report->'preserved_count' = :'preserved'::jsonb
+  and (report->>'withdrawal_attempted_at' is null) = (:'withdrawn' = 'null');
+SQL
+  )" = 1 ] || { printf '%s\n' "$result" >&2; exit 1; }
+)
+
+audit_refused() {
+  if audit "$1" >"$fixtures/audit.json" 2>"$fixtures/audit.err"; then
+    echo 'Invalid audit unexpectedly passed.' >&2; exit 1
+  fi
+  [ ! -s "$fixtures/audit.json" ] && grep -F "$2" "$fixtures/audit.err" >/dev/null
+}
+
 fingerprint() {
   query "select md5(coalesce(string_agg(to_jsonb(t)::text, E'\n' order by id), ''))
     from public.businesses t $1;
@@ -195,6 +226,12 @@ report publish "$pilot" "$fixtures/pilot.csv" published 3 0 0 3
 
 published=$(fingerprint '')
 published_ledger=$(ledger_fingerprint)
+audit_expected "$pilot" 3 3 3 null null
+audit_refused 'bad identifier' 'Missing or invalid Montréal pilot batch identifier'
+audit_refused "$renew" 'No published receipt for this Montréal pilot batch'
+query "update qmaps_ops.flexs_montreal_pilot_batches set member_count=4 where batch_id='$pilot'" >/dev/null
+audit_refused "$pilot" 'receipt member count does not match persisted membership'
+query "update qmaps_ops.flexs_montreal_pilot_batches set member_count=3 where batch_id='$pilot'" >/dev/null
 report publish "$pilot" "$fixtures/pilot.csv" already_published 0 0 0 3
 [ "$(fingerprint '')" = "$published" ]
 [ "$(ledger_fingerprint)" = "$published_ledger" ]
@@ -222,6 +259,7 @@ report withdraw "$pilot" "$fixtures/pilot.csv" preserved 0 1 2 3
 
 terminal=$(fingerprint '')
 terminal_ledger=$(ledger_fingerprint)
+audit_expected "$pilot" 3 2 2 1 2
 report withdraw "$pilot" "$fixtures/pilot.csv" already_withdrawn 0 0 2 3
 report publish "$pilot" "$fixtures/pilot.csv" already_withdrawn 0 0 2 3
 [ "$(fingerprint '')" = "$terminal" ]
@@ -231,6 +269,7 @@ refused 'already belongs to a Montréal pilot receipt' publish "$renew" "$fixtur
 
 report publish "$renew" "$fixtures/renew.csv" published 1 0 0 1
 report withdraw "$renew" "$fixtures/renew.csv" withdrawn 0 1 0 1
+audit_expected "$renew" 1 0 0 1 0
 report publish "$renew" "$fixtures/renew.csv" already_withdrawn 0 0 0 1
 [ "$(query "select count(*) from public.businesses where id = '$delta' and not is_active")" = 1 ]
 [ "$(fingerprint "where $filter" "where $link_filter")" = "$original" ] || {

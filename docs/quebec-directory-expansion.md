@@ -74,6 +74,26 @@ Le fichier de revue fournit de 1 à 24 lignes CC BY 4.0 corroborées. L’en-tê
 
 Vérifier le code de sortie et le JSON de l’opération. Le reçu privé du lot enregistre les identifiants exacts. Il faut réutiliser le même contenu pour le retrait, sous le même identifiant de lot. Le retrait fonctionne même si le reçu de préparation a changé ou n’existe plus. Une nouvelle exécution après retrait ne rend pas les fiches visibles. Le retrait désactive les fiches intactes et conserve les fiches modifiées, revendiquées ou en cours de revendication pour examen. Les avis, favoris et médias restent en base, et les compteurs dérivés des avis ne bloquent pas le retrait. Les fiches activées ne contiennent ni horaires, ni coordonnées, ni information de propriété supposée. Leur détail affiche le crédit municipal et distingue le statut administratif de la source de toute confirmation des horaires ou de l’exploitant actuel.
 
+### Vérifier le lot en lecture seule
+
+Confirmer d’abord le SHA de l’image API et la pagination avec `node scripts/verify-live-routing.mjs --api-sha SHA --directory-pages`. Le contrôle du lot utilise ensuite le même CSV privé que l’opération, sans écrire ni soumettre de formulaire. Avant la première activation, vérifier `absent`. Après activation, vérifier `published`.
+
+```sh
+python3 scripts/verify_montreal_pilot.py --batch mtl-2026-11-27-v1 --state absent /chemin/lot-pilote-confirme.csv
+python3 scripts/verify_montreal_pilot.py --batch mtl-2026-11-27-v1 --state published /chemin/lot-pilote-confirme.csv
+```
+
+La commande contrôle en invité les résultats paginés « Montréal · Restaurants » et chaque détail sur `qmaps.ca` et `www.qmaps.ca`. Elle échoue si la pagination est indisponible ou incomplète, s’il y a un doublon, une fiche supplémentaire du lot ou un crédit divergent. Le résumé ne contient pas les noms ni les adresses. Ouvrir aussi une des fiches publiées dans le navigateur pour vérifier le rendu du crédit et du lien de licence. Après retrait, `absent` confirme une disparition complète seulement. Si le reçu indique des fiches préservées, contrôler leur état séparément et ne pas annoncer le retrait de tout le lot.
+
+L’opérateur peut relire son reçu privé sans rejouer l’activation ou le retrait.
+
+```sh
+psql -X -Atq -v ON_ERROR_STOP=1 -v pilot_batch=mtl-2026-11-27-v1 \
+  -f server/db/imports/audit-flexs-montreal-pilot.sql
+```
+
+Le rapport opérateur distingue les membres enregistrés, la visibilité actuelle et les totaux du retrait. L’empreinte canonique stockée par PostgreSQL et l’empreinte du fichier CSV brut sont deux preuves différentes.
+
 ## Avant publication
 
 1. La recherche publique actuelle télécharge toutes les pages de résultats avant d’afficher les fiches. Déployer et vérifier une recherche paginée côté serveur qui conserve le tri et les filtres, notamment les heures, les services et la proximité. Vérifier les index avec le vrai volume, l’accès invité et le masquage par compte.

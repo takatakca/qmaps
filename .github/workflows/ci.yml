@@ -35,6 +35,9 @@ jobs:
       - name: Test
         run: bun run test
 
+      - name: Test the pilot verifier without network access
+        run: python3 -B -m unittest discover -s scripts -p test_verify_montreal_pilot.py
+
       - name: Launch checks
         run: bun run launch:check
 
