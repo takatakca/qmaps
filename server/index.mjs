@@ -1,4 +1,7 @@
-import { directoryCategories, directoryDetail, directorySearch, directoryPreferences, saveDirectoryPreference } from "./directory.mjs";
+import {
+  directoryCategories, directoryDetail, directoryNearby, directoryPreferences,
+  directorySearch, saveDirectoryPreference,
+} from "./directory.mjs";
 import {
   blockPublisher,
   publishingTerms,
@@ -185,6 +188,10 @@ async function route(req, res) {
   if (method === "GET" && path === "/v1/directory") {
     checkExpectedAccount(url.searchParams, id);
     return reply(res, 200, await scoped(id, db => directorySearch(db, url.searchParams)));
+  }
+  if (method === "GET" && path === "/v1/directory/nearby") {
+    checkExpectedAccount(url.searchParams, id);
+    return reply(res, 200, await scoped(id, db => directoryNearby(db, url.searchParams)));
   }
   if (method === "GET" && path === "/v1/directory/categories")
     return reply(res, 200, await scoped(id, db => directoryCategories(db, url.searchParams)));

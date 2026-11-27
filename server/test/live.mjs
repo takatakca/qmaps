@@ -91,6 +91,27 @@ assert.deepEqual((await request("/v1/directory?q=%25")).items, []);
 const catalogRow = await request("/v1/directory/" + place.id);
 assert.equal(catalogRow.name, place.name);
 assert.equal("owner_user_id" in catalogRow, false);
+const nearPoint = new URLSearchParams({ lat: String(bistro.latitude), lng: String(bistro.longitude) });
+const nearbyPath = "/v1/directory/nearby?" + nearPoint;
+const nearby = await request(nearbyPath);
+assert.equal(nearby.next, null);
+assert.deepEqual(nearby.items.map(row => row.id), [
+  bistro.id, ...montreal.items.filter(row => row.id !== bistro.id).map(row => row.id),
+]);
+const { distance_meters, ...closest } = nearby.items[0];
+assert.deepEqual(closest, bistro);
+assert.equal(distance_meters, 0);
+assert.ok(nearby.items[1].distance_meters > 0 && nearby.items[1].distance_meters <= 10000);
+assert.deepEqual(await request(nearbyPath + "&limit=1"), { items: [nearby.items[0]], next: null });
+assert.deepEqual(await request("/v1/browser/directory/nearby?" + nearPoint), nearby);
+assert.deepEqual(await request(nearbyPath + "&account=" + owner.user_id, "GET", owner.token), nearby);
+await request(nearbyPath + "&account=" + owner.user_id, "GET", customer.token, undefined, 409);
+for (const invalid of [
+  "lat=45", "lat=&lng=-73", "lat=NaN&lng=-73", "lat=1e400&lng=-73",
+  "lat=91&lng=-73", "lat=45&lng=-181", "lat=0x2d&lng=-73",
+  nearPoint + "&lat=45", nearPoint + "&limit=0", nearPoint + "&limit=25",
+  nearPoint + "&limit=1.5", nearPoint + "&limit=2&limit=3",
+]) await request("/v1/directory/nearby?" + invalid, "GET", null, undefined, 400);
 const preferencePath = "/v1/me/directory-preferences";
 const preference = preferencePath + "/" + bistro.id;
 const signal = { action: "view", accountId: customer.user_id };
