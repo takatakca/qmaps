@@ -1,3 +1,5 @@
+> **Note du 2026-11-26 — Taktak** : Domaine hérité de l'ancienne version Lovable — la production est qmaps.ca depuis le rebuild ; adresses officielles en @qmaps.ca.
+
 # Admin playbook — Billing & subscriptions
 
 _Phase 11. Internal use only._
