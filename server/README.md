@@ -10,6 +10,12 @@ Pour déployer, choisir **Docker Compose** depuis le dépôt QMAPS dans Coolify,
 
 Les routes `/v1/browser/` utilisent un cookie de session Secure, HttpOnly et SameSite=Strict. Une écriture par navigateur nécessite l’origine HTTPS QMAPS. Les comptes web et mobiles appartiennent au même répertoire. La console lit `/v1/browser/console`, réservé aux administrateurs. Pour le premier propriétaire, vérifier son identifiant auprès de lui, relever son UUID dans PostgreSQL et appliquer `server/db/grant-owner.sql` avec `psql -X -d qmaps -v owner_id=UUID -f grant-owner.sql`. Aucun privilège ne découle de l’inscription.
 
+### Fiches à proximité
+
+`GET /v1/directory/nearby?lat=45.509&lng=-73.554&limit=6` et sa route navigateur utilisent les mêmes règles de visibilité que l’annuaire. Ils renvoient les fiches géolocalisées à 10 km ou moins, classées par distance en mètres, puis par identifiant. La limite par défaut est 6 et le maximum est 24. La réponse contient `items`, un `distance_meters` pour chaque fiche et `next: null`. Le filtre spatial s’appuie sur l’index PostGIS existant. Aucune migration de schéma n’est nécessaire.
+
+Déployer l’API en premier. Vérifier un HTTP 200 JSON sur la route `/api/v1/browser/directory/nearby` de chacun des domaines QMAPS avec les coordonnées et la limite ci-dessus. Basculer ensuite la rangée web « À proximité ». Une route 404 ne constitue pas un catalogue vide et ne valide pas la bascule.
+
 ## Sauvegarde et récupération
 
 La tâche quotidienne Coolify exécute `sh /opt/qmaps/server/db/backup.sh` dans

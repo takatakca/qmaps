@@ -32,6 +32,15 @@ function page(rows, size) {
   return { items, next: rows.length > size ? items[items.length - 1].id : null };
 }
 
+function coordinate(params, key, bound) {
+  const values = params.getAll(key);
+  const value = Number(values[0]);
+  if (values.length !== 1 || !/^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(values[0]) ||
+      !Number.isFinite(value) || Math.abs(value) > bound)
+    throw new ApiError(400, "Coordonnées invalides");
+  return value;
+}
+
 export async function directoryCategories(db, params) {
   const size = limit(params);
   const { rows } = await db.query(`
@@ -88,6 +97,27 @@ export async function directorySearch(db, params) {
     [city, cursor(params), prices.map(Number), rating === null ? null : Number(rating),
       category, name, matches, ranked ? size : size + 1, ranked]);
   return page(rows, size);
+}
+
+export async function directoryNearby(db, params) {
+  const latitude = coordinate(params, "lat", 90);
+  const longitude = coordinate(params, "lng", 180);
+  const limits = params.getAll("limit");
+  const requested = limits[0] ?? "6";
+  const size = Number(requested);
+  if (limits.length > 1 || !/^\d{1,2}$/.test(requested) || size < 1 || size > 24)
+    throw new ApiError(400, "Taille de page invalide");
+
+  const { rows } = await db.query(`
+    SELECT ${columns}, ST_Distance(b.location, origin.point) AS distance_meters
+    FROM public.businesses b
+    CROSS JOIN (
+      SELECT ST_SetSRID(ST_MakePoint($1::float8, $2::float8), 4326)::geography AS point
+    ) AS origin
+    WHERE ${visible} AND b.location IS NOT NULL
+      AND ST_DWithin(b.location, origin.point, 10000)
+    ORDER BY distance_meters, b.id LIMIT $3`, [longitude, latitude, size]);
+  return { items: rows, next: null };
 }
 
 export async function directoryPreferences(db, userId) {
