@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-quebec-directory-stage | 155 634 fiches chargées en privé sur base jetable | retrouver le catalogue FLEXS et préparer l’import Québec avec licences distinctes | vérifier la pagination et la charge avant publication
+
 2026-11-27 | Codex | codex/qmaps-home-nearby-directory | Chromium et API validés sur base jetable | lire la proximité de l’accueil depuis PostgreSQL QMAPS | garder le brouillon jusqu’au HTTP 200 de la route Coolify
 
 2026-11-27 | Codex | codex/qmaps-directory-nearby-api | route API vérifiée sur base jetable | fournir la proximité bornée depuis l’annuaire QMAPS | déployer l’API dans Coolify et contrôler la route avant la bascule web
