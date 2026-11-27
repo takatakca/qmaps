@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-directory-expired-session | validé avec une session révoquée sur base jetable | maintenir la consultation publique de l’annuaire après expiration de session | valider la CI puis vérifier les parcours publics sur les trois domaines
+
 2026-11-26 | Codex | codex/qmaps-home-directory | divergence reproduite et correction testée | raccorder les rangées principales de l’accueil à l’annuaire QMAPS | valider la CI puis vérifier les rangées et la fiche en production
 
 2026-11-26 | Codex | codex/qmaps-role-qa | modes ciblés vérifiés sur PostgreSQL jetable | vérifier commerçant et administrateur séparément sans rejouer le client | exécuter chaque mode lorsque son accès de recette est lié
