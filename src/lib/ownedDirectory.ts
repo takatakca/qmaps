@@ -1,5 +1,6 @@
 import type { BusinessCardSource } from "@/lib/business";
 import { isRejectedBrowserSession, type BrowserReadCredentials } from "@/lib/browserSession";
+import type { Coordinates } from "@/lib/geo";
 
 type CategoryLink = { categories: { id: string; name: string; slug: string } };
 export type DirectoryPlace = BusinessCardSource & {
@@ -7,6 +8,7 @@ export type DirectoryPlace = BusinessCardSource & {
   longitude: number | null;
   business_categories: CategoryLink[];
 };
+type NearbyPlace = DirectoryPlace & { distance_meters: number };
 type Page<T> = { items: T[]; next: string | null };
 class DirectorySessionRejected extends Error {}
 
@@ -24,7 +26,7 @@ async function readWithBrowserSession<T>(
 }
 
 async function page<T>(
-  path: "" | "/categories",
+  path: "" | "/categories" | "/nearby",
   filters: URLSearchParams,
   credentials: BrowserReadCredentials,
   signal?: AbortSignal,
@@ -71,4 +73,20 @@ export async function topPlaces(filters: URLSearchParams, size: number, signal: 
   params.set("limit", String(size));
   params.set("order", "rating");
   return readWithBrowserSession(signal, async credentials => (await page<DirectoryPlace>("", params, credentials, signal)).items);
+}
+
+export async function nearbyPlaces(position: Coordinates, size: number, signal: AbortSignal): Promise<NearbyPlace[]> {
+  const params = new URLSearchParams({
+    // A 10 km discovery search does not need exact device coordinates.
+    lat: position.latitude.toFixed(3),
+    lng: position.longitude.toFixed(3),
+    limit: String(size),
+  });
+  return readWithBrowserSession(signal, async credentials => {
+    const result = await page<NearbyPlace>("/nearby", params, credentials, signal);
+    if (result.next !== null || result.items.length > size ||
+        result.items.some(item => !Number.isFinite(item?.distance_meters) || item.distance_meters < 0))
+      throw new Error("Réponse de proximité invalide.");
+    return result.items;
+  });
 }

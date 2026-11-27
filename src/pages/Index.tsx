@@ -9,7 +9,7 @@ import MerchantBanner from "@/components/home/MerchantBanner";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
-import { useNearbyBusinesses } from "@/hooks/useNearbyBusinesses";
+import { useOwnedNearbyBusinesses } from "@/hooks/useOwnedNearbyBusinesses";
 import { useHomeListings } from "@/hooks/useHomeListings";
 import { useLang } from "@/i18n/language";
 import { categoryImages } from "@/lib/categoryImages";
@@ -75,7 +75,7 @@ const Index = () => {
   const [city, setCity] = useState("");
   const { t } = useLang();
   const listings = useHomeListings(10);
-  const { businesses: nearbyBusinesses, loading: nearbyLoading, error: nearbyError } = useNearbyBusinesses(6);
+  const { businesses: nearbyBusinesses, loading: nearbyLoading, error: nearbyError } = useOwnedNearbyBusinesses(6);
   const { recommended, trending, loading: recLoading } = useRecommendedBusinesses({ limit: 5 });
 
   return (

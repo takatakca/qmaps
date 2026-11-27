@@ -16,7 +16,7 @@ vi.mock("@/components/home/MerchantBanner", () => ({ default: () => null }));
 vi.mock("@/components/sponsored/SponsoredListings", () => ({ default: () => null }));
 vi.mock("@/components/recommendations/DirectoryRecommendations", () => ({ default: () => null }));
 vi.mock("@/components/Seo", () => ({ default: () => null }));
-vi.mock("@/hooks/useNearbyBusinesses", () => ({ useNearbyBusinesses: () => ({ businesses: [], loading: false }) }));
+vi.mock("@/hooks/useOwnedNearbyBusinesses", () => ({ useOwnedNearbyBusinesses: () => ({ businesses: [], loading: false }) }));
 vi.mock("@/hooks/useRecommendedBusinesses", () => ({
   useRecommendedBusinesses: () => ({ recommended: [], trending: [], loading: false }),
 }));

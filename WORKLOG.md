@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-home-nearby-directory | Chromium et API validés sur base jetable | lire la proximité de l’accueil depuis PostgreSQL QMAPS | garder le brouillon jusqu’au HTTP 200 de la route Coolify
+
 2026-11-27 | Codex | codex/qmaps-directory-nearby-api | route API vérifiée sur base jetable | fournir la proximité bornée depuis l’annuaire QMAPS | déployer l’API dans Coolify et contrôler la route avant la bascule web
 
 2026-11-27 | Codex | codex/qmaps-owned-review-entry | parcours testé sur base jetable | raccorder la publication d’avis à l’annuaire QMAPS | valider la CI et les liens d’avis sur les domaines de production
