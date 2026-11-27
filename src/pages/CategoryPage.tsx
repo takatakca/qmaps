@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityLabelFromSlug } from "@/lib/localSearch";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 import SearchBar from "@/components/SearchBar";
 import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
@@ -124,7 +125,7 @@ const CategoryPage = () => {
               Aucune entreprise dans {heading}{cityLabel ? ` à ${cityLabel}` : ""}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              <Link to="/add-business" className="text-primary underline">
+              <Link to={ownedMerchantUrl} className="text-primary underline">
                 Ajouter une entreprise
               </Link>
             </p>

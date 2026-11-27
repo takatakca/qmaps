@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import SponsoredListings from "@/components/sponsored/SponsoredListings";
 import { cityLabelFromSlug } from "@/lib/localSearch";
+import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 import SearchBar from "@/components/SearchBar";
 import DirectoryRecommendations from "@/components/recommendations/DirectoryRecommendations";
 import { useRecommendedBusinesses } from "@/hooks/useRecommendedBusinesses";
@@ -108,7 +109,7 @@ const CityPage = () => {
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <p className="text-sm font-medium">Aucun commerce trouvé à {cityLabel}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Soyez le premier à <Link to="/add-business" className="text-primary underline">ajouter une entreprise</Link>.
+              Soyez le premier à <Link to={ownedMerchantUrl} className="text-primary underline">ajouter une entreprise</Link>.
             </p>
           </div>
         ) : (
