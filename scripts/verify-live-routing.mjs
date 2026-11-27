@@ -1,6 +1,6 @@
 import { pathToFileURL } from "node:url";
 
-const origins = ["https://qmaps.ca", "https://www.qmaps.ca"];
+const origins = ["https://qmaps.ca", "https://www.qmaps.ca", "https://qmaps.takatak.ca"];
 const needsSession = (body) => body?.error === "Connexion requise";
 const checks = [
   {
