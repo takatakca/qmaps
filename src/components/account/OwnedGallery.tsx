@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ownedApi } from "@/lib/ownedApi";
+import { loadPublicPlaceSection, ownedApi } from "@/lib/ownedApi";
+import type { BrowserReadCredentials } from "@/lib/browserSession";
 
 type Photo = {
   id: string;
@@ -15,16 +16,21 @@ export default function OwnedGallery({
   place,
   viewer,
   readOnly = false,
+  publicCredentials,
 }: {
   place: string;
   viewer: string;
   readOnly?: boolean;
+  publicCredentials?: BrowserReadCredentials;
 }) {
   const path = "places/" + place + "/photos";
+  const preview = readOnly ? publicCredentials : undefined;
   const gallery = useInfiniteQuery({
-    queryKey: ["qmaps-gallery", place, viewer],
+    queryKey: preview ? ["qmaps-gallery", place, viewer, preview] : ["qmaps-gallery", place, viewer],
     initialPageParam: 0,
-    queryFn: ({ pageParam }) => ownedApi<Page>(path + "?offset=" + pageParam),
+    queryFn: ({ pageParam, signal }) => preview
+      ? loadPublicPlaceSection<Page>(place, "photos", preview, signal, pageParam)
+      : ownedApi<Page>(path + "?offset=" + pageParam),
     getNextPageParam: (last) => last.next ?? undefined,
   });
   const [busy, setBusy] = useState(false);

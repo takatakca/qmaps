@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ownedApi } from "@/lib/ownedApi";
+import { loadPublicPlaceSection, ownedApi } from "@/lib/ownedApi";
+import type { BrowserReadCredentials } from "@/lib/browserSession";
 
 type Review = {
   id: string;
@@ -16,16 +17,21 @@ export default function OwnedReviews({
   owner,
   viewer,
   readOnly = false,
+  publicCredentials,
 }: {
   place: string;
   owner: boolean;
   viewer: string;
   readOnly?: boolean;
+  publicCredentials?: BrowserReadCredentials;
 }) {
   const path = "places/" + place + "/reviews";
+  const preview = readOnly && !owner ? publicCredentials : undefined;
   const reviews = useQuery({
-    queryKey: ["qmaps-owned-reviews", place, viewer],
-    queryFn: () => ownedApi<Review[]>(path),
+    queryKey: preview ? ["qmaps-owned-reviews", place, viewer, preview] : ["qmaps-owned-reviews", place, viewer],
+    queryFn: ({ signal }) => preview
+      ? loadPublicPlaceSection<Review[]>(place, "reviews", preview, signal)
+      : ownedApi<Review[]>(path),
   });
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);

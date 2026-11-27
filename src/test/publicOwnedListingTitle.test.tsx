@@ -5,8 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import PublicOwnedListing from "@/components/business/PublicOwnedListing";
 
 vi.mock("@/components/BottomNav", () => ({ default: () => null }));
-vi.mock("@/components/account/OwnedGallery", () => ({ default: () => null }));
-vi.mock("@/components/account/OwnedReviews", () => ({ default: () => null }));
+vi.mock("@/components/account/OwnedGallery", () => ({
+  default: ({ publicCredentials }: { publicCredentials?: string }) => <div data-gallery-credentials={publicCredentials} />,
+}));
+vi.mock("@/components/account/OwnedReviews", () => ({
+  default: ({ publicCredentials }: { publicCredentials?: string }) => <div data-reviews-credentials={publicCredentials} />,
+}));
 
 let host: HTMLElement;
 let root: Root;
@@ -54,5 +58,29 @@ describe("public QMAPS detail", () => {
     expect(host.textContent).toContain("6280 Av Somerled · Montréal");
     expect(host.textContent).toContain(description);
     expect(host.textContent).not.toContain("Fiche d’exemple");
+  });
+
+  it("reopens the public detail as a guest after the browser session expires", async () => {
+    const id = "1944a6d1-a00d-49b9-84b0-c480074e3f26";
+    const request = vi.fn(async (_url: string, options: RequestInit) => options.credentials === "same-origin"
+      ? Response.json({ error: "Session expirée" }, { status: 401 })
+      : Response.json({ id, name: "Mon Commerce", city: "Montréal" }));
+    vi.stubGlobal("fetch", request);
+    await showPlace(id);
+
+    expect(host.querySelector("h1")?.textContent).toBe("Mon Commerce");
+    expect(request.mock.calls.map(([, options]) => options.credentials)).toEqual(["same-origin", "omit"]);
+    expect(host.querySelector("[data-gallery-credentials=omit]")).not.toBeNull();
+    expect(host.querySelector("[data-reviews-credentials=omit]")).not.toBeNull();
+  });
+
+  it.each([403, 404])("does not change viewer when the detail returns %i", async (status) => {
+    const request = vi.fn(async () => Response.json({ error: "Fiche introuvable" }, { status }));
+    vi.stubGlobal("fetch", request);
+    await showPlace("1944a6d1-a00d-49b9-84b0-c480074e3f26");
+
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(host.querySelector("h1")?.textContent).toBe(status === 404 ? "Commerce introuvable" : "Impossible de charger la fiche");
+    expect(host.querySelector("[data-gallery-credentials]")).toBeNull();
   });
 });

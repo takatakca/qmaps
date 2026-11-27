@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import Seo from "@/components/Seo";
 import OwnedGallery from "@/components/account/OwnedGallery";
 import OwnedReviews from "@/components/account/OwnedReviews";
 import { Button } from "@/components/ui/button";
-import { ownedApi, QmapsRequestError, type QmapsPlace } from "@/lib/ownedApi";
+import { loadPublicPlace, QmapsRequestError } from "@/lib/ownedApi";
 import { exampleListingTitle } from "@/lib/exampleListing";
 
-type Result = { place: QmapsPlace } | { missing: boolean };
+type Result = Awaited<ReturnType<typeof loadPublicPlace>> | { missing: boolean };
 
 export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy }: {
   id: string;
@@ -17,15 +17,16 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
 }) {
   const [result, setResult] = useState<Result | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const preview = useId();
   useEffect(() => {
-    let active = true;
+    const request = new AbortController();
     setResult(null);
-    ownedApi<QmapsPlace>("places/" + id)
-      .then(place => { if (active) setResult({ place }); })
+    loadPublicPlace(id, request.signal)
+      .then(detail => { if (!request.signal.aborted) setResult(detail); })
       .catch(error => {
-        if (active) setResult({ missing: error instanceof QmapsRequestError && error.status === 404 });
+        if (!request.signal.aborted) setResult({ missing: error instanceof QmapsRequestError && error.status === 404 });
       });
-    return () => { active = false; };
+    return () => request.abort();
   }, [id, attempt]);
   if (!result) return <main className="mx-auto max-w-lg p-5" aria-busy="true">Chargement de la fiche…</main>;
   if ("missing" in result) {
@@ -53,8 +54,8 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
       {place.description && <p>{place.description}</p>}
     </header>
     <Button asChild><Link to={"/compte?fiche=" + id}>Ouvrir cette fiche dans mon compte</Link></Button>
-    <OwnedGallery place={id} viewer="public-preview" readOnly />
-    <OwnedReviews place={id} viewer="public-preview" owner={false} readOnly />
+    <OwnedGallery place={id} viewer={preview} publicCredentials={result.credentials} readOnly />
+    <OwnedReviews place={id} viewer={preview} publicCredentials={result.credentials} owner={false} readOnly />
     <BottomNav />
   </main>;
 }
