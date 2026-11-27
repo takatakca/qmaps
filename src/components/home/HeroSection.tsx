@@ -1,5 +1,5 @@
 import { searchUrl } from "@/lib/localSearch";
-import { ownedMerchantUrl } from "@/lib/ownedRoutes";
+import { ownedMerchantUrl, ownedReviewUrl } from "@/lib/ownedRoutes";
 import { Link } from "react-router-dom";
 import { ChevronDown, MapPin, Search, ShieldCheck, Star } from "lucide-react";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
@@ -88,7 +88,7 @@ const HeroSection = ({ city, onCityChange }: { city: string; onCityChange: (valu
       <CategoryLinks city={city} />
 
       <nav aria-label="Communauté QMaps" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium qmaps-scene-text">
-        <Link to="/add-review" className="hover:underline">Écrire un avis</Link>
+        <Link to={ownedReviewUrl} className="hover:underline">Écrire un avis</Link>
         <Link to="/activity" className="hover:underline">Activité récente</Link>
       </nav>
 

@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import OwnedLogin from "@/components/account/OwnedLogin";
 import { exampleListingTitle } from "@/lib/exampleListing";
-import { wantsOwnedMerchantTab } from "@/lib/ownedRoutes";
+import { wantsOwnedMerchantTab, wantsOwnedReview } from "@/lib/ownedRoutes";
 import {
   ownedApi,
   QmapsRequestError,
@@ -97,10 +97,11 @@ function Console({ userId }: { userId: string }) {
 
 type MarketplaceTab = "catalogue" | "saved" | "merchant";
 
-function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
+function Marketplace({ user, initialPlace = null, initialTab = "catalogue", reviewEntry = false }: {
   user: QmapsUser;
   initialPlace?: QmapsPlace | null;
   initialTab?: MarketplaceTab;
+  reviewEntry?: boolean;
 }) {
   const [tab, setTab] = useState<MarketplaceTab>(initialTab);
   const [term, setTerm] = useState(""),
@@ -161,6 +162,15 @@ function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
     return new FormData(event.currentTarget);
   };
   const selectedExampleTitle = selected && exampleListingTitle(selected);
+  const reviewMode = reviewEntry && tab === "catalogue";
+  const places = (list.data ?? []).filter(place => !reviewMode || !exampleListingTitle(place));
+  const reviews = selected && <OwnedReviews
+    key={selected.id}
+    place={selected.id}
+    owner={tab === "merchant"}
+    viewer={user.id}
+    readOnly={reviewMode && Boolean(selectedExampleTitle)}
+  />;
   return (
     <div className="space-y-5">
       <nav className="flex flex-wrap gap-2" aria-label="Espace QMAPS">
@@ -198,17 +208,13 @@ function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
             {selected.address ? " · " + selected.address : ""}
           </p>
           {selected.description && <p>{selected.description}</p>}
+          {reviewMode && reviews}
           <OwnedGallery
             key={"photos-" + selected.id}
             place={selected.id}
             viewer={user.id}
           />
-          <OwnedReviews
-            key={selected.id}
-            place={selected.id}
-            owner={tab === "merchant"}
-            viewer={user.id}
-          />
+          {!reviewMode && reviews}
           {tab !== "merchant" && (
             <Button
               variant="outline"
@@ -298,6 +304,7 @@ function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
         </section>
       ) : (
         <>
+          {reviewMode && <p>Choisissez une fiche de l’annuaire pour écrire votre avis.</p>}
           {tab === "catalogue" && (
             <form
               className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
@@ -365,11 +372,11 @@ function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
             <p>Chargement…</p>
           ) : list.isError ? (
             <p role="alert">{list.error.message}</p>
-          ) : list.data.length === 0 ? (
+          ) : places.length === 0 ? (
             <p>Aucune fiche dans cette liste.</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {list.data.map((p) => {
+              {places.map((p) => {
                 const exampleTitle = exampleListingTitle(p);
                 return (
                   <button
@@ -394,7 +401,7 @@ function Marketplace({ user, initialPlace = null, initialTab = "catalogue" }: {
     </div>
   );
 }
-function LinkedMarketplace({ user, placeId }: { user: QmapsUser; placeId: string }) {
+function LinkedMarketplace({ user, placeId, reviewEntry }: { user: QmapsUser; placeId: string; reviewEntry: boolean }) {
   const place = useQuery({
     queryKey: ["qmaps-linked-place", user.id, placeId],
     queryFn: () => ownedApi<QmapsPlace>("places/" + placeId),
@@ -408,7 +415,7 @@ function LinkedMarketplace({ user, placeId }: { user: QmapsUser; placeId: string
       <Link className="underline" to="/compte">Retour au catalogue</Link>
     </div>
   );
-  return <Marketplace user={user} initialPlace={place.data} />;
+  return <Marketplace user={user} initialPlace={place.data} reviewEntry={reviewEntry} />;
 }
 
 export default function OwnedWorkspace() {
@@ -418,6 +425,7 @@ export default function OwnedWorkspace() {
   const linked = params.get("fiche");
   const placeId = linked && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(linked) ? linked : null;
   const merchantEntry = pathname === "/compte" && !placeId && wantsOwnedMerchantTab(params);
+  const reviewEntry = pathname === "/compte" && wantsOwnedReview(params);
   const initialTab = merchantEntry ? "merchant" : "catalogue";
   const consolePage = pathname === "/console";
   const closurePage = pathname === "/compte/fermeture";
@@ -524,6 +532,7 @@ export default function OwnedWorkspace() {
         ) : !user ? (
           <>
             {merchantEntry && <p>Connectez-vous ou créez un compte QMAPS pour ajouter votre entreprise à l’annuaire.</p>}
+            {reviewEntry && <p>Connectez-vous ou créez un compte QMAPS pour écrire un avis sur un commerce.</p>}
             <OwnedLogin onReady={() => void refresh()} />
           </>
         ) : closurePage ? (
@@ -538,8 +547,8 @@ export default function OwnedWorkspace() {
           <>
             <PublicationTerms key={user.id} userId={user.id} />
             {placeId
-              ? <LinkedMarketplace key={user.id + placeId} user={user} placeId={placeId} />
-              : <Marketplace key={user.id + "-" + initialTab} user={user} initialTab={initialTab} />}
+              ? <LinkedMarketplace key={user.id + placeId} user={user} placeId={placeId} reviewEntry={reviewEntry} />
+              : <Marketplace key={user.id + "-" + initialTab} user={user} initialTab={initialTab} reviewEntry={reviewEntry} />}
           </>
         )}
       </div>

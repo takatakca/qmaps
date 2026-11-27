@@ -42,6 +42,7 @@ describe("public QMAPS detail", () => {
 
     expect(host.querySelector("h1")?.textContent).toBe("Café du quartier");
     expect(host.textContent).toContain("Fiche d’exemple");
+    expect(host.querySelector('a[href*="onglet=avis"]')).toBeNull();
     expect(document.title).not.toContain("Démo");
     expect(fetchPlace).toHaveBeenCalledWith("/api/v1/browser/places/" + id, expect.objectContaining({ method: "GET" }));
   });
@@ -58,6 +59,8 @@ describe("public QMAPS detail", () => {
     expect(host.textContent).toContain("6280 Av Somerled · Montréal");
     expect(host.textContent).toContain(description);
     expect(host.textContent).not.toContain("Fiche d’exemple");
+    expect(host.querySelector('a[href="/compte?onglet=avis&fiche=' + id + '"]')?.textContent).toBe("Écrire un avis");
+    expect(host.querySelector('a[href="/compte?fiche=' + id + '"]')).not.toBeNull();
   });
 
   it("reopens the public detail as a guest after the browser session expires", async () => {

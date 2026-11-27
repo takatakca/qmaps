@@ -4,13 +4,16 @@ import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import OwnedWorkspace from "@/pages/OwnedWorkspace";
-import { ownedMerchantUrl } from "@/lib/ownedRoutes";
+import { ownedListingReviewUrl, ownedMerchantUrl, ownedReviewUrl } from "@/lib/ownedRoutes";
 
 vi.mock("@/components/account/OwnedLogin", () => ({
   default: ({ onReady }: { onReady: () => void }) => <button onClick={onReady}>Session de recette prête</button>,
 }));
-vi.mock("@/components/account/OwnedGallery", () => ({ default: () => null }));
-vi.mock("@/components/account/OwnedReviews", () => ({ default: () => null }));
+vi.mock("@/components/account/OwnedGallery", () => ({ default: () => <div data-gallery /> }));
+vi.mock("@/components/account/OwnedReviews", () => ({
+  default: ({ place, readOnly }: { place: string; readOnly?: boolean }) =>
+    <div data-review={place} data-readonly={String(Boolean(readOnly))} />,
+}));
 
 const placeId = "1944a6d1-a00d-49b9-84b0-c480074e3f26";
 let host: HTMLDivElement;
@@ -18,14 +21,18 @@ let root: Root;
 let cache: QueryClient;
 let signedIn: boolean;
 
-function apiMock() {
+function apiMock(catalogue: { id: string; name: string; city: string }[] = []) {
   return vi.fn(async (input: string) => {
     const path = input.replace(/^\/api\/v1\/browser\//, "");
     if (path === "me") return signedIn
       ? Response.json({ id: "qa-owner", handle: "qa-owner", roles: ["user"] })
       : Response.json({ error: "Connexion requise" }, { status: 401 });
     if (path === "me/publication-terms") return Response.json({ version: "qa", accepted: true });
+    if (path.startsWith("places?")) return Response.json(catalogue);
     if (path === "places/" + placeId) return Response.json({ id: placeId, name: "Commerce de recette", city: "Montréal" });
+    if (path === "places/a9bf0001-0000-4000-8000-000000000001") return Response.json({
+      id: "a9bf0001-0000-4000-8000-000000000001", name: "Bistro de nuit", city: "Montréal",
+    });
     if (path.endsWith("/guest-settings")) return Response.json({ waitlist: false });
     return Response.json([]);
   });
@@ -94,5 +101,39 @@ describe("entry to the owned merchant catalogue", () => {
     vi.stubGlobal("fetch", apiMock());
     await open("/compte");
     expect(host.querySelector('nav[aria-label="Espace QMAPS"] [aria-pressed="true"]')?.textContent).toBe("Découvrir");
+  });
+});
+
+describe("entry to an owned listing review", () => {
+  it("retains the review intention after login, and uses the owned catalogue to choose a real place", async () => {
+    const fetchOwned = apiMock([
+      { id: placeId, name: "Commerce de recette", city: "Montréal" },
+      { id: "a9bf0001-0000-4000-8000-000000000001", name: "QMAPS Démo — Bistro de nuit", city: "Montréal" },
+    ]);
+    vi.stubGlobal("fetch", fetchOwned);
+    await open(ownedReviewUrl);
+    expect(host.textContent).toContain("écrire un avis sur un commerce");
+    expect(fetchOwned.mock.calls.map(([url]) => url)).toEqual(["/api/v1/browser/me"]);
+
+    signedIn = true;
+    await act(async () => Array.from(host.querySelectorAll("button")).find(b => b.textContent === "Session de recette prête")?.click());
+    await settle();
+    expect(host.textContent).toContain("Choisissez une fiche de l’annuaire");
+    expect(host.textContent).not.toContain("Bistro de nuit");
+    const place = Array.from(host.querySelectorAll("button")).find(b => b.textContent?.includes("Commerce de recette"));
+    expect(place).toBeDefined();
+    await act(async () => place?.click());
+    expect(host.querySelector("[data-review]")?.getAttribute("data-review")).toBe(placeId);
+    expect(host.querySelector("[data-review]")?.getAttribute("data-readonly")).toBe("false");
+    expect(host.querySelector("[data-review]")?.nextElementSibling?.hasAttribute("data-gallery")).toBe(true);
+  });
+
+  it("opens a linked example's reviews in read-only mode", async () => {
+    signedIn = true;
+    vi.stubGlobal("fetch", apiMock());
+    await open(ownedListingReviewUrl("a9bf0001-0000-4000-8000-000000000001"));
+    await settle();
+    expect(host.querySelector("h2")?.textContent).toBe("Bistro de nuit");
+    expect(host.querySelector("[data-review]")?.getAttribute("data-readonly")).toBe("true");
   });
 });
