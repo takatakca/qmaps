@@ -245,7 +245,7 @@ const MerchantBillingPlans = () => {
                     onClick={() => {
                       if (cta === "contact") {
                         window.location.href =
-                          "mailto:hello@qmaps.app?subject=Plan Premium";
+                          "mailto:hello@qmaps.ca?subject=Plan Premium";
                         return;
                       }
                       if (cta === "checkout") {

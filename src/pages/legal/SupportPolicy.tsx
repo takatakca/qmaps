@@ -41,7 +41,7 @@ const ContactForm = ({ lang }: { lang: LegalLang }) => {
       message,
     ].filter(Boolean).join("\n");
     const subject = `[QMAPS Support] ${topicLabel}`;
-    const mailto = `mailto:support@qmaps.app?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailto = `mailto:support@qmaps.ca?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   };
 
@@ -97,10 +97,10 @@ const renderEn = () => (
     </p>
     <Section title="📧 Contact channels">
       <ul className="list-disc pl-5 space-y-1">
-        <li>General support: <a href="mailto:support@qmaps.app" className="text-primary underline">support@qmaps.app</a></li>
-        <li>Privacy and data: <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a></li>
-        <li>Abuse / DMCA: <a href="mailto:abuse@qmaps.app" className="text-primary underline">abuse@qmaps.app</a></li>
-        <li>Merchants and billing: <a href="mailto:business@qmaps.app" className="text-primary underline">business@qmaps.app</a></li>
+        <li>General support: <a href="mailto:support@qmaps.ca" className="text-primary underline">support@qmaps.ca</a></li>
+        <li>Privacy and data: <a href="mailto:privacy@qmaps.ca" className="text-primary underline">privacy@qmaps.ca</a></li>
+        <li>Abuse / DMCA: <a href="mailto:abuse@qmaps.ca" className="text-primary underline">abuse@qmaps.ca</a></li>
+        <li>Merchants and billing: <a href="mailto:business@qmaps.ca" className="text-primary underline">business@qmaps.ca</a></li>
       </ul>
     </Section>
     <Section title="⏱ Response times">
@@ -137,10 +137,10 @@ const renderFr = () => (
     </p>
     <Section title="📧 Canaux de contact">
       <ul className="list-disc pl-5 space-y-1">
-        <li>Support général : <a href="mailto:support@qmaps.app" className="text-primary underline">support@qmaps.app</a></li>
-        <li>Vie privée et données : <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a></li>
-        <li>Signalement d'abus / DMCA : <a href="mailto:abuse@qmaps.app" className="text-primary underline">abuse@qmaps.app</a></li>
-        <li>Commerçants et facturation : <a href="mailto:business@qmaps.app" className="text-primary underline">business@qmaps.app</a></li>
+        <li>Support général : <a href="mailto:support@qmaps.ca" className="text-primary underline">support@qmaps.ca</a></li>
+        <li>Vie privée et données : <a href="mailto:privacy@qmaps.ca" className="text-primary underline">privacy@qmaps.ca</a></li>
+        <li>Signalement d'abus / DMCA : <a href="mailto:abuse@qmaps.ca" className="text-primary underline">abuse@qmaps.ca</a></li>
+        <li>Commerçants et facturation : <a href="mailto:business@qmaps.ca" className="text-primary underline">business@qmaps.ca</a></li>
       </ul>
     </Section>
     <Section title="⏱ Délais de réponse">

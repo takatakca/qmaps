@@ -62,7 +62,7 @@ const renderEn = () => (
       </p>
     </Section>
     <Section title="13. Your rights (Quebec Law 25)">
-      <p>You can access, rectify and request deletion of your personal data. Our privacy officer is Pierre Lévesque. Contact him at <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a>.</p>
+      <p>You can access, rectify and request deletion of your personal data. Our privacy officer is Pierre Lévesque. Contact him at <a href="mailto:privacy@qmaps.ca" className="text-primary underline">privacy@qmaps.ca</a>.</p>
     </Section>
   </>
 );
@@ -121,7 +121,7 @@ const renderFr = () => (
       </p>
     </Section>
     <Section title="13. Vos droits (Loi 25 — Québec)">
-      <p>Vous avez le droit d'accéder, de rectifier et de demander la suppression de vos données personnelles. Pierre Lévesque est le responsable de la protection des renseignements personnels. Vous pouvez le joindre à <a href="mailto:privacy@qmaps.app" className="text-primary underline">privacy@qmaps.app</a>.</p>
+      <p>Vous avez le droit d'accéder, de rectifier et de demander la suppression de vos données personnelles. Pierre Lévesque est le responsable de la protection des renseignements personnels. Vous pouvez le joindre à <a href="mailto:privacy@qmaps.ca" className="text-primary underline">privacy@qmaps.ca</a>.</p>
     </Section>
   </>
 );

@@ -16,9 +16,9 @@ describe("Stripe checkout / portal return-origin boundaries", () => {
     expect(resolveCheckoutReturnOrigin("https://www.qmaps.ca", null)).toBe("https://www.qmaps.ca");
     expect(resolveCheckoutReturnOrigin("https://qmaps.ca", null)).toBe("https://qmaps.ca");
     expect(
-      resolveCheckoutReturnOrigin("https://staging.qmaps.ca", "https://staging.qmaps.ca, https://qmaps.app"),
+      resolveCheckoutReturnOrigin("https://staging.qmaps.ca", "https://staging.qmaps.ca, https://qmaps.ca"),
     ).toBe("https://staging.qmaps.ca");
-    expect(resolveCheckoutReturnOrigin("https://qmaps.app", "https://qmaps.app")).toBe("https://qmaps.app");
+    expect(resolveCheckoutReturnOrigin("https://qmaps.ca", "https://qmaps.ca")).toBe("https://qmaps.ca");
   });
 
   it("rejects lookalike origins, non-HTTPS and credentials", () => {
