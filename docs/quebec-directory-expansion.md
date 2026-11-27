@@ -57,6 +57,19 @@ L’activité FLEXS « Restaurant » regroupe plusieurs types municipaux, dont l
 
 Pour les futures fiches publiques, afficher le crédit de la Ville de Montréal, la référence et la licence. Mentionner la sélection et l’adaptation FLEXS/QMAPS. Laisser vides les heures, le téléphone et les coordonnées non corroborés. Ne proposer ni statut vérifié, ni revendication sans parcours de reprise. Conserver un manifeste des identifiants exacts du lot. En cas de retrait, désactiver seulement les fiches concernées après vérification des modifications ou revendications, sans supprimer en cascade les avis, favoris ou médias.
 
+### Activer ou retirer le lot après la recette
+
+Valider d’abord sur une base jetable. L’aperçu et le manifeste de revue ne déclenchent aucun import. Seul l’opérateur PostgreSQL autorisé peut exécuter ces commandes. Avant toute publication sur la base QMAPS publique, vérifier le déploiement de la recherche paginée et l’affichage du crédit sur une fiche de recette, confirmer une sauvegarde, et revérifier les références municipales du petit lot.
+
+```sh
+sh server/db/imports/run-flexs-montreal-pilot.sh publish mtl-2026-11-27-v1 /chemin/lot-pilote-confirme.csv
+sh server/db/imports/run-flexs-montreal-pilot.sh withdraw mtl-2026-11-27-v1 /chemin/lot-pilote-confirme.csv
+```
+
+Le fichier de revue fournit de 1 à 24 lignes CC BY 4.0 corroborées. L’en-tête exact et les champs sont `id_qmaps_propose,reference_municipale,nom,adresse_publique,ville,province,categorie_qmaps,source,licence`. Les quatre derniers champs utilisent `QC`, `restaurants`, `Ville de Montréal — Établissements alimentaires` et `CC BY 4.0`, et la ville est `Montréal`. Ce fichier reste hors Git. L’adresse vient du rapprochement municipal, pas du cliché FLEXS. Une référence absente du dernier cliché, un chevauchement avec une fiche QMAPS existante même inactive, ou un conflit de nom, d’alias ou d’adresse empêche l’activation du lot entier.
+
+Vérifier le code de sortie et le JSON de l’opération. Le reçu privé enregistre les identifiants exacts du lot. Il faut réutiliser le même contenu pour le retrait, sous le même identifiant de lot. Une nouvelle exécution après retrait ne rend pas les fiches visibles. Le retrait désactive les fiches intactes et conserve les fiches modifiées, revendiquées ou en cours de revendication pour examen. Les avis, favoris et médias restent en base, et les compteurs dérivés des avis ne bloquent pas le retrait. Les fiches activées ne contiennent ni horaires, ni coordonnées, ni information de propriété supposée. Leur détail affiche le crédit municipal et distingue le statut administratif de la source de toute confirmation des horaires ou de l’exploitant actuel.
+
 ## Avant publication
 
 1. La recherche publique actuelle télécharge toutes les pages de résultats avant d’afficher les fiches. Déployer et vérifier une recherche paginée côté serveur qui conserve le tri et les filtres, notamment les heures, les services et la proximité. Vérifier les index avec le vrai volume, l’accès invité et le masquage par compte.

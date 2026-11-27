@@ -32,7 +32,8 @@ jobs:
             createdb -U postgres qmaps_flexs_stage_test
             pg_dump -U postgres --format=custom -f "$archive" qmaps
             pg_restore -U postgres --exit-on-error -d qmaps_flexs_stage_test "$archive"
-            PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-directory-stage.sh'
+            PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-directory-stage.sh
+            PGDATABASE=qmaps_flexs_stage_test PGUSER=postgres sh /opt/qmaps/server/test/flexs-montreal-pilot.sh'
           compose exec -T qmaps-db psql -X -U postgres -d qmaps < server/test/directory-results.sql
           node --test server/test/directory-result-filters.mjs
           QMAPS_TEST_RESULTS_FIXTURE=1 node server/test/live.mjs || { compose logs --tail 20 qmaps-api; exit 1; }

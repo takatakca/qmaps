@@ -10,6 +10,20 @@ import { exampleListingTitle } from "@/lib/exampleListing";
 import { ownedListingReviewUrl } from "@/lib/ownedRoutes";
 
 type Result = Awaited<ReturnType<typeof loadPublicPlace>> | { missing: boolean };
+const municipalSource = "https://www.donneesquebec.ca/recherche/dataset/vmtl-etablissements-alimentaires";
+const ccByLicense = "https://creativecommons.org/licenses/by/4.0/deed.fr";
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+
+function municipalReference(attributes: unknown): string | null {
+  const marker = asRecord(asRecord(attributes)?.qmaps_directory_import);
+  if (marker?.source !== "mtl_food" || marker.licence !== "CC-BY-4.0") return null;
+  return typeof marker.external_id === "string" && /^[0-9]{1,20}$/.test(marker.external_id)
+    ? marker.external_id
+    : null;
+}
 
 export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy }: {
   id: string;
@@ -45,6 +59,7 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
   const place = result.place;
   const exampleTitle = exampleListingTitle(place);
   const name = exampleTitle ?? place.name;
+  const reference = exampleTitle ? null : municipalReference(place.attributes);
   return <main className="mx-auto max-w-2xl space-y-6 px-5 py-6 pb-24">
     <Seo title={name + " · " + place.city + " | QMAPS"} description={place.description || name + " à " + place.city} canonicalPath={"/business/" + id} />
     <Link className="text-sm underline" to={"/search?" + new URLSearchParams({ city: place.city })}>Retour à la recherche</Link>
@@ -54,6 +69,12 @@ export default function PublicOwnedListing({ id, legacyUnavailable, retryLegacy 
       <p>{[place.address, place.city].filter(Boolean).join(" · ")}</p>
       {place.description && <p>{place.description}</p>}
     </header>
+    {reference && <aside className="space-y-1 rounded-xl border p-4 text-sm" aria-label="Provenance de la fiche">
+      <p className="font-semibold">Fiche de source municipale</p>
+      <p>Source <a className="text-primary underline" href={municipalSource}>Ville de Montréal, « Établissements alimentaires »</a>.</p>
+      <p>Référence municipale {reference} · <a className="text-primary underline" href={ccByLicense}>CC BY 4.0</a></p>
+      <p>Adaptation par FLEXS et QMAPS. Les horaires et l’exploitant actuel ne sont pas confirmés.</p>
+    </aside>}
     <div className="flex flex-wrap gap-2">
       {!exampleTitle && <Button asChild><Link to={ownedListingReviewUrl(id)}>Écrire un avis</Link></Button>}
       <Button asChild variant={exampleTitle ? "default" : "outline"}><Link to={"/compte?fiche=" + id}>Ouvrir cette fiche dans mon compte</Link></Button>

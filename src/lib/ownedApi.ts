@@ -54,7 +54,7 @@ function readPublicPlace(path: string, credentials: BrowserReadCredentials, sign
 }
 
 export async function loadPublicPlace(id: string, signal: AbortSignal): Promise<{
-  place: QmapsPlace;
+  place: QmapsPlace & { attributes?: unknown };
   credentials: BrowserReadCredentials;
 }> {
   const path = encodeURIComponent(id);
