@@ -67,7 +67,7 @@ describe("merchant Stripe sessions", () => {
             maybeSingle: async () => ({
               data: table === "businesses"
                 ? { id: businessId, owner_user_id: userId, name: "Test" }
-                : { provider_customer_id: "cus_test" },
+                : sessionKind === "portal" ? { provider_customer_id: "cus_test" } : null,
               error: null,
             }),
           }),
@@ -93,6 +93,104 @@ describe("merchant Stripe sessions", () => {
     expect(response.status).toBe(200);
     expect(sessionKind === "checkout" ? checkout : portal).toHaveBeenCalledOnce();
     expect(sessionKind === "checkout" ? portal : checkout).not.toHaveBeenCalled();
+  });
+});
+
+const recordedStripeSubscription = {
+  provider: "stripe", provider_subscription_id: "sub_existing", provider_customer_id: "cus_existing",
+};
+
+function checkoutFixture(row: object | null = recordedStripeSubscription, status = "active") {
+  const checkout = vi.fn().mockResolvedValue({ url: "https://checkout.stripe.test/session", id: "cs_test" });
+  const retrieve = vi.fn().mockResolvedValue({
+    id: "sub_existing", status, customer: "cus_existing", cancel_at_period_end: true,
+  });
+  const supabase = {
+    auth: { getUser: async () => ({ data: { user: { id: userId } }, error: null }) },
+    from: (table: string) => ({
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({
+        data: table === "businesses" ? { id: businessId, owner_user_id: userId } : row, error: null,
+      }) }) }),
+    }),
+  };
+  const handler = loadHandler("create-merchant-checkout-session", supabase, {
+    subscriptions: { retrieve }, checkout: { sessions: { create: checkout } },
+  });
+  const purchase = () => handler(new Request("https://qmaps.ca/checkout", {
+    method: "POST", headers: { Authorization: "Bearer local", "Content-Type": "application/json" },
+    body: JSON.stringify({ business_id: businessId, plan: "pro" }),
+  }));
+  return { purchase, retrieve, checkout };
+}
+
+describe("Stripe Checkout with a previous subscription", () => {
+  it.each(["active", "trialing", "past_due", "incomplete", "unpaid", "paused", "unknown"])(
+    "does not start a second Checkout when Stripe reports %s",
+    async status => {
+      const { purchase, retrieve, checkout } = checkoutFixture(recordedStripeSubscription, status);
+      const response = await purchase();
+      expect(response.status).toBe(409);
+      expect(await response.json()).toMatchObject({ error: "subscription_exists" });
+      expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_existing");
+      expect(checkout).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(["canceled", "incomplete_expired"])("allows a fresh Checkout after %s", async status => {
+    const { purchase, retrieve, checkout } = checkoutFixture(recordedStripeSubscription, status);
+    expect((await purchase()).status).toBe(200);
+    expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_existing");
+    expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ customer: "cus_existing" }));
+  });
+
+  it("does not start Checkout when a recorded Stripe subscription cannot be verified", async () => {
+    const { purchase, retrieve, checkout } = checkoutFixture();
+    retrieve.mockRejectedValue(new Error("Provider unavailable"));
+    expect((await purchase()).status).toBe(500);
+    expect(checkout).not.toHaveBeenCalled();
+  });
+
+  it.each(["stripe", null])("does not treat a %s record with only a Stripe customer ID as a first purchase", async provider => {
+    const { purchase, retrieve, checkout } = checkoutFixture({
+      ...recordedStripeSubscription, provider, provider_subscription_id: null,
+    });
+    const response = await purchase();
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ error: "subscription_unverified" });
+    expect(retrieve).not.toHaveBeenCalled();
+    expect(checkout).not.toHaveBeenCalled();
+  });
+
+  it("does not redirect to an unavailable portal when the recorded customer ID is missing", async () => {
+    const { purchase, retrieve, checkout } = checkoutFixture({ ...recordedStripeSubscription, provider_customer_id: null });
+    const response = await purchase();
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ error: "subscription_unverified" });
+    expect(retrieve).toHaveBeenCalledExactlyOnceWith("sub_existing");
+    expect(checkout).not.toHaveBeenCalled();
+  });
+
+  it("does not reuse a customer reference from another billing provider", async () => {
+    const { purchase, retrieve, checkout } = checkoutFixture({
+      provider: "manual", provider_subscription_id: "manual-subscription", provider_customer_id: "manual-customer",
+    });
+    expect((await purchase()).status).toBe(200);
+    expect(retrieve).not.toHaveBeenCalled();
+    expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ customer: undefined }));
+  });
+
+  it("allows a first purchase with no subscription record", async () => {
+    const { purchase, retrieve, checkout } = checkoutFixture(null);
+    expect((await purchase()).status).toBe(200);
+    expect(retrieve).not.toHaveBeenCalled();
+    expect(checkout).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ customer: undefined }));
+  });
+
+  it("does not start Checkout with mismatched Stripe customer data", async () => {
+    const { purchase, retrieve, checkout } = checkoutFixture();
+    retrieve.mockResolvedValue({ id: "sub_existing", status: "canceled", customer: "cus_other" });
+    expect((await purchase()).status).toBe(500);
+    expect(checkout).not.toHaveBeenCalled();
   });
 });
 

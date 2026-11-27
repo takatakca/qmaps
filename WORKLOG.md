@@ -1,3 +1,5 @@
+2026-11-26 | Codex | codex/qmaps-stripe-existing-subscription | régression et correctif vérifiés | éviter un nouveau Checkout pour un abonnement Stripe en cours | valider la CI puis tester le Checkout et le portail dans Stripe Sandbox
+
 2026-11-26 | Codex | codex/qmaps-stripe-webhook-order | régression et correctif vérifiés | conserver l’état Stripe actuel lors des livraisons hors ordre | valider la CI puis déployer le webhook en préproduction Sandbox autorisée
 
 2026-11-26 | Codex | codex/qmaps-authenticated-qa | procédure prête | documenter la recette Stripe Sandbox QMAPS | confirmer la préproduction et valider Checkout et webhook avec les accès de test

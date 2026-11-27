@@ -35,7 +35,7 @@ const MerchantBillingPlans = () => {
   const [businesses, setBusinesses] = useState<Pick<Tables<"businesses">, "id" | "name">[]>([]);
   const [selectedBizId, setSelectedBizId] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<PlanKey | null>(null);
-  const { plan: currentPlan, loading: subLoading, error: subscriptionError, refresh: refreshSubscription } = useMerchantSubscription(selectedBizId);
+  const { plan: currentPlan, status: subscriptionStatus, loading: subLoading, error: subscriptionError, refresh: refreshSubscription } = useMerchantSubscription(selectedBizId);
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -96,6 +96,19 @@ const MerchantBillingPlans = () => {
         toast({
           title: "Bientôt disponible",
           description: payload?.message || "Les paiements ne sont pas encore activés.",
+        });
+      } else if (code === "subscription_exists") {
+        if (user) saveMerchantBusinessId(user.id, selectedBizId);
+        toast({
+          title: "Abonnement existant",
+          description: "Gérez votre abonnement depuis la facturation.",
+        });
+        navigate("/merchant/billing");
+      } else if (code === "subscription_unverified") {
+        toast({
+          title: "Abonnement non vérifié",
+          description: payload?.message || "Aucun paiement n’a été lancé.",
+          variant: "destructive",
         });
       } else if (code === "forbidden") {
         toast({
@@ -187,7 +200,8 @@ const MerchantBillingPlans = () => {
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {PLANS.map((p) => {
-            const isCurrent = !subLoading && currentPlan === p.key;
+            const isCurrent = !subLoading && subscriptionStatus !== "canceled" &&
+              subscriptionStatus !== "incomplete" && currentPlan === p.key;
             const cta: PlanDefinition["cta"] = isCurrent ? "current" : p.cta;
             const isLoading = checkoutLoading === p.key;
             const disabled =
