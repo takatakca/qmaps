@@ -6,6 +6,8 @@ declare
   opts pg_temp.flexs_montreal_pilot_options%rowtype;
   prior qmaps_ops.flexs_montreal_pilot_batches%rowtype;
   matched_snapshot timestamptz;
+  expected_counts jsonb;
+  actual_counts jsonb;
   v_manifest_hash text;
   restaurants_id uuid;
   v_member_count integer;
@@ -83,10 +85,23 @@ begin
     if to_regclass('qmaps_ops.flexs_directory_stage') is null then
       raise exception 'QMAPS FLEXS staging is not initialized';
     end if;
+    if to_regclass('qmaps_ops.flexs_directory_snapshots') is null then
+      raise exception 'No complete open FLEXS snapshot is staged';
+    end if;
     lock table qmaps_ops.flexs_directory_stage in share mode;
-    select max(staged_at) into matched_snapshot from qmaps_ops.flexs_directory_stage
-    where source = 'mtl_food' and licence = 'CC-BY-4.0';
-    if matched_snapshot is null or exists (
+    select staged_at, source_counts into matched_snapshot, expected_counts
+    from qmaps_ops.flexs_directory_snapshots where source_family = 'open' for share;
+    if matched_snapshot is null then
+      raise exception 'No complete open FLEXS snapshot is staged';
+    end if;
+    select jsonb_object_agg(t.source, t.quantity) into actual_counts from (
+      select source, count(*) as quantity from qmaps_ops.flexs_directory_stage
+      where staged_at = matched_snapshot and licence in ('CC-BY-4.0', 'CC0-1.0') group by source
+    ) t;
+    if actual_counts is distinct from expected_counts then
+      raise exception 'Staged rows do not match the complete open FLEXS snapshot receipt';
+    end if;
+    if exists (
       select 1 from pg_temp.flexs_montreal_pilot_input i
       where not exists (
         select 1 from qmaps_ops.flexs_directory_stage s
@@ -117,7 +132,7 @@ begin
       )
       select 1 from qmaps_ops.flexs_directory_stage s join inputs i on s.flexs_id <> i.id_qmaps_propose
       where s.licence in ('CC-BY-4.0','CC0-1.0') and pg_temp.qmaps_pilot_montreal(s.city)
-        and (s.source <> 'mtl_food' or s.staged_at = matched_snapshot)
+        and s.staged_at = matched_snapshot
         and (pg_temp.qmaps_pilot_fold(s.name) in (i.name_key,i.alias_key)
           or pg_temp.qmaps_pilot_fold(s.other_name) in (i.name_key,i.alias_key))
     ) then
