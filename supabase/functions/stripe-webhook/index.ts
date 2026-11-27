@@ -1,5 +1,5 @@
 // Phase 7B — Stripe webhook handler. Source of truth for subscription state.
-// Deduplicate completed deliveries by provider event ID.
+// Persist a Stripe receipt and any subscription change in one database transaction.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
@@ -8,6 +8,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
+
+function acknowledge(duplicate = false) {
+  return new Response(JSON.stringify(duplicate ? { received: true, duplicate: true } : { received: true }), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 function mapStatus(stripeStatus: string): string {
   switch (stripeStatus) {
@@ -72,12 +79,7 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
     if (lookupError) throw new Error("Unable to check the Stripe event receipt");
-    if (existingEvent) {
-      return new Response(JSON.stringify({ received: true, duplicate: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    if (existingEvent) return acknowledge(true);
 
     let businessId: string | null = null;
     let userId: string | null = null;
@@ -91,35 +93,21 @@ Deno.serve(async (req) => {
       }
     };
 
-    const upsertSubscription = async (
-      sub: Stripe.Subscription,
-      bId: string,
-      uId: string,
-      planKey: string
-    ) => {
-      const row = {
-        business_id: bId,
-        user_id: uId,
-        plan: planKey,
-        status: mapStatus(sub.status),
-        provider: "stripe",
-        provider_customer_id:
-          typeof sub.customer === "string" ? sub.customer : sub.customer.id,
-        provider_subscription_id: sub.id,
-        current_period_start: sub.current_period_start
-          ? new Date(sub.current_period_start * 1000).toISOString()
-          : null,
-        current_period_end: sub.current_period_end
-          ? new Date(sub.current_period_end * 1000).toISOString()
-          : null,
-        cancel_at_period_end: !!sub.cancel_at_period_end,
-        updated_at: new Date().toISOString(),
-      };
-      const { error } = await admin
-        .from("merchant_subscriptions")
-        .upsert(row, { onConflict: "business_id" });
-      if (error) throw new Error("Unable to save the Stripe subscription");
-    };
+    const subscriptionState = (sub: Stripe.Subscription, planKey: string) => ({
+      plan: planKey,
+      status: mapStatus(sub.status),
+      provider_customer_id:
+        typeof sub.customer === "string" ? sub.customer : sub.customer.id,
+      provider_subscription_id: sub.id,
+      current_period_start: sub.current_period_start
+        ? new Date(sub.current_period_start * 1000).toISOString()
+        : null,
+      current_period_end: sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : null,
+      cancel_at_period_end: !!sub.cancel_at_period_end,
+    });
+    let subscription: ReturnType<typeof subscriptionState> | null = null;
 
     switch (event.type) {
       case "checkout.session.completed": {
@@ -136,7 +124,7 @@ Deno.serve(async (req) => {
               ? session.subscription
               : session.subscription.id;
           const sub = await retrieveSubscription(subId);
-          await upsertSubscription(sub, businessId, userId, plan);
+          subscription = subscriptionState(sub, plan);
         }
         break;
       }
@@ -159,7 +147,7 @@ Deno.serve(async (req) => {
             throw new Error("Stripe subscription no longer matches the event target");
           }
           plan = currentPlan;
-          await upsertSubscription(sub, businessId, userId, currentPlan);
+          subscription = subscriptionState(sub, currentPlan);
         }
         break;
       }
@@ -173,7 +161,7 @@ Deno.serve(async (req) => {
         break;
       }
       default:
-        // Unhandled events still get logged for audit trail.
+        // Ignore events that are not associated with this billing flow.
         break;
     }
 
@@ -190,23 +178,21 @@ Deno.serve(async (req) => {
     }
 
     if (businessId) {
-      const { error } = await admin.from("merchant_billing_events").insert({
-        business_id: businessId,
-        user_id: userId,
-        event_type: event.type,
-        provider: "stripe",
-        provider_event_id: event.id,
-        metadata: safeMetadata as never,
+      const { data: applied, error } = await admin.rpc("qmaps_apply_stripe_billing_event", {
+        p_event_id: event.id,
+        p_event_type: event.type,
+        p_business_id: businessId,
+        p_user_id: userId,
+        p_metadata: safeMetadata,
+        p_subscription: subscription,
       });
-      if (error) throw new Error("Unable to save the Stripe event receipt");
+      if (error || typeof applied !== "boolean") throw new Error("Unable to apply the Stripe event transaction");
+      return acknowledge(!applied);
     } else {
       console.warn("Webhook event without business_id metadata", event.id, event.type);
     }
 
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return acknowledge();
   } catch (err) {
     console.error("stripe-webhook handler error", err);
     return new Response(JSON.stringify({ error: "handler_error" }), {

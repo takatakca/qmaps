@@ -10,7 +10,20 @@ Cette recette valide un abonnement marchand de test, son suivi par webhook et sa
 
 ## Configurer la préproduction
 
-Déployer dans le projet Supabase de préproduction les fonctions `create-merchant-checkout-session`, `create-merchant-billing-portal-session` et `stripe-webhook` depuis le même commit. Appliquer la migration [qui réserve les reçus Stripe au service](../supabase/migrations/20261126080026_protect_stripe_billing_receipts.sql) à cette base. Le frontend doit pointer sur ce projet via `VITE_SUPABASE_URL` et sa clé publique `VITE_SUPABASE_PUBLISHABLE_KEY`.
+Préparer le projet de préproduction vérifié. Appliquer la migration [qui réserve les reçus Stripe au service](../supabase/migrations/20261126080026_protect_stripe_billing_receipts.sql). Avant d’appliquer la [migration de transaction Stripe](../supabase/migrations/20261127040944_apply_stripe_billing_event.sql), contrôler l’unicité des reçus déjà présents dans cette même base, sans exporter d’identifiants.
+
+```sql
+select count(*) as groupes_de_doublons
+from (
+  select provider_event_id
+  from public.merchant_billing_events
+  where provider = 'stripe' and provider_event_id is not null
+  group by provider_event_id
+  having count(*) > 1
+) as doublons;
+```
+
+S’il existe des doublons, bloquer cette mise à jour et préserver l’historique pour une réconciliation distincte. Si le résultat est zéro, appliquer la migration puis déployer `create-merchant-checkout-session`, `create-merchant-billing-portal-session` et `stripe-webhook` depuis le même commit, avant d’activer la livraison Sandbox. Le frontend doit pointer sur ce projet via `VITE_SUPABASE_URL` et sa clé publique `VITE_SUPABASE_PUBLISHABLE_KEY`.
 
 | Variable serveur | Valeur attendue en préproduction |
 | --- | --- |
@@ -38,7 +51,7 @@ Configurer la version d’API de la destination pour correspondre à celle utili
 1. **Annulation Checkout.** Se connecter comme marchand de recette et ouvrir `/merchant/billing/plans` en préproduction. Choisir un plan et vérifier que Stripe affiche le Sandbox attendu ainsi que le tarif et la périodicité configurés. Quitter Checkout avec son lien de retour. Vérifier le retour sur l’origine de préproduction, à `/merchant/billing/plans?checkout=cancel`, et confirmer que le plan gratuit est inchangé.
 2. **Abonnement.** Relancer Checkout depuis la même fiche et terminer le parcours avec une carte de test. Vérifier le retour sur cette même origine à `/merchant/billing?checkout=success`. Recharger la facturation après la livraison du webhook et vérifier le plan choisi. Un retour sur un domaine de production signale une configuration d’origine à corriger.
 3. **Persistance et preuve Stripe.** Dans Stripe Sandbox, ouvrir la livraison de `checkout.session.completed` issue de l’abonnement et vérifier son code 2xx. Dans la base de préproduction, vérifier le plan et le statut dans `merchant_subscriptions`, puis le reçu portant le même identifiant d’événement et la même fiche dans `merchant_billing_events`. Utiliser les extraits SQL existants en filtrant sur la fiche ou l’événement de recette. Un 2xx seul ne prouve pas que le reçu existe. Une livraison générique qui ne porte pas les métadonnées QMAPS ne remplace pas celle créée par Checkout. [Requêtes de vérification](production-verification-sql.md)
-4. **Rediffusion.** Une fois le reçu confirmé, renvoyer ce même événement depuis Stripe Sandbox. Confirmer la réponse 200 avec `duplicate: true`, un seul reçu pour cet identifiant et un abonnement inchangé. Cette vérification couvre une rediffusion après enregistrement. Une garantie lors de livraisons simultanées demanderait un contrôle transactionnel et un test dédiés. Le test automatisé couvre les erreurs de lecture et d’écriture qui doivent produire un 500 afin que Stripe retente la livraison. Utiliser ce test pour la validation des erreurs sans perturber la préproduction. [Tests du webhook](../src/test/stripeBillingHandlers.test.ts) · [Livraison des webhooks Stripe](https://docs.stripe.com/webhooks)
+4. **Rediffusion.** Une fois le reçu confirmé, renvoyer ce même événement depuis Stripe Sandbox. Confirmer la réponse 200 avec `duplicate: true`, un seul reçu pour cet identifiant et un abonnement inchangé. En base, la même transaction enregistre le reçu et toute mise à jour d’abonnement pour un événement donné, même en cas de rediffusion simultanée de ce même identifiant. Les tests locaux couvrent aussi l’échec de cette transaction, qui ne laisse pas de reçu empêchant une nouvelle tentative. Cela ne détermine pas l’ordre de deux événements différents. [Tests du webhook](../src/test/stripeBillingHandlers.test.ts) · [Livraison des webhooks Stripe](https://docs.stripe.com/webhooks)
 5. **Abonnement déjà en cours, portail et annulation.** Avec l’abonnement de recette reconnu en base, essayer de choisir un autre plan. L’application doit revenir à la facturation et aucun nouveau Checkout ne doit s’ouvrir. Depuis `/merchant/billing`, ouvrir « Gérer l’abonnement » et vérifier que le portail Sandbox présente le même abonnement. L’annuler suivant la configuration du portail. Après livraison du webhook de souscription, vérifier `cancel_at_period_end` ou `status = canceled`, selon le mode d’annulation, dans Supabase et dans l’interface QMAPS. Une annulation programmée ne rend pas encore l’abonnement terminal. Après une annulation effective confirmée, vérifier qu’un nouveau Checkout peut s’ouvrir, puis le quitter sans payer.
 6. **Isolation.** Depuis une autre session marchande de test, vérifier que les données de facturation de la première fiche sont inaccessibles. Les tests SQL du dépôt vérifient que les rôles applicatifs ne peuvent pas créer de reçus Stripe et que les écritures manuelles autorisées restent possibles. [Tests des droits sur les reçus](../server/test/billing-receipts.sql)
 
