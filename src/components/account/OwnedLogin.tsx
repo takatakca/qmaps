@@ -5,8 +5,11 @@ import { Label } from "@/components/ui/label";
 import { ownedApi } from "@/lib/ownedApi";
 
 type Mode = "login" | "register" | "recover";
-export default function OwnedLogin({ onReady }: { onReady: () => void }) {
-  const [mode, setMode] = useState<Mode>("login");
+export default function OwnedLogin({ onReady, initialMode = "login" }: {
+  onReady: () => void;
+  initialMode?: "login" | "register";
+}) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [handle, setHandle] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");

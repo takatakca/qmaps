@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-owned-account-entry | entrées Moi et Créer un compte reliées à l’espace QMAPS | distinguer inscription par identifiant et accès historiques explicites | vérifier les deux parcours invités après déploiement sans créer de compte
+
 2026-11-27 | Codex | codex/qmaps-public-local-actions | bascule des liens d’ajout des pages locales vers Mon commerce QMAPS | éviter d’envoyer les commerçants vers l’ancien annuaire depuis une recherche vide | vérifier les trois parcours publics, sans créer de compte ni de fiche
 
 2026-11-27 | Codex | codex/qmaps-owned-sitemap | sitemap de 32 fiches ON2GO publiques avec liens canoniques QMAPS | remplacer le générateur historique et conserver un build sans réseau | vérifier le XML et une fiche après publication du site

@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search, ClipboardList, Bookmark, User, MoreHorizontal } from "lucide-react";
 import { useUnreadCounts } from "@/hooks/useUnreadCounts";
+import { ownedAccountUrl } from "@/lib/ownedRoutes";
 
 const tabs = [
   { path: "/", icon: Search, label: "Recherche" },
   { path: "/projects", icon: ClipboardList, label: "Projets" },
-  { path: "/profile", icon: User, label: "Moi" },
+  { path: ownedAccountUrl, icon: User, label: "Moi" },
   { path: "/collections", icon: Bookmark, label: "Collections" },
   { path: "/more", icon: MoreHorizontal, label: "Plus" },
 ];
@@ -13,14 +14,14 @@ const tabs = [
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { unreadNotifications, unreadMessages } = useUnreadCounts();
+  const { unreadNotifications } = useUnreadCounts();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border shadow-elevated pb-safe">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
-          const badge = tab.path === "/more" ? unreadNotifications : tab.path === "/profile" ? unreadMessages : 0;
+          const badge = tab.path === "/more" ? unreadNotifications : 0;
           return (
             <button
               key={tab.path}

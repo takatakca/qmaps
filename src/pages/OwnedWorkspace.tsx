@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import OwnedLogin from "@/components/account/OwnedLogin";
 import { exampleListingTitle } from "@/lib/exampleListing";
-import { wantsOwnedMerchantTab, wantsOwnedReview } from "@/lib/ownedRoutes";
+import { ownedAccountUrl, wantsOwnedMerchantTab, wantsOwnedReview, wantsOwnedSignup } from "@/lib/ownedRoutes";
 import {
   ownedApi,
   QmapsRequestError,
@@ -424,8 +424,10 @@ export default function OwnedWorkspace() {
   const params = new URLSearchParams(search);
   const linked = params.get("fiche");
   const placeId = linked && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(linked) ? linked : null;
-  const merchantEntry = pathname === "/compte" && !placeId && wantsOwnedMerchantTab(params);
-  const reviewEntry = pathname === "/compte" && wantsOwnedReview(params);
+  const merchantEntry = pathname === ownedAccountUrl && !placeId && wantsOwnedMerchantTab(params);
+  const reviewEntry = pathname === ownedAccountUrl && wantsOwnedReview(params);
+  const loginEntryMode = pathname === ownedAccountUrl && !placeId && !merchantEntry && !reviewEntry && wantsOwnedSignup(params)
+    ? "register" : "login";
   const initialTab = merchantEntry ? "merchant" : "catalogue";
   const consolePage = pathname === "/console";
   const closurePage = pathname === "/compte/fermeture";
@@ -533,7 +535,7 @@ export default function OwnedWorkspace() {
           <>
             {merchantEntry && <p>Connectez-vous ou créez un compte QMAPS pour ajouter votre entreprise à l’annuaire.</p>}
             {reviewEntry && <p>Connectez-vous ou créez un compte QMAPS pour écrire un avis sur un commerce.</p>}
-            <OwnedLogin onReady={() => void refresh()} />
+            <OwnedLogin key={loginEntryMode} initialMode={loginEntryMode} onReady={() => void refresh()} />
           </>
         ) : closurePage ? (
           <OwnedClosure key={user.id} userId={user.id} />

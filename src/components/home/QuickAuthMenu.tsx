@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useLang } from "@/i18n/language";
 import { headerTriggerClass } from "@/components/home/LanguageSwitcher";
-import { ownedMerchantUrl } from "@/lib/ownedRoutes";
+import { ownedAccountUrl, ownedMerchantUrl, ownedSignupUrl } from "@/lib/ownedRoutes";
 
 /**
  * TAKATAK Auth-style account popover. Only shows providers that work today:
@@ -78,7 +78,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
         </div>
 
         <div className="p-2">
-          <Item icon={UserRound} label="Mon espace QMAPS" onClick={() => go("/compte")} />
+          <Item icon={UserRound} label="Mon espace QMAPS" onClick={() => go(ownedAccountUrl)} />
           {user ? (
             <>
               <Item icon={UserRound} label={t("publicProfile")} onClick={() => go("/profile")} />
@@ -119,7 +119,7 @@ const QuickAuthMenu = ({ tone = "light" }: { tone?: "light" | "dark" }) => {
                 <Item icon={Briefcase} label={t("proSpace")} sub={t("proSpaceSub")} onClick={() => go(ownedMerchantUrl)} />
               </div>
               <button
-                onClick={() => go("/auth?mode=signup")}
+                onClick={() => go(ownedSignupUrl)}
                 className="mt-2 w-full rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
               >
                 {t("createAccount")}
