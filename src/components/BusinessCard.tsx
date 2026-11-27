@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
 import { getCategoryImage } from "@/lib/categoryImages";
 import { exampleListingTitle } from "@/lib/exampleListing";
+import { ownedListingUrl } from "@/lib/ownedRoutes";
 import type { Business } from "@/types";
 
 interface BusinessCardProps {
@@ -53,7 +54,7 @@ const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) =
         )}
       </div>
       <div className="p-3.5">
-        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={`/business/${business.id}`} onClick={recordVisit}>{displayName}</Link></h3>
+        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={ownedDirectory ? ownedListingUrl(business.id) : `/business/${business.id}`} onClick={recordVisit}>{displayName}</Link></h3>
         {exampleTitle && <span className="text-xs text-muted-foreground">Fiche d’exemple</span>}
         <div className="flex items-center gap-2 mt-1">
           <StarRating rating={business.rating} />

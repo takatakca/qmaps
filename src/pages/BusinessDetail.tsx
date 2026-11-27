@@ -34,12 +34,22 @@ import { isBusinessOpenNow } from "@/lib/searchFilters";
 import { readBusinessStatus } from "@/lib/businessStatus";
 import { categoryNameFromEmbed } from "@/lib/business";
 import { exampleListingTitle } from "@/lib/exampleListing";
+import { wantsOwnedListing } from "@/lib/ownedRoutes";
 import type { Tables } from "@/integrations/supabase/types";
 
 const tabs = ["Menu", "Demander", "Info", "Avis"] as const;
 type Tab = typeof tabs[number];
 
 const BusinessDetail = () => {
+  const { id } = useParams();
+  const [params] = useSearchParams();
+  // Catalogue links keep their source across reloads and new tabs. A missing
+  // or withdrawn QMAPS listing must not be replaced by a legacy copy.
+  if (id && wantsOwnedListing(params)) return <PublicOwnedListing key={id} id={id} />;
+  return <LegacyBusinessDetail />;
+};
+
+const LegacyBusinessDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   return <Listing key={id + (user?.id ?? "")} />;
