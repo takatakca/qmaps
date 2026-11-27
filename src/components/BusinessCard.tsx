@@ -7,6 +7,7 @@ import { ownedApi } from "@/lib/ownedApi";
 import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
 import { getCategoryImage } from "@/lib/categoryImages";
+import { exampleListingTitle } from "@/lib/exampleListing";
 import type { Business } from "@/types";
 
 interface BusinessCardProps {
@@ -24,8 +25,10 @@ const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) =
       .catch(() => { /* A recommendation signal must not interrupt navigation. */ });
   }
   const bookmarkClass = "absolute z-10 top-3 right-3 w-9 h-9 bg-card/95 rounded-full flex items-center justify-center shadow-soft";
+  const exampleTitle = exampleListingTitle(business);
+  const displayName = exampleTitle ?? business.name;
   const hasPhoto = Boolean(business.image) && business.image !== "/placeholder.svg";
-  const image = hasPhoto ? business.image : getCategoryImage(business.category, business.name);
+  const image = hasPhoto ? business.image : getCategoryImage(business.category, displayName);
 
   return (
     <div
@@ -34,7 +37,7 @@ const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) =
       <div className="relative overflow-hidden">
         <img
           src={image}
-          alt={business.name}
+          alt={displayName}
           loading="lazy"
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -42,7 +45,7 @@ const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) =
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         {ownedDirectory ? <DirectoryBookmark id={business.id} className={bookmarkClass} /> :
           <BookmarkButton businessId={business.id} city={business.neighborhood} source="business_card" className={bookmarkClass} />}
-        {business.isOpen && (
+        {business.isOpen && !exampleTitle && (
           <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-success text-success-foreground text-[11px] font-semibold rounded-full shadow-soft">
             <span className="w-1.5 h-1.5 rounded-full bg-success-foreground/90" />
             Ouvert
@@ -50,7 +53,8 @@ const BusinessCard = ({ business, ownedDirectory = false }: BusinessCardProps) =
         )}
       </div>
       <div className="p-3.5">
-        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={`/business/${business.id}`} onClick={recordVisit}>{business.name}</Link></h3>
+        <h3 className="font-heading font-semibold text-foreground"><Link className="after:absolute after:inset-0 focus-visible:underline" to={`/business/${business.id}`} onClick={recordVisit}>{displayName}</Link></h3>
+        {exampleTitle && <span className="text-xs text-muted-foreground">Fiche d’exemple</span>}
         <div className="flex items-center gap-2 mt-1">
           <StarRating rating={business.rating} />
           <span className="text-xs text-muted-foreground">

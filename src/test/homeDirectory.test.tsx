@@ -78,6 +78,34 @@ describe("homepage listing rows use the owned directory", () => {
     expect(legacy).not.toHaveBeenCalled();
   });
 
+  it("shows real listings first, distinguishes examples and doesn't claim unknown hours", async () => {
+    const example = {
+      ...row,
+      id: "a9bf0001-0000-4000-8000-000000000001",
+      name: "QMAPS Démo — Bistro de nuit",
+      avg_rating: 5,
+    };
+    const imported = {
+      ...row,
+      id: "on2go-source-listing",
+      name: "Restaurant réel",
+      is_claimed: false,
+      is_open: false,
+      hours: null,
+      hours_json: null,
+      avg_rating: 0,
+    };
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ items: [example, imported], next: null })));
+    await mount();
+
+    const [real, sample] = cards("popular");
+    expect(real.querySelector("h3")?.textContent).toBe("Restaurant réel");
+    expect(real.textContent).not.toMatch(/Ouvert|Fermé|Vérifié/);
+    expect(sample.querySelector("h3")?.textContent).toBe("Bistro de nuit");
+    expect(sample.textContent).not.toContain("Démo");
+    expect(sample.textContent).toContain("Fiche d’exemple");
+  });
+
   it("aborts the listing request when leaving the page", async () => {
     const fetchDirectory = vi.fn(async (_url: string, { signal }: RequestInit) => new Promise<Response>((_resolve, reject) => {
       signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });

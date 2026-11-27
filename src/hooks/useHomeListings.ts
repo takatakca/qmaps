@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { topPlaces, type DirectoryPlace } from "@/lib/ownedDirectory";
+import { exampleListingTitle } from "@/lib/exampleListing";
 
 /**
  * Public homepage rows use the same catalogue as browser search. Keep the
@@ -11,6 +12,8 @@ export type HomeListing = Pick<DirectoryPlace,
 > & {
   category_name?: string | null;
   category_slug?: string | null;
+  hours?: DirectoryPlace["hours"];
+  hours_json?: DirectoryPlace["hours_json"];
 };
 
 export interface HomeListings {
@@ -30,6 +33,8 @@ const ESSENTIAL = /[eé]picer|d[eé]panneur|march[eé]|alimentation|pharmac|bouc
 
 const score = (b: HomeListing) => Number(b.avg_rating || 0) * 10 + Math.min(b.reviews_count || 0, 100) / 10;
 const createdAt = (b: HomeListing) => Date.parse(b.created_at ?? "") || 0;
+const examplesLast = (a: HomeListing, b: HomeListing) =>
+  Number(Boolean(exampleListingTitle(a))) - Number(Boolean(exampleListingTitle(b)));
 
 export const useHomeListings = (perSection = 10): HomeListings => {
   const [rows, setRows] = useState<HomeListing[]>([]);
@@ -62,11 +67,11 @@ export const useHomeListings = (perSection = 10): HomeListings => {
   const text = (b: HomeListing) => `${b.category_name ?? ""} ${b.category_slug ?? ""} ${b.name}`;
 
   return {
-    restaurants: rows.filter((b) => FOOD.test(text(b))).sort((a, b) => score(b) - score(a)).slice(0, perSection),
-    popular: [...rows].sort((a, b) => score(b) - score(a)).slice(0, perSection),
-    services: rows.filter((b) => SERVICE.test(text(b)) && !FOOD.test(text(b))).sort((a, b) => score(b) - score(a)).slice(0, perSection),
+    restaurants: rows.filter((b) => FOOD.test(text(b))).sort((a, b) => examplesLast(a, b) || score(b) - score(a)).slice(0, perSection),
+    popular: [...rows].sort((a, b) => examplesLast(a, b) || score(b) - score(a)).slice(0, perSection),
+    services: rows.filter((b) => SERVICE.test(text(b)) && !FOOD.test(text(b))).sort((a, b) => examplesLast(a, b) || score(b) - score(a)).slice(0, perSection),
     recent: [...rows]
-      .sort((a, b) => createdAt(b) - createdAt(a))
+      .sort((a, b) => examplesLast(a, b) || createdAt(b) - createdAt(a))
       .slice(0, perSection),
     essentials: rows.filter((b) => ESSENTIAL.test(text(b))).slice(0, perSection),
     loading,
