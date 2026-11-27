@@ -1,3 +1,5 @@
+2026-11-27 | Codex | codex/qmaps-flexs-restaurant-preview | aperçu privé validé sur 5 249 lignes, 15 candidats corroborés | préparer le premier lot Montréal sans écrire en production | revoir les fiches à partir du registre municipal puis valider l’affichage avant import
+
 2026-11-27 | Codex | codex/qmaps-paged-search-web | brouillon, Chromium validé sur 155 634 fiches | 24 résultats puis chargement à la demande | attendre la deuxième page 200 JSON de la nouvelle API sur tous les domaines
 
 2026-11-27 | Codex | codex/qmaps-directory-results-api | API validée sur PostgreSQL/PostGIS jetable, non déployée | servir la recherche Québec par pages ordonnées sans modifier les routes existantes | tests HTTP des cinq tris, filtres, curseurs, visibilité et alias navigateur réussis, avec cinq tests unitaires d’horaires et services. Étape suivante : confirmer la charge réelle et le HTTP 200 sur les domaines QMAPS avant la bascule web et l’import public.

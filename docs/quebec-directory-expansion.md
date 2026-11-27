@@ -42,6 +42,21 @@ Le test SQL peut être joué dans une base QMAPS jetable nommée `qmaps_flexs_st
 
 Le dépôt complet a été testé sur PostgreSQL jetable. Les 155 634 fiches ont été chargées en privé, avec zéro accès pour les trois rôles applicatifs et aucun changement du catalogue public. Une simulation de publication dans la même base jetable indique que la recherche sans filtre ferait 623 requêtes de 250 fiches avant affichage. La première réponse locale comptait 127 457 octets. Ce n’est pas une mesure de performance de production.
 
+## Préparer un premier lot de restaurants montréalais
+
+Utiliser un cliché complet et récent du fichier ouvert FLEXS. En base de recette, charger le cliché avec la commande de dépôt ci-dessus, puis générer le rapport avec le même rôle opérateur. La requête est en lecture seule et ne publie ni ne modifie aucune fiche. Ne pas commiter le rapport nominatif.
+
+```sh
+psql -X -Atq -v ON_ERROR_STOP=1 \
+  -f server/db/imports/preview-flexs-montreal-restaurants.sql > montreal-restaurants-a-verifier.json
+```
+
+Le rapport couvre seulement le dernier chargement de la source `mtl_food` à la ville de Montréal et à l’activité FLEXS « Restaurant ». Il donne les comptes par motif, le crédit de la source et jusqu’à 24 références stables. Il écarte les références non numériques, les noms sans lettres, les identifiants ou noms déjà présents dans QMAPS et les collisions de noms ou d’alias dans les sources ouvertes. La comparaison de nom ignore les accents et la ponctuation et recherche aussi dans les arrondissements de Montréal. Elle signale des chevauchements possibles sans les fusionner. Les données ODbL ne participent ni au lot ni à la comparaison. Un nouveau chargement complet d’une même source rend hors lot les anciennes lignes omises, sans effacer la zone privée.
+
+L’activité FLEXS « Restaurant » regroupe plusieurs types municipaux, dont les camions-cuisines et les cantines mobiles. Pour ce premier lot, retrouver la référence `source_ref` dans le champ `business_id` du registre municipal. Retenir le type exact `Restaurant`, une ligne au statut municipal `Ouvert`, un nom qui concorde et une adresse de rue exploitable à Montréal. Examiner les adresses partagées, changements de noms et chevauchements avec QMAPS et ON2GO avant publication. Les informations municipales peuvent avoir du retard. Le statut administratif `Ouvert` ne confirme ni les heures d’ouverture ni le propriétaire. [Registre et licence CC BY 4.0](https://www.donneesquebec.ca/recherche/dataset/vmtl-etablissements-alimentaires)
+
+Pour les futures fiches publiques, afficher le crédit de la Ville de Montréal, la référence et la licence. Mentionner la sélection et l’adaptation FLEXS/QMAPS. Laisser vides les heures, le téléphone et les coordonnées non corroborés. Ne proposer ni statut vérifié, ni revendication sans parcours de reprise. Conserver un manifeste des identifiants exacts du lot. En cas de retrait, désactiver seulement les fiches concernées après vérification des modifications ou revendications, sans supprimer en cascade les avis, favoris ou médias.
+
 ## Avant publication
 
 1. La recherche publique actuelle télécharge toutes les pages de résultats avant d’afficher les fiches. Déployer et vérifier une recherche paginée côté serveur qui conserve le tri et les filtres, notamment les heures, les services et la proximité. Vérifier les index avec le vrai volume, l’accès invité et le masquage par compte.
