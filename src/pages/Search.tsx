@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { directoryPages, type DirectoryPlace } from "@/lib/ownedDirectory";
 import BusinessCard from "@/components/BusinessCard";
 import BottomNav from "@/components/BottomNav";
 import SearchBar from "@/components/SearchBar";
@@ -14,15 +13,13 @@ import { ownedMerchantUrl } from "@/lib/ownedRoutes";
 import { categoryNameFromEmbed, mapBusinessToCard } from "@/lib/business";
 import Seo from "@/components/Seo";
 import {
-  sortBusinesses,
   SORT_OPTIONS,
   type SortOption,
-  isBusinessOpenNow,
-  matchesAmenityFilter,
   serviceFilters,
   normalizeSearchText,
 } from "@/lib/searchFilters";
 import { useAllCategories, searchCategories } from "@/hooks/useAllCategories";
+import { useDirectoryResults } from "@/hooks/useDirectoryResults";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,10 +31,7 @@ const Search = () => {
   }, [searchParams]);
   const selectedCategory = searchParams.get("category") || "";
 
-  const [businesses, setBusinesses] = useState<DirectoryPlace[]>([]);
-  const [searchError, setSearchError] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
@@ -56,50 +50,37 @@ const Search = () => {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    let current = true;
-    const controller = new AbortController();
-    setLoading(true);
-    setSearchError(false);
-    setBusinesses([]);
-    const load = async () => {
-      if (categoriesLoading && (selectedCategory || query)) return;
-      if (categoryError && (selectedCategory || query)) throw new Error("Catégories indisponibles");
-      const matched = selectedCategory
-        ? categories.filter(c => c.slug === selectedCategory)
-        : searchCategories(categories, query, 4);
-      if (selectedCategory && !matched.length) {
-        setLoading(false);
-        return;
-      }
-      const filters = new URLSearchParams({ q: query, city });
-      if (selectedCategory) filters.set("category", selectedCategory);
-      else for (const category of matched) filters.append("match", category.id);
-      for (const price of selectedPrice) filters.append("price", String(price));
-      if (minRating) filters.set("rating", String(minRating));
-      const rows = await directoryPages<DirectoryPlace>("", filters, controller.signal);
-      if (current) {
-        setBusinesses(rows);
-        setLoading(false);
-      }
-    };
-    void load().catch(() => {
-      if (current) { setSearchError(true); setLoading(false); }
-    });
-    return () => { current = false; controller.abort(); };
-  }, [query, city, selectedCategory, selectedPrice, minRating, categories, categoriesLoading, categoryError, attempt]);
-
-  const results = useMemo(() => {
-    const rows = businesses.map(b => ({
-      ...b,
-      distance_meters: position ? distanceMeters(position, b.latitude, b.longitude) : undefined,
-    })).filter(b =>
-      matchesAmenityFilter(b, services) &&
-      (!openNow || isBusinessOpenNow(b)) &&
-      (radiusKm === null || (b.distance_meters != null && b.distance_meters <= radiusKm * 1000))
-    );
-    return sortBusinesses(rows, sortBy);
-  }, [businesses, position, openNow, radiusKm, sortBy, services]);
+  const needsCategories = Boolean(selectedCategory || query.trim());
+  const waitingCategories = needsCategories && categoriesLoading;
+  const failedCategories = needsCategories && Boolean(categoryError);
+  const filters = useMemo(() => {
+    if (waitingCategories || failedCategories) return null;
+    if (selectedCategory && !categories.some(category => category.slug === selectedCategory)) return null;
+    const params = new URLSearchParams({ q: query, city, sort: sortBy });
+    if (selectedCategory) params.set("category", selectedCategory);
+    else if (query.trim()) {
+      for (const category of searchCategories(categories, query, 4)) params.append("match", category.id);
+    }
+    for (const price of selectedPrice) params.append("price", String(price));
+    if (minRating) params.set("rating", String(minRating));
+    if (openNow) params.set("open", "1");
+    for (const service of services) params.append("service", service);
+    if (position && (sortBy === "distance" || radiusKm !== null)) {
+      params.set("lat", position.latitude.toFixed(3));
+      params.set("lng", position.longitude.toFixed(3));
+      if (radiusKm !== null) params.set("radius", String(radiusKm));
+    }
+    return params.toString();
+  }, [waitingCategories, failedCategories, categories, selectedCategory, query, city, sortBy,
+      selectedPrice, minRating, openNow, services, position, radiusKm]);
+  const page = useDirectoryResults(filters, attempt);
+  const loading = waitingCategories || page.loading;
+  const searchError = failedCategories || page.failed;
+  const results = page.items.map(place => ({
+    ...place,
+    distance_meters: place.distance_meters ??
+      (position ? distanceMeters(position, place.latitude, place.longitude) : undefined),
+  }));
 
   const clearFilters = () => {
     setSelectedPrice([]);
@@ -234,10 +215,10 @@ const Search = () => {
         {/* Results */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-3 gap-2">
-            <p className="text-sm text-muted-foreground">
+            <p aria-live="polite" className="text-sm text-muted-foreground">
               {loading
                 ? "Recherche..."
-                : searchError ? "Recherche indisponible" : `${results.length} résultat${results.length !== 1 ? "s" : ""}${query ? ` pour "${query}"` : ""}${city ? ` à ${city}` : ""}`}
+                : searchError ? "Recherche indisponible" : `${results.length} ${results.length === 1 ? "résultat affiché" : "résultats affichés"}${query ? ` pour "${query}"` : ""}${city ? ` à ${city}` : ""}`}
             </p>
             <select
               aria-label="Trier les résultats"
@@ -252,20 +233,24 @@ const Search = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((b) => (
-              <BusinessCard key={b.id} ownedDirectory business={mapBusinessToCard({
+            {results.map((b) => {
+              const card = mapBusinessToCard({
                 ...b,
                 category_name: categoryNameFromEmbed(b, selectedCategoryName || "Commerce"),
-              })} />
-            ))}
+              });
+              // Results filtered for open now already use Québec business time,
+              // not the timezone of the device displaying this card.
+              return <BusinessCard key={b.id} ownedDirectory business={openNow ? { ...card, isOpen: true } : card} />;
+            })}
 
             {searchError && <div role="alert" className="col-span-full rounded-xl border p-4">
-              Impossible de charger les résultats. <Button variant="outline" onClick={() => {
+              {page.sessionChanged ? "La recherche a expiré. Relancez-la pour obtenir des résultats à jour." : "Impossible de charger les résultats."}{" "}
+              <Button variant="outline" onClick={() => {
                 if (categoryError) retryCategories();
                 setAttempt(value => value + 1);
-              }}>Réessayer</Button>
+              }}>{page.sessionChanged ? "Relancer la recherche" : "Réessayer"}</Button>
             </div>}
-            {!loading && !searchError && results.length === 0 && (
+            {!loading && !searchError && !page.hasNext && !page.moreError && results.length === 0 && (
               <div className="col-span-full rounded-2xl border border-border bg-card p-6 space-y-5">
                 <div className="text-center">
                   <p className="font-heading text-base font-semibold text-foreground">
@@ -331,6 +316,25 @@ const Search = () => {
               </div>
             )}
           </div>
+          {page.hasNext && results.length === 0 && !page.loadingMore && !page.moreError && (
+            <p className="text-center text-sm text-muted-foreground">
+              Aucun résultat dans cette page. D’autres fiches sont à vérifier.
+            </p>
+          )}
+          {(page.hasNext || page.moreError) && (
+            <div className="mt-4 space-y-2 text-center">
+              {page.moreError && <p role="alert" className="text-sm text-muted-foreground">
+                Impossible de charger la suite des résultats.
+              </p>}
+              <Button variant="outline" disabled={page.loadingMore} onClick={() => {
+                if (page.hasNext) void page.loadMore();
+                else setAttempt(value => value + 1);
+              }}>
+                {page.loadingMore ? "Chargement…" : !page.hasNext ? "Relancer la recherche"
+                  : page.moreError ? "Réessayer de charger la suite" : "Voir plus de résultats"}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
